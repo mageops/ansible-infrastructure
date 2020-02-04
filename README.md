@@ -10,7 +10,7 @@
 
 ## MageSuite ecosystem
 
-Altough it's possible to use this code to hosting any Magento based shop,
+Altough it's possible to use this code to host any Magento-based shop,
 some features are only avaialble (and tailored for) [MageSuite](https://magesuite.io/) ecosystem.
 
 ## Cloud infrastructre
