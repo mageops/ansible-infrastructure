@@ -1,0 +1,21 @@
+# highest version provisioning runs fully on
+ansible>=2.7,<2.8
+
+# needed for the crappy `ec2.py` dynamic inventory script
+boto
+
+# needed for inventory and aws modules
+boto3
+
+# needed for python `ipaddr` filter
+ipaddress
+netaddr
+
+# needed for managing databases (e.g. creating project db in infra step)
+mysql
+
+# needed for running docker (e.g. building aws lambda artifacts)
+docker-py
+
+# some tasks call aws command on localhost
+awscli

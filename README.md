@@ -29,6 +29,7 @@ only for local development though and not yet supported_.
   - Nodes are warmed up when new code is being deployed before being attached
     to the varnish load-balancer to avoid cache generation penalty after traffic hit
 - Varnish caching tailored for Magento with multiple configurable custom features
+- Built-in support for elasticsearch / [ElasticSuite](https://github.com/Smile-SA/elasticsuite)
 - Redis Magento cache backend with 
   - Separate redis instance for session storage 
 - Customizable multi-website / multi-shop deployments
