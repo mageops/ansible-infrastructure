@@ -1,0 +1,31 @@
+- name: Install s3fs from RPM
+  yum:
+    name: s3fs-fuse
+    state: present
+
+- name: Add read permission to other users
+  file:
+    path: /etc/fuse.conf
+    state: file
+    mode: "o=r"
+
+- name: Allow non-root users to specify the allow_other or allow_root mount options
+  lineinfile:
+    dest: "/etc/fuse.conf"
+    regexp: "^#user_allow_other$"
+    line: "user_allow_other"
+    state: present
+    backrefs: yes
+
+- name: Create s3fs config dir
+  file:
+    path: /etc/s3fs/
+    state: directory
+
+- name: Add ahbe config for set additional headers to s3 objects
+  template:
+    src: ahbe.conf.j2
+    dest: "/etc/s3fs/ahbe.conf"
+    owner: "root"
+    force: yes
+    mode: 0644

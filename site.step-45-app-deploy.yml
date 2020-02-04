@@ -1,0 +1,154 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: app:&current:!immutable
+  pre_tasks:
+    - name: Check if previous release exists
+      stat:
+        path: "{{ deploy_current_release_dir }}"
+      failed_when: no
+      register: _current_release_check
+
+    - name: Set previous release existence fact
+      set_fact:
+        deploy_previous_release_exists: "{{ _current_release_check.stat is defined and _current_release_check.stat.islnk is defined and _current_release_check.stat.islnk }}"
+
+    - name: Gather deployment run facts
+      set_fact:
+        deploy_release_id: "{{ ansible_date_time.iso8601_basic_short }}"
+        deploy_keep_current_release: "{{ deploy_skip_installation | default(false) and deploy_previous_release_exists }}"
+        deploy_previous_release_id: "{{ deploy_previous_release_exists | ternary((_current_release_check.stat.lnk_target | default('')).split('/') | last, false) }}"
+
+    - name: Compute release id
+      set_fact:
+        magento_release_id: "{{ deploy_keep_current_release | ternary(deploy_previous_release_id, deploy_release_id) }}"
+
+    - name: Print deployment run information
+      debug:
+        msg: |
+          ========================================
+          ==     Starting Magento Deployment    ==
+          ========================================
+
+          Previous release id: {{ deploy_previous_release_id | ternary( deploy_previous_release_id, 'None - fresh install') }}
+          Deployed release id: {{ deploy_release_id }}
+
+          {{ deploy_keep_current_release | ternary('Code deploy is skipped!', 'New code will be deployed!') }}
+
+          ----------------------------------------
+
+  roles:
+    - role: cs.aws-facts-all
+      aws_facts_gather_ami: no
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+
+    - role: cs.deploy
+      deploy_install_actions:
+        - name: Configure Magento
+          role: cs.magento-configure
+      deploy_install_abort:
+        - name: Failed deploy install stage - get rid of possible corrupted cache
+          role: cs.magento-configure
+          tasks_from: 060-flush-cache.yml
+      deploy_release_actions:
+        - name: Setup S3FS mounts
+          role: cs.s3-mount
+          when: "{{ aws_use }}"
+        - name: Setup EFS mounts
+          role: cs.aws-efs
+          when: "{{ aws_use }}"
+      deploy_release_abort:
+        - name: Failed deploy release stage - get rid of possible corrupted cache
+          role: cs.magento-configure
+          tasks_from: 060-flush-cache.yml
+      deploy_post_actions:
+        - name: Link static files version dir
+          role: cs.magento-configure
+          tasks_from: 200-static-symlink.yml
+
+    - role: cs.magento-import-dispatcher
+      when: magento_import_dispatcher_enable
+
+    - role: cs.magento-cache-warmup-crawler
+      when: magento_page_cache_warmer_enable
+
+  tasks:
+    - name: Execute custom post deploy tasks
+      include_tasks: "{{ extra_tasks_deploy }}"
+      when: extra_tasks_deploy is defined and extra_tasks_deploy
+
+  vars:
+    deploy_install_new_release: "{{ not deploy_keep_current_release }}"
+    deploy_keep_current_releases: 2
+    deploy_copy_previous_release: yes
+    deploy_directory_permissions: "0775"
+    deploy_file_permissions: "0664"
+    deploy_app_user: "{{ magento_user }}"
+    deploy_app_group: "{{ magento_group }}"
+    deploy_ssh_key_path: "{{ mageops_ansible_temp_dir }}/ssh-deploy-key.{{ mageops_app_name }}"
+    deploy_webserver_user: nginx
+    deploy_root_dir: "{{ mageops_app_web_dir }}"
+    deploy_artifact_dir: "{{ deploy_artifact_local_path }}"
+    deploy_artifact_temp_dir: /tmp/ansible-deploy-artifacts-temp
+    deploy_releases_dir: "{{ deploy_root_dir }}/releases"
+    deploy_current_release_dir: "{{ deploy_root_dir }}/current"
+    deploy_shared_dirs_basic:
+      - 'pub/media'
+      - 'pub/shared'
+      - 'var/import'
+      - 'var/export'
+    deploy_shared_dirs: "{{ deploy_shared_dirs_basic + deploy_shared_dirs_extra }}"
+    deploy_writable_dirs:
+      - "var"
+      - "pub"
+      - "generated"
+    deploy_rsync_excludes: "{{ deploy_rsync_excludes_basic + deploy_rsync_excludes_extra }}"
+    deploy_copy_previous_excludes:
+      - "/var"
+      - "/generated"
+    deploy_perm_fix_find_opts: "-xdev"
+    deploy_restarted_services:
+      - php-fpm
+      - nginx
+
+    magento_core_config_settings: "{{ magento_core_config_settings_default + magento_core_config_settings_extra }}"
+    magento_core_config_settings_to_remove: "{{ magento_core_config_settings_to_remove_default + magento_core_config_settings_to_remove_extra }}"
+    magento_varnish_host: "{{ mageops_varnish_host }}"
+    magento_varnish_port: "{{ mageops_varnish_port }}"
+    magento_static_cache_dir: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static/_cache/"
+    magento_media_dir: "{{ mageops_app_web_dir }}/shared/pub/media/"
+    magento_s3fs_buckets_base:
+      - name: "Media"
+        mountpoint: "{{ magento_media_dir }}"
+        bucket: "{{ aws_s3_media_bucket }}"
+      - name: "Static asset cache"
+        mountpoint: "{{ magento_static_cache_dir }}"
+        bucket: "{{ aws_s3_media_bucket }}:/static/_cache-{{ deploy_release_id }}/"
+    magento_efs_app_node_basic_mounts:
+      - local_mountpoint: "{{ magento_efs_import_data_app_path }}"
+        remote_path: "{{ magento_efs_import_data_remote_path }}"
+        owner: "{{ magento_user }}"
+        group: "{{ magento_group }}"
+      - local_mountpoint: "{{ magento_efs_export_data_app_path }}"
+        remote_path: "{{ magento_efs_export_data_remote_path }}"
+        owner: "{{ magento_user }}"
+        group: "{{ magento_group }}"
+      - local_mountpoint: "{{ magento_efs_publicly_shared_app_path }}"
+        remote_path: "{{ magento_efs_publicly_shared_remote_path }}"
+        owner: "{{ magento_user }}"
+        group: "{{ magento_group }}"
+
+    s3fs_iam_role: "{{ aws_iam_role_app_node }}"
+    s3fs_owner_user: "{{ magento_user }}"
+    s3fs_owner_group: "{{ magento_group }}"
+    s3fs_owner_uid: "{{ magento_uid }}"
+    s3fs_owner_gid: "{{ magento_gid }}"
+    s3fs_buckets: "{{ magento_s3fs_buckets_base + magento_s3fs_buckets_extra }}"
+
+    efs_name: "{{ magento_efs_app_node_name }}"
+    efs_subnet_id: "{{ aws_vpc_subnet_id }}"
+    efs_aws_security_group_id: "{{ aws_security_group_efs_id | default(omit, true) }}"
+    efs_tags: "{{ aws_tags_role_shared_storage }}"
+    efs_mounts: "{{ magento_efs_app_node_basic_mounts + magento_efs_app_node_mounts }}"

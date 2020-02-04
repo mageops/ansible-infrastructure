@@ -1,0 +1,45 @@
+- name: Get AWS region
+  aws_region_facts:
+    region: "{{ aws_region }}"
+  register: region_facts
+
+- name: Set region facts
+  set_fact:
+    aws_region_info: "{{ region_facts.regions | selectattr('region_name', 'equalto', aws_region) | first }}"
+    aws_region_names: "{{ region_facts.regions | map(attribute='region_name') }}"
+    aws_regions: "{{ region_facts.regions }}"
+    cacheable: yes
+
+- name: Get availaibility zones for region
+  aws_az_facts:
+    region: "{{ aws_region }}"
+  register: az_facts
+
+- name: Set region AZ facts
+  set_fact:
+    aws_availability_zones: "{{ az_facts.availability_zones }}"
+    aws_availability_zone_names: "{{ az_facts.availability_zones | map(attribute='zone_name') | list }}"
+    aws_availability_zone_ids: "{{ az_facts.availability_zones | map(attribute='zone_id') | list }}"
+    cacheable: yes
+
+- name: Set preferred AZ to the first one if not defined
+  set_fact:
+    aws_preferred_availability_zone: "{{ aws_availability_zone_names | first }}"
+  register: aws_selected_preferred_az
+  when: not aws_preferred_availability_zone | default(false, true)
+
+- name: Print the chosen availability zone
+  debug:
+    msg: "No preferred avaialability zone set, selected automatically: {{ aws_preferred_availability_zone }}"
+  when: aws_selected_preferred_az is not skipped
+
+- name: Set region S3 facts
+  set_fact:
+    aws_s3_website_info: "{{ aws_s3_website_endpoints | selectattr('region_name', 'equalto', aws_region) | first }}"
+    cacheable: yes
+
+- name: Set S3 website endpoint fact
+  set_fact:
+    aws_s3_website_endpoint: "{{ aws_s3_website_info.website_endpoint }}"
+    cacheable: yes
+

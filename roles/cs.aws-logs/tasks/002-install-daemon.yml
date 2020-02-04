@@ -1,0 +1,5 @@
+- name: Install AWS Cloudwatch Agent
+  yum:
+    name: "{{ aws_cloudwatch_agent_package }}"
+    state: latest
+

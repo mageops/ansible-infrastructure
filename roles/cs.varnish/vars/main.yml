@@ -1,0 +1,8 @@
+varnish_package_name: varnish
+
+varnish_user: "varnish"
+varnish_group: "varnish"
+
+varnish_secure_site_http_auth_string: "{{ varnish_secure_site_user }}:{{ varnish_secure_site_password }}"
+varnish_backend_instances_filter_base:
+  instance-state-name: running

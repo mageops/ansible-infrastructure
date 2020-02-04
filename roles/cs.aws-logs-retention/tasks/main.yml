@@ -1,0 +1,29 @@
+- name: Fetch existing log groups per region
+  shell: "aws logs describe-log-groups --region={{ region_info.region_name }}"
+  register: aws_log_rentention_describe
+  when: region_info.opt_in_status == 'opt-in-not-required'
+  changed_when: no
+  loop: "{{ aws_regions }}"
+  loop_control:
+    loop_var: region_info
+    label: "{{ region_info.region_name }}"
+
+- name: Get log groups with no retention for each region
+  set_fact:
+    data:
+        groups: "{{ (result.stdout | from_json).logGroups | json_query('[?!retentionInDays].logGroupName') }}"
+        region: "{{ result.region_info.region_name }}"
+  when: result is not skipped
+  loop: "{{ aws_log_rentention_describe.results }}"
+  loop_control:
+    loop_var: result
+    label: "{{ result.region_info.region_name }}"
+  register: aws_log_retention_groups
+
+- name: Set log retention for groups that do not have it
+  shell: "aws logs put-retention-policy --log-group-name={{ item[1] }} --retention-in-days=7 --region={{ item[0].ansible_facts.data.region }}"
+  with_subelements:
+    - "{{ aws_log_retention_groups.results }}"
+    - "ansible_facts.data.groups"
+  loop_control:
+    label: "{{ item[1] }}"

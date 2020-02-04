@@ -1,0 +1,48 @@
+
+- name: Ensure directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ nginx_www_dir }}"
+    - "{{ nginx_log_dir }}"
+    - "{{ nginx_confd_dir }}"
+
+- name: Ensure var directories always exist
+  lineinfile:
+    path: /etc/tmpfiles.d/nginx.conf
+    regexp: "\\s+{{ entry.path | regex_escape }}\\s+"
+    line: >-
+      {{ entry.type | default('d') }}
+      {{ entry.path }}
+      {{ entry.mode | default('0755') }}
+      {{ entry.user | default('nginx') }}
+      {{ entry.group | default('nginx') }}
+      {{ entry.age | default('-') }}
+      {{ entry.argument | default('-') }}
+    create: yes
+  loop:
+    - path: "{{ nginx_www_dir }}"
+    - path: "{{ nginx_log_dir }}"
+    - path: "{{ nginx_log_dir }}/*.log"
+      mode: '0644'
+      type: z
+  loop_control:
+    loop_var: entry
+    label: "{{ entry.path }}"
+  register: tmpfiles_config
+
+- name: Ensure var directory changes are applied at once
+  command: systemd-tmpfiles --create
+  when: tmpfiles_config is changed
+  
+- name: Create nginx configuration
+  template:
+    src: nginx.conf
+    dest: "{{ nginx_etc_dir }}/nginx.conf"
+  notify: Reload nginx
+
+- name: Restart and enable nginx
+  service:
+    name: nginx
+    enabled: yes

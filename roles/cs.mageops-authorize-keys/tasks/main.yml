@@ -1,0 +1,18 @@
+- name: Authorize root keys
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ item }}"
+  loop: "{{ mageops_root_ssh_keys }}"
+  loop_control:
+    label: "{{ item.split(' ')[2:] | join(' ') }}"
+
+- name: Authorize app keys
+  authorized_key:
+    user: "{{ mageops_app_user }}"
+    state: present
+    key: "{{ item }}"
+  loop: "{{ mageops_app_ssh_keys }}"
+  loop_control:
+    label: "{{ item.split(' ')[2:] | join(' ') }}"
+  when: mageops_ssh_authorize_app

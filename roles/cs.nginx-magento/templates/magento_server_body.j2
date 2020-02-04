@@ -1,0 +1,297 @@
+root $MAGE_ROOT/pub;
+
+index index.php;
+autoindex off;
+charset off;
+
+set $PHP_MEMORY_LIMIT {{ php_http_request_memory_limit }};
+set $PHP_MAX_EXECUTION_TIME {{ php_http_request_max_execution_time }};
+
+location = /WARMUP {
+    # This ensures that requests to /WARMUP file are never rewritten
+    # to PHP. This is crucial for varnish backend health probe.
+    #
+    # If the probe launches magento with no cache it will start
+    # warming up by itself causing overload, timeouts and the file
+    # generation to fail. In effect the whole env may be down.
+    try_files $uri =404;
+}
+
+{% if nginx_blacklist_vhost_check_config_file is defined %}
+include "{{ nginx_blacklist_vhost_check_config_file }}";
+{% endif %}
+
+{% if magento_enable_setup_url | default(False) %}
+location ~* ^/setup($|/) {
+    root $MAGE_ROOT;
+
+    location ~ ^/setup/index.php {
+        fastcgi_pass fastcgi_backend;
+
+        fastcgi_index index.php;
+
+        include fastcgi_params;
+        include {{ nginx_magento_fastcgi_params_conf_path }};
+    }
+
+    location ~ ^/setup/(?!pub/). {
+        deny all;
+    }
+
+    location ~ ^/setup/pub/ {
+        add_header X-Frame-Options "SAMEORIGIN";
+    }
+}
+
+# PHP entry point for update application
+location ~* ^/update($|/) {
+    root $MAGE_ROOT;
+
+    location ~ ^/update/index.php {
+        fastcgi_split_path_info ^(/update/index.php)(/.+)$;
+        fastcgi_pass fastcgi_backend;
+        fastcgi_index index.php;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+
+        include fastcgi_params;
+        include {{ nginx_magento_fastcgi_params_conf_path }};
+    }
+
+    # Deny everything but index.php
+    location ~ ^/update/(?!pub/). {
+        deny all;
+    }
+
+    location ~ ^/update/pub/ {
+        add_header X-Frame-Options "SAMEORIGIN";
+    }
+}
+{% endif %}
+
+location ~* ^/sitemap\.xml {
+    rewrite ^/sitemap\.xml$ /media/$1 break;
+}
+
+{% if magento_version is version('2.2', '<') %}
+{# Magento 2.2+ handles robots.txt programatically #}
+location ~* ^/robots\.txt {
+    rewrite ^/robots\.txt$ /media/$1 break;
+}
+{% endif %}
+
+location / {
+    {% if mageops_https_enable %}
+        if ($http_x_forwarded_proto = 'http') {
+            return 301 https://$http_host$request_uri;
+        }
+    {% endif %}
+
+    add_header Vary "Accept-Encoding";
+
+    try_files $uri $uri/ /index.php$is_args$args;
+}
+
+location /media/catalog/product/thumbnail {
+    auth_basic  off;
+
+    try_files $uri $uri/ /resize.php$is_args$args;
+}
+
+location /rest/ {
+    auth_basic  off;
+
+    try_files $uri $uri/ /index.php$is_args$args;
+}
+
+location /pub/ {
+    location ~ ^/pub/media/(downloadable|customer|import|theme_customization/.*\.xml) {
+        deny all;
+    }
+
+    alias $MAGE_ROOT/pub/;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+}
+
+location ~* (.*\.(jpeg|jpg|png|gif|bmp|tiff|svg|apng|ico))\.webp$ {
+    add_header Cache-Control "public";
+    add_header X-Frame-Options "SAMEORIGIN";
+    expires +1y;
+    try_files $uri $uri/ $1;
+}
+
+location = /favicon.ico {
+    add_header Cache-Control "public";
+    add_header X-Frame-Options "SAMEORIGIN";
+    expires +1y;
+    log_not_found off;
+    log_subrequest off;
+    access_log off;
+    error_page 404 /404notlogged.html;
+    try_files $uri =404;
+}
+
+location = /404notlogged.html {
+    expires +1y;
+    log_not_found off;
+    log_subrequest off;
+    access_log off;
+    internal;
+}
+
+location /static/ {
+    expires max;
+
+    {% if magento_nginx_rewrite_static_assets_version|default(false) %}
+    # Remove signature of the static files that is used to overcome the browser cache
+    location ~ ^/static/version {
+        rewrite ^/static/(version\d*/)?(.*)$ /static/$2 last;
+    }
+    {% endif %}
+
+    location ~* \.(html|ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2|json)$ {
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Host,Origin,Accept';
+            add_header 'Access-Control-Max-Age' 1728000;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            add_header 'Content-Length' 0;
+            return 204;
+        }
+
+        if ($request_method = 'POST') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Host,Origin,Accept';
+            add_header 'Access-Control-Expose-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Host,Origin,Accept';
+        }
+
+        if ($request_method = 'GET') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+            add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Host,Origin,Accept';
+            add_header 'Access-Control-Expose-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range,Host,Origin,Accept';
+        }
+
+        add_header Vary "Accept-Encoding";
+        add_header Cache-Control "public";
+        add_header X-Frame-Options "SAMEORIGIN";
+        expires +1y;
+
+        if (!-f $request_filename) {
+            rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
+        }
+    }
+
+    location ~* \.(zip|gz|gzip|bz2|csv|xml)$ {
+        add_header Cache-Control "no-store";
+        add_header X-Frame-Options "SAMEORIGIN";
+        expires    off;
+
+        if (!-f $request_filename) {
+           rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
+        }
+    }
+
+    if (!-f $request_filename) {
+        rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
+    }
+
+    add_header X-Frame-Options "SAMEORIGIN";
+}
+
+location /media/ {
+    try_files $uri $uri/ /get.php$is_args$args;
+
+    location ~ ^/media/theme_customization/.*\.xml {
+        deny all;
+    }
+
+    location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
+        add_header Cache-Control "public";
+        add_header X-Frame-Options "SAMEORIGIN";
+        expires +1y;
+        try_files $uri $uri/ /get.php$is_args$args;
+    }
+
+    location ~* \.(zip|gz|gzip|bz2|csv|xml)$ {
+        add_header Cache-Control "no-store";
+        add_header X-Frame-Options "SAMEORIGIN";
+        expires    off;
+        try_files $uri $uri/ /get.php$is_args$args;
+    }
+
+    add_header X-Frame-Options "SAMEORIGIN";
+}
+
+location /media/customer/ {
+    deny all;
+}
+
+location /media/downloadable/ {
+    deny all;
+}
+
+location /media/import/ {
+    deny all;
+}
+
+# PHP entry point for main application
+location ~ (resize|index|get|static|report|404|503)\.php$ {
+    try_files $uri =404;
+
+    fastcgi_pass fastcgi_backend;
+    fastcgi_index index.php;
+
+    if ($request_uri ~ ^/rest/.*$) {
+        set $PHP_MEMORY_LIMIT {{ magento_api_request_php_memory_limit }};
+        set $PHP_MAX_EXECUTION_TIME {{ magento_api_request_php_max_execution_time }};
+    }
+
+    if ($request_uri ~ ^/{{ magento_admin_path }}/.*$) {
+        set $PHP_MEMORY_LIMIT {{ magento_admin_request_php_memory_limit }};
+        set $PHP_MAX_EXECUTION_TIME {{ magento_admin_request_php_max_execution_time }};
+    }
+
+    {% for limit in php_http_request_limits_custom | default([]) %}
+        if ($request_uri ~ {{ limit.path_pattern }}) {
+            # Custom limits - {{ limit.name | default(limit.path_pattern) }}
+            set $PHP_MEMORY_LIMIT {{ limit.memory_limit | default(php_http_request_memory_limit) }};
+            set $PHP_MAX_EXECUTION_TIME {{ limit.max_execution_time | default(php_http_request_max_execution_time) }};
+        }
+    {% endfor %}
+
+    include fastcgi_params;
+    include {{ nginx_magento_fastcgi_params_conf_path }};
+}
+
+location ~ cron\.php {
+    try_files $uri =404;
+
+    auth_basic "Cron Authentication";
+    auth_basic_user_file /etc/nginx/htpasswd;
+
+    fastcgi_pass fastcgi_backend;
+    fastcgi_index cron.php;
+
+    set $PHP_MEMORY_LIMIT {{ magento_cron_request_php_memory_limit }};
+    set $PHP_MAX_EXECUTION_TIME {{ magento_cron_request_php_max_execution_time }};
+
+    include fastcgi_params;
+    include {{ nginx_magento_fastcgi_params_conf_path }};
+}
+
+{% if nginx_custom_php_scripts_path_pattern %}
+# Custom PHP scripts
+location ~ {{ nginx_custom_php_scripts_path_pattern }} {
+    fastcgi_pass fastcgi_backend;
+
+    include fastcgi_params;
+    include {{ nginx_magento_fastcgi_params_conf_path }};
+}
+{% endif %}
+
+location ~ .*\.php$ {
+    deny all;
+}

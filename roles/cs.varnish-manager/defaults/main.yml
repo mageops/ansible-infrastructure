@@ -1,0 +1,12 @@
+varnish_manager_user: "varnish-manager"
+varnish_manager_group: "varnish-manager"
+
+varnish_manager_allowed_commands:
+    - "/usr/bin/varnishadm"
+    - "/etc/init.d/varnish reload"
+    - "/etc/init.d/varnish restart"
+    - "/etc/init.d/varnish start"
+    - "/etc/init.d/varnish stop"
+    - "/usr/bin/varnish_update_backends"
+
+varnish_manager_ssh_key_filename: varnish/sesame

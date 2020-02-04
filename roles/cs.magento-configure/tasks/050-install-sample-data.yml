@@ -1,0 +1,5 @@
+- name: Install sample data
+  become: true
+  become_user: "{{ magento_user }}"
+  shell: "php {{ magento_release_dir }}/bin/magento sampledata:deploy"
+

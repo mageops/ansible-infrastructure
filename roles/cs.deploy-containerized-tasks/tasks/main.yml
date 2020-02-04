@@ -1,0 +1,43 @@
+- name: Execute containerized tasks if defined
+  block:
+    - name: Prepare execution environment
+      block:
+        - name: Install packages
+          yum:
+            name: "{{ containerized_tasks_packages }}"
+            state: present
+          notify:
+            - Clean packages
+            - Clean yum cache
+        - name: Install ansible docker support
+          pip:
+            name: docker
+        - name: Ensure docker daemon is started
+          service:
+            name: docker
+            state: started
+          notify:
+            - Stop docker daemon
+            - Clean docker data
+        - name: Remember that it has been prepared
+          set_fact:
+            containerized_tasks_env_is_prepared: yes
+      # Skip preparation if it has already been done on this host during the run
+      when: not containerized_tasks_env_is_prepared
+
+    - name: Execute containerized tasks
+      command: >
+        docker run
+        {% if item.name is defined %}--name {{ item.name }}-{{ ansible_date_time.iso8601_basic_short }}{% endif %}
+        --volume {{ item.workdir }}:{{ item.container_workdir | default(containerized_tasks_container_workdir_default) }}:rw
+        {% if item.user is defined %}--user {{ item.user }}{% endif %}
+        {{ item.image | mandatory }}
+        {{ item.commandline | default('') }}
+      args:
+        warn: no
+      register: containerized_tasks_result
+      loop: "{{ containerized_tasks }}"
+    - debug: var=containerized_tasks_result
+  when: containerized_tasks | length > 0
+
+

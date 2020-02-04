@@ -1,0 +1,54 @@
+- name: Install PHP and dependency packages
+  yum:
+    name: "{{ php_packages + php_extra_packages | default([]) + php_install_fpm_package | ternary(['php-fpm'], []) }}"
+    state: present
+
+- name: Configure PHP tmpfiles
+  template:
+    src: php.tmpfiles.conf
+    dest: /etc/tmpfiles.d/php.conf
+  register: tmpfiles_config
+
+- name: Ensure PHP tmpfiles config is applied
+  command: systemd-tmpfiles --create
+  when: tmpfiles_config is changed
+
+- name: Configure PHP INI
+  template:
+    src: php.ini
+    dest: /etc/php.ini
+  notify: PHP Configuration Changed
+
+- name: Configure PHP CLI INI
+  template:
+    src: php-cli.ini
+    dest: /etc/php-cli.ini
+    force: yes
+  notify: PHP Configuration Changed
+
+# This is needed so specific /etc/php*.ini settings are not
+# overrided by package provided defaults.
+- name: Disable unwanted PHP INI overrides
+  copy:
+    content: |
+      ; WARNING! Do not add any settings here!
+      ;
+      ; This file is empty on purpose to allow
+      ; settings for this module to be set in
+      ; the main /etc/php*.ini files.
+    dest: /etc/php.d/{{ item }}.ini
+    force: yes
+  with_items:
+    - 10-opcache
+  notify: PHP Configuration Changed
+
+- name: Create cache cleaning service
+  template:
+    src: php.clean-tmp.service
+    dest: /etc/systemd/system/php-clean-tmp.service
+  notify: PHP Configuration Changed
+
+- name: Ensure cache cleaning service is enabled
+  systemd:
+    enabled: yes
+    name: php-clean-tmp

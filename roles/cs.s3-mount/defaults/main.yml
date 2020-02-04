@@ -1,0 +1,28 @@
+s3fs_mount_use_goofys: false
+
+s3fs_mount_fstype: "{{ s3fs_mount_use_goofys | ternary('fuse', 'fuse.s3fs') }}"
+s3fs_mount_fuse_binary: "{{ s3fs_mount_use_goofys | ternary('goofys', 's3fs') }}"
+
+s3fs_cache_dir: /tmp/s3
+s3fs_use_cache: yes
+
+s3fs_options_s3fs:
+    - "ahbe_conf=/etc/s3fs/ahbe.conf"
+    - "auto_unmount"
+    - "max_stat_cache_size=100000"
+    - "uid={{ s3fs_owner_uid }}"
+    - "gid={{ s3fs_owner_gid }}"
+    - "umask=0002"
+    - "url=http://s3.{{ aws_region }}.amazonaws.com/"
+    - "retries=10"
+    - "readwrite_timeout=300"
+    - "connect_timeout=900"
+    - "iam_role={{ s3fs_iam_role }}"
+
+s3fs_options_goofys:
+    - "--uid={{ s3fs_owner_uid }}"
+    - "--gid={{ s3fs_owner_gid }}"
+
+s3fs_mount_opts: "{{ s3fs_mount_use_goofys | ternary(s3fs_options_goofys, s3fs_options_s3fs) }}"
+
+s3fs_premount_bind_mounts: []

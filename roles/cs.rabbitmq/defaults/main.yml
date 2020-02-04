@@ -1,0 +1,32 @@
+rabbitmq_server_version: "rabbitmq-server-3.7.9-1.el{{ rabbitmq_el_release }}"
+rabbitmq_erlang_version: "erlang-21.3.7-1.el{{ rabbitmq_el_release }}"
+
+# No other options are supported right now as our repos support EL7 only
+rabbitmq_el_release: 7
+
+# Ensure the nodename is not auto-generated so we can use various tools
+rabbitmq_nodename: rabbit
+
+# Basic port for AMQP protocol used by most apps
+rabbitmq_amqp_port: 5672
+
+# Port that publishes HTTP API and management UI
+rabbitmq_http_port: 15672
+
+# Whether to enable the web management API+UI plugin
+rabbitmq_enable_management: no
+
+# List of plugins to be enabled besides the management UI
+rabbitmq_plugins: []
+
+# These are kind of a "namespaces" that can be used
+# to separate multiple apps on one RMQ instance
+#
+# Set to a list of vhosts to be created on first installation
+rabbitmq_virtual_hosts: []
+
+# Users to be created
+rabbitmq_users: []
+
+# See `vm_memory_high_watermark.relative` option.
+rabbitmq_highmem_relative: 0.3

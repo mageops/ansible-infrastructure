@@ -1,0 +1,19 @@
+
+packages_install: []
+packages_remove: []
+
+packages_full_update: yes
+packages_full_update_exclude: []
+
+packages_maintenance_interval: "{{ 3600 * 24 * 3 }}"
+packages_maintenance_marker_path: /var/cache/yum/ansible-package-maintenance-timestamp
+packages_rebuild_caches: yes
+packages_rebuild_fastestmirrors: yes
+packages_mirrorlist_countrycode: no
+packages_mirrorlists:
+  - { file: CentOS-Base.repo, repo: base,       url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=os" }
+  - { file: CentOS-Base.repo, repo: updates,    url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=updates" }
+  - { file: CentOS-Base.repo, repo: extras,     url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=extras" }
+  - { file: CentOS-Base.repo, repo: centosplus, url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=centosplus" }
+
+

@@ -1,0 +1,14 @@
+[program:import_dispatcher]
+command=php {{ mageops_app_web_dir }}/current/bin/magento importer:import:dispatcher
+directory={{ mageops_app_web_dir }}/current
+autostart=true
+autorestart=true
+; Setting startsecs to 0 should ensure that the process never goes into FATAL state,
+; thus will always be restarted
+startsecs=0
+startretries=100							            ; max # of serial start failures (default 3)
+user={{ magento_user }}
+redirect_stderr=true
+stdout_logfile=/var/log/supervisor/%(program_name)s.log	
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3

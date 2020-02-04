@@ -1,0 +1,8 @@
+#!/bin/sh
+
+/usr/sbin/logrotate /etc/logrotate.d/magento
+EXITVALUE=$?
+if [ $EXITVALUE != 0 ]; then
+    /usr/bin/logger -t logrotate-magento "ALERT exited abnormally with [$EXITVALUE]"
+fi
+exit 0

@@ -1,0 +1,11 @@
+disk:
+  resources:
+    - "/"
+  measurement:
+    - used_percent
+mem:
+  measurement:
+    - used_percent
+swap:
+  measurement:
+    - used_percent

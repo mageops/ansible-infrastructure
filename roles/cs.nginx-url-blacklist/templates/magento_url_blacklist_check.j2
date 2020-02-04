@@ -1,0 +1,8 @@
+{# This file shall be included inside your `server` block #}
+
+{% if nginx_blacklist_urls | length > 0 %}
+# Return {{ nginx_blacklist_urls_response_code }} for url patterns that we want unavailable.
+if (${{ nginx_blacklist_map_variable_name }}) {
+    return {{ nginx_blacklist_urls_response_code }};
+}
+{% endif %}

@@ -1,0 +1,18 @@
+[program:varnish-purge-proxy]
+
+command="{{ varnish_pp_bin.path }} aws {{ varnish_pp_instance_tags }} --listen={{ varnish_pp_listen_address }} --destport={{ varnish_pp_listen_port }} --port={{ varnish_pp_listen_port }}" -f
+priority=5								                ; start before others try to use /home/git/data
+autostart=true							                ; start at supervisord start (default: true)
+autorestart=true						                ; whether/when to restart (default: unexpected)
+;startsecs=1							                ; number of secs prog must stay running (def. 1)
+;startretries=3							                ; max # of serial start failures (default 3)
+exitcodes=0,2							                ; 'expected' exit codes for process (default 0,2)
+;stopsignal=QUIT						                ; signal used to kill process (default TERM)
+;stopwaitsecs=10						                ; max num secs to wait b4 SIGKILL (default 10)
+;stopasgroup=false						                ; send stop signal to the UNIX process group (default false)
+;killasgroup=false						                ; SIGKILL the UNIX process group (def false)
+user=root								                ; setuid to this UNIX account to run the program
+redirect_stderr=true					                ; redirect proc stderr to stdout (default false)
+stdout_logfile=/var/log/supervisor/%(program_name)s.log	; stdout log path, NONE for none; default AUTO
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3

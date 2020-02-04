@@ -1,0 +1,10 @@
+repo_nodejs_package_name: nodejs-release
+repo_nodejs_name_prefix: nodejs
+repo_nodejs_variants:
+  - '10'
+  - '11'
+  - '12'
+  - '13'
+repo_nodejs_variants_enabled:
+  - '10'
+

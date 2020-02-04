@@ -1,0 +1,51 @@
+- name: Transform instance filters to format used in Lambda
+  set_fact:
+    varnish_instances_filter_lambda: "{{ varnish_instances_aws_tags | prefix_keys('tag:') | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
+    varnish_backend_instances_filter_lambda: "{{ varnish_backend_instances_aws_tags | prefix_keys('tag:')  | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
+    varnish_extra_instances_filter_lambda: "{{ varnish_extra_instances_aws_tags | prefix_keys('tag:') | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
+  vars:
+    _jq_map_ec2_instance_filter: '{Name: key, Values: [value]}'
+
+- name: Register lambda handler for autoscaling event
+  lambda:
+    name: "{{ aws_lambda_handle_autoscaling_event_name }}"
+    state: present
+    zip_file: "{{ aws_lambda_varnish_deploy_package_path }}"
+    runtime: "{{ aws_lambda_varnish_runtime }}"
+    role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_autoscaling_event_lambda }}"
+    handler: handle_autoscaling_event.handle
+    region: "{{ aws_region }}"
+    timeout: 120
+    environment_variables:
+        VARNISH_INSTANCE_FILTER: "{{ varnish_instances_filter_lambda | to_json }}"
+        BACKEND_INSTANCE_FILTER: "{{ varnish_backend_instances_filter_lambda | to_json }}"
+        EXTRA_INSTANCE_FILTER: "{{ varnish_extra_instances_filter_lambda | to_json }}"
+        KEY_BUCKET: "{{ aws_lambda_update_varnish_vcl_function_s3_bucket_name }}"
+        KEY_NAME: "{{ aws_lambda_update_varnish_vcl_function_ssh_key_name }}"
+        SSH_USERNAME: "{{ varnish_manager_user }}"
+        ASG_PREFIX: "{{ mageops_app_name }}"
+        TERMINATE_HOOK: "{{ aws_app_node_webnodedown_hook_name }}"
+        UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
+  register: handle_autoscaling_event_lambda
+
+- name: Setup autoscaling event trigger
+  cloudwatchevent_rule:
+    name: "trigger-autoscaling-lambda-{{ mageops_app_name }}"
+    region: "{{ aws_region }}"
+    state: present
+    event_pattern: "{{ aws_lambda_update_varnish_vcl_autoscaling_event_pattern | to_json }}"
+    targets:
+        - id: "{{ aws_lambda_handle_autoscaling_event_name }}-target"
+          arn: "{{ handle_autoscaling_event_lambda.configuration.function_arn }}"
+  register: varnish_autoscaling_event
+
+- name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
+  lambda_policy:
+    state: present
+    region: "{{ aws_region }}"
+    function_name: "{{ aws_lambda_handle_autoscaling_event_name }}"
+    action: "lambda:InvokeFunction"
+    principal: "events.amazonaws.com"
+    statement_id: "AWSEvents-handleAutoscalingEvent-{{ mageops_app_name }}"
+    source_arn: "{{ varnish_autoscaling_event.rule.arn }}"
+

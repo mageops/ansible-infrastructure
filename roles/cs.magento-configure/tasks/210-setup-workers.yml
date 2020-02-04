@@ -1,0 +1,11 @@
+- name: Ensure supervisord config fragment dir exists
+  file:
+    state: directory
+    dest: "/etc/supervisor.d/"
+
+- name: Configure consumer worker jobs
+  template:
+    src: magento_consumer_worker.supervisor.conf.j2
+    dest: "/etc/supervisor.d/magento-consumer-{{ item.consumer }}.conf"
+  loop: "{{ magento_consumer_workers }}"
+

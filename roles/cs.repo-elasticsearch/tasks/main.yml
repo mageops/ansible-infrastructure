@@ -1,0 +1,17 @@
+- name: Ensure Elasticsearch repo release package is installed and up-to-date
+  yum:
+    name: "{{ repo_elasticsearch_package_name }}"
+
+- name: Ensure chosen elasticsearch repo variants are enabled
+  ini_file:
+    state: present
+    create: no
+    path: "/etc/yum.repos.d/{{ repo_elasticsearch_filename }}.repo"
+    section: "{{ repo_elasticsearch_name_prefix }}{{ variant }}"
+    option: enabled
+    value: "{{ (variant in repo_elasticsearch_variants_enabled) | ternary('1', '0') }}"
+    no_extra_spaces: yes
+  loop: "{{ repo_elasticsearch_variants }}"
+  loop_control:
+    loop_var: variant
+

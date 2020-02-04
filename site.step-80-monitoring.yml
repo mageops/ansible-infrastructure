@@ -1,0 +1,7 @@
+- hosts: localhost
+  connection: local
+  roles:
+    - role: cs.aws-region-facts
+    - role: cs.aws-logs-slack
+      when: aws_logs_slack_notifications
+    - role: cs.aws-logs-retention

@@ -1,0 +1,4 @@
+- name: Install goofys packages
+  yum:
+    name: goofys
+    state: present

@@ -1,0 +1,10 @@
+- name: Reload systemctl daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Restart PHP-FPM
+  service:
+    name: php-fpm
+    state: restarted
+  listen: PHP Configuration Changed
+

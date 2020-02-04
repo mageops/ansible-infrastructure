@@ -1,0 +1,24 @@
+- name: Get info about VPC networks
+  ec2_vpc_net_facts:
+    region: "{{ aws_region }}"
+    filters: "{{ aws_vpc_facts_net_filters | combine (aws_vpc_facts_net_tags | prefix_keys('tag:')) }}"
+  register: vpc_net_facts
+
+- name: Fail if no VPC network has been found
+  fail:
+    msg: Error! No VPC network found, have you ran infrastructure provisioning yet?
+  when: vpc_net_facts.vpcs | length == 0
+
+- name: Warn when more than one VPC has been found
+  debug:
+    msg: Warning! More than one VPC network found, using first one.
+  when: vpc_net_facts | length == 0
+
+- name: Set VPC network info
+  set_fact:
+    aws_vpc_network_info: "{{ vpc_net_facts.vpcs | first }}"
+
+- name: Set VPC network facts
+  set_fact:
+    aws_vpc_id: "{{ aws_vpc_network_info.id }}"
+    aws_vpc_cidr_block: "{{ aws_vpc_network_info.cidr_block }}"

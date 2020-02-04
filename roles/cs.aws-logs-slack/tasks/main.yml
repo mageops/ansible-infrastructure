@@ -1,0 +1,75 @@
+- name: Get log groups
+  set_fact:
+    aws_logs_slack_log_groups: "{{ aws_logs_slack_log_groups_default + aws_logs_slack_log_groups_extra }}"
+
+- name: Get log groups
+  set_fact:
+    aws_logs_slack_log_groups: "{{ aws_logs_slack_log_groups + aws_logs_slack_log_groups_report }}"
+  when: aws_logs_log_magento_crash_reports
+
+# This is needed because lambda action expects the file to be on the remote machine
+# and we need to zip it. It doesn't make a difference tha we're using localhost for this.
+- name: Create temporary build directory
+  tempfile:
+    state: directory
+    suffix: build
+  register: send_logs_to_slack_temp_dir
+
+- name: Copy lambda sources
+  copy:
+    src: forwardLogsToSlack.js
+    dest: "{{ send_logs_to_slack_temp_dir.path }}/index.js"
+
+- name: Zip the sources
+  archive:
+    path: "{{ send_logs_to_slack_temp_dir.path }}/*.js"
+    dest: "{{ send_logs_to_slack_temp_dir.path }}/lambda.zip"
+    format: zip
+
+- name: Create slack log forwarder lambda function
+  lambda:
+    name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
+    state: present
+    runtime: nodejs12.x
+    memory_size: 128
+    role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_basic_lambda_execution }}"
+    handler: index.handler
+    src: "{{ send_logs_to_slack_temp_dir.path }}/lambda.zip"
+    region: "{{ aws_region }}"
+    environment_variables:
+      SLACK_HOOK_URL: "{{ aws_logs_slack_hook_url }}"
+      SLACK_CHANNEL: "{{ aws_logs_slack_channel }}"
+
+- name: Allow slack log forwarder lambda function to be invoked by CloudWatch Logs
+  lambda_policy:
+    state: present
+    region: "{{ aws_region }}"
+    function_name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
+    action: "lambda:InvokeFunction"
+    principal: "logs.{{ aws_region }}.amazonaws.com"
+    statement_id: lambda-logs-push-to-slack-{{ item.group | replace('/', '-')|replace('.', '-') }}
+    source_arn: "arn:aws:logs:{{ aws_region }}:{{ aws_account_id }}:log-group:/{{ mageops_project }}/{{ mageops_environment }}/{{ item.group }}:*"
+    source_account: "{{ aws_account_id }}"
+  with_items: "{{ aws_logs_slack_log_groups }}"
+
+# Function ARN has to be constructed manually, because the one from register contains version and prohibits the call from working
+- name: Attach function to exception report group
+  local_action:
+    module: "shell aws logs put-subscription-filter --region {{ aws_region }} --log-group-name /{{ mageops_project }}/{{ mageops_environment }}/{{ item.group }} --filter-name send_to_slack --filter-pattern {{ item.filter | default('')|quote }} --destination-arn arn:aws:lambda:{{ aws_region }}:{{ aws_account_id }}:function:{{ aws_lambda_slack_exceptions_forwarder_name }}"
+  with_items: "{{ aws_logs_slack_log_groups }}"
+
+- name: Fetch existing log groups
+  shell: "aws logs --region {{ aws_region }} describe-log-groups"
+  register: aws_logs_describe
+
+- name: Set log group list
+  set_fact:
+    aws_logs_log_group_names: "{{ (aws_logs_describe.stdout | from_json).logGroups | map(attribute='logGroupName')|list }}"
+
+- name: Create function log group
+  shell: "aws logs create-log-group --region {{ aws_region }} --log-group-name={{ aws_lambda_slack_exceptions_forwarder_name_log_group_name }}"
+  when: not aws_lambda_slack_exceptions_forwarder_name_log_group_name in aws_logs_log_group_names
+
+- name: Set retention policy for function log group
+  shell: "aws logs put-retention-policy --region {{ aws_region }} --log-group-name={{ aws_lambda_slack_exceptions_forwarder_name_log_group_name }} --retention-in-days=3"
+

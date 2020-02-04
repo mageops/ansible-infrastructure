@@ -1,0 +1,6 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  roles:
+    - role: cs.aws-iam
+    # - role: cs.aws-iam-employee-access

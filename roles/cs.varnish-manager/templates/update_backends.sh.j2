@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+NEW_VCL_NAME="$1"
+NEW_VCL_PATH="/home/{{ varnish_manager_user }}/${NEW_VCL_NAME}"
+CUR_VCL_PATH="{{ varnish_backends_vcl }}"
+BKP_VCL_PATH="${CUR_VCL_PATH}.backup"
+
+if [ ! -f "$NEW_VCL_PATH" ] ; then
+    echo "No new backends file found"
+    exit 1
+fi
+
+echo "Backing up vcl..."
+cp "${CUR_VCL_PATH}" "${BKP_VCL_PATH}"
+
+echo "Using new backends vcl file ${NEW_VCL_PATH}..."
+cp "${NEW_VCL_PATH}" "${CUR_VCL_PATH}"
+
+echo "Reloading VCLs..."
+/bin/systemctl reload varnish
+
+if [ $? -ne 0 ] ; then
+    echo "VCL didn't compile, restoring backup..."
+    cp "${BKP_VCL_PATH}" "${CUR_VCL_PATH}"
+    exit 1
+fi
+

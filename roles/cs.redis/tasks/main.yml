@@ -1,0 +1,5 @@
+- name: Install redis
+  include_tasks: install.yml
+
+- name: Configure redis
+  include_tasks: configure.yml

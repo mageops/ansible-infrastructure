@@ -1,0 +1,35 @@
+- name: Install watchdog script
+  template:
+    mode: 0755
+    src: mount-watchdog.bash
+    dest: /usr/local/bin/mageops-mount-watchdog
+
+- name: Install fix cronjob
+  cron:
+    name: "S3FS - FIX MOUNT #{{ s3fs_mount_id }}"
+    minute: "*/2"
+    job: "/usr/local/bin/mageops-mount-watchdog fix '{{ s3fs_mount.mountpoint }}'"
+  loop: "{{ s3fs_buckets }}"
+  loop_control:
+    index_var: s3fs_mount_id
+    loop_var: s3fs_mount
+
+- name: Install daily remount cronjob
+  cron:
+    name: "S3FS - REMOUNT #{{ s3fs_mount_id }}"
+    minute: 0
+    hour: 4
+    job: "/usr/bin/systemd-cat --identifier=mageops-mount-watchdog /usr/local/bin/mageops-mount-watchdog remount '{{ s3fs_mount.mountpoint }}'"
+  loop: "{{ s3fs_buckets }}"
+  loop_control:
+    index_var: s3fs_mount_id
+    loop_var: s3fs_mount
+
+- name: Clear S3FS temp daily
+  cron:
+    name: "S3FS - CLEAN CACHE"
+    hour: 3
+    minute: 45
+    job: /usr/bin/bash -c 'rm -rf "{{ s3fs_cache_dir }}"/*'
+  when: s3fs_use_cache and not s3fs_mount_use_goofys
+

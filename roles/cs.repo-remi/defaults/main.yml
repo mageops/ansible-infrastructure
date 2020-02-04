@@ -1,0 +1,127 @@
+php_repo_remi_package_name: remi-release
+php_repo_remi_variants_enabled:
+  - safe
+
+php_repo_remi_variants:
+  safe:
+    name: remi-safe
+    filename: remi-safe
+  safe-debuginfo:
+    name: remi-safe-debuginfo
+    filename: remi-safe
+
+  remi:
+    name: remi
+    filename: remi
+  debuginfo:
+    name: remi-debuginfo
+    filename: remi
+  test:
+    name: remi-test
+    filename: remi
+  test-debuginfo:
+    name: remi-test-debuginfo
+    filename: remi
+
+  php54:
+    name: remi-php54
+    filename: remi-php54
+
+  php55:
+    name: remi-php55
+    filename: remi
+  php55-debuginfo:
+    name: remi-php55-debuginfo
+    filename: remi
+  php56:
+    name: remi-php56
+    filename: remi
+  php56-debuginfo:
+    name: remi-php56-debuginfo
+    filename: remi
+
+  php70:
+    name: remi-php70
+    filename: remi-php70
+  php70-debuginfo:
+    name: remi-php70-debuginfo
+    filename: remi-php70
+  php70-test:
+    name: remi-php70-test
+    filename: remi-php70
+  php70-test-debuginfo:
+    name: remi-php70-test-debuginfo
+    filename: remi-php70
+
+  php71:
+    name: remi-php71
+    filename: remi-php71
+  php71-debuginfo:
+    name: remi-php71-debuginfo
+    filename: remi-php71
+  php71-test:
+    name: remi-php71-test
+    filename: remi-php71
+  php71-test-debuginfo:
+    name: remi-php71-test-debuginfo
+    filename: remi-php71
+
+  php72:
+    name: remi-php72
+    filename: remi-php72
+  php72-debuginfo:
+    name: remi-php72-debuginfo
+    filename: remi-php72
+  php72-test:
+    name: remi-php72-test
+    filename: remi-php72
+  php72-test-debuginfo:
+    name: remi-php72-test-debuginfo
+    filename: remi-php72
+
+  php73:
+    name: remi-php73
+    filename: remi-php73
+  php73-debuginfo:
+    name: remi-php73-debuginfo
+    filename: remi-php73
+  php73-test:
+    name: remi-php73-test
+    filename: remi-php73
+  php73-test-debuginfo:
+    name: remi-php73-test-debuginfo
+    filename: remi-php73
+
+  php74:
+    name: remi-php74
+    filename: remi-php74
+  php74-debuginfo:
+    name: remi-php74-debuginfo
+    filename: remi-php74
+  php74-test:
+    name: remi-php74-test
+    filename: remi-php74
+  php74-test-debuginfo:
+    name: remi-php74-test-debuginfo
+    filename: remi-php74
+
+  glpi91:
+    name: remi-glpi91
+    filename: remi-glpi91
+  glpi92:
+    name: remi-glpi92
+    filename: remi-glpi92
+  glpi93:
+    name: remi-glpi93
+    filename: remi-glpi93
+  glpi94:
+    name: remi-glpi94
+    filename: remi-glpi94
+
+  modular:
+    name: remi-modular
+    filename: remi-modular
+  modular-test:
+    name: remi-modular-test
+    filename: remi-modular
+

@@ -1,0 +1,29 @@
+- name: Set varnish backend template vars
+  set_fact:
+    varnish_backend_template_vars:
+      varnish_backend_port: "{{ mageops_varnish_backend_port }}"
+      varnish_backend_probe_endpoint: "{{ varnish_backend_probe_endpoint }}"
+      varnish_backend_max_conns: "{{ varnish_backend_max_conns }}"
+      varnish_backend_first_byte_timeout: "{{ varnish_backend_first_byte_timeout }}"
+
+- name: Register lambda handler for updating varnish backends
+  lambda:
+    name: "{{ aws_lambda_update_varnish_backends_name }}"
+    state: present
+    zip_file: "{{ aws_lambda_varnish_deploy_package_path }}"
+    runtime: "{{ aws_lambda_varnish_runtime }}"
+    role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_update_varnish_backend_lambda_execution }}"
+    handler: update_varnish_backends.handle
+    region: "{{ aws_region }}"
+    timeout: 120
+    vpc_security_group_ids:
+      - "{{ aws_security_group_lambda_ssh_id }}"
+    vpc_subnet_ids: "{{ aws_vpc_subnet_ids }}"
+    environment_variables:
+      BACKEND_TEMPLATE: "{{ lookup('file', 'roles/cs.varnish/templates/vcl/backends.vcl.j2')|to_json }}"
+      BACKEND_TEMPLATE_VARS: "{{ varnish_backend_template_vars | to_json }}"
+
+
+
+
+

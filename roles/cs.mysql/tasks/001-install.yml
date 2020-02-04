@@ -1,0 +1,7 @@
+- name: Setup Mysql
+  include_tasks: flavor/mysql.yml
+  when: not mysql_mariadb_flavor
+
+- name: Setup Mariadb
+  include_tasks: flavor/mariadb.yml
+  when: mysql_mariadb_flavor

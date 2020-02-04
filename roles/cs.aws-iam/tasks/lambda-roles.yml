@@ -1,0 +1,58 @@
+- name: Create basic lambda execution role
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'lambda_execution.policy.json') }}"
+    name: "{{ aws_iam_role_basic_lambda_execution }}"
+    state: present
+    managed_policy:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+- name: Create custom policy for autoscale events handler lambda
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_autoscaling_event_lambda }}"
+    policy_description: Custom permissions for autoscaling event handler lambda
+    policy: "{{ lookup('template', 'handle_autoscaling_event_lambda.policy.json') }}"
+    state: present
+  register: iam_handle_autoscaling_event_lambda
+
+- name: Create role for autoscale events handler lambda
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'lambda_execution.policy.json') }}"
+    name: "{{ aws_iam_role_autoscaling_event_lambda }}"
+    state: present
+    managed_policy:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - "{{ iam_handle_autoscaling_event_lambda.policy.arn }}"
+
+- name: Create custom policy for update varnish backends lambda
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_update_varnish_backends }}"
+    policy_description: Custom permissions for update varnish backend lambda
+    policy: "{{ lookup('template', 'update_varnish_backends_lambda.policy.json') }}"
+    state: present
+  register: iam_update_varnish_backends_lambda
+
+- name: Create custom policy for import scaling handler lambda
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_import_scaling_lambda }}"
+    policy_description: Custom permissions for import scaling handler lambda
+    policy: "{{ lookup('template', 'handle_import_scaling_lambda.policy.json') }}"
+    state: present
+  register: iam_import_scaling_handler_lambda
+
+- name: Create role for handle autoscaling event lambda
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'lambda_execution.policy.json') }}"
+    name: "{{ aws_iam_role_update_varnish_backend_lambda_execution }}"
+    state: present
+    managed_policy:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - "{{ iam_update_varnish_backends_lambda.policy.arn }}"
+
+- name: Create role for import scaling handler lambda
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'lambda_execution.policy.json') }}"
+    name: "{{ aws_iam_role_import_scaling_lambda_execution }}"
+    state: present
+    managed_policy:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      - "{{ iam_import_scaling_handler_lambda.policy.arn }}"

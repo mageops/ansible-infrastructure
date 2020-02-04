@@ -1,0 +1,7 @@
+- name: Make sure old nginx configuration files are absent
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "{{ nginx_confd_dir }}/magento2.conf"
+    - "{{ nginx_confd_dir }}/upsteram.conf"

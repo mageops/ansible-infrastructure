@@ -1,0 +1,6 @@
+- name: Remove default vhosts configuration if exists
+  file:
+    path: "{{ nginx_confd_dir }}/default.conf"
+    state: absent
+  when: nginx_remove_default_vhost
+  notify: Reload nginx

@@ -1,0 +1,51 @@
+- name: Ensure Varnish Manager group exists
+  group:
+    name: "{{ varnish_manager_group }}"
+    state: present
+
+- name: Ensure Varnish Manager user exists
+  user:
+    shell: /bin/bash
+    name: "{{ varnish_manager_user }}"
+    group: "{{ varnish_manager_group }}"
+    groups:
+      - "{{ varnish_group }}"
+    append: yes
+    generate_ssh_key: yes
+  register: _varnish_manager_user
+
+- name: Authorize SSH access to Varnish Manager account via key
+  authorized_key:
+    user: "{{ varnish_manager_user }}"
+    state: present
+    key: "{{ _varnish_manager_user.ssh_public_key }}"
+
+- name: Fetch Varnish Manager's SSH key
+  fetch:
+    src: "{{ _varnish_manager_user.ssh_key_file }}"
+    dest: "{{ mageops_ansible_temp_dir }}"
+  register: _varnish_ssh_key
+
+- name: Ensure Varnish Manager's private key is securely stored in S3
+  delegate_to: localhost
+  become: no
+  connection: local
+  aws_s3:
+    region: "{{ aws_region }}"
+    bucket: "{{ aws_s3_secret_bucket }}"
+    src: "{{ _varnish_ssh_key.dest }}"
+    object: "{{ varnish_manager_ssh_key_filename }}"
+    mode: put
+    retries: 3
+
+- name: Ensure sudoers configuration for Varnish Manager exists
+  template:
+    src: varnish_manager_user_sudoers.j2
+    dest: "/etc/sudoers.d/{{ varnish_manager_user }}"
+
+- name: Install Varnish backend update script
+  template:
+    src: update_backends.sh.j2
+    dest: /usr/bin/varnish_update_backends
+    mode: 0750
+    owner: root

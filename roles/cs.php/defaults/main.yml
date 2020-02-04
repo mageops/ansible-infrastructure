@@ -1,0 +1,116 @@
+php_version: "7.2"
+php_packages:
+  - php-cli
+  - php-common
+  - php-mbstring
+  - php-curl
+  - php-gd
+  - php-xml
+  - php-intl
+  - php-opcache
+
+php_install_fpm_package: no
+
+# --- Basic default PHP INI configuration ---
+
+php_date_timezone: "Europe/Berlin"
+php_memory_limit: -1
+php_max_execution_time: 60
+
+php_max_input_time: 600
+php_max_input_vars: 2000
+
+php_realpath_cache_size: "4M"
+php_realpath_cache_ttl: "3600"
+php_upload_max_filesize: "64M"
+php_post_max_size: "32M"
+php_session_name: PHPSESSID
+php_display_errors: "Off"
+php_conf_fragment_dir_path: "/etc/php.d"
+# disable GC for web requests
+php_zend_enable_gc: "Off"
+
+# --- OPcache Module INI settings ---
+
+php_opcache_memory_consumption: 256
+php_opcache_interned_strings_buffer: 16
+
+php_opcache_max_accelerated_files: 65406
+php_opcache_max_wasted_percentage: 5
+php_opcache_max_file_size: 0
+
+php_opcache_consistency_checks: 0
+php_opcache_enable_file_override: 1
+
+php_opcache_validate_timestamps: 0
+php_opcache_validate_permission: 0
+
+php_opcache_revalidate_path: 0
+php_opcache_revalidate_freq: 2592000
+
+php_opcache_use_cwd: 1
+php_opcache_huge_code_pages: 0
+
+php_opcache_file_update_protection: 0
+php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.blacklist"
+
+# --- File-based opcache settings for CLI scripts ---
+
+# Warning! This is an experimental feature. Currenly it does
+# not work correctly with Magento - standalone Magento cron 
+# processes are not being run - until the issue is fixed it's not
+# recommended to enable this.
+
+php_cli_opcache_file_cache_enable: no
+php_cli_opcache_file_cache_dir: /var/tmp/php-cli-opcache
+php_cli_opcache_file_cache_consistency_checks: 1
+
+# Even though the source does not change in some cases (e.g. during deploy)
+# there are commands ran which can (re)generate code at runtime. As it's
+# very tricky to invalidate the file cache for this cases, it's better
+# to turn this on, performance impact should be neglible and anyway it's 
+# offset by the gains of having the CLI file cache on.
+php_cli_opcache_validate_timestamps: 1
+
+# Revalidate at every start of CLI script.
+php_cli_opcache_revalidate_freq: 0
+
+# Do not cache files changed in last 5 seconds to protect from
+# partial updates (files being written)
+php_cli_opcache_file_update_protection: 5
+
+# enable GC for CLi as these processes can be long-running
+php_cli_zend_enable_gc: "On"
+
+# make sure CLI processes are restarted once in a while to avoid 
+# memory leaks which could happen with bad code even though GC is on
+php_cli_max_execution_time: 3600
+
+# we can afford more space for file-based cache
+php_cli_opcache_memory_consumption: "{{ php_opcache_memory_consumption * 2 }}"
+
+php_cli_error_log_path: /var/log/php-cli-error.log
+
+
+# As all of the defaults are tuned for production setups you'll
+# usually want to override these settings for development envs:
+#
+# php_opcache_validate_timestamps: 1
+# php_opcache_consistency_checks: 1
+# php_opcache_file_update_protection: 2
+# php_opcache_revalidate_path: 1
+# php_opcache_revalidate_freq: 0
+# php_cli_opcache_file_cache_enable: yes
+# php_cli_opcache_file_cache_consistency_checks: 1
+
+
+# --- Performance Tuning ---
+# PERFORMANCE TODO Enable hugepages use in opcache for better performance
+#
+#   1) Make sure THP is supported and enabled and we're not running in a container (docker / LXC / openvz / whateva)
+#      See: roles/cs.redis/tasks/configure.yml for enabling THP
+#   2) Set hugepages to PHP opcache size / hugepage size (2MB default), e.h. `sysctl -w vm.nr_hugepages=128`
+#   3) Enable in opcache cfg - set `opcache.huge_code_pages=1` in `/etc/php.dń/10-opcache.ini`
+#   4) Restart PHP-FPM
+#
+# php_opcache_use_thp: yes

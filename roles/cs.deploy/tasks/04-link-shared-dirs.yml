@@ -1,0 +1,20 @@
+- name: Make sure top-level directory for shared dirs exists
+  file:
+    state: directory
+    path: "{{ (deploy_next_release_path ~ '/' ~ item)|dirname }}"
+    owner: "{{ deploy_app_user }}"
+    group: "{{ deploy_app_group }}"
+    mode: "{{ deploy_directory_permissions }}"
+  with_items: "{{ deploy_shared_dirs }}"
+  become: yes
+  become_user: "{{ deploy_app_user }}"
+
+- name: Link shared directories to next release
+  file:
+    state: link
+    path: "{{ deploy_next_release_path }}/{{ item }}"
+    src: "{{ deploy_shared_dir }}/{{ item }}"
+    force: yes
+  with_items: "{{ deploy_shared_dirs }}"
+  become: yes
+  become_user: "{{ deploy_app_user }}"

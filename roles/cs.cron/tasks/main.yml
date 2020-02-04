@@ -1,0 +1,22 @@
+- name: Install Cron deamon
+  yum:
+    name: cronie
+    state: latest
+  become: true
+
+- name: Configure cron (disable email delivery)
+  lineinfile:
+      path: /etc/sysconfig/crond
+      regexp: '^CRONDARGS'
+      line: 'CRONDARGS="-m off"'
+  notify: Restart cron daemon
+
+- name: Make sure cron is restarted if needed
+  meta: flush_handlers
+
+- name: Start and enable Cron deamon
+  service:
+    name: crond
+    enabled: yes
+    state: started
+  become: true

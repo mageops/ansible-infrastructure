@@ -1,0 +1,4 @@
+dependencies: 
+  - cs.repo-epel
+  
+allow_duplicates: true

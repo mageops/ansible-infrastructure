@@ -1,0 +1,11 @@
+[Unit]
+Description=Clean PHP Temps and Caches
+
+Before=sysinit.target shutdown.target php-fpm.service supervisord.service
+PartOf=php-fpm.service supervisord.service
+ConditionPathExists=/etc/tmpfiles.d/php.conf
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/systemd-tmpfiles --remove /etc/tmpfiles.d/php.conf

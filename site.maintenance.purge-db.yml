@@ -1,0 +1,43 @@
+# Warning! Each maintenance playbook shall run without generated vars being present!
+# It should fetch this information as needed, without the need to run whole infra step.
+
+# This playbook will remove the project's database. This is useful for testing envs
+# which need a completely different build installed which cannot migrate the current
+# database state.
+
+# This task will work only with environments which have `mageops_mysql_host` predefined in ansible-config
+# for now (so 99% of test envs). If there's a need we can dynamically fetch the host somehow later.
+
+# It will dump the current DB before doing that.
+
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Ensure dump directory exists
+      file:
+        path: "{{ pre_purge_db_directory }}"
+        state: directory
+
+    - name: Dump the current database
+      mysql_db:
+        login_host: "{{ mageops_mysql_host }}"
+        login_user: "{{ mageops_mysql_root_user }}"
+        login_password: "{{ mageops_mysql_root_pass }}"
+        state: dump
+        name: "{{ mageops_app_mysql_db }}"
+        quick: yes
+        target: "{{ pre_purge_db_directory }}/{{ mageops_app_name }}-{{ ansible_date_time.date }}-{{ ansible_date_time.hour }}.{{ ansible_date_time.minute }}.sql"
+
+    - name: Drop the current database
+      mysql_db:
+        login_host: "{{ mageops_mysql_host }}"
+        login_user: "{{ mageops_mysql_root_user }}"
+        login_password: "{{ mageops_mysql_root_pass }}"
+        state: absent
+        name: "{{ mageops_app_mysql_db }}"
+  vars:
+    - pre_purge_db_directory: "{{ ansible_env.HOME }}/maintenance-db-purge-dumps/{{ mageops_app_name }}/"
+  vars_files:
+    - vars/app/credentials.yml
+    - vars/app/env.yml
+    - vars/aws/env.yml

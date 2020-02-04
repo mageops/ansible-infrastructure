@@ -1,0 +1,32 @@
+- name: Create temporary distribution config build directory
+  tempfile:
+    state: directory
+    suffix: build
+  register: aws_cloudfront_distribution_temp_dir
+
+- name: Build cloudfront distribution config
+  template:
+    src: distribution-config.json
+    dest: "{{ aws_cloudfront_distribution_temp_dir.path }}/config.json"
+
+- name: Create cloudfront distribution
+  shell: "aws cloudfront create-distribution --distribution-config=file://{{ aws_cloudfront_distribution_temp_dir.path }}/config.json"
+  when: not aws_cloudfront_distribution | default(false, true)
+  register: aws_cloudfront_create_distribution_cmd
+
+- name: Update cloudfront distribution
+  shell: "aws cloudfront update-distribution --distribution-config=file://{{ aws_cloudfront_distribution_temp_dir.path }}/config.json --id={{ aws_cloudfront_distribution.Id }} --if-match={{ aws_cloudfront_distribution.ETag }}"
+  when: aws_cloudfront_distribution | default(false, true)
+  register: aws_cloudfront_update_distribution_cmd
+
+- name: Set cloudfront distribution id fact
+  set_fact:
+    aws_cloudfront_distribution_id: "{{ (aws_cloudfront_create_distribution_cmd.stdout | from_json).Distribution.Id }}"
+  when: aws_cloudfront_create_distribution_cmd is changed
+
+- name: Ensure distribution is tagged
+  cloudfront_distribution:
+    state: present
+    distribution_id: "{{ aws_cloudfront_distribution_id }}"
+    tags: "{{ aws_cloudfront_ditribution_tags }}"
+  when: aws_cloudfront_distribution_id is defined

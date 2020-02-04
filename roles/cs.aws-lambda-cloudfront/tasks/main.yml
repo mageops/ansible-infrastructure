@@ -1,0 +1,41 @@
+- name: Download lambda deploy packages
+  get_url:
+    url: "{{ aws_lambda_cloudfront_deploy_package_url }}"
+    dest: "{{ aws_lambda_cloudfront_deploy_package_path }}"
+
+- name: Create Lambda Edge Function
+  lambda:
+    name: "{{ aws_lambda_cloudfront_name }}"
+    state: present
+    runtime: nodejs10.x
+    memory_size: 1024
+    timeout: 20
+    role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_basic_lambda_execution }}"
+    handler: origin-request.handler
+    src: "{{ aws_lambda_cloudfront_deploy_package_path }}"
+    region: "{{ aws_cloudfront_lambda_region }}"
+  register: aws_cloudfront_lambda
+
+- name: Allow replicator to get this lambda
+  lambda_policy:
+    state: present
+    function_name: "{{ aws_lambda_cloudfront_name }}"
+    action: "lambda:GetFunction"
+    principal: "replicator.lambda.amazonaws.com"
+    statement_id: lambda-edge-origin-request-replicator-get-function
+    source_account: "{{ aws_account_id }}"
+    region: "{{ aws_cloudfront_lambda_region }}"
+
+- name: Get lambda versions
+  lambda_facts:
+    function_name: "{{ aws_lambda_cloudfront_name }}"
+    query: versions
+    region: "{{ aws_cloudfront_lambda_region }}"
+  register: aws_cloudfront_lambda_versions
+
+- name: Get latest version ARN
+  set_fact:
+    # to_json | from_json is a fix for https://github.com/ansible/ansible/issues/27299
+    aws_cloudfront_lambda_latest_arn: "{{ aws_cloudfront_lambda_versions | to_json | from_json | json_query(aws_cloudfront_lambda_latest_arn_json_query) }}"
+  vars:
+    aws_cloudfront_lambda_latest_arn_json_query: "max_by(ansible_facts.lambda_facts.function.\"{{ aws_lambda_cloudfront_name }}\".versions[?version!='$LATEST'], &version).function_arn"

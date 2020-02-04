@@ -1,0 +1,101 @@
+
+- name: Ensure /var/lib/rpm-state exists (fix for https://access.redhat.com/solutions/3573891)
+  file:
+    path: /var/lib/rpm-state
+    state: directory
+
+- name: Get last package maintenance timestamp
+  slurp:
+    path: "{{ packages_maintenance_marker_path }}"
+  register: packages_maintenance_last_timestamp
+  changed_when: false
+  failed_when: no
+
+- name: Install DNF for speedup when installing packages (ansible should use it automatically)
+  yum:
+    name:
+      - dnf
+      - dnf-plugins-core
+    state: present
+
+- name: Perform one-time package maintenance
+  block:
+    - name: Set localized yum mirrorlist for core repos
+      ini_file:
+        path: "/etc/yum.repos.d/{{ item.file }}"
+        section: "{{ item.repo }}"
+        option: mirrorlist
+        value: "{{ item.url }}"
+        backup: yes
+        no_extra_spaces: yes
+      loop: "{{ packages_mirrorlists }}"
+      loop_control:
+        label: "{{ item.repo }}"
+      when: packages_mirrorlist_countrycode is defined and packages_mirrorlist_countrycode
+
+    - name: Force rebuild mirror benchmark list by removing current one
+      file:
+        path:
+        state: absent
+      loop:
+        - "/var/cache/yum/{{ ansible_machine }}/{{ ansible_distribution_major_version }}/timedhosts"
+        - "/var/cache/yum/{{ ansible_machine }}/{{ ansible_distribution_major_version }}/timedhosts.txt"
+      when: packages_rebuild_fastestmirrors
+
+    - name: Clean yum caches
+      command: "{{ item }}"
+      args:
+        warn: no
+      with_items:
+        - yum -y clean headers
+        - yum -y clean metadata
+      when: packages_rebuild_caches
+
+    - name: Rebuild yum cache
+      command: yum -y makecache
+      args:
+        warn: no
+      register: yum_make_cache_result
+      until: yum_make_cache_result.rc == 0
+      retries: 3
+      delay: 5
+      when: packages_rebuild_caches
+
+    - name: Make sure banned packages are not present
+      yum:
+        name: "{{ packages_remove | default([]) }}"
+        state: absent
+      when: packages_remove is defined and packages_remove | length
+
+    - name: Store information that package maintenance was done
+      copy:
+        content: "{{ ansible_date_time.epoch }}"
+        dest: "{{ packages_maintenance_marker_path }}"
+  when: >-
+    packages_maintenance_last_timestamp.content is not defined or (
+      (
+        packages_maintenance_last_timestamp.content | int - ansible_date_time.epoch | int
+      ) > packages_maintenance_interval | int
+    )
+
+- name: Make sure there are no open yum transactions
+  shell: yum-complete-transaction --cleanup-only
+  args:
+    warn: no
+
+- name: "Install packages"
+  yum:
+    name: "{{ packages_install }}"
+    state: present
+  register: packages_install_command
+  retries: 5
+  delay: 5
+  until: not packages_install_command is failed
+
+- name: "Ensure all packages are up to date"
+  yum:
+    name: '*'
+    state: latest
+    exclude: "{{ packages_full_update_exclude }}"
+  when: packages_full_update
+

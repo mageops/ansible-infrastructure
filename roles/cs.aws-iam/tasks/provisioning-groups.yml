@@ -1,0 +1,24 @@
+- name: Create custom IAM group for users running provisioning
+  iam_group:
+    name: "{{ aws_iam_group_custom_policies }}"
+    managed_policy:
+      - "{{ aws_iam_policy_ec2_assign_iam_role }}"
+      - "{{ aws_iam_policy_lambda_access }}"
+      # Added here because we are already at policy limit in standard policies
+      - AmazonElasticFileSystemFullAccess
+    state: present
+
+- name: Create standard IAM group for users running provisioning
+  iam_group:
+    name: "{{ aws_iam_group_standard_policies }}"
+    managed_policy:
+      - AmazonRDSFullAccess
+      - AmazonEC2FullAccess
+      - AmazonElastiCacheFullAccess
+      - AutoScalingFullAccess
+      - AmazonS3FullAccess
+      - CloudFrontFullAccess
+      - AmazonVPCFullAccess
+      - IAMReadOnlyAccess
+      - CloudWatchEventsFullAccess
+    state: present

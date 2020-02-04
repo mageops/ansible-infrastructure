@@ -1,0 +1,10 @@
+aws_varnish_node_ami_id: "{{ aws_ami_clean_base_id }}"
+aws_varnish_node_instance_type: t3a.micro
+aws_varnish_node_ebs_volume_size: 10
+aws_ansible_varnish_node_inventory_group: varnish
+aws_varnish_node_instance_name: "{{ mageops_app_name }}-varnish"
+aws_varnish_node_launch_script_extra: ''
+aws_varnish_node_security_groups:
+  - "{{ aws_security_group_ssh_id }}"
+  - "{{ aws_security_group_varnish_id }}"
+

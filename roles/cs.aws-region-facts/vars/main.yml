@@ -1,0 +1,62 @@
+
+# List of S3 website endpoints for each region.
+# As I found no easy way to get this dynamically, instead this is a harcoded list from AWS Docs. /FS
+# See: https://docs.aws.amazon.com/general/latest/gr/rande.html#s3_website_region_endpoints
+aws_s3_website_endpoints:
+  - region_name: us-east-2
+    website_endpoint: s3-website.us-east-2.amazonaws.com
+    hosted_zone_id: Z2O1EMRO9K5GLX
+  - region_name: us-east-1
+    website_endpoint: s3-website-us-east-1.amazonaws.com
+    hosted_zone_id: Z3AQBSTGFYJSTF
+  - region_name: us-west-1
+    website_endpoint: s3-website-us-west-1.amazonaws.com
+    hosted_zone_id: Z2F56UZL2M1ACD
+  - region_name: us-west-2
+    website_endpoint: s3-website-us-west-2.amazonaws.com
+    hosted_zone_id: Z3BJ6K6RIION7M
+  - region_name: ap-east-1
+    website_endpoint: s3-website.ap-east-1.amazonaws.com
+    hosted_zone_id: ZNB98KWMFR0R6
+  - region_name: ap-south-1
+    website_endpoint: s3-website.ap-south-1.amazonaws.com
+    hosted_zone_id: Z11RGJOFQNVJUP
+  - region_name: ap-northeast-3
+    website_endpoint: s3-website.ap-northeast-3.amazonaws.com
+    hosted_zone_id: Z2YQB5RD63NC85
+  - region_name: ap-northeast-2
+    website_endpoint: s3-website.ap-northeast-2.amazonaws.com
+    hosted_zone_id: Z3W03O7B5YMIYP
+  - region_name: ap-southeast-1
+    website_endpoint: s3-website-ap-southeast-1.amazonaws.com
+    hosted_zone_id: Z3O0J2DXBE1FTB
+  - region_name: ap-southeast-2
+    website_endpoint: s3-website-ap-southeast-2.amazonaws.com
+    hosted_zone_id: Z1WCIGYICN2BYD
+  - region_name: ap-northeast-1
+    website_endpoint: s3-website-ap-northeast-1.amazonaws.com
+    hosted_zone_id: Z2M4EHUR26P7ZW
+  - region_name: ca-central-1
+    website_endpoint: s3-website.ca-central-1.amazonaws.com
+    hosted_zone_id: Z1QDHH18159H29
+  - region_name: eu-central-1
+    website_endpoint: s3-website.eu-central-1.amazonaws.com
+    hosted_zone_id: Z21DNDUVLTQW6Q
+  - region_name: eu-west-1
+    website_endpoint: s3-website-eu-west-1.amazonaws.com
+    hosted_zone_id: Z1BKCTXD74EZPE
+  - region_name: eu-west-2
+    website_endpoint: s3-website.eu-west-2.amazonaws.com
+    hosted_zone_id: Z3GKZC51ZF0DB4
+  - region_name: eu-west-3
+    website_endpoint: s3-website.eu-west-3.amazonaws.com
+    hosted_zone_id: Z3R1K369G5AVDG
+  - region_name: eu-north-1
+    website_endpoint: s3-website.eu-north-1.amazonaws.com
+    hosted_zone_id: Z3BAZG2TWCNX0D
+  - region_name: sa-east-1
+    website_endpoint: s3-website-sa-east-1.amazonaws.com
+    hosted_zone_id: Z7KQH4QJS55SO
+  - region_name: me-south-1
+    website_endpoint: s3-website.me-south-1.amazonaws.com
+    hosted_zone_id: Z1MPMWCPA7YB62

@@ -1,0 +1,3 @@
+dependencies:
+  - role: cs.aws-rds-facts
+    when: aws_use | default(false)

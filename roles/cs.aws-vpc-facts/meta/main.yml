@@ -1,0 +1,6 @@
+allow_duplicates: no
+dependencies:
+  - role: cs.ansible-plugins
+  # Needed to compute the preferred AZ
+  # if not forced by project configured
+  - role: cs.aws-region-facts

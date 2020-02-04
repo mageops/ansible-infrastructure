@@ -1,0 +1,49 @@
+- name: Create VPC network
+  ec2_vpc_net:
+    state: present
+    region: "{{ aws_region }}"
+    cidr_block: "{{ aws_vpc_subnet_prefix }}.0.0/16"
+    name: "{{ aws_vpc_name }}"
+    tags: "{{ aws_tags_default }}"
+  register: vpc_net
+
+- name: Create internet gateway in VPC
+  ec2_vpc_igw:
+    state: present
+    region: "{{ aws_region }}"
+    tags: "{{ aws_tags_default | combine(vpc_igw_tags) }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+  vars:
+    vpc_igw_tags:
+      Name: "{{ mageops_app_name }}"
+
+- name: Create public subnets in VPC
+  ec2_vpc_subnet:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    tags: "{{ aws_tags_default | combine(vpc_subnet_tags) }}"
+    az: "{{ az_name }}"
+    cidr: "{{ aws_vpc_subnet_prefix }}.{{ az_index + 1 }}.0/25"
+  vars:
+    vpc_subnet_tags:
+      Name: "{{ aws_vpc_name }}-public-{{ az_name[-2:] }}"
+  loop: "{{ aws_availability_zone_names }}"
+  loop_control:
+    loop_var: az_name
+    index_var: az_index
+  register: vpc_subnet
+
+- name: Create route table
+  ec2_vpc_route_table:
+    state: present
+    region: "{{ aws_region }}"
+    tags: "{{ aws_tags_default | combine(vpc_route_table_tags) }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    subnets: "{{ vpc_subnet.results | map(attribute='subnet') | map(attribute='cidr_block') | list }}"
+    routes: "{{ aws_vpc_routes_default + aws_vpc_routes_extra | default([]) }}"
+  vars:
+    vpc_route_table_tags:
+      Name: "{{ aws_vpc_name }}-routes"
+
+

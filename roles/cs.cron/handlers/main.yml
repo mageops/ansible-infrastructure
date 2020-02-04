@@ -1,0 +1,4 @@
+- name: Restart cron daemon
+  service:
+    name: crond
+    state: restarted

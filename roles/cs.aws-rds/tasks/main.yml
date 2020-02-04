@@ -1,0 +1,30 @@
+- name: Create RDS subnet group
+  rds_subnet_group:
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ aws_rds_subnet_group_name }}"
+    description: "{{ aws_rds_subnet_group_name }}"
+    subnets: "{{ aws_rds_subnet_group_subnets }}"
+
+- name: Create MySQL RDS
+  rds:
+    command: create
+    region: "{{ aws_region }}"
+    publicly_accessible: true
+    instance_name: "{{ aws_rds_instance_name }}"
+    db_engine: "{{ aws_rds_db_engine }}"
+    size: "{{ aws_rds_storage_size }}"
+    instance_type: "{{ aws_rds_instance_type }}"
+    username: "{{ mageops_mysql_root_user }}"
+    password: "{{ mageops_mysql_root_pass }}"
+    subnet: "{{ aws_rds_subnet_group_name }}"
+    vpc_security_groups: "{{ aws_rds_security_groups }}"
+    backup_retention: "{{ aws_rds_backup_retention }}"
+    backup_window: "{{ aws_rds_backup_window }}"
+    maint_window: "{{ aws_rds_maintenance_window }}"
+    upgrade: "{{ aws_rds_auto_upgrade }}"
+    tags: "{{ aws_tags_default | combine(aws_tags_role_database, aws_tags_role_mysql_database, aws_tags_node_mysql) }}"
+    zone: "{{ aws_rds_availability_zone }}"
+    wait: yes
+    wait_timeout: 600
+

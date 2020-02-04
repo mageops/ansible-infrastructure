@@ -1,0 +1,20 @@
+[program:magento-consumer-{{ item.consumer }}]
+command=php {{ mageops_app_web_dir }}/current/bin/magento queue:consumers:start {{ item.consumer }} --batch-size={{ item.batch_size | default(100) }}
+process_name = magento-consumer-{{ item.consumer }}-%(process_num)s
+numprocs={{ item.process_count | default(1) }}
+directory={{ mageops_app_web_dir }}/current
+autostart=true
+autorestart=true
+startsecs=0
+startretries=10
+exitcodes=0,2
+stopsignal=KILL
+stopwaitsecs=10
+user={{ magento_user }}
+redirect_stderr=false
+stdout_logfile=/var/log/supervisor/%(program_name)s.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=3
+stderr_logfile=/var/log/supervisor/%(program_name)s.error.log
+stderr_logfile_maxbytes=1MB
+stderr_logfile_backups=3

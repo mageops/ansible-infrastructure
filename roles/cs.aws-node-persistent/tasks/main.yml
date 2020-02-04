@@ -1,0 +1,78 @@
+- name: Create persistent node instance
+  ec2:
+    region: "{{ aws_region }}"
+    monitoring: no
+    assign_public_ip: yes
+    exact_count: 1
+    key_name: "{{ aws_ec2_ssh_key_name }}"
+    group_id: >-
+      {{
+          aws_persistent_node_security_groups
+          + aws_security_group_redis_id | default(false, true) | ternary([aws_security_group_redis_id], [])
+          + aws_security_group_sftp_id | default(false, true) | ternary([aws_security_group_sftp_id], [])
+          + aws_security_group_elasticsearch_id | default(false, true) | ternary([aws_security_group_elasticsearch_id], [])
+          + varnish_is_in_autoscaling_group | ternary(
+              aws_security_group_varnish_id | default(false, true) | ternary([aws_security_group_varnish_id], []),
+              []
+          )
+      }}
+    vpc_subnet_id: "{{ aws_persistent_node_vpc_subnet_id }}"
+    image: "{{ aws_persistent_node_ami_id }}"
+    instance_type: "{{ aws_persistent_node_instance_type }}"
+    instance_profile_name: "{{ aws_iam_role_varnish }}"
+    instance_initiated_shutdown_behavior: terminate
+    user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
+    count_tag: "{{ aws_persistent_node_name_tags }}"
+    instance_tags: >-
+      {{
+          aws_tags_default | combine(
+            aws_tags_role_persistent,
+            aws_tags_node_persistent,
+            mageops_elasticsearch_create | ternary(aws_tags_role_elasticsearch, {}),
+            mageops_rabbitmq_create | ternary(aws_tags_role_rabbitmq_message_queue, {}),
+            (mageops_redis_create or mageops_redis_sessions_create) | ternary(aws_tags_role_redis_cache, {}),
+            aws_persistent_node_name_tags
+          )
+      }}
+    volumes:
+      - device_name: "{{ aws_persistent_node_root_device }}"
+        volume_type: gp2
+        volume_size: "{{ aws_persistent_node_ebs_volume_size }}"
+        delete_on_termination: yes
+    wait: yes
+    wait_timeout: 1500
+    # This has zero costs on current-gen instances
+    ebs_optimized: yes
+  vars:
+    aws_ec2_user_launch_script: "{{ aws_persistent_node_launch_script_extra }}"
+    aws_persistent_node_name_tags:
+      Name: "{{ aws_persistent_node_instance_name }}"
+  register: aws_persistent_ec2
+
+- name: Wait for persistent node instance to get up
+  wait_for:
+    port: 22
+    host: "{{ item.public_ip }}"
+  loop: '{{ aws_persistent_ec2.tagged_instances }}'
+  loop_control:
+    label: "{{ item.public_dns_name }}"
+
+- name: Add persistent host to inventory
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname:
+      - persistent
+      - "{{ mageops_app_host_group }}"
+  loop: '{{ aws_persistent_ec2.tagged_instances }}'
+  loop_control:
+    label: "{{ item.public_ip }}"
+
+- name: Assign elastic IP to persistent node
+  ec2_eip:
+    region: "{{ aws_region }}"
+    device_id: "{{ aws_persistent_ec2.tagged_instances[0].id }}"
+    ip: "{{ aws_persistent_node_elastic_ip }}"
+  when: aws_persistent_node_elastic_ip | default(false, true)
+
+
+

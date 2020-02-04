@@ -1,0 +1,10 @@
+- name: Install Magento logrotate configuration
+  template:
+    src: magento_logrotate.conf.j2
+    dest: /etc/logrotate.d/magento
+
+- name: Run Magento logrotate hourly
+  template:
+    src: magento_logrotate_cron.sh.j2
+    dest: /etc/cron.hourly/logrotate-magento
+    mode: 0755

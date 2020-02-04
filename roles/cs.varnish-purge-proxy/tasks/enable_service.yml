@@ -1,0 +1,7 @@
+- name: "Enable service"
+  service:
+    name: "varnish-purge-proxy"
+    state: restarted
+    enabled: yes
+  ignore_errors: yes
+  #TODO: Fix it. It is failing Ansible even if service is properly restarted.

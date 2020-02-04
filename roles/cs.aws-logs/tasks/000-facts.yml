@@ -1,0 +1,3 @@
+- name: Set loggers configuration var
+  set_fact:
+    _aws_logs_loggers: "{{ (aws_logs_loggers_default | combine(aws_logs_loggers, recursive=True)).values()|list }}"

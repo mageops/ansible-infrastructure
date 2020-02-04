@@ -1,0 +1,39 @@
+- name: Fetch existing local ssh identities
+  set_fact:
+    authorize_local_keys_identity_data: >
+      {{
+        authorize_local_keys_identity_data | default([]) + [
+          (
+            {
+              'name': identity | basename | splitext | first,
+              'path': identity,
+              'pubkey': lookup('file', identity),
+              'comment': (lookup('file', identity).split(' '))[2:] | join(' ')
+            }
+          ) | combine(identity_common)
+        ]
+      }}
+  when: identity is file
+  loop: "{{ authorize_local_identities }}"
+  vars:
+    identity_common:
+      user: "{{ lookup('pipe', 'whoami') }}"
+      host: "{{ lookup('pipe', 'hostname') }}"
+  loop_control:
+    loop_var: identity
+  delegate_to: localhost
+  connection: local
+  become: no
+
+- name: Authorize local ssh identities
+  authorized_key:
+    comment: "{{ entry[1].comment }} (sourced from {{ entry[1].user }}@{{ entry[1].host }})"
+    user: "{{ entry[0] }}"
+    state: present
+    key: "{{ entry[1].pubkey }}"
+  with_nested:
+    - "{{ authorize_local_keys_for_users }}"
+    - "{{ authorize_local_keys_identity_data }}"
+  loop_control:
+    loop_var: entry
+    label: "Authorize local key '{{ entry[1].name }} / {{ entry[1].comment }}' for remote user '{{ entry[0] }}'"

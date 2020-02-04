@@ -1,0 +1,33 @@
+- name: Install sshd packages
+  yum:
+    name: openssh-server
+    state: present
+
+- name: Ensure sshd configuration
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: "{{ entry.key }} {{ entry.value }}"
+    regexp: "#?\\s*{{ entry.key }}\\s+"
+    state: present
+  loop:
+    - key: PasswordAuthentication
+      value: "{% if sshd_password_auth %}yes{% else %}no{% endif %}"
+    - key: PubkeyAuthentication
+      value: "yes"
+    - key: PermitRootLogin
+      value: "{% if sshd_permit_root_login %}yes{% else %}no{% endif %}"
+    - key: PermitEmptyPasswords
+      value: "no"
+    - key: MaxAuthTries
+      value: "{{ ssh_max_auth_tries }}"
+    - key: TCPKeepAlive
+      value: "yes"
+    - key: ClientAliveInterval
+      value: "60"
+    - key: AuthorizedKeysFile
+      value: ".ssh/authorized_keys"
+  loop_control:
+    loop_var: entry
+    label: "{{ entry.key }}={{ entry.value }}"
+  notify:
+    - Reload ssh daemon

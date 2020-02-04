@@ -1,0 +1,4 @@
+allow_duplicates: no
+dependencies:
+  - role: cs.ansible-plugins
+  - role: cs.aws-vpc-facts

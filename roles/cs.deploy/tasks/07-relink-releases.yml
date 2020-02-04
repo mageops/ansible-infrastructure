@@ -1,0 +1,88 @@
+- name: Link previous release
+  file:
+    state: link
+    force: yes
+    dest: "{{ deploy_previous_release_dir }}"
+    src: "{{ deploy_current_release_path }}"
+  become: yes
+  become_user: "{{ deploy_app_user }}"
+  when: deploy_current_release_path is defined
+
+- name: Link current release
+  file:
+    state: link
+    force: yes
+    dest: "{{ deploy_current_release_dir }}"
+    src: "{{ deploy_next_release_path }}"
+  become: yes
+  become_user: "{{ deploy_app_user }}"
+
+- name: List current release directories
+  find:
+    file_type: directory
+    follow: no
+    hidden: no
+    recurse: no
+    path: "{{ deploy_releases_dir }}"
+  register: deploy_find_releases
+
+# The fact `ansible_mount` contains only the root mount while we have tons of others.
+# Cleared fact cache, tried `setup` module, I think this is a bug.
+- name: Find current mounts
+  become: yes
+  become_user: root
+  command: "findmnt --all --output=TARGET --raw --noheadings --notruncate"
+  changed_when: no
+  register: deploy_findmnt_cmd
+
+- name: Set list directories to remove
+  set_fact:
+    deploy_release_to_remove: >-
+      {{
+        (
+          deploy_find_releases.files
+            | sort(attribute='ctime')
+            | map(attribute='path')
+            | list
+        )[:-deploy_keep_current_releases]
+          | reject('equalto', deploy_next_release_path)
+          | list
+      }}
+    deploy_release_mountpoints_to_unmount: >-
+      {{
+        deploy_findmnt_cmd.stdout_lines
+          | select('match', deploy_releases_dir | regex_escape ~ '.*')
+          | list
+      }}
+
+# We cannot remove dirs with mounts which may sometimes break deploy
+# if previous broken deploys managed to get stuff mounted; also we
+# have to do `unmount` then `absent` because of some weird ansible bug
+- name: Unmount any mountpoints in the release directories to be removed
+  become: yes
+  become_user: root
+  mount:
+    path: "{{ item[1] }}"
+    state: "{{ item[2] }}"
+  when: item[1].startswith(item[0])
+  with_nested:
+    - "{{ deploy_release_to_remove }}"
+    - "{{ deploy_release_mountpoints_to_unmount }}"
+    - ['unmounted', 'absent']
+  loop_control:
+    label: "{{ item[2] | capitalize }} {{ item[1] }}"
+
+
+# Retry release removal as some mounts take some time to finally
+# release the mountpoint directories (S3FS FTW!)
+- name: Remove stale releases
+  become: yes
+  become_user: root
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop: "{{ deploy_release_to_remove }}"
+  register: deploy_remove_release_result
+  retries: 5
+  delay: 10
+  until: deploy_remove_release_result is not failed

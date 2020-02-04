@@ -1,0 +1,6 @@
+- import_tasks: 000-facts.yml
+- import_tasks: 001-setup-log-groups.yml
+- import_tasks: 002-install-daemon.yml
+- import_tasks: 003-configure-daemon.yml
+- include_tasks: 004-setup-magento-crash-report-handler.yml
+  when: aws_logs_log_magento_crash_reports

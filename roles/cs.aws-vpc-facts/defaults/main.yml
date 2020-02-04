@@ -1,0 +1,9 @@
+aws_vpc_facts_subnet_filters:
+  state: available
+
+aws_vpc_facts_subnet_tags: "{{ aws_tags_base }}"
+
+aws_vpc_facts_net_filters:
+  state: available
+
+aws_vpc_facts_net_tags: "{{ aws_tags_base }}"

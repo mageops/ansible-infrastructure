@@ -1,0 +1,8 @@
+sshd_password_auth: no
+sshd_permit_root_login: yes
+
+# People have many ssh keys in agent so increase this to a sane value.
+# Also we don't allow SSH access from outside trused CIDRs anywhere
+# and don't allow password authentication anyway so this shall be
+# not have any security implications.
+ssh_max_auth_tries: "{{ sshd_password_auth | ternary(1, 20) }}"

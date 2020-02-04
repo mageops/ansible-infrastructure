@@ -1,0 +1,5 @@
+# Setup s3 website config and add cloudfront access policy
+- import_tasks: setup-s3.yml
+# Create/update the cloudfront distribution
+- import_tasks: setup-distribution.yml
+

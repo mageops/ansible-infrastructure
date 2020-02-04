@@ -1,0 +1,48 @@
+- name: Ensure data dir exists
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ goaccess_data_dir }}"
+    - "{{ goaccess_data_dir }}/daily"
+    - "{{ goaccess_data_dir }}/weekly"
+    - "{{ goaccess_data_dir }}/monthly"
+
+- name: Ensure report dir exists
+  file:
+    path: "{{ goaccess_report_dir }}"
+    state: directory
+
+- name: Ensure goaccess is installed
+  yum:
+    name: goaccess
+    state: present
+
+- name: Install goaccess prerotate script
+  template:
+    src: prerotate.sh
+    dest: "{{ goaccess_prerotate_path }}"
+    mode: 0755
+
+- name: Add prerotate to nginx logrotate configuration
+  blockinfile:
+    path: /etc/logrotate.d/nginx
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    insertbefore: "postrotate"
+    content: |
+        prerotate
+            # if goaccess fails do not fail the whole rotation
+            {{ goaccess_prerotate_path }} $@ || true
+        endscript
+
+- name: Install logrotate config for goaccess reports
+  template:
+    src: logrotate.reports
+    dest: /etc/logrotate.d/goaccess
+
+- name: Install goaccess vhost
+  template:
+    src: vhost.conf
+    dest: "{{ nginx_confd_dir }}/goaccess.conf"
+  notify: reload nginx
+  when: goaccess_vhost_port is defined

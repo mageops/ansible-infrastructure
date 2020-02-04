@@ -1,0 +1,38 @@
+# Example: https://github.com/rabbitmq/rabbitmq-server/blob/master/docs/rabbitmq.conf.example#L211
+# Reference: https://www.rabbitmq.com/configure.html#config-items
+
+# Default AMQP port rabbitmq_amqp_port - listen on all interfaces
+listeners.tcp.default = {{ rabbitmq_amqp_port }}
+
+# Guest user can only connect through localhost
+loopback_users.guest = true
+
+# Internal auth
+auth_backends.1   = rabbit_auth_backend_internal
+
+# Enable default PLAIN auth for HTTP
+auth_mechanisms.1 = PLAIN
+# Enable AMQPLAIN used by apps at the AMQP port
+auth_mechanisms.2 = AMQPLAIN
+
+# Choose a strong password hash algo
+password_hashing_module = rabbit_password_hashing_sha512
+
+# High memory threshold in relation to total system
+vm_memory_high_watermark.relative = {{ rabbitmq_highmem_relative }}
+
+{% if rabbitmq_enable_management %}
+# Management UI port
+management.listener.port = {{ rabbitmq_http_port }}
+management.listener.ip = 0.0.0.0
+management.listener.ssl = false
+management.http_log_dir = /var/log/rabbitmq/http
+management.rates_mode = basic
+management.sample_retention_policies.global.minute = 5
+management.sample_retention_policies.global.hour = 60
+management.sample_retention_policies.global.day = 1200
+management.sample_retention_policies.basic.minute = 5
+management.sample_retention_policies.basic.hour = 60
+management.sample_retention_policies.detailed.10 = 5
+{% endif %}
+

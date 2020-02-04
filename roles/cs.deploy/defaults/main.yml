@@ -1,0 +1,139 @@
+# [optional] Number of releases to keep
+deploy_keep_current_releases: 3
+
+# [optional] Owner of the deployed file, defaults to ssh user
+#deploy_app_user:
+
+# [optional] Owner group of the deployed files - defaults to `deploy_app_user`
+#deploy_app_group:
+
+# [optional] Id of the deployment - used for naming dirs - defaults to current timestamp
+#deploy_release_id:
+
+# [optional] Webserver user which shall have access to the files
+deploy_webserver_user: nginx
+
+# [required] Main directory where releases and shared files are kept
+#deploy_root_dir:
+
+# [required] Local directory where artifcats will be copied from
+#deploy_artifact_dir:
+
+# [optional] List of directories shared between releases, paths relative to project root
+deploy_shared_dirs: []
+
+# [optional] List of directories that shall be writable by app user and web server
+deploy_writable_dirs: []
+
+# [optional] Dir where releases are kept
+deploy_releases_dir: "{{ deploy_root_dir }}/releases"
+
+# [optional] Dir where shared files are kept
+deploy_shared_dir: "{{ deploy_root_dir }}/shared"
+
+# [optional] Symlink to current release
+deploy_current_release_dir: "{{ deploy_root_dir }}/current"
+
+# [optional] Symlink to previous release
+deploy_previous_release_dir: "{{ deploy_root_dir }}/previous"
+
+# [optional] Whether to copy previous release to speed up sync
+deploy_copy_previous_release: yes
+
+# [optional] Permission mask for the directories - must be passed as string!
+deploy_directory_permissions: "0775"
+
+# [optional] Permission mask for the files - must be passed as string!
+deploy_file_permissions: "0664"
+
+# [optional] Additional options for rsync
+deploy_rsync_opts: []
+
+# [optional] Additional options for finding files/dirs when ensuring write permissions
+deploy_perm_fix_find_opts: ~
+
+# [optional] Services to be restarted
+deploy_restarted_services: []
+
+# [optional] Directories to be excluded when copying previous artifacts
+deploy_copy_previous_excludes: []
+
+# Use a fixed path instead of random dir to speed up everything and reuse artifact temps
+deploy_artifact_temp_dir: /tmp/ansible-deploy-artifacts-temp
+
+# Force ssh key that will be authorized as deploy user and used for rsync.
+# If set at the default `no` then ad-hoc key will be generated.
+deploy_ssh_key_path: "{{ playbook_dir }}/.tmp.ansible.ssh-deploy-key.{{ deploy_release_id }}.{{ deploy_app_user }}"
+deploy_ssh_key_path_pub: "{{ deploy_ssh_key_path }}.pub"
+
+# Options to use for SSH during artifact rsync
+deploy_rsync_ssh_opts: 
+  - "-o StrictHostKeyChecking=no"
+  - "-o UserKnownHostsFile=/dev/null"
+  - "-o ServerAliveInterval=60"
+  - "-o ServerAliveCountMax=30"
+
+# Additional defaults opts that should improve perf possible at the cost of reliability.
+deploy_rsync_perf_opts:
+  - "--compress"
+  - "--whole-file"
+  - "--inplace"
+
+deploy_rsync_excludes: []
+
+# Hooks
+
+# Before deploy has even started, just basic data is gathered.
+deploy_pre_actions: []
+
+# After the new code artificats have been installed in the release directory.
+deploy_install_actions: []
+
+# Executed always after install phase is complete, no matter if it went find,
+# this should clean up any temporary resources created before.
+deploy_cleanup_actions: []
+
+# Executed when anything fails during the install phase, attempt may be
+# made to try to restore the system to working order here.
+deploy_abort_install_actions: []
+
+# Executed after the newly prepared release dir has been relinked as the 
+# current one and default post deploy actions executed.
+deploy_release_actions: []
+
+# Executed when anything fails after linking the new release, attempt may be
+# made to try to restore the system to working order here.
+deploy_abort_release_actions: []
+
+# Executed after every deploy task has completed.
+deploy_post_actions: []
+
+
+deploy_post_install_abort_msg: |
+  ====================================================
+  ==  FATAL! The deploy has failed Before Release!  ==  
+  ====================================================
+
+      The new release has not been linked yey but 
+      still the system probably broken in some way 
+      due to interrupted configuration, stale cache,
+      partial database migrations,...
+
+      Please make 100% sure that everything is 
+      working correctly!
+
+  ----------------------------------------------------
+
+deploy_post_release_abort_msg: |
+  ====================================================
+  ==   FATAL! The deploy has failed Post Release!   ==
+  ====================================================
+
+      And attempt was made to restore the system 
+      to the previous pre-release state, but it is
+      probably broken in some way.
+
+      Please make 100% sure that everything is 
+      working correctly!
+
+  ----------------------------------------------------

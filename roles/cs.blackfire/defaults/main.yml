@@ -1,0 +1,6 @@
+blackfire_packages:
+  - blackfire-agent
+  - blackfire-php
+blackfire_server_id: ""
+blackfire_server_token: ""
+blackfire_install: yes

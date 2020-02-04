@@ -1,0 +1,30 @@
+- name: Find app node AMIs
+  ec2_ami_facts:
+    region: "{{ aws_region }}"
+    filters: "{{ ami_facts_common_filters | combine(ami_facts_app_node_filters, ami_facts_app_node_tag_filters) }}"
+  vars:
+    ami_facts_app_node_tag_filters: "{{ ami_facts_app_node_tags | prefix_keys('tag:') }}"
+  register: ami_app_node_facts
+
+- name: Set latest app node AMI facts if found
+  when: ami_app_node_facts.images | length > 0
+  block:
+    - name: Set latest app node AMI info
+      set_fact:
+        aws_ami_app_node_info: "{{ ami_app_node_facts.images | sort(attribute='creation_date') | last }}"
+
+    - name: Set latest app node AMI facts
+      set_fact:
+        aws_ami_app_node_id: "{{ aws_ami_app_node_info.image_id }}"
+        aws_ami_app_node_name: "{{ aws_ami_app_node_info.name }}"
+        aws_ami_app_node_location: "{{ aws_ami_app_node_info.image_location }}"
+
+- name: Print information about newest app node AMI found
+  when: ami_app_node_facts.images | length > 0
+  debug:
+    msg: "Found previous app node AMI: {{ aws_ami_app_node_name }} ({{ aws_ami_app_node_id }})"
+
+- name: Print information if no images were found
+  when: ami_app_node_facts.images | length == 0
+  debug:
+    msg: "No previous app node AMI was found! Clean build is coming..."

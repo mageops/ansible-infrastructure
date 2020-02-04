@@ -1,0 +1,9 @@
+if (beresp.status == 503) {
+    synthetic(std.fileread("/etc/varnish/error503.html"));
+
+    set beresp.http.Cache-Control = "no-cache, no-store, must-revalidate";
+    set beresp.http.Pragma = "no-cache";
+    set beresp.http.Expires = "0";
+
+    return (deliver);
+}

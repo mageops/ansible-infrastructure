@@ -1,0 +1,20 @@
+- name: Stop docker daemon
+  service:
+    name: docker
+    state: stopped
+    enabled: no
+
+- name: Clean yum cache
+  shell: yum clean all
+  args:
+    warn: no
+
+- name: Clean packages
+  yum:
+    name: "{{ containerized_tasks_packages }}"
+    state: absent
+
+- name: Clean docker data
+  file:
+    path: /var/lib/docker
+    state: absent

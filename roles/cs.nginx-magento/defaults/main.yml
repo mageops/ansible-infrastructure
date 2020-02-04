@@ -1,0 +1,35 @@
+nginx_app_port: 8080
+
+nginx_cron_htpasswd_file: "{{ nginx_etc_dir }}/htpasswd"
+nginx_site_htpasswd_file: "{{ nginx_etc_dir }}/sitepasswd"
+
+nginx_magento_mode: "{{ magento_mode | default('production') }}"
+
+nginx_fcgi_upstream_conf_file: "{{ nginx_confd_dir }}/000-php-fpm-upstream.conf"
+nginx_fcgi_read_timeout: '600s'
+nginx_fcgi_connect_timeout: '600s'
+nginx_fcgi_backend_socket: '/var/run/php-fpm/magento.sock'
+
+nginx_magento_fastcgi_params_conf_path: "{{ nginx_etc_dir }}/magento_fastcgi_params"
+nginx_magento_server_body_conf_path: "{{ nginx_etc_dir }}/magento_server_body"
+nginx_magento_vhost_conf_path: "{{ nginx_confd_dir }}/magento.conf"
+
+
+# Can be `website` or `store` depending on what do you want to switch.
+# Warning! Store means actually means "store view", so you should use store view codes with this setting.
+nginx_magento_run_type: no
+
+# Mapping hostname => store/website code.
+nginx_mage_run_code_map: {}
+
+# Which code to use when no host matches.
+nginx_mage_default_run_code: no
+
+# A dictionary of paths which produces 301 redirects in the form key => value
+nginx_custom_redirects: {}
+
+nginx_magento_fastcgi_params_template: magento_fastcgi_params.j2
+nginx_magento_server_body_template: magento_server_body.j2
+nginx_magento_vhost_template: magento_vhost.conf.j2
+
+

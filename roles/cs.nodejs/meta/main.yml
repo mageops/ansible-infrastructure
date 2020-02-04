@@ -1,0 +1,4 @@
+dependencies:
+  - role: cs.repo-nodejs
+    repo_nodejs_variants_enabled:
+      - "{{ nodejs_version.split('.') | first }}"

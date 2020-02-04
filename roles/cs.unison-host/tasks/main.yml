@@ -1,0 +1,35 @@
+- name: Install unison-fsmonitor
+  get_url:
+    url: "https://raw.githubusercontent.com/hnsl/unox/0.2.0/src/unox/unox.py"
+    dest: "/usr/local/bin/unison-fsmonitor"
+    mode: 0755
+
+- name: Install fsmonitor deps
+  pip:
+    name: 
+      - macfsevents
+      - watchdog
+    state: present
+
+- name: Install unison binary
+  get_url:
+    url: http://creativetest.de/rpms/unison/unison-macosx-{{ macosx_version }}
+    dest: /usr/local/bin/unison
+    mode: 0755
+  vars:
+    macosx_version: "{{ (ansible_distribution_version.split('.'))[:2]|join('.') }}"
+
+- name: Create unison config dir
+  file:
+    path: "~/.unison"
+    state: directory
+
+- name: Ensure local project dir exsits
+  file:
+    path: "{{ unison_local_path }}"
+    state: directory
+
+- name: Create unison profile
+  template:
+    src: project.prf
+    dest: "~/.unison/{{ unison_project_name }}.prf"

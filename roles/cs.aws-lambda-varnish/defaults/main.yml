@@ -1,0 +1,24 @@
+aws_lambda_varnish_deploy_package_url: "https://github.com/mageops/aws-lambdas-autoscaling/releases/download/1.6.0/autoscaling-lambdas-deploy-package.python3.7.zip"
+aws_lambda_varnish_deploy_package_path: "{{ mageops_ansible_temp_dir }}/varnish-lambda-deploy-package.zip"
+aws_lambda_varnish_runtime: python3.7
+
+aws_lambda_handle_autoscaling_event_name: "handleAutoscalingEvent-{{ mageops_app_name }}"
+aws_lambda_update_varnish_backends_name: "updateVarnishBackends-{{ mageops_app_name }}"
+
+
+aws_lambda_update_varnish_vcl_function_s3_bucket_name: "{{ aws_s3_secret_bucket }}"
+aws_lambda_update_varnish_vcl_function_ssh_key_name: "{{ varnish_manager_ssh_key_filename }}"
+aws_lambda_update_varnish_vcl_autoscaling_event_pattern:
+    source:
+        - aws.autoscaling
+    detail-type:
+        - "EC2 Instance Launch Successful"
+        - "EC2 Instance-terminate Lifecycle Action"
+
+
+# Those we don't handle for now
+#        - "EC2 Instance-launch Lifecycle Action"
+#        - "EC2 Instance Terminate Successful"
+#        - "EC2 Instance Launch Unsuccessful"
+#        - "EC2 Instance Terminate Unsuccessful"
+

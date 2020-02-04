@@ -1,0 +1,11 @@
+repo_mariadb_package_name: mariadb-release
+repo_mariadb_name_prefix: mariadb
+repo_mariadb_variants:
+  - '101'
+  - '102'
+  - '103'
+  - '104'
+
+repo_mariadb_variants_enabled:
+  - '104'
+

@@ -1,0 +1,6 @@
+aws_import_scaling_lambda_schedule: rate(5 minutes)
+
+aws_lambda_handle_import_scaling_name: "handleImportScaling-{{ mageops_app_name }}"
+aws_lambda_import_scaling_deploy_package_url: "https://github.com/mageops/aws-lambdas-autoscaling/releases/download/1.2.0/autoscaling-lambdas-deploy-package.python3.7.zip"
+aws_lambda_handle_import_scaling_runtime: python3.7
+aws_lambda_import_scaling_deploy_package_path: "{{ mageops_ansible_temp_dir }}/import-scaling-lambda-deploy-package.zip"

@@ -1,0 +1,64 @@
+- name: Create S3 access policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_s3_access_name }}"
+    policy_description: Allow S3 bucket access
+    policy: "{{ lookup('template', 'app_s3_access.policy.json') }}"
+    state: present
+  register: iam_s3_access
+
+- name: Create EFS access policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_efs_access }}"
+    policy_description: Allow EFS share access
+    policy: "{{ lookup('template', 'app_efs_access.policy.json') }}"
+    state: present
+  register: iam_efs_access
+
+- name: Create CloudWatch Logs access policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_cloudwatch_logs_access }}"
+    policy_description: Allow Cloudwatch access for pushing logs
+    policy: "{{ lookup('template', 'cloudwatch_logs_access.policy.json') }}"
+    state: present
+  register: iam_cloudwatch_logs_access
+
+- name: Create CloudWatch Metric policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_cloudwatch_metrics_access }}"
+    policy_description: Allow Cloudwatch access for pushing monitoring data
+    policy: "{{ lookup('template', 'cloudwatch_access.policy.json') }}"
+    state: present
+  register: iam_cloudwatch_access
+
+- name: Create EC2 list policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_ec2_list_name }}"
+    policy_description: Allow listing of EC2 instances and Autoscaling Goups
+    policy: "{{ lookup('template', 'ec2_list.policy.json') }}"
+    state: present
+  register: iam_ec2_list
+
+- name: Create role for EC2 app instances
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'ec2_assume_policy_document.json') }}"
+    name: "{{ aws_iam_role_app_node }}"
+    state: present
+    managed_policy:
+      - "{{ iam_s3_access.policy.arn }}"
+      - "{{ iam_efs_access.policy.arn }}"
+      - "{{ iam_cloudwatch_access.policy.arn }}"
+      - "{{ iam_cloudwatch_logs_access.policy.arn }}"
+      - "{{ iam_ec2_list.policy.arn }}"
+      - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+
+- name: Create role for EC2 persistent instances
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'ec2_assume_policy_document.json') }}"
+    name: "{{ aws_iam_role_persistent_node }}"
+    state: present
+    managed_policy:
+      - "{{ iam_s3_access.policy.arn }}"
+      - "{{ iam_cloudwatch_access.policy.arn }}"
+      - "{{ iam_cloudwatch_logs_access.policy.arn }}"
+      - "{{ iam_ec2_list.policy.arn }}"
+      - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"

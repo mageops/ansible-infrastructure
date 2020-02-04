@@ -1,0 +1,7 @@
+- name: PHP Configuration Changed
+  debug:
+    msg: >
+      PHP Configuration has been changed on disk -
+      services keeping PHP processes in memory
+      will be restarted.
+

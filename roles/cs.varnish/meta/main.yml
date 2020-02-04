@@ -1,0 +1,26 @@
+allow_duplicates: no
+dependencies:
+  - cs.ansible-plugins
+  - cs.repo-varnish
+
+galaxy_info:
+  author: creativestyle
+  description: Varnish server for MageOps Infrastructure
+  company: creativestyle Polska
+  license: license (BSD, MIT)
+  min_ansible_version: 2.7
+  platforms:
+    - name: EL
+      versions: [7]
+  galaxy_tags:
+    - varnish
+    - aws
+    - autoscaling
+    - webserver
+    - server
+    - http
+    - proxy
+    - mageops
+    - magento
+    - magesuite
+    - creativestyle

@@ -1,0 +1,10 @@
+repo_rabbitmq_package_name: rabbitmq-release
+repo_rabbitmq_name_prefix: rabbitmq-
+repo_rabbitmq_variants:
+  - erlang
+  - server
+
+repo_rabbitmq_variants_enabled:
+  - erlang
+  - server
+

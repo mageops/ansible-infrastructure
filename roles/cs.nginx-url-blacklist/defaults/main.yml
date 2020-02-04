@@ -1,0 +1,14 @@
+# List of request URL patterns which to block (return `nginx_blacklist_urls_response_code` immediately)
+nginx_blacklist_urls: []
+
+# HTTP response code returned for blacklisted URLs (410 is recommended everywhere)
+nginx_blacklist_urls_response_code: 410
+
+# Path to the partial nginx config with URL map to be created
+nginx_blacklist_map_config_file: "{{ nginx_confd_dir }}/000-url-blacklist-map.conf"
+
+# Path to the partial nginx config to be included in vhost
+nginx_blacklist_vhost_check_config_file: "{{ nginx_etc_dir }}/url_blacklist_check"
+
+# Nginx variable name used for the final check
+nginx_blacklist_map_variable_name: "blacklisted_url"

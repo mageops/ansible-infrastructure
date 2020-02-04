@@ -1,0 +1,8 @@
+- name: Optimize autoloader
+  become: true
+  become_user: "{{ magento_user }}"
+  shell: >
+    {{ magento_release_dir }}/vendor/bin/composer \
+      dump-autoload \
+        --optimize \
+        --working-dir '{{ magento_release_dir }}'

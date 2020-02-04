@@ -1,0 +1,16 @@
+- name: Find nanorc hilight configs
+  find:
+    paths: /usr/share/nano/
+    recurse: yes
+    patterns: '*.nanorc'
+  register: _nanorcs
+
+- name: Enable nano hilights
+  lineinfile:
+    path: /etc/nanorc
+    regexp: '{{ _nanorc_file.path }}'
+    line: 'include "{{ _nanorc_file.path }}"'
+  loop: "{{ _nanorcs.files }}"
+  loop_control:
+    loop_var: _nanorc_file
+    label: "{{ _nanorc_file.path }}"

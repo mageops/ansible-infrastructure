@@ -1,0 +1,6 @@
+- name: Get info about clean base AMI
+  import_tasks: find-clean-base-ami.yml
+
+- name: Get info about app node AMI
+  import_tasks: find-app-node-ami.yml
+

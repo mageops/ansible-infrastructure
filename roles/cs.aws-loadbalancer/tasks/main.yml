@@ -1,0 +1,41 @@
+- name: Launch Elastic Load Balancer
+  ec2_elb_lb:
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ aws_elb_name }}"
+    subnets: "{{ aws_vpc_subnet_ids }}"
+    aws_security_group_names:
+      - "{{ aws_security_group_lb_name }}"
+    cross_az_load_balancing: "{{ lb_cross_az }}"
+    idle_timeout: "{{ lb_timeout }}"
+    listeners: "{{ [elb_listener_http] + mageops_https_enable | ternary([elb_listener_https], []) }}"
+    health_check:
+      ping_protocol: tcp
+      ping_port: "{{ lb_http_port }}"
+      ping_path: "{{ lb_ping_path }}"
+      response_timeout: 5
+      interval: 10
+      unhealthy_threshold: 3
+      healthy_threshold: 2
+    access_logs: "{{ lb_s3_logs | ternary(elb_access_logs, omit) }}"
+    tags: "{{ aws_tags_default | combine(aws_tags_role_loadbalancer, aws_tags_elb) }}"
+  vars:
+    elb_listener_http:
+      protocol: http
+      load_balancer_port: 80
+      instance_port: "{{ lb_http_port }}"
+    elb_listener_https:
+      protocol: https
+      load_balancer_port: 443
+      instance_protocol: http
+      instance_port: 80
+      ssl_certificate_id: "{{ lb_ssl_cert }}"
+    elb_access_logs:
+      interval: 60
+      s3_location: "{{ lb_s3_logs_bucket }}"
+      s3_prefix: "{{ lb_s3_logs_prefix }}"
+  register: load_balancer_https
+
+- name: Remember DNS name of Load Balancer
+  set_fact:
+    lb_domain: "{{ load_balancer_https.elb.dns_name }}"

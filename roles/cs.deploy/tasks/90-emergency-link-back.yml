@@ -1,0 +1,10 @@
+- name: "Failed deploy! Damage control: Link previous release as the current one"
+  file:
+    state: link
+    force: yes
+    dest: "{{ deploy_current_release_dir }}"
+    src: "{{ deploy_current_release_path }}"
+  become: yes
+  become_user: "{{ deploy_app_user }}"
+  ignore_errors: yes
+  when: deploy_current_release_path | default(false, true)

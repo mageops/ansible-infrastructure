@@ -1,0 +1,4 @@
+- debug:
+    msg: "Execute deploy hook tasks action: {{ deploy_hook_action_name }}"
+
+- include_tasks: "{{ deploy_hook_tasks }}"

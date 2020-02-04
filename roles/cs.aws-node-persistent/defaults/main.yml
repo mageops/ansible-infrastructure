@@ -1,0 +1,11 @@
+aws_persistent_node_ami_id: "{{ aws_ami_clean_base_id }}"
+aws_persistent_node_instance_type: t3a.micro
+aws_persistent_node_ebs_volume_size: 10
+aws_ansible_persistent_node_inventory_group: persistent
+aws_persistent_node_instance_name: "{{ mageops_app_name }}-persistent"
+
+aws_persistent_node_launch_script_extra: ''
+
+aws_persistent_node_security_groups:
+  - "{{ aws_security_group_ssh_id }}"
+

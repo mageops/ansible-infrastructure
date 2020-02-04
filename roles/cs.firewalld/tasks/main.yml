@@ -1,0 +1,135 @@
+- name: Install firewalld
+  yum:
+    name: firewalld
+
+- name: Start & enable firewalld
+  service: 
+    name: firewalld
+    state: started
+    enabled: yes
+
+## --- Public zone setup ---
+
+- name: Open public ports
+  firewalld:
+    zone: public
+    permanent: yes
+    immediate: yes
+    port: "{{ item }}"
+    state: enabled
+  with_items: "{{ firewall_public_ports }}"
+
+- name: Open public services
+  firewalld:
+    zone: public
+    permanent: yes
+    immediate: yes
+    service: "{{ item }}"
+    state: enabled
+  with_items: "{{ firewall_public_services }}"
+
+- name: Enable public zone
+  firewalld:
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: Enable public SSH access
+  firewalld:
+    zone: public
+    service: ssh
+    permanent: yes
+    immediate: yes
+    state: enabled
+  when: not firewall_restrict_to_trusted_public_ips
+
+
+### --- Trusted zone setup restricting all non-public access (including SSH) to selected IPs ---
+
+- name: Restrict trusted zone to selected IPs
+  firewalld:
+    zone: trusted
+    source: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ firewall_restrict_to_trusted_public_ips }}"
+  when: firewall_restrict_to_trusted_public_ips
+
+- name: Enable trusted zone
+  firewalld:
+    zone: trusted
+    permanent: yes
+    immediate: yes
+    state: enabled
+  when: firewall_restrict_to_trusted_public_ips
+
+# By default SSH is always added to public zone so we need to remove it.
+- name: Remove SSH access from public zone
+  firewalld:
+    zone: public
+    service: ssh
+    permanent: yes
+    immediate: yes
+    state: disabled
+  when: firewall_restrict_to_trusted_public_ips
+
+
+## --- Guarded services ---
+
+# Just to be sure, in case somebody added it at any earlier point in time, we will remove more services.
+- name: Remove guarded services from public zone
+  firewalld:
+    zone: public
+    service: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: disabled
+  with_items: "{{ firewall_guarded_services }}"
+
+- name: Remove guarded ports from public zone
+  firewalld:
+    zone: public
+    port: "{{ item }}"
+    permanent: yes
+    immediate: yes
+    state: disabled
+  with_items: "{{ firewall_guarded_ports }}"
+
+
+## --- Internal "VLAN" zone setup ---
+
+- name: Restrict internal zone to server group
+  firewalld:
+    zone: internal
+    source: "{{ hostvars[item]['ansible_' ~ (hostvars[item].firewall_internal_interface | default(firewall_internal_interface))].ipv4.address }}/32"
+    permanent: yes
+    immediate: yes
+    state: enabled
+  with_items: "{{ groups[firewall_internal_group] }}"
+
+- name: Open internal ports
+  firewalld:
+    zone: internal
+    permanent: yes
+    immediate: yes
+    port: "{{ item }}"
+    state: enabled
+  with_items: "{{ firewall_internal_ports }}"
+
+- name: Open internal services
+  firewalld:
+    zone: internal
+    permanent: yes
+    immediate: yes
+    service: "{{ item }}"
+    state: enabled
+  with_items: "{{ firewall_internal_services }}"
+
+- name: Enable internal zone
+  firewalld:
+    zone: public
+    permanent: yes
+    immediate: yes
+    state: enabled

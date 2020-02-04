@@ -1,0 +1,8 @@
+varnish_pp_instance_tags: "varnish:{{ mageops_app_name }}"
+
+varnish_pp_listen_address: "0.0.0.0"
+varnish_pp_listen_port: "80"
+
+varnish_pp_bin:
+  src: "http://creativetest.de/rpms/varnish-purge-proxy"
+  path: "/usr/local/bin/varnish-purge-proxy"

@@ -1,0 +1,76 @@
+- name: Fail if varnish should be hidden but is bound to port 80
+  fail:
+    msg: Varnish should be hidden, but is on port 80, set `varnish_port` to some other value
+  when: https_termination_hide_varnish and varnish_port == 80
+
+- name: Make sure cert fragment dir is existing
+  file:
+    path: "{{ https_termination_certificate_dir }}/{{ item.name }}.d"
+    state: directory
+    mode: 0700
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.cert_path | default(False) or item.cert_chain_path | default(False)
+
+- name: Copy public certficate
+  copy:
+    src: "{{ mageops_project_certs_dir }}/{{ item.cert_path }}"
+    dest: "{{ https_termination_certificate_dir }}/{{ item.name }}.d/001-certificate.cer"
+    mode: 0600
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.cert_path | default(False)
+
+- name: Copy certificate chain
+  copy:
+    src: "{{ mageops_project_certs_dir }}/{{ item.cert_chain_path }}"
+    dest: "{{ https_termination_certificate_dir }}/{{ item.name }}.d/002-chain.cer"
+    mode: 0600
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.cert_chain_path | default(False)
+
+- name: Bundle the certificates
+  assemble:
+    src: "{{ https_termination_certificate_dir }}/{{ item.name }}.d"
+    dest: "{{ https_termination_certificate_dir }}/{{ item.name }}.cer"
+    mode: 0600
+    validate: 'openssl x509 -in %s -text -noout'
+  notify:
+    - reload httpd
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.cert_path | default(False) or item.cert_chain_path | default(False)
+
+- name: Copy certificate key
+  copy:
+    src: "{{ mageops_project_certs_dir }}/{{ item.cert_key_path }}"
+    dest: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
+    mode: 0600
+  notify:
+    - reload httpd
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: item.cert_key_path | default(False)
+
+- name: Install vhost config
+  template:
+    src: vhost.conf.j2
+    dest: "{{ nginx_confd_dir }}/{{ item.name }}.conf"
+  register: https_termination_vhost_config
+  notify:
+    - reload httpd
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+
+
+
+
+

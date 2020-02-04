@@ -1,0 +1,23 @@
+- name: Reload systemctl daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Reload varnish
+  service: 
+    name: varnish
+    state: reloaded
+
+- name: Restart varnish
+  service:
+    name: varnish
+    state: restarted
+
+- name: Restart varnish purge logger
+  service: 
+    name: varnish-purge-logger 
+    state: restarted
+
+- name: Reload varnishncsa
+  service: 
+    name: varnishncsa 
+    state: restarted

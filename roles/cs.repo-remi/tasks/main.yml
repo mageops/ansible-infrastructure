@@ -1,0 +1,17 @@
+- name: Ensure Remi's repo release package is installed and up-to-date
+  yum:
+    name: "{{ php_repo_remi_package_name }}"
+
+- name: Ensure chosen Remi's repo variants are enabled
+  ini_file:
+    state: present
+    create: no
+    path: "/etc/yum.repos.d/{{ variant.value.filename }}.repo"
+    section: "{{ variant.value.name }}"
+    option: enabled
+    value: "{{ (variant.key in php_repo_remi_variants_enabled) | ternary('1', '0') }}"
+    no_extra_spaces: yes
+  loop: "{{ php_repo_remi_variants | dict2items }}"
+  loop_control:
+    loop_var: variant
+    label: "{{ variant.key }}"

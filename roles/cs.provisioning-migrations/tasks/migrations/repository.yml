@@ -1,0 +1,14 @@
+- name: Remove deprecated yum repos
+  file:
+    path: "/etc/yum.repos.d/{{ item }}.repo"
+    state: absent
+  register: _mageops_old_yum_repos_remove
+  loop: "{{ mageops_migrations_deprecated_yum_repos }}"
+
+- name: Rebuild yum cache if any old repos were removed
+  command: yum -y makecache
+  args:
+    warn: no
+  when: _mageops_old_yum_repos_remove is changed
+
+

@@ -1,0 +1,3 @@
+dependencies:
+  - role: cs.php
+    php_install_fpm_package: yes

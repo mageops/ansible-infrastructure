@@ -1,0 +1,31 @@
+{% if varnish_secure_site %}
+{# This ACL is used only when secure site is enabled and varnish fails to compile VCL with unused ACL #}
+acl client_ip_whitelist {
+    "localhost";
+    "10.0.0.0"/8;
+    "192.168.0.0"/16;
+}
+{% endif %}
+
+acl purge {
+    "127.0.0.1";
+    {% for ip in varnish_purge_trusted_ips %}
+    {% if ip | ipaddr('network') %}
+    "{{ ip | ipaddr('network') }}"/{{ ip | ipaddr('prefix') }};
+    {% else %}
+    "{{ ip | ipaddr('address') }}";
+    {% endif %}
+    {% endfor %}
+}
+
+{% if varnish_secure_site  %}
+acl trusted {
+    {% for ip in varnish_secure_site_trusted_ips %}
+    {% if ip | ipaddr('network') %}
+    "{{ ip | ipaddr('network') }}"/{{ ip | ipaddr('prefix') }};
+    {% else %}
+    "{{ ip | ipaddr('address') }}";
+    {% endif %}
+    {% endfor %}
+}
+{% endif %}

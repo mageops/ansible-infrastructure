@@ -1,0 +1,17 @@
+- name: Install earlyoom packages
+  yum:
+    name: earlyoom
+    state: present
+
+- name: Configure earlyoom
+  template:
+    src: earlyoom.default
+    dest: /etc/default/earlyoom
+    force: yes
+  notify: Restart earlyoom service
+
+- name: Start and enable earlyoom service
+  service:
+    name: earlyoom
+    state: started
+    enabled: yes

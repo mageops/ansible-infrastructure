@@ -1,0 +1,3 @@
+dependencies:
+    - cs.java
+    - cs.repo-elasticsearch

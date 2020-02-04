@@ -1,0 +1,3 @@
+allow_duplicates: no
+dependencies:
+  - role: cs.aws-region-facts

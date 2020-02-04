@@ -1,0 +1,5 @@
+- name: "Copy varnish-purge-proxy binary file"
+  get_url:
+    url: "{{ varnish_pp_bin.src }}"
+    dest: "{{ varnish_pp_bin.path }}"
+    mode: 0755

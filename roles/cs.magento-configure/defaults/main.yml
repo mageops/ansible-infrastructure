@@ -1,0 +1,65 @@
+magento_core_config_settings: []
+magento_core_config_settings_to_remove: []
+
+mageops_varnish_host: 127.0.0.1
+mageops_varnish_port: 80
+
+# Root directory where releases, shared files are kept
+magento_deployment_dir:    "{{ mageops_app_web_dir }}"
+
+# Current realease directory
+magento_release_dir:       "{{ magento_deployment_dir }}/releases/{{ magento_release_id }}"
+magento_media_dir:         "{{ magento_deployment_dir }}/shared/pub/media/"
+magento_static_cache_dir:  "{{ magento_release_dir }}/pub/static/_cache/"
+
+# Path to node warmup script executed at instance start relative to magento app root dir
+magento_node_warmup_script_path: /bin/node-warmup.sh
+
+magento_install_sample_data: no
+
+# ----------------------------------------
+# --------  Magento Redis Caching --------
+# ----------------------------------------
+
+# Whether to use redis for caching
+magento_redis_cache: yes
+magento_session_max_redis_concurrency: 15
+
+magento_app_etc_config_template: magento_app_etc_config.php.j2
+magento_app_etc_env_template: magento_app_etc_env.php.j2
+
+magento_consumer_workers_enable: no
+magento_consumer_workers: []
+magento_consumer_workers_max_messages: 500
+# Example:
+#  - consumer: async.operations.all
+#    batch_size: 100
+#    process_count: 1
+
+# Containerized tasks to be executed post content deploy
+magento_scd_containerized_tasks: []
+
+# Reindexing will be performed if there are no indices matching app present
+magento_deploy_auto_reindex: no
+
+# -----------------------
+# --------  SCD  --------
+# -----------------------
+
+magento_scd_skip: no
+magento_scd_strategy: quick
+
+# We need a t3.small builder or frequently it will run out of memory
+# So setting the default at 1 upon consideration
+magento_scd_parallel_jobs: 1 # "{{ ansible_processor_vcpus }}"
+magento_scd_excluded_themes: []
+
+# Tip: When using custom themes exclude luma
+# magento_scd_excluded_themes
+#   - Magento/luma
+
+magento_scd_languages:
+  - de_DE
+  - en_US
+
+

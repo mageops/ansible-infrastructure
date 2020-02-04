@@ -1,0 +1,9 @@
+rds_gfs_daily_snapshot_retention: 7
+rds_gfs_weekly_snapshot_retention: 4
+rds_gfs_monthly_snapshot_retention: 12
+
+# On which day of the week the snapshot shall be created
+rds_gfs_weekly_snapshot_weekday_nr: 1
+
+# On which day of the month the snapshot shall be created
+rds_gfs_monthly_snapshot_monthday_nr: 1

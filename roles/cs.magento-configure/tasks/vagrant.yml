@@ -1,0 +1,14 @@
+- name: Execute Magento setup
+  block:
+    - include_tasks: 020-check-database.yml
+    - include_tasks: 030-setup-elasticsuite.yml
+      when: mageops_elasticsearch_host is defined and mageops_elasticsearch_host != ""
+    - include_tasks: 040-install-m2.yml
+    - include_tasks: 050-install-sample-data.yml
+      when: magento_install_sample_data
+    - include_tasks: 060-flush-cache.yml
+    - include_tasks: 070-setup-modules.yml
+    - include_tasks: 080-configure-integrations.yml
+    - include_tasks: 090-setup-upgrade.yml
+  become: yes
+  become_user: "{{ magento_user }}"

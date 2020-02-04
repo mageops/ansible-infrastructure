@@ -1,0 +1,20 @@
+- name: Check if there was old package installed
+  stat:
+    path: /usr/share/awscli/bin/aws
+  register: _mageops_awscli_deprecated
+
+- block:
+    - name: Make sure awscli package leftovers are removed
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/alternatives/aws
+        - /var/lib/alternatives/aws
+
+    - name: Uninstall deprecated awscli package 
+      yum:
+        name: awscli
+        state: absent
+  when: _mageops_awscli_deprecated.stat.exists is defined and _mageops_awscli_deprecated.stat.exists
+

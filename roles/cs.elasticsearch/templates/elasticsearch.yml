@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+
+#######################################################################################
+# Please consult the documentation for further information on configuration options:  #
+# https://www.elastic.co/guide/en/elasticsearch/reference/index.html                  #
+#######################################################################################
+
+cluster.name: {{ elasticsearch_cluster_name }}
+
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+
+network.host: {{ elasticsearch_network_host }}
+http.port: {{ elasticsearch_http_port }}
+transport.tcp.port: {{ elasticsearch_transport_tcp_port }}
+
+node.name: {{ elasticsearch_node_name }}
+node.data: true
+node.master: true
+
+bootstrap.memory_lock: {{ elasticsearch_memlock_enable | ternary('true', 'false') }}
+
+

@@ -1,0 +1,6 @@
+authorize_local_identities:
+  - "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519.pub"
+  - "{{ lookup('env', 'HOME') }}/.ssh/id_rsa.pub"
+  - "{{ lookup('env', 'HOME') }}/.ssh/id_ecdsa.pub"
+  - "{{ lookup('env', 'HOME') }}/.ssh/id_dsa.pub"
+  - "{{ lookup('env', 'HOME') }}/.ssh/id_ed25519.pub"

@@ -1,0 +1,4 @@
+- name: Install nginx packages
+  yum:
+    name: "{{ [nginx_package] + nginx_packages_extra }}"
+    state: present

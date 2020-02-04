@@ -1,0 +1,9 @@
+repo_nginx_package_name: nginx-release
+repo_nginx_name_prefix: nginx-
+repo_nginx_variants:
+  - mainline
+  - stable
+
+repo_nginx_variants_enabled:
+  - stable
+

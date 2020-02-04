@@ -1,0 +1,68 @@
+plugin: aws_ec2
+
+strict: False
+
+regions: eu-central-1
+
+filters:
+  tag:Infrastructure: mageops
+  instance-state-name:
+    - running
+    - pending
+
+keyed_groups:
+  - key: tags.Name
+    prefix: "node"
+    separator: "_"
+
+  - key: tags.AppName
+    prefix: "app"
+    separator: "_"
+
+  - key: tags.AppId
+    prefix: "app"
+    separator: "_"
+
+  - key: tags.Role
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleBuilder
+    prefix: "builder"
+    separator: "_"
+
+  - key: tags.RoleExtra
+    prefix: "extra"
+    separator: "_"
+
+  - key: tags.RoleSearch
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleCache
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleHttpCache
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleLoadBalancer
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleDatabase
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleStorage
+    prefix: ""
+    separator: ""
+
+  - key: tags.RoleMessageQueue
+    prefix: ""
+    separator: ""
+
+  - key: tags.TraitImmutable
+    prefix: ""
+    separator: ""

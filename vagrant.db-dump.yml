@@ -1,0 +1,22 @@
+- hosts: database
+  become: yes
+  tasks:
+    - name: Ensure directory exists
+      file:
+        path: "{{ dumps_dir }}"
+        state: directory
+        mode: 0777
+    - name: "{{ action }} database"
+      mysql_db:
+        login_host: "{{ mageops_mysql_host }}"
+        login_user: "{{ mageops_mysql_root_user }}"
+        login_password: "{{ mageops_mysql_root_pass }}"
+        name: "{{ mageops_app_mysql_db }}"
+        state: "{{ action }}"
+        target: "{{ dumps_dir }}/{{ dump_file }}"
+      when: action == "dump" or action == "import"
+  vars:
+    mageops_mysql_host: 127.0.0.1
+    dumps_dir: /var/www/nfs/dumps
+    dump_file: "{{ mageops_app_mysql_db }}.sql"
+    action: import_or_dump

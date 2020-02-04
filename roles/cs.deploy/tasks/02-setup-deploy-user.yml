@@ -1,0 +1,44 @@
+- name: Ensure basic directories exists
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ deploy_app_user }}"
+    group: "{{ deploy_app_group }}"
+    mode: "{{ deploy_directory_permissions }}"
+  with_items:
+    - "{{ deploy_root_dir }}"
+    - "{{ deploy_releases_dir }}"
+    - "{{ deploy_shared_dir }}"
+
+- name: Ensure shared directories exist
+  file:
+    state: directory
+    path: "{{ deploy_shared_dir }}/{{ item }}"
+    owner: "{{ deploy_app_user }}"
+    group: "{{ deploy_app_group }}"
+    mode: "{{ deploy_directory_permissions }}"
+  with_items: "{{ deploy_shared_dirs }}"
+
+- name: Ensure deploy ssh key exists
+  command: ssh-keygen -b 2048 -t rsa -f "{{ deploy_ssh_key_path }}" -q -N "" -C "ansible-deploy-key.{{ deploy_release_id }}.{{ deploy_app_user }}@{{ ansible_host }}"
+  args:
+    creates: "{{ deploy_ssh_key_path }}"
+  delegate_to: localhost
+  delegate_facts: yes
+  become: false
+  become_user: false
+
+- name: Ensure deploy ssh key perms
+  file:
+    mode: 0600
+    path: "{{ deploy_ssh_key_path }}"
+  delegate_to: localhost
+  delegate_facts: yes
+  become: false
+  become_user: false
+
+- name: Authorize deploy key for deploy user
+  authorized_key:
+    user: "{{ deploy_app_user }}"
+    key: "{{ lookup('file', deploy_ssh_key_path_pub) }}"
+    state: present

@@ -1,0 +1,15 @@
+elasticsearch_memlock_enable: false
+elasticsearch_cluster_name: app
+elasticsearch_node_name: master
+elasticsearch_network_host: '0.0.0.0'
+elasticsearch_http_port: 9200
+elasticsearch_transport_tcp_port: 9300
+elasticsearch_heap_size: 1g
+elasticsearch_plugins:
+    - analysis-icu
+    - analysis-phonetic
+
+elasticsearch_syscfg_limit_nofile: 65535
+elasticsearch_syscfg_limit_nproc: 4096
+
+elasticsearch_version_file_path: /var/local/elasticsearch_version.txt

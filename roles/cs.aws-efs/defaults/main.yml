@@ -1,0 +1,29 @@
+efs_utils_package: amazon-efs-utils
+
+# Alternatively specify "max_io"
+efs_performance_mode: general_purpose
+
+efs_mount_opts: "_netdev" # add `,tls` for in-transport encryption
+
+# Array of objects, each containing:
+# - local_mountpoint: - path to mountpoint on the host
+# - remote_path: - path on the efs to be mounted
+# - owner (default: root)
+# - group (default: root)
+efs_mounts: []
+
+# Tags for the EFS resource
+efs_tags: []
+
+# Mandatory - name of the fs resource
+# efs_name:
+
+# Mandatory - id of the target subnet
+# efs_subnet_id:
+
+# Mandatory - sg for EFS mount
+# efs_aws_security_group_id:
+
+# Where to mount EFS root directory
+# This mount is needed for creating directories on remove
+efs_root_mountpoint: /mnt/efs

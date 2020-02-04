@@ -1,0 +1,2 @@
+- name: "Process migration: {{ migration.title }}"
+  include_tasks: "migrations/{{ migration.name }}.yml"

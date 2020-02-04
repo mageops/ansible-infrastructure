@@ -1,0 +1,56 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: varnish:&current:!immutable
+  roles:
+    - role: cs.aws-node-facts
+      delegate_to: localhost
+      become: no
+      when: aws_use
+    - role: pinkeen.selinux-disable
+    - role: cs.swap
+    - role: cs.earlyoom
+      when: mageops_earlyoom_enable
+    - role: cs.provisioning-migrations
+    - role: cs.packages
+      packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
+      packages_install: "{{ mageops_packages_common + mageops_packages_varnish + mageops_packages_varnish_extra }}"
+      packages_remove: "{{ mageops_packages_banned }}"
+    - role: cs.mageops-cli-profile
+    - role: cs.mageops-cli-user
+      mageops_cli_user: root
+      mageops_cli_user_bashrc_fragments:
+        - varnish
+        - nginx
+    - role: cs.mageops-authorize-keys
+    - role: cs.aws-cli
+      when: aws_use
+    - role: cs.cron
+    - role: geerlingguy.ntp
+    - role: cs.nginx-url-blacklist
+    - role: cs.nginx
+      nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
+    - role: cs.nginx-https-termination
+      varnish_port: "{{ mageops_varnish_port }}"
+      when: mageops_https_termination_enable
+    - role: cs.varnish
+      varnish_port: "{{ mageops_varnish_port }}"
+      varnish_backend_port: "{{ mageops_varnish_backend_port }}"
+      varnish_secure_site: "{{ mageops_secure_site }}"
+      varnish_secure_site_user: "{{ mageops_secure_site_user }}"
+      varnish_secure_site_password: "{{ mageops_secure_site_password }}"
+      varnish_secure_site_trusted_ips: "{{ mageops_trusted_cidr_blocks }}"
+      varnish_purge_trusted_ips: "{{ (aws_vpc_subnet_prefix is defined)|ternary([aws_vpc_subnet_prefix ~ '.0.0/16'], []) }}"
+      varnish_purge_logging: "{{ mageops_varnish_purge_logging }}"
+    - role: cs.varnish-manager
+      when: varnish_standalone and aws_use
+    - role: cs.mageops-cli-profile
+    - role: cs.goaccess
+      when: goaccess_enable
+    - role: cs.aws-logs
+      aws_logs_log_magento_crash_reports: no
+      aws_logs_stream_name: "{{ mageops_node_role }}"
+      aws_logs_loggers: "{{ aws_logs_loggers_varnish_default | combine(aws_logs_loggers_varnish_extra | default({}), recursive=True) }}"
+      when: aws_use
+
+  vars:
+    mageops_node_role: varnish

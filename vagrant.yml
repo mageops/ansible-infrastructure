@@ -1,0 +1,42 @@
+- name: Setup basic services
+  import_playbook: site.step-11-infrastructure.yml
+
+- name: Setup persistence services
+  import_playbook: site.step-20-persistent.yml
+
+- name: Setup app services
+  import_playbook: site.step-40-app-node.yml
+
+- hosts: vagrant
+  roles:
+    - role: cs.packages
+    - role: cs.sshd
+    - role: cs.vagrant-sudo
+    - role: geerlingguy.composer
+    - role: cs.nodejs
+    - role: cs.authorize-local-keys
+      authorize_local_keys_for_users:
+        - root
+        - "{{ magento_user }}"
+    - role: cs.mageops-cli-user
+      mageops_cli_user: root
+      mageops_cli_user_bashrc_fragments:
+        - magento-root
+        - elasticsearch
+        - nginx
+        - redis
+        - varnish
+  tasks:
+    - name: Install composer parallel download plugin globally
+      composer:
+        command: require
+        global_command: yes
+        arguments: hirak/prestissimo
+
+    - include_tasks: "{{ mageops_project_vars_dir }}/{{ item }}"
+      when: vagrant_tasks_project is defined
+      loop: "{{ vagrant_tasks_project }}"
+
+  vars:
+    packages_install: "{{ mageops_packages_common + mageops_packages_vagrant_node }}"
+    mageops_node_role: vagrant

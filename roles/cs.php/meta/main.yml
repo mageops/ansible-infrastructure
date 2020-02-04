@@ -1,0 +1,6 @@
+dependencies:
+  - role: cs.repo-remi
+    php_repo_remi_variants_enabled:
+      - "safe"
+      - "php{{ php_version | replace('.', '') }}"
+      - "php{{ php_version | replace('.', '') }}-debuginfo"

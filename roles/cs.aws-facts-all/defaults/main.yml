@@ -1,0 +1,7 @@
+aws_facts_gather_region: yes
+aws_facts_gather_vpc: yes
+aws_facts_gather_cloudfront: yes
+aws_facts_gather_rds: yes
+aws_facts_gather_node: yes
+aws_facts_gather_security_group: yes
+aws_facts_gather_ami: yes

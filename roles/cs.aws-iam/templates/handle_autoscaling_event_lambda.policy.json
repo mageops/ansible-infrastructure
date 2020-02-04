@@ -1,0 +1,28 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "Stmt1447799371000",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:Describe*",
+                "s3:*"
+            ],
+            "Resource": [
+                "*"
+            ]
+        },
+        {
+            "Sid": "Stmt1447799537000",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction",
+                "autoscaling:CompleteLifecycleAction"
+            ],
+            "Resource": [
+                "arn:aws:lambda:{{ aws_region }}:{{ aws_account_id }}:function:updateVarnishBackends*",
+                "arn:aws:autoscaling:*:*:autoScalingGroup:*:autoScalingGroupName/*"
+            ]
+        }
+    ]
+}

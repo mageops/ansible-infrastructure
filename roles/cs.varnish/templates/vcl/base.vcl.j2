@@ -1,0 +1,68 @@
+vcl 4.0;
+
+import directors;
+import std;
+import accept;
+
+{% if varnish_throttling_enabled -%}
+    import vsthrottle;
+{% endif %}
+
+{% include "acl.vcl.j2" %}
+
+{% if varnish_standalone -%}
+    include "backends.vcl";
+{% else %}
+    backend default {
+        .host = "{{ varnish_default_backend_ip }}";
+        .port = "{{ varnish_backend_port }}";
+    }
+{% endif %}
+
+sub vcl_init {
+    {% block vcl_init %}{% endblock %}
+}
+
+sub vcl_recv {
+    {% block vcl_recv %}{% endblock %}
+}
+
+sub vcl_hash {
+    {% block vcl_hash %}{% endblock %}
+}
+
+sub vcl_backend_response {
+    {% block vcl_backend_response %}{% endblock %}
+}
+
+sub vcl_deliver {
+    {% block vcl_deliver %}{% endblock %}
+}
+
+sub vcl_hit {
+    {% block vcl_hit %}{% endblock %}
+}
+
+sub vcl_backend_error {
+    {% if varnish_vcl_backend_error_extra %}
+    # ---  [START] custom project code  ---
+    {% filter indent(width=4) -%}
+    {{ varnish_vcl_backend_error_extra }}
+    {% endfilter %}
+    # ---  [END] custom project code  ---
+    {% endif %}
+
+    {% block vcl_backend_error %}{% endblock %}
+}
+
+sub vcl_synth {
+    {% if varnish_vcl_synth_extra %}
+    # ---  [START] custom project code  ---
+    {% filter indent(width=4) -%}
+    {{ varnish_vcl_synth_extra }}
+    {% endfilter %}
+    # ---  [END] custom project code  ---
+    {% endif %}
+
+    {% block vcl_synth %}{% endblock %}
+}

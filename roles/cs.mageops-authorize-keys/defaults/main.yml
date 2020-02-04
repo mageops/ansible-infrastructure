@@ -1,0 +1,9 @@
+mageops_root_ssh_keys_global: []
+mageops_root_ssh_keys_project: []
+mageops_root_ssh_keys: []
+
+mageops_app_ssh_keys_global: []
+mageops_app_ssh_keys_project: []
+mageops_app_ssh_keys: []
+
+mageops_ssh_authorize_app: no

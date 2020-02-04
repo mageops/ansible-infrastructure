@@ -1,0 +1,9 @@
+- hosts: localhost
+  connection: local
+  roles:
+    - role: cs.aws-ec2-cleanup
+      aws_ec2_cleanup_lcs_to_keep: 3
+      aws_ec2_cleanup_lc_name_prefixes:
+        - "{{ mageops_app_name }}-app-"
+        - "{{ mageops_app_name }}-extra-app-"
+    - role: cs.aws-cloudfront-post-deploy

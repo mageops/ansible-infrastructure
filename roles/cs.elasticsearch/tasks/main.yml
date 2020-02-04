@@ -1,0 +1,108 @@
+- name: Install elasticsearch packages
+  package:
+    name: elasticsearch
+    state: present
+  register: elasticsearch_packages_install
+
+# In case `/var` or `/var/run` is a tmpfs (common thing nowadays)
+- name: Ensure var directories always exist
+  lineinfile:
+    path: /etc/tmpfiles.d/elasticsearch.conf
+    regexp: "\\s+{{ entry.path | regex_escape }}\\s+"
+    line: >-
+      {{ entry.type | default('d') }}
+      {{ entry.path }}
+      {{ entry.mode | default('0755') }}
+      {{ entry.user | default('elasticsearch') }}
+      {{ entry.group | default('elasticsearch') }}
+      {{ entry.age | default('-') }}
+      {{ entry.argument | default('-') }}
+    create: yes
+  loop:
+    - path: /var/run/elasticsearch/
+    - path: /var/log/elasticsearch/
+    - path: /var/lib/elasticsearch/
+    - path: /var/log/elasticsearch/*.log
+      mode: '0644'
+      type: z
+  loop_control:
+    loop_var: entry
+    label: "{{ entry.path }}"
+  register: tmpfiles_config
+
+- name: Ensure var directory changes are applied at once
+  command: systemd-tmpfiles --create
+  when: tmpfiles_config is changed
+    
+- name: Configure elasticsearch
+  template:
+    src: "{{ item }}"
+    dest: /etc/elasticsearch/{{ item }}
+    owner: root
+    group: elasticsearch
+  with_items:
+    - jvm.options
+    - elasticsearch.yml
+  notify: Restart elasticsearch
+
+- name: Ensure elasticsearch systemd config override directory exists
+  file:
+    path: /etc/systemd/system/elasticsearch.service.d/
+    state: directory
+
+- name: Configure elasticsearch systemd service overrides
+  template:
+    src: systemd.service.overrides.conf
+    dest: /etc/systemd/system/elasticsearch.service.d/mageops.conf
+    trim_blocks: no
+  notify:
+    - Reload systemctl daemon
+    - Restart elasticsearch
+
+- name: Get current elasticsearch version
+  command: /usr/share/elasticsearch/bin/elasticsearch --version
+  register: elasticsearch_version_command
+  changed_when: false
+
+- name: Store current elasticsearch version
+  copy:
+    dest: "{{ elasticsearch_version_file_path }}"
+    content: "{{ elasticsearch_version_command.stdout | trim | lower }}"
+    force: yes
+  register: elasticsearch_version_save
+
+- name: Force update of elasticsearch plugins if necessary
+  block:
+    - name: Get list of installed elasticsearch plugins
+      command: /usr/share/elasticsearch/bin/elasticsearch-plugin list --silent
+      register: elasticsearch_plugin_list_command
+
+    - name: Remove current elasticsearch plugins so new version is installed
+      command: "/usr/share/elasticsearch/bin/elasticsearch-plugin remove {{ item }} --verbose"
+      args:
+        removes:  "/usr/share/elasticsearch/plugins/{{ item }}"
+      loop: "{{ elasticsearch_plugin_list_command.stdout_lines }}"
+  when: elasticsearch_version_save is changed
+
+- name: Install elasticsearch plugins
+  command: "/usr/share/elasticsearch/bin/elasticsearch-plugin install {{ item }}"
+  args:
+    creates: "/usr/share/elasticsearch/plugins/{{ item }}"
+  loop: "{{ elasticsearch_plugins }}"
+  notify: Restart elasticsearch
+
+- name: Ensure elasticsearch is started and enabled
+  service:
+    name: elasticsearch
+    state: started
+    enabled: yes
+
+- name: Make sure any configuration changes are applied
+  meta: flush_handlers
+
+- name: Ensure elasticsearch is up
+  wait_for:
+    host: "{{ elasticsearch_network_host }}"
+    port: "{{ elasticsearch_http_port }}"
+    delay: 6
+    timeout: 60

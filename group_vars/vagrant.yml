@@ -1,0 +1,66 @@
+mageops_app_host_group: vagrant
+
+mageops_https_enable: no
+mageops_packages_full_update: yes
+mageops_trusted_cidr_blocks:
+  - 192.168.100.1/32
+
+mageops_packages_app_node_extra:
+  - ghostscript
+
+firewall_enable: no
+
+php_opcache_validate_timestamps: 1
+php_opcache_consistency_checks: 1
+php_opcache_file_update_protection: 2
+
+php_opcache_revalidate_path: 1
+php_opcache_revalidate_freq: 0
+
+php_cli_opcache_file_cache_enable: yes
+php_cli_opcache_file_cache_consistency_checks: 1
+
+
+php_display_errors: On
+php_http_request_max_execution_time: 600
+
+varnish_host: 127.0.0.1
+varnish_port: 8080
+varnish_backend_port: 80
+varnish_standalone: false
+
+mysql_public_root_access: yes
+mysql_mariadb_flavor: yes
+
+nginx_app_port: 80
+
+mageops_rabbitmq_host: 127.0.0.1
+mageops_mysql_host: 127.0.0.1
+mageops_redis_host: 127.0.0.1
+mageops_redis_sessions_host: 127.0.0.1
+mageops_elasticsearch_host: 127.0.0.1
+
+magento_mode: default
+magento_redis_cache: yes
+magento_rabbitmq_password: vagrant
+magento_cron_disabled: yes
+magento_nginx_rewrite_static_assets_version: yes
+mageops_root_ssh_keys_global: []
+
+sshd_password_auth: yes
+sshd_permit_root_login: yes
+
+mageops_cli_user_groups: [wheel]
+mageops_cli_user_authorize_local_key: yes
+
+mageops_packages_mirrorlist_countrycode: pl
+mageops_packages_vagrant_node:
+  # Required for installing Virtualbox Guest Addons
+  - kernel-devel
+  # Required for patching Magento
+  - patch
+
+nodejs_use_yarn: yes
+nodejs_packages:
+  - gulp-cli
+

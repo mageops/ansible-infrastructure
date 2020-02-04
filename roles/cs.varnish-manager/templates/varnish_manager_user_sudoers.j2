@@ -1,0 +1,4 @@
+
+{% for command in varnish_manager_allowed_commands %}
+%{{ varnish_manager_group }}  ALL = (ALL) NOPASSWD:{{ command }}
+{% endfor %}

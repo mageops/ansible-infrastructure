@@ -1,0 +1,15 @@
+dependencies:
+  - role: cs.aws-region-facts
+    when: aws_facts_gather_region
+  - role: cs.aws-vpc-facts
+    when: aws_facts_gather_vpc
+  - role: cs.aws-cloudfront-facts
+    when: aws_facts_gather_cloudfront
+  - role: cs.aws-rds-facts
+    when: aws_facts_gather_rds
+  - role: cs.aws-node-facts
+    when: aws_facts_gather_node
+  - role: cs.aws-security-group-facts
+    when: aws_facts_gather_security_group
+  - role: cs.aws-ami-facts
+    when: aws_facts_gather_ami

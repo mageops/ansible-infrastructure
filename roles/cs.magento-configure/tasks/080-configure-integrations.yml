@@ -1,0 +1,63 @@
+# This will not be added if there's no central varnish (e.g. varnish as lb)
+- name: Add varnish configuration for core_config if needed
+  vars:
+    _extra_items:
+        - name: Set varnish URI for warmup crawler
+          path: "cache_warmer_crawler/general/varnish_uri"
+          value: "{% if magento_varnish_host %}http://{{ mageops_varnish_host }}:{{ mageops_varnish_port }}{% endif %}"
+  set_fact:
+    magento_core_config_settings: "{{ magento_core_config_settings + _extra_items }}"
+  when: magento_varnish_host | default(false, true)
+
+- name: Ensure core config database settings' values
+  mysql_query:
+    name: "{{ mageops_app_mysql_db }}"
+    table: core_config_data
+    login_host: "{{ mageops_mysql_host }}"
+    login_user: "{{ mageops_app_mysql_user }}"
+    login_password: "{{ mageops_app_mysql_pass }}"
+    identifiers:
+      path: "{{ magento_db_setting.path }}"
+    values:
+      value: "{{ magento_db_setting.value }}"
+    defaults:
+      scope_id: 0
+      scope: "default"
+  when: not magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
+  loop: "{{ magento_core_config_settings }}"
+  loop_control:
+    loop_var: magento_db_setting
+
+- name: Ensure core config database default values (no update if exists)
+  mysql_query:
+    name: "{{ mageops_app_mysql_db }}"
+    table: core_config_data
+    login_host: "{{ mageops_mysql_host }}"
+    login_user: "{{ mageops_app_mysql_user }}"
+    login_password: "{{ mageops_app_mysql_pass }}"
+    identifiers:
+      path: "{{ magento_db_setting.path }}"
+    defaults:
+      scope_id: 0
+      scope: "default"
+      value: "{{ magento_db_setting.value }}"
+  when: magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
+  loop: "{{ magento_core_config_settings }}"
+  loop_control:
+    loop_var: magento_db_setting
+
+- name: Ensure core config database settings are absent (defaults are used)
+  mysql_query:
+    state: absent
+    name: "{{ mageops_app_mysql_db }}"
+    table: core_config_data
+    login_host: "{{ mageops_mysql_host }}"
+    login_user: "{{ mageops_app_mysql_user }}"
+    login_password: "{{ mageops_app_mysql_pass }}"
+    identifiers:
+      path: "{{ magento_db_setting_path }}"
+  loop: "{{ magento_core_config_settings_to_remove }}"
+  loop_control:
+    loop_var: magento_db_setting_path
+
+

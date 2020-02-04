@@ -1,0 +1,99 @@
+- name: Ensure vagrant directory exists
+  file:
+    path: "{{ cs_vagrant_dir }}"
+    state: directory
+
+- name: Install Vagrantfile
+  template:
+    backup: yes
+    src: "{{ cs_vagrantfile_template }}"
+    dest: "{{ cs_vagrantfile_path }}"
+  register: _cs_vagrant_vagrantfile_install
+  environment:
+    # Set vagrant dir for validation command to work
+    VAGRANT_CWD: "{{ cs_vagrant_dir }}"
+
+- name: Check vagrant status
+  command: vagrant status --machine-readable
+  args:
+    chdir: "{{ cs_vagrant_dir }}"
+  register: _cs_vagrant_status
+  failed_when: false
+
+- name: Reload vagrant if running and configuration has changed
+  command: vagrant reload
+  args:
+    chdir: "{{ cs_vagrant_dir }}"
+  when: _cs_vagrant_vagrantfile_install is changed and _cs_vagrant_status.stdout is search('default,state,running')
+
+- name: Start vagrant if not up
+  command: vagrant reload
+  args:
+    chdir: "{{ cs_vagrant_dir }}"
+  when: _cs_vagrant_status.stdout is search('default,state,poweroff')
+
+- name: Initialize the machine
+  block:
+    - name: Create temporary directory
+      tempfile:
+        state: directory
+        suffix: raccoon-vagrant-init
+      register: _cs_vagrant_init_temp_dir_create
+
+    - name: Set temporary connection config
+      set_fact:
+        _cs_vagrant_init_temp_dir: "{{ _cs_vagrant_init_temp_dir_create.path }}"
+        _cs_vagrant_init_ssh_config: "{{ _cs_vagrant_init_temp_dir_create.path }}/ssh_config"
+
+    - name: Bring the machine up
+      command: vagrant up
+      args:
+        chdir: "{{ cs_vagrant_dir }}"
+
+    - name: Dump vagrant ssh connection config
+      shell: "vagrant ssh-config > {{ _cs_vagrant_init_ssh_config }}"
+      args:
+        chdir: "{{ cs_vagrant_dir }}"
+
+    - name: Ensure ssh identity exists
+      command: "ssh-keygen -f '{{ cs_vagrant_ssh_identity_path }}' -t ed25519 -q -N ''"
+      args:
+        creates: "{{ cs_vagrant_ssh_identity_path }}"
+
+      # TODO: Uncomment once ansible 2.8 migration is done - module not available in 2.7
+      # openssh_keypair:
+      #   path: "{{ cs_vagrant_ssh_identity_path }}"
+      #   type: ed25519
+      #   force: no
+
+    - name: Authorize ssh identity
+      authorized_key:
+        user: "{{ item[0] }}"
+        state: present
+        key: "{{ lookup('file', item[1] ~ '.pub') }}"
+      with_nested:
+        - ['root', 'vagrant']
+        - - "{{ cs_vagrant_ssh_identity_path }}"
+          - "{{ lookup('env','HOME') }}/.ssh/id_rsa"
+          - "{{ lookup('env','HOME') }}/.ssh/id_ecdsa"
+          - "{{ lookup('env','HOME') }}/.ssh/id_dsa"
+          - "{{ lookup('env','HOME') }}/.ssh/id_ed25519"
+      when: item[1] is file
+      loop_control:
+        label: "user={{ item[0] }} identity={{ item[1] }}"
+      become: yes
+      become_user: root
+      vars:
+        ansible_connection: ssh
+        ansible_host: default
+        ansible_user: vagrant
+        ansible_ssh_extra_args: "-F {{ _cs_vagrant_init_ssh_config }}"
+        ansible_python_interpreter: /usr/bin/python
+  always:
+    - name: Remove temporary directory
+      file:
+        path: "{{ _cs_vagrant_init_temp_dir }}"
+        state: absent
+  when: cs_vagrant_initialize and _cs_vagrant_status.stdout is search('default,state,not_created')
+
+

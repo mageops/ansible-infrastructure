@@ -1,0 +1,49 @@
+- name: Create user
+  when: unison_create_user
+  user:
+    name: "{{ unison_user }}"
+    state: present
+
+- name: Ensure directories exist
+  file:
+    dest: "{{ item }}"
+    state: directory
+    mode: 0775
+    owner: "{{ unison_user }}"
+    group: "{{ unison_group }}"
+  with_items:
+    - "{{ unison_guest_working_dir }}"
+    - "{{ unison_guest_project_dir }}"
+
+- name: Increase max system watches for inotify
+  sysctl:
+    name: fs.inotify.max_user_watches
+    value: 1000000
+    reload: yes
+    state: present
+
+- name: Make sure conflicting unison packages are not present
+  yum:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - unison
+    - unison240
+
+- name: Install unison
+  yum:
+    name: http://creativetest.de/rpms/unison/unison-ocaml406-2.48.4-5.el7.centos.x86_64.rpm
+    state: present
+  notify: restart unison
+
+- name: Install unison service file
+  template:
+    src: unison.service
+    dest: /etc/systemd/system
+  notify: restart unison
+
+- name: Start and enable unison
+  service:
+    name: unison
+    state: started
+    enabled: yes

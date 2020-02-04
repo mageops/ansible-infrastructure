@@ -1,0 +1,20 @@
+- name: Ensure file store group exists
+  group:
+    name: "{{ sftp_user }}"
+    gid: "{{ sftp_user_uid }}"
+    state: present
+
+- name: Create user for file storage
+  user:
+    name: "{{ sftp_user }}"
+    state: present
+    home: "{{ sftp_user_home }}"
+    uid: "{{ sftp_user_uid }}"
+    group: "{{ sftp_user_uid }}"
+    create_home: yes
+
+- name: Authorize import user to access
+  authorized_key:
+    user: "{{ sftp_user }}"
+    key: "{{ item }}"
+  with_items: "{{ sftp_authorized_keys }}"

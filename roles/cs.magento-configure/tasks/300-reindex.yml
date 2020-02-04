@@ -1,0 +1,11 @@
+- name: Check if Magento elasticsearch indices are present
+  command: "curl -m 1 -I -s -o /dev/null -w '%{http_code}' -XHEAD '{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}/_alias/{{ magento_elasticsearch_index_alias }}*?expand_wildcards=all&allow_no_indices=false'"
+  failed_when: no
+  changed_when: no
+  register: _magento_elasticsearch_index_check
+
+- name: Run Magento reindex
+  become: yes
+  become_user: "{{ magento_user }}"
+  command: "php {{ magento_release_dir }}/bin/magento indexer:reindex"
+  when: _magento_elasticsearch_index_check.stdout is defined and _magento_elasticsearch_index_check | trim == '404'

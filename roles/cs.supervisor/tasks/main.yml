@@ -1,0 +1,55 @@
+- name: Install supervisor
+  pip:
+    name: supervisor
+    state: present
+
+- name: Install systemd service config
+  copy:
+    src: supervisord.service
+    dest: /etc/systemd/system/supervisord.service
+  register: _svd_unit_install
+
+- name: Perform systemd daemon-reload
+  systemd:
+    daemon_reload: yes
+  when: _svd_unit_install is changed
+
+- name: Create supervisor config
+  template:
+    src: supervisord.conf.j2
+    dest: "/etc/supervisord.conf"
+    owner: root
+    force: yes
+    mode: 0655
+  notify: Restart supervisord
+
+- name: Create config directory
+  file:
+    path: /etc/supervisor.d
+    state: directory
+    mode: 0755
+
+- name: Create log directory
+  file:
+    path: /var/log/supervisor
+    state: directory
+    mode: 0755
+
+- name: Ensure custom taks configuration exists
+  template:
+    src: "{{ item.src }}"
+    dest: "/etc/supervisor.d/{{ item.name }}.conf"
+  with_items: "{{supervisor_programs}}"
+  when: supervisor_programs | length > 0
+  notify: Reload supervisord
+
+- name: Force a restart if configuration has changed
+  meta: flush_handlers
+
+- name: Enable and start supervisord
+  service:
+    name: supervisord
+    enabled: yes
+    state: started
+  
+  

@@ -1,0 +1,26 @@
+# Remove this file when all envirionments where fixed
+- name: Replace urllib3 with locally installed version to prevent conflict with system library
+  block:
+    - name: Check if system urllib3 is overwritten by pip installed one
+      stat:
+        path: /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
+      register: pip_urllib3_bug
+
+    - name: Remove urllib3 installed by pip
+      when: pip_urllib3_bug.stat.islnk is defined and pip_urllib3_bug.stat.islnk == False
+      pip:
+        name: urllib3
+        state: absent
+    
+    - name: Upgrade system urllib3
+      when: pip_urllib3_bug.stat.islnk is defined and pip_urllib3_bug.stat.islnk == False
+      yum:
+        name: python-urllib3
+        state: latest
+    
+    - name: Install local version of urllib3
+      when: pip_urllib3_bug.stat.islnk is defined and pip_urllib3_bug.stat.islnk == False
+      pip:
+        extra_args: "--user"
+        name: urllib3
+        state: latest

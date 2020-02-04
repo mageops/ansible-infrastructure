@@ -1,0 +1,68 @@
+- name: Create varnish node instance
+  ec2:
+    region: "{{ aws_region }}"
+    monitoring: no
+    assign_public_ip: yes
+    exact_count: 1
+    key_name: "{{ aws_ec2_ssh_key_name }}"
+    group_id: "{{ aws_varnish_node_security_groups + varnish_as_loadbalancer | ternary([aws_security_group_lb_id], []) }}"
+    vpc_subnet_id: "{{ aws_varnish_node_vpc_subnet_id }}"
+    image: "{{ aws_varnish_node_ami_id }}"
+    instance_type: "{{ aws_varnish_node_instance_type }}"
+    instance_profile_name: "{{ aws_iam_role_varnish }}"
+    instance_initiated_shutdown_behavior: terminate
+    user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
+    count_tag: "{{ aws_varnish_node_name_tags }}"
+    instance_tags: >-
+      {{
+          aws_tags_default | combine(
+            varnish_as_loadbalancer | ternary(aws_tags_role_loadbalancer, aws_tags_role_http_cache),
+            aws_tags_role_varnish_http_cache,
+            aws_tags_node_varnish,
+            aws_varnish_node_name_tags
+          )
+      }}
+    volumes:
+      - device_name: "{{ aws_varnish_node_root_device }}"
+        volume_type: gp2
+        volume_size: "{{ aws_varnish_node_ebs_volume_size }}"
+        delete_on_termination: yes
+    wait: yes
+    wait_timeout: 1500
+    # This has zero costs on current-gen instances
+    ebs_optimized: yes
+  vars:
+    aws_ec2_user_launch_script: "{{ aws_varnish_node_launch_script_extra }}"
+    aws_varnish_node_name_tags:
+      Name: "{{ aws_varnish_node_instance_name }}"
+  register: aws_varnish_ec2
+
+- name: Wait for varnish node instance to get up
+  wait_for:
+    port: 22
+    host: "{{ item.public_ip }}"
+  loop: '{{ aws_varnish_ec2.tagged_instances }}'
+  loop_control:
+    label: "{{ item.public_dns_name }}"
+
+- name: Add varnish host to inventory
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groupname:
+      - app
+      - builder_app
+      - builder
+      - "{{ mageops_app_host_group }}"
+  loop: '{{ aws_varnish_ec2.tagged_instances }}'
+  loop_control:
+    label: "{{ item.public_ip }}"
+
+- name: Assign elastic IP to varnish node
+  ec2_eip:
+    region: "{{ aws_region }}"
+    device_id: "{{ aws_varnish_ec2.tagged_instances[0].id }}"
+    ip: "{{ aws_varnish_node_elastic_ip }}"
+  when: aws_varnish_node_elastic_ip | default(false, true)
+
+
+

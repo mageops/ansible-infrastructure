@@ -1,0 +1,14 @@
+- name: Make sure old nginx packages are removed
+  yum:
+    name: 
+      - nginx-creativeshop
+      - nginx-creativeshop-modsecurity
+      - nginx-creativeshop-pagespeed
+    state: absent
+  register: _mageops_nginx_deprecated_pkgs
+
+- name: Make sure old nginx modules are absent (if any old packages were removed)
+  file:
+    path: /etc/nginx/modules
+    state: absent
+  when: _mageops_nginx_deprecated_pkgs is changed

@@ -1,0 +1,6 @@
+lb_cross_az: yes
+lb_ping_path: '/'
+lb_s3_logs_prefix: logs
+lb_s3_logs: yes
+lb_timeout: 120
+lb_http_port: 80

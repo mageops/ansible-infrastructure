@@ -1,0 +1,4 @@
+mysql_root_user: root
+mysql_root_pass: root
+mysql_public_root_access: no
+mysql_mariadb_flavor: no

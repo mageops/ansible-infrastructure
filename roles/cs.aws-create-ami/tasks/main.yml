@@ -1,0 +1,30 @@
+- name: Create AMI
+  ec2_ami:
+    region: "{{ aws_region }}"
+    state: present
+    description: "{{ ami_description }}"
+    instance_id: "{{ ami_instance_id }}"
+    name: "{{ ami_name }}"
+    wait: yes
+    wait_timeout: 600
+    tags: "{{ aws_tags_default | combine(ami_tags, ami_name_tags) }}"
+    delete_snapshot: "{{ ami_delete_snapshot | default('yes') }}"
+  vars:
+    ami_name_tags:
+      Name: "{{ ami_description }}"
+  register: ami_output
+
+- name: Wait until AMI is accessible
+  ec2_ami_find:
+    region: "{{ aws_region }}"
+    owner: self
+    sort: creationDate
+    sort_order: descending
+    no_result_action: fail
+    ami_tags: "{{ aws_tags_base | combine(ami_tags) }}"
+  register: ami_found
+  until: ami_found.results is defined and ami_found.results[0].ami_id == ami_output.image_id and ami_found.results[0].state == "available"
+  retries: 60
+  delay: 5
+  when: ami_output is changed
+

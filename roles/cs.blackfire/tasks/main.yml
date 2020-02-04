@@ -1,0 +1,23 @@
+- name: Install blackfire when configured
+  block:
+    - name: Install pypgpme
+      yum:
+        name: pygpgme
+        state: present
+
+    - name: Add Blackfire repository
+      template:
+        src: blackfire.repo
+        dest: /etc/yum.repos.d/blackfire.repo
+
+    - name: Ensure Blackfire packages are installed.
+      yum:
+        name: "{{ blackfire_packages }}"
+        state: present
+
+    - name: Create agent config
+      template: src=agent.j2 dest=/etc/blackfire/agent
+
+    - name: Create agent.json config files
+      template: src=agent.json.j2 dest=/etc/blackfire/agent.json
+  when: blackfire_install and blackfire_server_id and blackfire_server_token

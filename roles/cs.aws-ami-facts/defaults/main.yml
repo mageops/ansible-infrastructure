@@ -1,0 +1,13 @@
+ami_facts_common_filters:
+  state: "available"
+  architecture: "x86_64"
+  block-device-mapping.volume-type: "gp2"
+
+ami_facts_clean_base_filters:
+  name: "{{ aws_ami_base_marketplace_name }}"
+  is-public: "true"
+  owner-alias: "aws-marketplace"
+
+ami_facts_app_node_tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
+
+ami_facts_app_node_filters: {}

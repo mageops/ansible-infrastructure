@@ -1,0 +1,7 @@
+- debug:
+    msg: "Execute deploy hook role action: {{ deploy_hook_action_name }}"
+
+- include_role:
+    name: "{{ deploy_hook_action.role }}"
+    
+    

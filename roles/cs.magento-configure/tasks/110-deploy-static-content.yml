@@ -1,0 +1,105 @@
+- name: Force single SCD job for Magento < 2.3
+  set_fact:
+    magento_scd_parallel_jobs: 1
+  when: magento_version is version('2.3', '<')
+
+- name: Show information about SCD start
+  debug:
+    msg: |
+      ============================================
+      ==========  Starting Magento SCD   =========
+      ============================================
+
+       Using {{ magento_scd_strategy }} strategy with {{ magento_scd_parallel_jobs }} parallel jobs.
+
+        Using languages:
+        {% for lang in magento_scd_languages %}
+          - {{ lang }}
+        {% endfor %}
+
+      {% if magento_scd_excluded_themes -%}
+        Excluding themes:
+        {% for theme in magento_scd_excluded_themes %}
+          - {{ theme }}
+        {% endfor %}
+      {% endif %}
+
+      ============================================
+
+- name: Deploy static content for each language separately (Magento 2.1 and 2.2)
+  become: yes
+  become_user: "{{ magento_user }}"
+  command: >
+    php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+      {% for theme in magento_scd_excluded_themes -%}
+        --exclude-theme "{{ theme }}" \
+      {% endfor %}
+      -s "{{ magento_scd_strategy }}" \
+      -j {{ magento_scd_parallel_jobs }} \
+      '{{ magento_theme_language }}'
+  loop: "{{ magento_scd_languages }}"
+  loop_control:
+    loop_var: magento_theme_language
+    label: "Language: {{ magento_theme_language }}"
+  register: magento22_scd
+  when: magento_version is version('2.3', '<')
+
+- name: Set information about Magento SCD (Magento 2.1 and 2.2)
+  when: magento_version is version('2.3', '<')
+  set_fact:
+    magento_scd_duration: "{{ magento22_scd.delta }}"
+    magento_scd_command: "{{ magento22_scd.cmd | join(' ') }}"
+    magento_scd_output: "{{ magento22_scd.stdout }}"
+
+- name: Deploy static content (Magento 2.3+)
+  become: yes
+  become_user: "{{ magento_user }}"
+  command: >
+    php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+      {% for theme in magento_scd_excluded_themes -%}
+        --exclude-theme "{{ theme }}" \
+      {% endfor %}
+      -s "{{ magento_scd_strategy }}" \
+      -j {{ magento_scd_parallel_jobs }} \
+      {{ magento_scd_languages | join(' ') }}
+  register: magento_scd
+  when: magento_version is version('2.3', '>=')
+
+- name: Set information about Magento SCD (Magento 2.1 and 2.2)
+  when: magento_version is version('2.3', '>=')
+  set_fact:
+    magento_scd_duration: "{{ magento_scd.delta }}"
+    magento_scd_command: "{{ magento_scd.cmd | join(' ') }}"
+    magento_scd_output: "{{ magento_scd.stdout }}"
+
+- name: Show static content deployment logs
+  debug:
+    msg: |
+      ============================================
+      ==========  Magento SCD Complete   =========
+      ============================================
+
+      ----------------  Duration  ----------------
+
+                    {{ magento_scd_duration }}
+
+      ----------------  Command  -----------------
+
+      {{ magento_scd_command }}
+
+      ----------------  Output  ------------------
+
+      {{ magento_scd_output }}
+
+      ============================================
+
+- name: Execute post static-content deploy containerized tasks
+  block:
+    - name: Execute containerized tasks
+      include_role:
+        name: cs.deploy-containerized-tasks
+      vars:
+        containerized_tasks: "{{ magento_scd_containerized_tasks }}"
+  when: magento_scd_containerized_tasks | length > 0
+  become: yes
+  become_user: root

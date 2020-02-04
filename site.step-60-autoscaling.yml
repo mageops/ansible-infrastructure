@@ -1,0 +1,94 @@
+- hosts: localhost
+  connection: local
+  vars:
+    aws_app_node_security_group_ids: >-
+        {{
+            [
+              aws_security_group_app_id,
+              aws_security_group_ssh_id
+            ] + (
+              varnish_is_in_autoscaling_group | ternary(
+                [
+                  aws_security_group_varnish_id
+                ],
+                []
+              )
+            )
+        }}
+  roles:
+    - role: cs.aws-autoscaling
+      autoscaling_assign_public_ip: yes
+      autoscaling_loadbalancers: "{{ aws_app_asg_load_balancers }}"
+
+      autoscaling_webnodedown_hook_create: "{{ varnish_standalone }}"
+      autoscaling_webnodedown_hook_name: "{{ aws_app_node_webnodedown_hook_name }}"
+
+      autoscaling_asg_name: "{{ mageops_app_name }}-app"
+      autoscaling_asg_desired_capacity: "{{ aws_app_asg_desired_capacity }}"
+      autoscaling_asg_min_size: "{{ aws_app_asg_min_size }}"
+      autoscaling_asg_max_size: "{{ aws_app_asg_max_size }}"
+      autoscaling_asg_cooldown: "{{ aws_app_asg_cooldown }}"
+
+      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
+      autoscaling_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
+      autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"
+      autoscaling_instance_iam_role: "{{ aws_iam_role_app_node }}"
+      autoscaling_instance_volume_size: "{{ aws_app_node_ebs_volume_size }}"
+      autoscaling_instance_tags: >-
+        {{
+            aws_tags_default | combine(
+              aws_tags_role_app,
+              aws_tags_node_app,
+              varnish_is_in_autoscaling_group | ternary(aws_tags_node_varnish_app, {})
+            )
+        }}
+      autoscaling_instance_ami_search_tags: >-
+        {{
+            aws_tags_base | combine(
+              aws_tags_role_app
+            )
+        }}
+      autoscaling_instance_start_script: |
+        {{ aws_app_node_launch_script_extra }}
+        {{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}
+        {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
+
+    - role: cs.aws-autoscaling
+      when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
+      autoscaling_assign_public_ip: yes
+      autoscaling_loadbalancers: no
+
+      autoscaling_webnodedown_hook_create: "{{ varnish_standalone }}"
+      autoscaling_webnodedown_hook_name: "{{ aws_app_node_webnodedown_hook_name }}"
+
+      autoscaling_asg_name: "{{ mageops_app_name }}-extra-app"
+      autoscaling_asg_desired_capacity: "{{ aws_extra_app_asg_desired_capacity }}"
+      autoscaling_asg_min_size: "{{ aws_extra_app_asg_min_size }}"
+      autoscaling_asg_max_size: "{{ aws_extra_app_asg_max_size }}"
+      autoscaling_asg_cooldown: "{{ aws_extra_app_asg_cooldown }}"
+
+      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
+      autoscaling_instance_type: "{{ aws_extra_app_node_instance_type }}"
+      autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"
+      autoscaling_instance_iam_role: "{{ aws_iam_role_app_node }}"
+      autoscaling_instance_volume_size: "{{ aws_extra_app_node_ebs_volume_size }}"
+      autoscaling_instance_tags: >-
+        {{
+            aws_tags_default | combine(
+              aws_tags_role_app,
+              aws_tags_role_extra_app,
+              aws_tags_node_extra_app,
+              varnish_is_in_autoscaling_group | ternary(aws_tags_node_varnish_app, {})
+            )
+        }}
+      autoscaling_instance_ami_search_tags: >-
+        {{
+            aws_tags_base | combine(
+              aws_tags_role_app
+            )
+        }}
+      autoscaling_instance_start_script: |
+        {{ aws_app_node_launch_script_extra }}
+        {{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}
+        {% if magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
+

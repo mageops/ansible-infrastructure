@@ -1,0 +1,42 @@
+- name: Create daily snapshot
+  shell: "aws rds create-db-snapshot --db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --db-instance-identifier '{{ rds_gfs_instance_id }}' --tags '{{ rds_gfs_daily_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
+
+- name: Wait until daily snapshot is created
+  shell: "aws rds wait db-snapshot-completed --db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --region '{{ aws_region }}'"
+
+- name: Create weekly snapshot from the daily one
+  shell: "aws rds copy-db-snapshot --target-db-snapshot-identifier '{{ rds_gfs_weekly_snapshot_id }}' --source-db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --tags '{{ rds_gfs_weekly_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
+  when: ansible_date_time.weekday_number | int == rds_gfs_weekly_snapshot_weekday_nr
+
+- name: Create monthly snapshot from the daily one
+  shell: "aws rds copy-db-snapshot --target-db-snapshot-identifier '{{ rds_gfs_monthly_snapshot_id }}' --source-db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --tags '{{ rds_gfs_monthly_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
+  when: ansible_date_time.day | int == rds_gfs_monthly_snapshot_monthday_nr
+
+- name: Get current snapshots
+  rds_snapshot_facts:
+    snapshot_type: manual
+    db_instance_identifier: "{{ rds_gfs_instance_id }}"
+    region: "{{ aws_region }}"
+  register: _rds_gfs_snapshots
+
+- debug: var=_rds_gfs_snapshots
+
+- name: Get snapshots to be deleted
+  set_fact:
+    # Somehow I cannot get json_query to sort by creation time, every other attr works but not this
+    # so instead we'll sort in jinja :)
+    rds_gfs_daily_to_delete: "{{ _rds_gfs_snapshots.snapshots | json_query(_filter_daily_query) | sort(attribute='snapshot_create_time', reverse=True) | json_query('[' ~ rds_gfs_daily_snapshot_retention ~ ':].db_snapshot_identifier') }}"
+    rds_gfs_weekly_to_delete: "{{ _rds_gfs_snapshots.snapshots | json_query(_filter_weekly_query) | sort(attribute='snapshot_create_time', reverse=True) | json_query('[' ~ rds_gfs_weekly_snapshot_retention ~ ':].db_snapshot_identifier') }}"
+    rds_gfs_monthly_to_delete: "{{ _rds_gfs_snapshots.snapshots | json_query(_filter_monthly_query) | sort(attribute='snapshot_create_time', reverse=True) | json_query('[' ~ rds_gfs_monthly_snapshot_retention ~ ':].db_snapshot_identifier') }}"
+  vars:
+    _filter_daily_query: "[?tags.GfsType=='daily']"
+    _filter_weekly_query: "[?tags.GfsType=='weekly']"
+    _filter_monthly_query: "[?tags.GfsType=='monthly']"
+
+- name: Set snapshots to remove
+  set_fact:
+    rds_gfs_snapshots_to_remove: "{{ rds_gfs_daily_to_delete + rds_gfs_weekly_to_delete + rds_gfs_monthly_to_delete }}"
+
+- name: Remove old snapshots
+  shell: "aws rds delete-db-snapshot --db-snapshot-identifier '{{ item }}' --region '{{ aws_region }}'"
+  with_items: "{{ rds_gfs_snapshots_to_remove }}"

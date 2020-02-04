@@ -1,0 +1,20 @@
+- name: Add server to app user group
+  user:
+    name: "{{ deploy_webserver_user }}"
+    groups: "{{ deploy_app_group }}"
+    append: yes
+
+- name: Ensure directories exist
+  file:
+    state: directory
+    follow: yes
+    path: "{{ deploy_next_release_path }}/{{ item }}"
+  with_items: "{{ deploy_writable_dirs }}"
+  become: yes
+  become_user: "{{ deploy_app_user }}"
+
+- name: Set permissions for server writable dirs
+  shell:
+    find -L {{ deploy_next_release_path }}/{{ item }}/ {{ deploy_perm_fix_find_opts }} -type d -exec chmod {{ deploy_directory_permissions }} {{ '{}' }} \; &&
+    find -L {{ deploy_next_release_path }}/{{ item }}/ {{ deploy_perm_fix_find_opts }} -type f -exec chmod {{ deploy_file_permissions }} {{ '{}' }} \;
+  with_items: "{{ deploy_writable_dirs }}"

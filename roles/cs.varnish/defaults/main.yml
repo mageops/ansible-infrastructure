@@ -1,0 +1,94 @@
+# Whether to password protect the website (basic auth)
+varnish_secure_site: yes
+
+# Credentials for basic auth protection
+varnish_secure_site_user: varnish
+varnish_secure_site_password: varnish
+
+# Bypass basic auth protecting when remote IP matches any of these
+varnish_secure_site_trusted_ips: []
+
+# List of CIDRs that can perform PURGE requests
+# By defaults they are accepted only from 127.0.0.1
+varnish_purge_trusted_ips: []
+
+varnish_extra_packages:
+  - varnish-modules-extra
+  - varnish-module-accept
+
+varnish_port: 80
+varnish_listen_address: ''
+varnish_default_backend_ip: 127.0.0.1
+varnish_backend_first_byte_timeout: "300s"
+
+varnish_log_user: "varnishlog"
+varnish_log_group: "varnishlog"
+
+varnish_params:
+  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-hdr-len
+  http_resp_hdr_len: 42000
+  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-size
+  http_resp_size: 84000
+  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-backend
+  # WARNING! Shall be bigger than `http_resp_size` as resp size is allocated from this pool!
+  workspace_backend: 256000
+  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-client
+  workspace_client: 64000
+
+varnish_vcl_conf: /etc/varnish/default.vcl
+varnish_backends_vcl: /etc/varnish/backends.vcl
+varnish_run_dir: /var/run/varnish
+varnish_pid_file: "{{ varnish_run_dir }}/varnish.pid"
+varnish_storage: "malloc"
+# Whether to route requests intendend for extra instances
+# to the main ones if the extra ones are not healthy.
+varnish_extra_instance_failover_enable: yes
+
+varnish_memory: "128M"
+varnish_syscfg_limit_nofile: 131072
+varnish_syscfg_limit_memlock: 85983232
+varnish_syscfg_tasks_max: "infinity"
+varnish_syscfg_limit_core: "infinity"
+
+# Error page color theme
+varnish_error_page_color_primary: "#212121"
+
+# Display custom page in an IFRAME
+varnish_error_page_url: no
+
+# HTTP Throttling Switch
+# Warning! This will be enabled only if `varnish_standalone` is enabled.
+# This is because throttling makes no sense for many varnish instances
+# which do not communicate.
+varnish_throttling: no
+
+# Throttling rules, an array of items, each containing:
+# - `id` (required) - unqiue string used internally for hash computation
+# - `path_pattern` (required) - regex pattern that defined affects request paths
+# - `error_message` (optional) - custom error string returned to client when this rule is triggered
+# - `limit` (required) - number of requests until clien tis throttled
+# - `duration` (required) - time window over which the `limit` requests may be performed
+#   (use varnish duration format, see: https://varnish-cache.org/docs/4.1/reference/vcl.html#durations)
+#
+# Note: The rules are evaluated in the order they are defined. First limit that is exceeded
+# will stop any further evaluation. You should order the rules from most specific to the widest.
+varnish_throttling_rules: []
+
+varnish_backend_instances_extra: []
+varnish_backend_instances_app:
+    - private_ip_address: "{{ varnish_default_backend_ip }}"
+      instance_id: default
+
+varnish_log_dir: /var/log/varnish
+
+varnish_ncsa_logging: no
+varnish_ncsa_logfile: "{{ varnish_log_dir }}/varnishncsa.log"
+varnish_ncsa_log_format: '%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-agent}i"'
+
+varnish_purge_logging: yes
+varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
+
+# Extra VCL code to add to subroutines
+varnish_vcl_recv_extra: ""
+varnish_vcl_synth_extra: ""
+varnish_vcl_backend_error_extra: ""

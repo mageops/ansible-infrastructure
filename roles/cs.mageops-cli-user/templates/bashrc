@@ -1,0 +1,87 @@
+# -- Load system defaults ---
+
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+
+# Skipp all further CLI setup if no interactive shell
+if [[ "$-" != *i* ]] ; then
+	return 0
+fi
+
+# -- Set up bash history ---
+
+export HIST_STAMPS="yyyy-mm-dd"
+export PROMPT_COMMAND='history -a'
+export HISTSIZE=500000
+export HISTFILESIZE=100000
+export HISTCONTROL="erasedups:ignoreboth"
+export HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear"
+export HISTTIMEFORMAT='%F %T '
+
+shopt -s histappend
+shopt -s cmdhist
+shopt -s histreedit
+shopt -s histverify
+shopt -s lithist
+set -o histexpand
+
+# Process binds only for interactive shells
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+bind '"\e[C": forward-char'
+bind '"\e[D": backward-char'
+
+# -- Set up global options --
+
+export TIME_STYLE="+%Y-%m-%d %H:%M"
+export EDITOR='{{ mageops_cli_user_default_editor }}'
+export GIT_EDITOR="${EDITOR}"
+export GPG_TTY="$(tty)"
+
+# Only since bash 5+ ...
+# shopt -s complete_fullquote
+shopt -s globstar
+
+shopt -u direxpand
+shopt -u progcomp
+shopt -u cdspell
+shopt -u dirspell
+shopt -u autocd
+
+# -- Set up useful aliases --
+
+alias ls='ls --color=auto -N'
+alias ll='ls -lh --group-directories-first'
+alias l='ls -lAh --group-directories-first'
+alias lst='ls -lht'
+alias lss='ls -lhS'
+
+alias rm='rm -Id --preserve-root'
+alias ln='ln -v'
+
+alias pgrep='pgrep -f'
+alias pkill='pkill -f'
+
+alias grep='grep --color=auto'
+alias psa='ps axf'
+
+{% if magento_user is defined and mageops_cli_user == magento_user | default('magento') -%}
+alias magento='{{ magento_live_release_dir }}/bin/magento'
+{% endif %}
+
+alias mageops-env="env | grep -e '^MAGEOPS_'"
+
+# --- Load MageOps modules ---
+
+if [[ -d "$HOME/.bashrc.d/" ]] ; then
+	source "$HOME/.bashrc.d/"*.sh
+fi
+
+export PS1="$MAGEOPS_PS1"
+
+# Terminal tab name
+export PROMPT_COMMAND='echo -ne "\033]0;$(whoami)@${MAGEOPS_NODE_ROLE}.${MAGEOPS_PROJECT}-${MAGEOPS_ENVIRONMENT}\007"'
+
+

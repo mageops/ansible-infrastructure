@@ -1,0 +1,42 @@
+- name: Get info about security groups
+  ec2_group_facts:
+    region: "{{ aws_region }}"
+    filters: "{{ aws_sg_facts_filters | combine (aws_sg_facts_tags | prefix_keys('tag:')) }}"
+  register: ec2_group_facts
+
+- name: Set info about security groups
+  set_fact:
+    aws_security_groups_info: "{{ ec2_group_facts.security_groups }}"
+    cacheable: yes
+
+- name: Set info for each security group
+  set_fact:
+    aws_security_group_efs: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_efs_name) | list | default([false], true) | first }}"
+    aws_security_group_elasticsearch: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_elasticsearch_name) | list | default([false], true) | first }}"
+    aws_security_group_redis: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_redis_name) | list | default([false], true) | first }}"
+    aws_security_group_rds: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_rds_name) | list | default([false], true) | first }}"
+    aws_security_group_app: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_app_name) | list | default([false], true) | first }}"
+    aws_security_group_varnish: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_varnish_name) | list | default([false], true) | first }}"
+    aws_security_group_lb: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_lb_name) | list | default([false], true) | first }}"
+    aws_security_group_ssh: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_ssh_name) | list | default([false], true) | first }}"
+    aws_security_group_lambda_ssh: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_lambda_ssh_name) | list | default([false], true) | first }}"
+    aws_security_group_sftp: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_sftp_name) | list | default([false], true) | first }}"
+    cacheable: yes
+
+- name: Set id fact for each security group
+  set_fact:
+    aws_security_group_efs_id: "{{ aws_security_group_efs.group_id | default(omit) }}"
+    aws_security_group_elasticsearch_id: "{{ aws_security_group_elasticsearch.group_id | default(omit) }}"
+    aws_security_group_redis_id: "{{ aws_security_group_redis.group_id | default(omit) }}"
+    aws_security_group_rds_id: "{{ aws_security_group_rds.group_id | default(omit) }}"
+    aws_security_group_app_id: "{{ aws_security_group_app.group_id | default(omit) }}"
+    aws_security_group_varnish_id: "{{ aws_security_group_varnish.group_id | default(omit) }}"
+    aws_security_group_lb_id: "{{ aws_security_group_lb.group_id | default(omit) }}"
+    aws_security_group_ssh_id: "{{ aws_security_group_ssh.group_id | default(omit) }}"
+    aws_security_group_lambda_ssh_id: "{{ aws_security_group_lambda_ssh.group_id | default(omit) }}"
+    aws_security_group_sftp_id: "{{ aws_security_group_sftp.group_id | default(omit) }}"
+    cacheable: yes
+
+
+
+

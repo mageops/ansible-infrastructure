@@ -1,0 +1,18 @@
+- name: Ensure nodejs repo release package is installed and up-to-date
+  yum:
+    name: "{{ repo_nodejs_package_name }}"
+
+- name: Ensure chosen nodejs repo variants are enabled
+  ini_file:
+    state: present
+    create: no
+    path: "/etc/yum.repos.d/{{ repo_nodejs_filename }}.repo"
+    section: "{{ repo_nodejs_name_prefix }}{{ variant }}"
+    option: enabled
+    value: "{{ (variant in repo_nodejs_variants_enabled) | ternary('1', '0') }}"
+    no_extra_spaces: yes
+  loop: "{{ repo_nodejs_variants }}"
+  loop_control:
+    loop_var: variant
+    label: "{{ variant }} -> {% if variant in repo_nodejs_variants_enabled %}enabled{% else %}disabled{% endif %}"
+

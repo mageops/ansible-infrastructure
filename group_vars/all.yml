@@ -1,0 +1,1459 @@
+##################################################
+#                                                #
+#   ------------ MageOps Defaults ------------   #
+#                                                #
+##################################################
+
+
+# -------------------------------
+# --------  AWS General  --------
+# -------------------------------
+
+# Is this env hosted on AWS?
+aws_use: no
+
+# Region where the env will be hosted
+aws_region: eu-central-1
+
+# The preferred AZ to use - Set automatically to the first one if not defined
+# aws_preferred_availability_zone:
+
+# Force fresh custom AWS gathering
+aws_facts_force_fresh: no
+
+# ---------------------------
+# --------  AWS IAM  --------
+# ---------------------------
+
+# Prefix for naming IAM resources
+aws_iam_name_prefix: MageOps
+
+# Define this variable if you want to be able to switch to this account
+# from your master account using the employee access roles.
+# aws_iam_master_account_id:
+
+# IAM roles that need to be in global vars because they are used across roles
+# You almost never need to override this unless to keep backwards compat
+aws_iam_role_app_node: "{{ aws_iam_name_prefix }}AppNode"
+aws_iam_role_varnish: "{{ aws_iam_role_app_node }}"
+aws_iam_role_persistent_node: "{{ aws_iam_name_prefix }}PersistentNode"
+aws_iam_role_basic_lambda_execution: "{{ aws_iam_name_prefix }}BasicLambdaExecution"
+aws_iam_role_autoscaling_event_lambda: "{{ aws_iam_name_prefix }}HandleAutoscalingEventLambdaExecution"
+aws_iam_role_update_varnish_backend_lambda_execution: "{{ aws_iam_name_prefix }}UpdateVarnishBackendsLambdaExecution"
+aws_iam_role_import_scaling_lambda_execution: "{{ aws_iam_name_prefix }}HandleImportScalingLambdaExecution"
+
+# ----------------------------
+# --------  AWS Tags  --------
+# ----------------------------
+
+# A set of tags that uniquely identifies AWS resources
+# belonging to the specific environment.
+aws_tags_base:
+  Project: "{{ mageops_project }}"
+  Environment: "{{ mageops_environment }}"
+
+# Additional tags to be applied during automated provisioning
+aws_tags_meta:
+  Tool: ansible
+
+# Any extra tags that can be applied as needed
+aws_tags_extra: []
+
+aws_tags_details:
+  Infrastructure: mageops
+  AppId: "{{ mageops_app_id }}"
+
+
+# All environment-scoped tags to be applied when *creating* resources
+aws_tags_default: "{{ aws_tags_base|combine(aws_tags_meta, aws_tags_details, aws_tags_extra) }}"
+
+# ---  General traits that specify a subgroup or special treatment  ---
+
+# All nodes constructed out of pre-baked image (AMI in this case) must have
+# this tag to avoid provisioning them. All nodes in ASG will have this trait.
+aws_tags_trait_immutable:
+  TraitImmutable: "immutable"
+
+# ---  General tags indicating resource role  ---
+
+# --- APP ---
+
+aws_tags_role_app:
+  Role: "app"
+
+aws_tags_role_extra_app:
+  RoleExtra: "app"
+
+aws_tags_role_app_builder:
+  RoleBuilder: "app"
+
+# --- SEARCH ---
+
+aws_tags_role_search:
+  Role: "search"
+
+aws_tags_role_elasticsearch:
+  RoleSearch: "elasticsearch"
+
+# --- CACHED_DIRS ---
+
+aws_tags_role_cache:
+  Role: "cache"
+
+aws_tags_role_redis_cache:
+  RoleCache: "redis"
+
+# --- PERSISTENT ---
+
+aws_tags_role_persistent:
+  Role: "persistent"
+
+# --- HTTP CACHED_DIRS ---
+
+aws_tags_role_http_cache:
+  Role: "httpcache"
+
+aws_tags_role_varnish_http_cache:
+  RoleHttpCache: "varnish"
+
+# --- MESSAGE QUEUE ---
+
+aws_tags_role_message_queue:
+  Role: "message_queue"
+
+aws_tags_role_rabbitmq_message_queue:
+  RoleMessageQueue: "rabbitmq"
+
+# --- LOAD BALANCER ---
+
+aws_tags_role_loadbalancer:
+  Role: "loadbalancer"
+
+aws_tags_role_nginx_loadbalancer:
+  RoleLoadBalancer: "nginx"
+
+aws_tags_role_elb_loadbalancer:
+  RoleLoadBalancer: "elasticloadbalancer"
+
+# --- DATABASE ---
+
+aws_tags_role_database:
+  Role: "database"
+
+aws_tags_role_mysql_database:
+  RoleDatabase: "mysql"
+
+# --- STORAGE ---
+
+aws_tags_role_storage:
+  Role: "storage"
+
+aws_tags_role_shared_storage:
+  RoleStorage: "shared"
+  RoleStoragePublic: "no"
+
+aws_tags_role_media_storage:
+  RoleStorage: "media"
+  RoleStoragePublic: "yes"
+
+aws_tags_role_secret_storage:
+  RoleStorage: "secret"
+  RoleStoragePublic: "no"
+
+aws_tags_role_s3_storage:
+  RoleStorageProtocol: "s3"
+
+aws_tags_role_efs_storage:
+  RoleStorageProtocol: "nfs"
+
+# ---  CDN ---
+
+aws_tags_role_cdn:
+  Role: "cdn"
+
+aws_tags_role_cdn_cloudfront:
+  RoleCDN: "cloudfront"
+
+# ---  NODES ---
+
+# Specific node tags for matching node type
+# and environment using single tag.
+
+aws_tags_node_mysql:
+  NodeMySQL: "{{ mageops_app_name }}"
+
+aws_tags_node_app:
+  NodeApp: "{{ mageops_app_name }}"
+
+aws_tags_node_extra_app:
+  NodeExtraApp: "{{ mageops_app_name }}"
+
+aws_tags_node_varnish:
+  NodeVarnish: "{{ mageops_app_name }}"
+
+aws_tags_node_persistent:
+  NodePersistent: "{{ mageops_app_name }}"
+
+# -----------------------
+# --------  AMI  --------
+# -----------------------
+
+# AMI Name search pattern matching official CentOS 7 Marketplace AMI
+# Warning! You need to be subscribed to it first!
+aws_ami_base_marketplace_name: "*b7ee8a69-ee97-4a49-9e68-afaee216db2e*"
+
+# Whether to kill previously created builder or reuse it on next run
+aws_ami_build_force_fresh_builder: no
+
+# Always rebuild ami starting from fresh base image
+aws_ami_force_clean_build: no
+
+# Whether to terminate the builder instance after AMI is created
+aws_ami_build_terminate_builder: yes
+
+# -------------------------------
+# --------  AWS Network  --------
+# -------------------------------
+
+# Create a dedicated network?
+aws_vpc_create: yes
+
+# Prefix to use for the subnet, must be unique across projects if you
+# plan on doing any peering between their networks
+aws_vpc_subnet_prefix: "10.9"
+
+# Or reuse an existing one
+# aws_vpc_id:
+
+# VPC name for identification purposes
+aws_vpc_name: "{{ mageops_app_name }}"
+
+# Extra routes for the VPC
+aws_vpc_routes_extra: []
+
+# ---------------------------
+# --------  AWS EC2  --------
+# ---------------------------
+
+# The key has to be manually generated in the console and the name
+# has to agree with this setting.
+aws_ec2_ssh_key_name: "{{ mageops_app_name }}"
+
+
+# User data to add to every EC2 instance / Launch configuration
+# As a default configuration for compatibility reasons it changes
+# the default user to `ec2-user` just like Amazon Linux AMIs.
+#
+# The cloud config has to be supported by base AMI for this to work
+# - official CentOS 7 images do.
+#
+aws_ec2_instance_user_data: |
+  Content-Type: multipart/mixed; boundary="//"
+  MIME-Version: 1.0
+
+  --//
+  Content-Type: text/cloud-config; charset="us-ascii"
+  MIME-Version: 1.0
+  Content-Transfer-Encoding: 7bit
+  Content-Disposition: attachment; filename="cloud-config.txt"
+
+  #cloud-config
+  disable_root: false
+  users:
+    - name: root
+      ssh_redirect_user: false
+
+  --//
+  Content-Type: text/x-shellscript; charset="us-ascii"
+  MIME-Version: 1.0
+  Content-Transfer-Encoding: 7bit
+  Content-Disposition: attachment; filename="userdata.txt"
+
+  #!/bin/bash
+
+  /bin/echo "Hello creativestyle!" >> /tmp/creativestyle.txt
+
+  {{ aws_ec2_instance_user_launch_script_custom }}
+  {{ aws_ec2_user_launch_script | default('') }}
+
+  --//
+
+# Launch script to execute on every EC2 instance start
+# Do not override `ec2_instance_user_launch_script`
+# as it's used to customize the script in roles.
+aws_ec2_instance_user_launch_script_custom: ''
+
+# --- Security groups ---
+
+aws_security_group_sftp_name: "{{ mageops_app_name }}-sftp-sg"
+aws_security_group_ssh_name: "{{ mageops_app_name }}-ssh-sg"
+aws_security_group_lambda_ssh_name: "{{ mageops_app_name }}-lambda-ssh-sg"
+aws_security_group_lb_name: "{{ mageops_app_name }}-lb-sg"
+aws_security_group_varnish_name: "{{ mageops_app_name }}-varnish-sg"
+aws_security_group_app_name: "{{ mageops_app_name }}-app-sg"
+aws_security_group_rds_name: "{{ mageops_app_name }}-rds-sg"
+aws_security_group_redis_name: "{{ mageops_app_name }}-redis-sg"
+aws_security_group_elasticsearch_name: "{{ mageops_app_name }}-elastic-sg"
+aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
+
+
+# --- EC2 Node Specific Types / Roles ---
+
+# Persistent Node EC2
+aws_persistent_node_create: yes
+
+# EC2 Instance types
+aws_app_node_instance_type: t3a.micro
+aws_app_builder_node_instance_type: "{{ aws_app_node_instance_type }}"
+aws_extra_app_node_instance_type: "{{ aws_app_node_instance_type }}"
+aws_persistent_node_instance_type: t3a.micro
+
+# EC2 Elastic IPs
+aws_varnish_node_elastic_ip:
+aws_persistent_node_elastic_ip:
+
+# EC2 instance EBS volume sizes in GB
+aws_app_node_ebs_volume_size: 10
+aws_persistent_node_ebs_volume_size: 10
+aws_varnish_node_ebs_volume_size: 10
+aws_extra_app_node_ebs_volume_size: "{{ aws_app_node_ebs_volume_size }}"
+
+aws_app_asg_availability_zones:
+  - "{{ aws_preferred_availability_zone }}"
+
+# Extra contents to prepend to script which is executed
+# on the instance being launched.
+aws_app_node_launch_script_extra: ''
+aws_app_node_webnodedown_hook_name: WebNodeGoingDown
+
+aws_varnish_node_launch_script_extra: ''
+
+
+# ---------------------------------------------
+# --------  AWS Elastic Load Balancer  --------
+# ---------------------------------------------
+
+# Create Elastic Load Balancer?
+aws_elb_create: "{{ not varnish_as_loadbalancer }}"
+
+# Set up HTTPS termination on ELB?
+aws_elb_https: "{{ mageops_https_enable and aws_elb_create }}"
+
+# ARN of the Certificate assigned to the ELB
+aws_elb_https_certificate_arn:
+
+# Name of the LoadBalancer
+aws_elb_name: "{{ mageops_app_name }}-lb"
+
+# Target zones for CLB. No need to change in 99% cases
+aws_elb_availability_zones: "{{ vpc_availability_zones }}"
+
+
+# -------------------------------
+# --------  AWS EC2 ASG  --------
+# -------------------------------
+
+# Application app ASG
+aws_app_asg_min_size: 1
+aws_app_asg_max_size: 3
+aws_app_asg_desired_capacity: 1
+aws_app_asg_load_balancers: "{{ aws_elb_create|ternary([aws_elb_name], false) }}"
+aws_app_asg_cooldown: 300
+
+# Additional app node ASG for handling special cases
+# - on demand import instance
+# - bot traffic
+# - heavy API usage / import
+aws_extra_app_asg_enable: no
+aws_extra_app_asg_min_size: 0
+aws_extra_app_asg_max_size: 1
+aws_extra_app_asg_desired_capacity: 0
+aws_extra_app_asg_cooldown: 60
+
+aws_extra_app_asg_passthrough_url_pattern:
+aws_extra_app_asg_passthrough_uagent_pattern:
+aws_extra_app_asg_passthrough_ip_pattern:
+
+# Example regex to pass bot traffic to the extra instances:
+#aws_extra_app_asg_passthrough_uagent_pattern: "(?i)^alexa|^blitz\\.io|bot|^browsermob|crawl|^curl|^facebookexternalhit|feed|google web preview|^ia_archiver|indexer|^java|jakarta|^libwww-perl|^load impact|^magespeedtest|monitor|^Mozilla$|nagios |^\\.net|^pinterest|postrank|slurp|spider|uptime|^wget|yandex|^elb-healthchecker|binglocalsearch|^Ruby|^python-requests|^Mediapartners-Google|^Sogou"
+
+# -------------------------------
+# --------  AWS RDS --------
+# -------------------------------
+
+# Create RDS?
+aws_rds_create: "{{ mageops_mysql_create|default(true) and aws_use }}"
+
+# Type of the cloud DB instance
+aws_rds_instance_type: db.t3a.micro
+
+# Name of this instance
+aws_rds_instance_name: "{{ mageops_app_name }}-db"
+
+# --------------------------
+# --------  AWS S3  --------
+# --------------------------
+
+aws_s3_secret_bucket: "{{ mageops_app_name }}-secret"
+aws_s3_media_bucket: "{{ mageops_app_name }}-media"
+
+# Extra policies for bucket
+aws_s3_bucket_policies: []
+
+# -------------------------------
+# --------  AWS Logging  --------
+# -------------------------------
+
+# AWS Logs + slack notifications settings
+aws_logs_slack_hook_url: "https://hooks.slack.com/services/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"
+aws_logs_slack_channel: "{{ mageops_notifications_slack_channel }}"
+
+aws_logs_loggers_persistent_default:
+  syslog: { enabled: yes }
+  elasticsearch-main: { enabled: "{{ mageops_elasticsearch_create }}" }
+  redis-server: { enabled: "{{ mageops_redis_create }}" }
+  redis-sessions-server: { enabled: "{{ mageops_redis_sessions_create }}" }
+
+aws_logs_loggers_app_default:
+  syslog: { enabled: yes }
+  magento-system: { enabled: yes }
+  magento-debug: { enabled: yes }
+  magento-exception: { enabled: yes }
+  magento-paywithamazon: { enabled: yes }
+  nginx-error: { enabled: yes }
+  php-fpm-error: { enabled: yes }
+  php-cli-error: { enabled: yes }
+  postfix-maillog: { enabled: yes }
+  magento-report: { enabled: "{{ aws_logs_log_magento_crash_reports }}" }
+  warmup-crawler: { enabled: "{{ magento_page_cache_warmer_enable }}" }
+  varnish-purges: { enabled: "{{ mageops_varnish_purge_logging and not varnish_standalone }}" }
+
+aws_logs_loggers_varnish_default:
+  syslog: { enabled: yes }
+  nginx-error: { enabled: "{{ mageops_https_termination_enable }}" }
+  page-cache-misses: { enabled: "{{ mageops_https_termination_enable and https_termination_page_cache_misses_logging }}" }
+  varnish-purges: { enabled: "{{ mageops_varnish_purge_logging }}" }
+
+
+# The following vars can be used to add any extra log files which should be pushed to cloudwatch.
+# Example config:
+#
+# aws_logs_loggers_app_extra:
+#    your-unique-name:
+#        group_name: "/group/name/as/shown/in/cloudwatch.log"
+#        filename: "/path/to/the/file.log"
+#        date_format: "%b %d %H:%M:%S" # Date format parsing specifier
+#        retention: 14 # Loge retention in days (can be only specific values!)
+#        multiline: no # Are single log entries spanning more than one line?
+#        enabled: yes
+aws_logs_loggers_app_extra: {}
+aws_logs_loggers_persistent_extra: {}
+aws_logs_loggers_varnish_extra: {}
+aws_logs_log_magento_crash_reports: yes
+
+# ----------------------------------------
+# --------  MageOps Basic Config  --------
+# ----------------------------------------
+
+# Path to directory where provisioning caches / temporary files will be stored
+mageops_ansible_temp_dir: "{{ playbook_dir }}/tmp"
+
+# Inventory group for the current app
+mageops_app_host_group: "app_{{ mageops_app_id }}"
+
+# Where to load global configuration vars from
+mageops_global_vars_dir: "{{ playbook_dir }}/vars/global"
+
+# Where to load project configuration vars from
+mageops_project_vars_dir: "{{ playbook_dir }}/vars/project"
+
+# Where to load project templates from
+mageops_project_certs_dir: "{{ mageops_project_vars_dir }}/certs"
+
+# Where to load project templates from
+mageops_project_templates_dir: "{{ mageops_project_vars_dir }}/templates"
+
+# Where to load generated configuration vars from
+mageops_generated_vars_dir: "{{ playbook_dir }}/vars/generated"
+
+# Company prefix for namespacing resource identifiers
+mageops_prefix: cs
+
+# Basic project identifier, must be alphanumeric with dashes or underscores
+mageops_project: magesuite
+
+# The environment type / tier, indicates the purpose (stage), usually `dev` or `prod`
+mageops_environment: dev
+
+# Currently just used for naming things
+mageops_app_type: "magento"
+
+# Common application identifier used for namespacing resources
+mageops_app_name: "{{ mageops_prefix }}-{{ mageops_project }}-{{ mageops_environment }}"
+
+# Extra identifier used for naming users and namespacing some resources
+mageops_app_id: "{{ mageops_project }}_{{ mageops_environment }}"
+
+# Shorter version guaranteed to be at most 16 chars long (e.g. suitable for MySQL 5.6 username)
+mageops_app_id_short: "{{ mageops_project | truncate(10, true, '') }}_{{ mageops_environment | truncate(5, true, '') }}"
+
+# Enables special features that work with MageSuite only
+mageops_app_is_magesuite: yes
+
+mageops_app_user: "{{ mageops_app_type }}"
+mageops_app_group: "{{ mageops_app_user }}"
+mageops_app_uid: 1500
+mageops_app_gid: "{{ mageops_app_uid }}"
+
+# MySQL instance shall be provisioned? (or provide host)
+mageops_mysql_create: yes
+mageops_mysql_host:
+
+# Root DB password, not used directly by the application, needed for managing app dbs and users
+mageops_mysql_root_user: root
+# mageops_mysql_root_pass:
+
+# Application's MySQL credentials
+mageops_app_mysql_user: "{{ mageops_app_id_short }}"
+
+# mageops_app_mysql_pass:
+mageops_app_mysql_db: "{{ mageops_app_id_short }}"
+
+# Shall redis be installed/created automatically? (or provide host)
+mageops_redis_create: yes
+mageops_redis_host:
+mageops_redis_port: 6379
+
+mageops_redis_sessions_create: "{{ mageops_redis_create }}"
+mageops_redis_sessions_host:
+mageops_redis_sessions_port: 6380
+
+# Enable to provision Elasticsearch (or provide host)
+mageops_elasticsearch_create: yes
+# mageops_elasticsearch_host:
+
+mageops_varnish_purge_logging: yes
+mageops_varnish_port: "{% if mageops_https_termination_enable %}8000{% else %}80{% endif %}"
+mageops_varnish_backend_port: "{% if varnish_is_in_autoscaling_group %}8080{% else %}80{% endif %}"
+
+# The directory where application releases are stored - this is not public directory and not app root!
+mageops_app_web_dir: "{{ nginx_www_dir }}/{{ mageops_app_type }}"
+
+# Timezone to set on servers and configure for PHP and other services
+mageops_timezone: Europe/Berlin
+
+# Is HTTPS enabled (via different means)
+mageops_https_enable: yes
+
+# Whether to password-protect the site using basic auth on varnish or nginx level
+# - this is standard procedure for every test system and preproduction environment
+mageops_secure_site: yes
+mageops_secure_site_user: "{{ mageops_project }}"
+# Mandatory! Set this per project in an encrypted credentials file
+# mageops_secure_site_password:
+
+# Install additional development and debugging tools like Blackfire?
+mageops_install_development_tools: yes
+
+# ------------------------------------------
+# --------  SSH Key Authorizations  --------
+# ------------------------------------------
+
+mageops_root_ssh_keys_global: []
+mageops_app_ssh_keys_global: "{{ mageops_root_ssh_keys_global }}"
+
+# SSH keys to authorize for root access to nodes customizable per project
+mageops_root_ssh_keys_project: []
+
+# SSH keys to authorize for access to app user customizable per project
+mageops_app_ssh_keys_project: "{{ mageops_root_ssh_keys_project }}"
+
+mageops_root_ssh_keys: "{{ mageops_root_ssh_keys_global + mageops_root_ssh_keys_project }}"
+mageops_app_ssh_keys: "{{ mageops_app_ssh_keys_global + mageops_app_ssh_keys_project }}"
+
+# --------------------------------------------
+# --------  Global HTTP adjustements  --------
+# --------------------------------------------
+
+# List of all configurable app timeouts
+mageops_http_pipeline_request_timeout_list:
+  - "{{ php_http_request_max_execution_time|int }}"
+  - "{{ magento_api_request_php_max_execution_time|int }}"
+  - "{{ magento_admin_request_php_max_execution_time|int }}"
+  - "{{ magento_cron_request_php_max_execution_time|int }}"
+
+# Use this variable to override all timeouts present across
+# the whole HTTP pipeline/stack. The common use-case is that
+# you need to increase the timeouts for certain PHP endpoints
+# without increasing `php_http_request_max_execution_time`
+# globally. Usually you don't need to touch this as it is set
+# automatically to the highest app timeout configured.
+mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_request_timeout_list|max }}"
+
+
+# ---------------------------------
+# --------  Trusted CIDRs  --------
+# ---------------------------------
+
+# - pass-through basic site password protections
+# - can connect via ssh
+# - easier life everywhere
+
+mageops_trusted_cidr_blocks_global: []
+mageops_trusted_cidr_blocks_extra: []
+
+mageops_trusted_cidr_blocks: "{{ mageops_trusted_cidr_blocks_global + mageops_trusted_cidr_blocks_extra }}"
+
+
+# -----------------------------------------------------
+# --------  App Transactional E-mail Settings  --------
+# -----------------------------------------------------
+
+# Emails are never directly sent from nodes, instead
+# you have to configure target SMTP server that will
+# messages will be relayed through local Postfix instance.
+# mageops_app_email_smtp_relay_host:
+# mageops_app_email_smtp_relay_user:
+# mageops_app_email_smtp_relay_pass:
+mageops_app_email_smtp_relay_port: 587
+
+
+# ---------------------------
+# --------  Magento  --------
+# ---------------------------
+
+magento_hostname: "{{ magento_base_url|urlsplit('hostname') }}"
+
+magento_version: "2.3"
+
+magento_mode: "{{ mage_mode|default('production') }}"
+
+# This var should point to the final directory where the
+# live application lives (latest, running sources)
+magento_live_release_dir: "{{ mageops_app_web_dir }}/current"
+
+magento_user: "{{ mageops_app_user }}"
+magento_group: "{{ mageops_app_group }}"
+magento_uid: "{{ mageops_app_uid }}"
+magento_gid: "{{ mageops_app_gid }}"
+
+magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
+
+# ----------------------------------------------------------
+# --------  Magento Project Specific Configuration  --------
+# ----------------------------------------------------------
+
+# - This will be usually set in project's vars...
+
+# magento_bounce_email_address:
+magento_language: en_US
+magento_currency: EUR
+# magento_crypt_key:
+# magento_admin_user_username:
+# magento_admin_user_password:
+magento_admin_path: mgsadmin
+magento_admin_user_email: admin@magesuite.io
+magento_admin_user_firstname: Mage
+magento_admin_user_lastname: Suite
+# magento_base_url:
+
+# Path to node warmup script executed at instance start relative to magento app root dir - never need to override...
+magento_node_warmup_script_path: /bin/node-warmup.sh
+
+# ------------------------------
+# --------  Magento SCD --------
+# ------------------------------
+
+magento_scd_advanced_js_bundling: no
+
+
+# --------------------------------
+# --------  Magento Cron  --------
+# --------------------------------
+
+magento_cron_user: "{{ mageops_app_id }}"
+# magento_cron_password:
+
+magento_cron_disabled: no
+magento_cron_observer_relative_path: vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
+
+
+# ----------------------------------
+# --------  Magento Deploy  --------
+# ----------------------------------
+
+
+# Magento commands that should be always executed as the last post-deploy step
+# on one of the *new* web-nodes (created from the AMI being deployed).
+magento_post_deploy_commands_basic:
+  # Flush the full_page cache in case old page version got cached in varnish
+  # between last flush and new nodes going up.
+  - "bin/magento cache:flush full_page"
+
+# Use this variable to define custom per-project commands
+magento_post_deploy_commands_custom: []
+
+# Do not change this undless you want to get rid of the basic ones (never)
+magento_post_deploy_commands: "{{ magento_post_deploy_commands_basic + magento_post_deploy_commands_custom }}"
+
+
+
+# ----------------------------------
+# --------  Magento Import  --------
+# ----------------------------------
+
+# Whether to enable import dispatcher supervisor job
+magento_import_dispatcher_enable: no
+
+# Absolute path to import dispatcher script - never change this!
+magento_import_dispatcher_switch_script_path: /usr/bin/import_dispatcher_switch
+
+# Whether to automatically create/destroy extra instance for handling imports (AWS)
+magento_aws_ondemand_import_instance_enable: "{{ ondemand_import_instance_enable|default(false) }}"
+
+
+# ---------------------------------------------
+# --------  Magento Queues / RabbitMQ  --------
+# ---------------------------------------------
+
+# Whether to use rabbitmq for magento queues
+magento_rabbitmq_queue: no
+
+# This is kind of a "namespace" that can be used to separate multiple apps on one RMQ instance
+# More information: https://www.rabbitmq.com/vhosts.html
+magento_rabbitmq_virtual_host: "/{{ mageops_app_id }}"
+
+# Username
+magento_rabbitmq_username: "{{ mageops_app_id }}"
+
+# This should be "no" for production as we want to get 404
+# if the requested version does not exist on current node
+# to prevent caching old assets when old nodes are still
+# active during deploy.
+magento_nginx_rewrite_static_assets_version: "{{ nginx_magento_static_version_rewrite|default(false) }}"
+
+
+# ----------------------------------------------
+# --------  Magento Core Configuration  --------
+# ----------------------------------------------
+
+# Core config default settings that can be customized per-project
+magento_core_config_enable_redirect_to_base: no
+magento_core_config_cron_use_separate_process_for_default_group: yes
+magento_core_config_cron_use_separate_process_for_index_group: yes
+magento_core_config_cron_use_separate_process_for_yotpo_yotpo_group: no
+magento_core_config_cron_use_separate_process_for_scconnector_group: no
+magento_core_config_cron_use_separate_process_for_consumers_group: no
+magento_core_config_cron_use_separate_process_for_ddg_automation_group: no
+
+# Default core config settings set on deploy
+magento_core_config_settings_default:
+  - name: Enable Varnish
+    path: "system/full_page_cache/caching_application"
+    value: '2'
+
+  - name: Set Elasticsuite prefix
+    path: "smile_elasticsuite_core_base_settings/indices_settings/alias"
+    value: "{{ mageops_app_name }}"
+
+  - name: Set redirect to base
+    path: "web/url/redirect_to_base"
+    # Magento config values: 0 - disabled, 1 - 302 redirect, 301 - 301 redirect
+    value: "{{ '1' if magento_core_config_enable_redirect_to_base | int == 302 else magento_core_config_enable_redirect_to_base | int | string }}"
+
+  - name: Separate process for default cronjob group
+    path: "system/cron/default/use_separate_process"
+    value: "{{ magento_core_config_cron_use_separate_process_for_default_group | ternary(1, 0) | string }}"
+
+  - name: Separate process for index cronjob group
+    path: "system/cron/index/use_separate_process"
+    value: "{{ magento_core_config_cron_use_separate_process_for_index_group | ternary(1, 0) | string }}"
+
+  - name: Separate process for yotpo_yotpo cronjob group
+    path: "system/cron/yotpo_yotpo/use_separate_process"
+    value: "{{ magento_core_config_cron_use_separate_process_for_yotpo_yotpo_group | ternary(1, 0) | string }}"
+
+  - name: Separate process for scconnector cronjob group
+    path: "system/cron/scconnector/use_separate_process"
+    value: "{{ magento_core_config_cron_use_separate_process_for_scconnector_group | ternary(1, 0) | string }}"
+
+  - name: Separate process for consumers cronjob group
+    path: "system/cron/consumers/use_separate_process"
+    value: "{{ magento_core_config_cron_use_separate_process_for_consumers_group | ternary(1, 0) | string }}"
+
+  - name: Separate process for ddg_automation cronjob group
+    path: "system/cron/ddg_automation/use_separate_process"
+    value: "{{ magento_core_config_cron_use_separate_process_for_ddg_automation_group | ternary(1, 0) | string }}"
+
+  - name: Set password for fake warmup customers
+    path: "cache_warmer/general/password"
+    value: "{{ magento_page_cache_warmer_fake_account_password }}"
+
+  - name: Set e-mail host prefix for fake warmup customers
+    path: "cache_warmer/general/domain"
+    value: "{{ magento_page_cache_warmer_fake_account_email_host }}"
+
+  - name: Set default request concurrency for warmup crawler
+    path: "cache_warmer_crawler/general/default_concurrency"
+    value: "{{ magento_page_cache_warmer_concurrency | string }}"
+
+  - name: Set target TTFB for warmup crawler
+    path: "cache_warmer_crawler/general/default_target_ttfb"
+    value: "{{ magento_page_cache_warmer_target_ttfb | string }}"
+
+  # Automatically set cloudfront domain for static / media URLs
+  # If cloudfront domain aliases are configured this setting
+  # will be processed in "default" mode - it will not be updated
+  # if it is already set.
+  - name: Set secure media url to cloudfront domain
+    path: "web/secure/base_media_url"
+    value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
+    default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
+    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+
+  - name: Set secure static url to cloudfront domain
+    path: "web/secure/base_static_url"
+    value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
+    default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
+    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+
+  - name: Set unsecure media url to cloudfront domain
+    path: "web/secure/base_media_url"
+    value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
+    default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
+    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+
+  - name: Set unsecure static url to cloudfront domain
+    path: "web/secure/base_static_url"
+    value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
+    default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
+    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+
+
+# Extra core config settings to be set at deploy,
+# see roles/cs.magento-configure/tasks/080-configure-integrations.yml
+magento_core_config_settings_extra: []
+
+# Settings to remove by default
+magento_core_config_settings_to_remove_default:
+  - "smile_elasticsuite_core_base_settings/es_client/servers"
+
+
+# ----------------------------------------
+# --------  Magento - PHP Limits  --------
+# ----------------------------------------
+
+# - For even more options see `php_http_request_memory_limit` and `php_http_request_limits_custom` vars.
+
+# Settings to remove - customizable locally for project
+magento_core_config_settings_to_remove_extra: []
+
+# You can adjust the parameters for API request
+magento_api_request_php_memory_limit: "{{ php_http_request_memory_limit }}"
+magento_api_request_php_max_execution_time: "{{ php_http_request_max_execution_time }}"
+
+# Separate limits for admin URLs
+magento_admin_request_php_memory_limit: "{{ php_http_request_memory_limit }}"
+magento_admin_request_php_max_execution_time: 300
+
+# You can adjust the parameters for cron request
+# Warning - this does not affect separate cron processes
+magento_cron_request_php_memory_limit: "{{ php_http_request_memory_limit }}"
+magento_cron_request_php_max_execution_time: "{{ php_http_request_max_execution_time }}"
+
+
+# ---------------------------------------------
+# --------  Magento Page Cache Warmer  --------
+# ---------------------------------------------
+
+# Enable it?
+magento_page_cache_warmer_enable: no
+
+# Requests made by crawler simulatenously; this param will be throttled first
+magento_page_cache_warmer_concurrency: 4
+
+# Target time to first byte (in seconds), above this threshold crawler will start throttling
+magento_page_cache_warmer_target_ttfb: 3
+
+# Shared password for fake user accounts used to warm-up pages for each customer-group.
+# Shall be unique per deployment, we reuse the crypt key and hash it just so it cannot be reversed.
+magento_page_cache_warmer_fake_account_email_host: "{{ magento_hostname }}"
+magento_page_cache_warmer_fake_account_password: "{{ (magento_page_cache_warmer_fake_account_email_host ~ magento_crypt_key)|hash('sha1') }}"
+
+# -------------------------------------------------------------
+# --------  Magento S3 mounts and buckets  --------
+# -------------------------------------------------------------
+
+# Any extra buckets you want for you app
+magento_s3fs_buckets_extra: []
+
+# -------------------------------------------------------------
+# --------  Magento Import/Export AWS EFS file shares  --------
+# -------------------------------------------------------------
+
+# WARNING! Do not mount efs in a directory that has symlink in any part of the path!
+# The symlink will be dereferenced in fstab config - this will cause the mount
+# to be duplicated with every deploy without clean_install!
+magento_efs_import_data_remote_path: "/import"
+magento_efs_export_data_remote_path: "/export"
+magento_efs_publicly_shared_remote_path: "/pub/shared"
+
+magento_efs_import_data_app_path: "{{ mageops_app_web_dir }}/shared/var/import"
+magento_efs_export_data_app_path: "{{ mageops_app_web_dir }}/shared/var/export"
+magento_efs_publicly_shared_app_path: "{{ mageops_app_web_dir }}/shared/pub/shared"
+
+# EFS resource name
+magento_efs_app_node_name: "{{ mageops_app_name }}-app-shared"
+
+# Use this to set up app additional instance mounts per-project
+mageops_efs_app_node_mounts: []
+
+# ---------------------------------------
+# --------  Magento SFTP Access  --------
+# ---------------------------------------
+
+# Clients can access the SSH/SFTP account using Persistent Node as gateway
+sftp_access_enabled: no
+
+# SFTP User Account
+sftp_user: sftp
+
+# Warning - this is kind of a hack to allow file access between app/persistent!
+# We may use idmapping sometime in the future, for now EFS disabled it by default
+# - there's also no way to configure `all_squash` for an EFS share.
+sftp_user_uid: "{{ magento_uid }}"
+sftp_user_home: "/home/{{ sftp_user }}"
+
+# Legacy var name that is still used in project cfgs
+sftp_home: "{{ sftp_user_home }}"
+
+# Set this in project config to the keys of your choice
+mageops_sftp_ssh_keys: []
+
+# EFS -> SFTP mounts can be configured per project here
+sftp_efs_mounts_project: "{{ sftp_efs_mounts|default([]) }}"
+
+# Magento Import/Export
+magento_sftp_import_data_path: "{{ sftp_user_home }}/import"
+magento_sftp_export_data_path: "{{ sftp_user_home }}/export"
+
+# Basic mounts should stay here, for per project configuration change `mageops_sftp_mounts`!
+magento_sftp_basic_efs_mounts:
+    - local_mountpoint: "{{ magento_sftp_export_data_path }}"
+      remote_path: "{{ magento_efs_export_data_remote_path }}"
+      owner: "{{ sftp_user }}"
+      group: "{{ sftp_user }}"
+    - local_mountpoint: "{{ magento_sftp_import_data_path }}"
+      remote_path: "{{ magento_efs_import_data_remote_path }}"
+      owner: "{{ sftp_user }}"
+      group: "{{ sftp_user }}"
+
+# Custom mounts to set per project
+magento_efs_app_node_mounts: []
+
+
+# -----------------------
+# --------  PHP  --------
+# -----------------------
+
+php_version: 7.2
+php_packages:
+  - php-cli
+  - php-common
+  - php-pdo
+  - php-json
+  - php-intl
+  - php-curl
+  - php-mysqlnd
+  - php-pecl-apcu-bc
+  - php-pecl-redis
+  - php-gd
+  - php-mcrypt
+  - php-imagick
+  - php-xml
+  - php-pecl-zip
+  - php-opcache
+  - php-mbstring
+  - php-bcmath
+  - php-soap
+
+php_conf_fragment_dir_path: "/etc/php.d"
+
+php_fpm_run_dir_path: "/var/run/php-fpm"
+php_fpm_log_dir_path: "/var/log/php-fpm"
+
+php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
+php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ mageops_app_type|default('app') }}.sock"
+php_fpm_service: php-fpm
+
+php_date_timezone: "{{ mageops_timezone }}"
+php_memory_limit: "-1"
+
+# This value is unlimited (0) for CLI by default, not matter the php.ini setting!
+php_max_execution_time: "600"
+php_max_input_time: "600"
+php_max_input_vars: "2000"
+php_realpath_cache_size: "4M"
+php_realpath_cache_ttl: "3600"
+php_upload_max_filesize: "64M"
+php_post_max_size: "32M"
+php_session_name: "PHPSESSID"
+
+# Parameters overriden in nginx FCGI config (valid for HTTP requests)
+php_http_request_memory_limit: "256M"
+php_http_request_max_execution_time: "60"
+# Custom memory/max exec time limits per request path pattern.
+# You can customize this var per environment.
+# Example (`name` is optional):
+#
+# php_http_request_limits_custom:
+#     - name: "Cleverreach scripts execute longer, so give the more"
+#       path_pattern: '^/cleverreach/.*$'
+#       memory_limit: 512M
+#       max_execution_time: 3600
+php_http_request_limits_custom: []
+
+# OpCache settings
+php_opcache_enable: 1
+php_opcache_memory_consumption: "256"
+php_opcache_interned_strings_buffer: "16"
+php_opcache_max_accelerated_files: "65406"
+php_opcache_max_wasted_percentage: "5"
+php_opcache_validate_timestamps: "0"
+php_opcache_revalidate_path: "0"
+php_opcache_revalidate_freq: "2"
+php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.blacklist"
+
+
+# Whether to enable file-based opcache for CLI commands
+php_cli_opcache_file_cache_enable: no
+
+
+# ---------------------------
+# --------  PHP FPM  --------
+# ---------------------------
+
+php_fpm_pm_type: static
+php_fpm_pm_max_children: 4
+php_fpm_pm_max_requests: 100
+
+# -----------------------------
+# --------  Blackfire  --------
+# -----------------------------
+
+# Credentials for setting up Blackfire tools, used only if `mageops_install_development_tools` is enabled
+blackfire_server_id:
+blackfire_server_token:
+blackfire_install: "{{ mageops_install_development_tools }}"
+
+
+# -------------------------
+# --------  nginx  --------
+# -------------------------
+
+nginx_version: "1.10.3"
+nginx_user: "nginx"
+nginx_group: "nginx"
+
+nginx_worker_processes: "{{ ansible_processor_vcpus|default(ansible_processor_count + 1) }}"
+nginx_worker_connections: "1024"
+
+nginx_multi_accept: "off"
+
+nginx_www_dir: "/var/www"
+nginx_etc_dir: "/etc/nginx"
+nginx_log_dir: "/var/log/nginx"
+nginx_confd_dir: "{{ nginx_etc_dir }}/conf.d"
+
+nginx_error_log: "{{ nginx_log_dir }}/error.log warn"
+nginx_access_log: "{{ nginx_log_dir }}/access.log main buffer=16k"
+
+nginx_cron_htpasswd_file: "{{ nginx_etc_dir }}/htpasswd"
+nginx_site_htpasswd_file: "{{ nginx_etc_dir }}/sitepasswd"
+
+nginx_app_port: "{{ mageops_varnish_backend_port }}"
+nginx_fcgi_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}s"
+nginx_fcgi_connect_timeout: "5s"
+
+# List of nginx request path patterns to block completely by default
+# (See: `cs.nginx-url-blacklist` role)
+# --
+# These are actually nginx regex patterns, so be careful and take advantage of this!
+# --
+# Note: If using varnish-as-loadbalancer this blocking will be added to front-facing
+# https-termination nginx running on varnish node. If AWS load-balancer is used then
+# this will be configured on local nginx running on each web-node.
+nginx_blacklist_urls_default:
+  # Just for testing purposes and to see if blacklist is enabled. Later we can even
+  # automate this kind of feature checks for auditing old environments.
+  - "^/cs-mageops/features/blacklisted-url/.*$"
+  # This is a joomla URL, not handled by Magento at all but it causes OOM crashes
+  # every time and it's not worth the time to debug any more - strange behaviour
+  # preventing blackfire from working properly.
+  - "option=com_user&task=register"
+
+# Project specific URls to block
+nginx_blacklist_urls_project: []
+
+# You can change the default response code returned for blacklisted urls
+# nginx_blacklist_urls_response_code: 410
+
+# Nginx variable name used for the final check
+nginx_blacklist_map_variable_name: "magento_blacklisted_url"
+
+# Path to the url blacklist pattern definition map
+nginx_blacklist_map_config_file: "{{ nginx_confd_dir }}/000-magento-url-blacklist-map.conf"
+
+# Path to the partial nginx config to be included in vhost
+nginx_blacklist_vhost_check_config_file: "{{ nginx_etc_dir }}/magento_url_blacklist_check"
+
+
+
+# ---------------------------------
+# --------  Elasticsearch  --------
+# ---------------------------------
+
+# Install elasticsearch 6.x as this is the latest version fully supported by
+# ElasticSuite. There's already 7.x though...
+repo_elasticsearch_variants_enabled: ['6']
+
+elasticsearch_cluster_name: "{{ mageops_app_id }}"
+elasticsearch_node_name: master
+
+elasticsearch_http_port: 9200
+elasticsearch_transport_tcp_port: 9300
+elasticsearch_heap_size: "{{ es_heap_size|default((ansible_memtotal_mb / 2)|int ~ 'm') }}"
+elasticsearch_plugins:
+    - analysis-icu
+    - analysis-phonetic
+
+
+
+
+# -------------------------
+# --------  Redis  --------
+# -------------------------
+
+redis_databases: 4
+
+# These are default redis settings, used for the base cache instance
+redis_bind_interface: 0.0.0.0
+redis_maxmemory_policy: allkeys-lru
+redis_maxmemory: 200M
+redis_persistence_enable: no # We don't need to persist magento cache
+
+# Sessions redis instance settings, rest inherited from base
+redis_sessions_maxmemory_policy: noeviction
+redis_sessions_maxmemory: 100M
+redis_sessions_persistence_enable: yes
+
+# Use AWS Elasticache instead install own one - this options are currently dead/unused
+redis_aws_elasticache_use: no
+redis_aws_elasticache_instance_type: t3a.micro
+
+# ------------------------------------------------
+# --------  HTTPS Terminating Web Server  --------
+# ------------------------------------------------
+
+mageops_https_termination_enable: "{{ mageops_https_enable }}"
+
+https_termination_proxy_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
+
+# Special logging setup for requests for cacheable HTML pages which were a cache MISS
+https_termination_page_cache_misses_logging: yes
+https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-cache-misses.json.log"
+
+
+# ---------------------------
+# --------  Varnish  --------
+# ---------------------------
+
+repo_varnish_variants_enabled: ['60lts']
+
+varnish_instances_aws_tags: "{{ aws_tags_base | combine(aws_tags_node_varnish) }}"
+varnish_backend_instances_aws_tags: "{{ aws_tags_base | combine(aws_tags_node_app) }}"
+varnish_extra_instances_aws_tags: "{{ aws_tags_base | combine(aws_tags_node_extra_app) }}"
+
+varnish_manager_user: "varnish-manager"
+varnish_manager_group: "{{ varnish_manager_user }}"
+varnish_manager_ssh_key_filename: varnish/sesame
+
+# TODO: We can come up with a single var describing all varnish use-cases and set these
+# ones automatically. This is too complicated with 3 freely-editable variables.
+#
+# Let's say just `varnish_as_loadbalancer` is usually changed:
+#
+# 1) varnish_as_loadbalancer: yes, varnish_standalone: yes, https_termination: yes
+#    Standard setup with dedicated varnish node with nginx as HTTPS terminator
+#    directly handling external traffic.
+#
+# 2) varnish_as_loadbalancer: yes, varnish_standalone: yes, https_termination: no
+#    Almost not used, doesn't make much sense. A standalone "naked" varnish instance
+#    which handles traffic coming from the ELB (which does HTTPS termination).
+#
+# 3) varnish_as_loadbalancer: no, varnish_standalone: no, https_termination: no
+#
+# ... TBC
+
+# Is varnish hosted on a separate, dedicated node?
+varnish_standalone: yes
+
+# Shall standalone varnish instance be used as a loadbalancer (instead of AWS ELB)?
+varnish_as_loadbalancer: "{{ varnish_standalone and mageops_https_termination_enable }}"
+
+# Is varnish being autoscaled along with the app nodes (residing on each one)?
+varnish_is_in_autoscaling_group: no
+
+varnish_backend_max_conns: "{{ (php_fpm_pm_max_children * 50)|int }}"
+varnish_backend_first_byte_timeout: "{{ mageops_http_pipeline_request_timeout_override }}s"
+varnish_backends_vcl: /etc/varnish/backends.vcl
+varnish_backend_probe_endpoint: /WARMUP
+
+# Changing varnish user/groups names will have no effect on actual ones
+# - these variables are here only to avoid hardcoding values
+varnish_user: "varnish"
+varnish_group: "varnish"
+varnish_log_user: "varnishlog"
+varnish_log_dir: /var/log/varnish
+
+# We already have nginx access log on this node
+varnish_ncsa_logging: no
+
+# If enabled then Magento PURGE requests to varnish will be logged
+varnish_purge_logging: yes
+varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
+
+# Error page customization
+varnish_error_page_color_primary: "#444"
+
+# Max-age (in seconds) returned in Cache-Control header for HTML pages
+# (this header is rewritted by varnish as magento sets it unappropriately)
+varnish_html_cache_control_max_age: 60
+varnish_strip_google_gclid_params: yes
+
+
+# ----------------------------------------------------------
+# --------  Varnish Language Detection & Redirects  --------
+# ----------------------------------------------------------
+
+# If non-empty then language redirects on varnish level are enabled
+# This should be an array mapping urls (without http(s):// prefix!)  to list of supported locales, ex:
+#
+# _Mind the trailing slashes!_
+#
+# varnish_lang_redirects:
+#   "my-shop.com/": [en, en-GB]
+#   "my-shop.pl/": [pl, pl-PL]
+#   "my-shop.com/fr/": [fr, fr-FR, fr-CH]
+#   "de.my-shop.com/": [de, de-DE, de-CH]
+#
+# WARNING! The redirect work only on homepage - bare host with `/` path. This means that you will be never
+# redirected from urls like `my-shop.com/gb/`.
+varnish_lang_redirects: []
+varnish_lang_redirect_only_on_initial_visit: yes
+
+
+# -----------------------------------------------
+# --------  Network Security / Firewall  --------
+# -----------------------------------------------
+
+# Firewall settings for noaws nodes
+firewall_enable: yes
+
+firewall_restrict_to_trusted_public_ips: "{{ mageops_trusted_cidr_blocks }}"
+firewall_internal_group: all
+firewall_internal_services:
+    - mysql
+
+firewall_internal_ports:
+    - "{{ elasticsearch_http_port }}/tcp"
+    - "{{ elasticsearch_transport_tcp_port }}/tcp"
+    - "{{ mageops_redis_port }}/tcp"
+firewall_public_services:
+    - http
+    - https
+
+
+# -------------------------------
+# --------  Supervisord  --------
+# -------------------------------
+
+mageops_supervisor_programs_app_node: []
+
+
+# ----------------------------------
+# --------  AWS Cloudfront  --------
+# ----------------------------------
+
+# Create CloudFront distribution?
+aws_cloudfront_distribution_create: yes
+
+# Whether to enable Cloudfront
+aws_cloudfront_optimizing_edge_lambda_enable: yes
+
+
+# ------------------------------------------------
+# --------  Goaccess Access Log Analysis  --------
+# ------------------------------------------------
+
+goaccess_report_dir: "{{ nginx_www_dir }}/goaccess"
+goaccess_vhost_port: 6162
+goaccess_enable: no
+
+
+# ----------------------------
+# --------  RabbitMQ  --------
+# ----------------------------
+
+# Whether to install RabbitMQ on persistent node or not
+mageops_rabbitmq_create: "{{ magento_rabbitmq_queue }}"
+
+# Default AMQP port - this is the only port used by magento
+rabbitmq_amqp_port: 5672
+
+# This port will provide an HTTP API and management UI
+# - might be useful for debugging and will be accessible from `mageops_trusted_cidr_blocks`
+rabbitmq_http_port: 15672
+
+# --------------------------
+# --------  Deploy  --------
+# --------------------------
+
+# Skip installation of new artifact, just reprovision the app node
+# This option is ignored if no release is present yet (fresh server/ami)
+
+deploy_skip_installation: no
+deploy_artifact_local_path: "./artifacts"
+
+deploy_rsync_excludes_basic:
+  - "*.sample"
+  - ".git"
+  - "/phpserver"
+  - "hacks"
+  - "*.md"
+  - "/build"
+  - "/dev"
+  - "/var/log/*"
+  - "/var/generation/*"
+  - "/generated/*"
+  - "/pub/media"
+
+# Extra excludes to set per project
+deploy_rsync_excludes_extra: []
+
+# Extra dirs that will be shared across releases
+deploy_shared_dirs_extra: []
+
+# --------------------------------------
+# --------  System Maintenance  --------
+# --------------------------------------
+
+# Whether to install and enable the earlyoom daemon
+mageops_earlyoom_enable: yes
+
+earlyoom_ram_min_percent: 7
+earlyoom_swap_min_percent: 40
+
+# ----------------------------
+# --------  Packages  --------
+# ----------------------------
+
+# Whether to perform full update
+mageops_packages_full_update: yes
+
+# Packages that are ensured to be absent on all nodes
+mageops_packages_mirrorlist_countrycode: "de"
+
+# Banned packages which shall be always removed
+mageops_packages_banned:
+  - sendmail
+
+# Basic packages needed for ansible/provisioning
+mageops_packages_base:
+  - python
+  - python2-pip
+  - python36-mysql
+  - MySQL-python
+  - unzip
+  - yum-utils
+  - git
+  - rsync
+  - jq
+  - curl
+  - wget
+
+# Handy tools for interactive users
+mageops_packages_tools:
+  - psmisc
+  - nano
+  - mc
+  - vim
+
+# Ops tools
+mageops_packages_ops:
+  - htop
+  - iotop
+  - sysstat
+  - strace
+  - nmap
+  - nc
+  - socat
+  - gdb
+  - bind-utils
+  - goaccess
+  - atop
+
+# Handy packages installed on all nodes by default
+mageops_packages_common: "{{ mageops_packages_base + mageops_packages_tools + mageops_packages_ops }}"
+
+# Packages specific to web nodes
+mageops_packages_app_node:
+  - lftp
+  - pngquant
+  - libjpeg-turbo
+  - libjpeg-turbo-devel
+  - libjpeg-turbo-static
+  - libjpeg-turbo-utils
+  - optipng
+  - gifsicle
+  - mysql
+  - jpegoptim
+
+# Any extra packages needed on webnode to be customized per-project
+# The default is there to preserve backwards-compat with old name
+mageops_packages_app_node_extra: []
+
+# Packages specific to the persistent node
+mageops_packages_persistent: []
+
+# Extra packages for persistent nodes to be customized per-project
+mageops_packages_persistent_extra: []
+
+# Packages specific to varnish node
+mageops_packages_varnish: []
+
+# Extra packages for varnish nodes to be customized per-project
+mageops_packages_varnish_extra: []
+
+# Set highest priority for mageops repo
+mageops_repo_priority: 1
+
+# Pass environment package configuration into `cs.packages` role vars
+packages_full_update: "{{ mageops_packages_full_update }}"
+packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode }}"
+packages_remove: "{{ mageops_packages_banned }}"
+
+
+# ------------------------------
+# --------  Time / NTP  --------
+# ------------------------------
+
+# Variable alias for passing this data into external NTP role
+ntp_timezone: "{{ mageops_timezone }}"
+
+
+# -------------------------------------------------
+# --------  Notifications Common Settings  --------
+# -------------------------------------------------
+
+mageops_notifications_slack_channel: "#mage-errors"

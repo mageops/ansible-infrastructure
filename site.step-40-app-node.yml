@@ -1,0 +1,124 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: app:&current:!immutable
+  gather_facts: no
+  pre_tasks:
+    - name: Wait for builder's SSH to become available
+      wait_for_connection: ~
+
+    - name: Gather facts for first time
+      setup: ~
+
+  roles:
+    - role: cs.aws-node-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+
+    - role: cs.aws-rds-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+
+    - role: pinkeen.selinux-disable
+
+    - role: cs.swap
+
+    - role: cs.earlyoom
+      when: mageops_earlyoom_enable
+
+    - role: cs.provisioning-migrations
+
+    - role: cs.packages
+      packages_install: "{{ mageops_packages_common + mageops_packages_app_node + mageops_packages_app_node_extra }}"
+
+    - role: cs.mageops-cli-profile
+
+    - role: cs.mageops-cli-user
+      mageops_cli_user: root
+      mageops_cli_user_bashrc_fragments:
+        - magento-root
+
+    - role: cs.mageops-cli-user
+      mageops_cli_user: "{{ magento_user }}"
+      mageops_cli_user_group: "{{ magento_group }}"
+      mageops_cli_user_uid: "{{ magento_uid }}"
+      mageops_cli_user_gid: "{{ magento_gid }}"
+      mageops_cli_user_bashrc_fragments:
+        - magento
+
+    - role: cs.mageops-authorize-keys
+      mageops_ssh_authorize_app: yes
+
+    - role: cs.aws-cli
+      when: aws_use
+
+    - role: cs.cron
+
+    - role: geerlingguy.ntp
+
+    - role: cs.supervisor
+      supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"
+
+    - role: cs.nginx-url-blacklist
+
+    - role: cs.nginx
+
+    - role: cs.nginx-magento
+      nginx_secure_cron_user: "{{ magento_cron_user }}"
+      nginx_secure_cron_password: "{{ magento_cron_password }}"
+      nginx_secure_site: "{{ mageops_secure_site and not varnish_standalone }}"
+      nginx_secure_site_user: "{{ mageops_secure_site_user }}"
+      nginx_secure_site_password: "{{ mageops_secure_site_password }}"
+      nginx_app_root_dir: "{{ magento_live_release_dir }}"
+      nginx_blacklist_urls: "{{ mageops_app_node_https_termination_enable | ternary([], mageops_app_node_nginx_blacklist_urls) }}"
+      nginx_fcgi_backend_socket: "{{ php_fpm_pool_fcgi_socket_path }}"
+
+    - role: cs.nginx-https-termination
+      when: mageops_app_node_https_termination_enable
+      nginx_blacklist_urls: "{{ mageops_app_node_https_termination_enable | ternary(mageops_app_node_nginx_blacklist_urls, []) }}"
+
+    - role: cs.php-fpm
+      tags: php
+      php_fpm_pool_user: "{{ magento_user }}"
+      php_fpm_pool_group: "{{ magento_group }}"
+      php_fpm_terminate_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
+
+    - role: cs.varnish
+      when: not varnish_standalone
+
+    - role: cs.blackfire
+      when: blackfire_install
+
+    - role: cs.s3-fuse-s3fs
+      when: aws_use and not s3fs_mount_use_goofys | default(false)
+    - role: cs.s3-fuse-goofys
+      when: aws_use and s3fs_mount_use_goofys | default(false)
+
+    - role: pinkeen.postfix
+
+    - role: pinkeen.postfix-relay
+      postfix_relay_host: "{{ mageops_app_email_smtp_relay_host }}"
+      postfix_relay_username: "{{ mageops_app_email_smtp_relay_user }}"
+      postfix_relay_password: "{{ mageops_app_email_smtp_relay_pass }}"
+      postfix_relay_port: "{{ mageops_app_email_smtp_relay_port }}"
+
+    - role: cs.magento-postfix
+
+    - role: cs.aws-logs
+      aws_logs_stream_name: app
+      aws_logs_loggers: "{{ aws_logs_loggers_app_default | combine(aws_logs_loggers_app_extra | default({}), recursive=True) }}"
+      when: aws_use
+
+    - role: cs.mageops-cli-profile
+
+  tasks:
+    - include_tasks: "{{ extra_tasks_webnode }}"
+      when: extra_tasks_webnode is defined
+
+  vars:
+    mageops_node_role: app
+    mageops_app_node_nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
+    mageops_app_node_https_termination_enable: "{{ mageops_https_termination_enable and not varnish_standalone }}"

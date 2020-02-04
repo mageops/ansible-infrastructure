@@ -1,0 +1,28 @@
+if ((resp.status == 301 || resp.status == 302) && req.http.location) {
+    set resp.http.location = req.http.location;
+    set resp.http.set-cookie = "vrredir=" + req.http.location + "; Secure";
+    return (deliver);
+}
+
+if (resp.status == 502 || resp.status == 503 || resp.status == 504) {
+    synthetic(std.fileread("/etc/varnish/error" + resp.status + ".html"));
+    set resp.http.Cache-Control = "no-cache, no-store, must-revalidate";
+    set resp.http.Pragma = "no-cache";
+    set resp.http.Expires = "0";
+    return (deliver);
+}
+
+{% if varnish_secure_site %}
+    if (resp.status == 401) {
+        synthetic(std.fileread("/etc/varnish/error401.html"));
+
+        set resp.http.Content-Type = "text/html; charset=utf-8";
+        set resp.http.WWW-Authenticate = "Basic realm=Secured";
+
+        return (deliver);
+    }
+{% endif %}
+
+{% if varnish_throttling_enabled %}
+    {% include "vcl/subroutines/synth_throttling.vcl.j2" %}
+{% endif %}

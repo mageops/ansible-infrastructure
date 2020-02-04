@@ -1,0 +1,3 @@
+upstream fastcgi_backend {
+    server unix:{{ nginx_fcgi_backend_socket }};
+}

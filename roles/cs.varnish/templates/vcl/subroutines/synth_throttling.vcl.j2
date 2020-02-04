@@ -1,0 +1,7 @@
+if (resp.status == 429) {
+    synthetic(std.fileread("/etc/varnish/error429.html"));
+
+    set resp.http.Retry-After = "10";
+
+    return (deliver);
+}

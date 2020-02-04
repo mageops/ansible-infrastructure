@@ -1,0 +1,158 @@
+- name: Install python modules
+  pip:
+    name: pyOpenSSL
+    state: present
+
+- name: Create main private key
+  openssl_privatekey:
+    path: "{{ https_termination_letsencrypt_privkey_path }}"
+    type: RSA
+
+- name: Create host private keys
+  openssl_privatekey:
+    path: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
+    type: RSA
+  when: item.letsencrypt | default(False)
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.server_name }}"
+
+- name: Create CSR for each host
+  openssl_csr:
+    path: "{{ https_termination_csr_dir }}/{{ item.name }}.csr"
+    privatekey_path: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
+    common_name: "{{ item.server_name }}"
+    subject_alt_name: "{{ item.aliases | default([])|map('regex_replace', '^', 'DNS:')|list }}"
+    subject_alt_name_critical: yes
+  when: item.letsencrypt | default(False)
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.server_name }}"
+  register: https_termination_csrs
+
+- name: Check if any cert exists
+  stat:
+    path: "{{ https_termination_certificate_dir }}/{{ item.name }}.cer"
+  when: item.letsencrypt | default(False)
+  with_items: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ item.server_name }}"
+  register: https_termination_certs_stat
+
+- name: Generate self-signed certificates for letsencrypt hosts so nginx properly reloads
+  openssl_certificate:
+    path: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
+    privatekey_path: "{{ https_termination_letsencrypt_privkey_path }}"
+    csr_path: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
+    provider: selfsigned
+  when: item[0].letsencrypt | default(False) and not item[1].stat.exists | default(False)
+  register: https_termination_generated_selfsigned
+  with_together:
+    - "{{ https_termination_hosts }}"
+    - "{{ https_termination_certs_stat.results }}"
+  loop_control:
+    label: "{{ item[0].server_name }}"
+  
+- name: Reload nginx immediately for the letsencrypt stage so acme challenge dirs are available
+  service:
+    name: nginx
+    state: reloaded
+  when: https_termination_vhost_config is changed or https_termination_generated_selfsigned is changed
+
+- name: Remove self-signed certs so letsencrypt can do it's work
+  file:
+    path: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
+    state: absent
+  when: item[0].letsencrypt | default(False) and not item[1].stat.exists | default(False)
+  with_together:
+    - "{{ https_termination_hosts }}"
+    - "{{ https_termination_certs_stat.results }}"
+  loop_control:
+    label: "{{ item[0].server_name }}"
+
+    
+- name: Initiate ACME validation
+  acme_certificate:
+    acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
+    account_key: "{{ https_termination_letsencrypt_privkey_path }}"
+    csr: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
+    dest: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
+    challenge: http-01
+    # Force regeneration if CSR has changed
+    remaining_days: "{% if item[1] is changed %}99999{% else %}{{ https_termination_letsencrypt_remaining_days }}{% endif %}"
+    acme_version: 2
+    terms_agreed: yes
+  register: https_termination_acme
+  when: item[0].letsencrypt | default(False)
+  with_together:
+    - "{{ https_termination_hosts }}"
+    - "{{ https_termination_csrs.results }}"
+  loop_control:
+    label: "{{ item[0].server_name }}"
+
+- name: Loop over the list of challenges
+  set_fact:
+    data:
+        name: "{{ item[0].name }}"
+        challenges: "{{ item[1]['challenge_data'].values()|list }}"
+  when: item[0].letsencrypt | default(False) and item[1] is changed
+  with_together:
+    - "{{ https_termination_hosts }}"
+    - "{{ https_termination_acme.results }}"
+  loop_control:
+    label: "{{ item[0].server_name }}"
+  register: https_termination_challenge_loop
+
+- name: Create challenge list
+  set_fact:
+    # Once we have ansible 2.7+ the following can be simplified to `subelements` filter with skip missing
+    https_termination_challenges: "{{ https_termination_challenge_loop.results | selectattr('ansible_facts', 'defined')|map(attribute='ansible_facts.data')|list }}"
+  when: https_termination_acme is changed
+
+- name: Create challenge directories
+  file:
+    path: "{{ https_termination_letsencrypt_challenge_root }}/{{ item[0]['name'] }}/{{ item[1]['http-01']['resource']|dirname }}"
+    state: directory
+    mode: 0770
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_group }}"
+  with_subelements:
+    - "{{ https_termination_challenges }}"
+    - challenges
+  when: https_termination_acme is changed
+
+- name: Install challenge files
+  copy:
+    dest: "{{ https_termination_letsencrypt_challenge_root }}/{{ item[0]['name'] }}/{{ item[1]['http-01']['resource'] }}"
+    content: "{{ item[1]['http-01']['resource_value'] }}"
+    mode: 0770
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_group }}"
+  with_subelements:
+    - "{{ https_termination_challenges }}"
+    - challenges
+  when: https_termination_acme is changed
+
+- name: Get the certs
+  acme_certificate:
+    acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
+    account_key: "{{ https_termination_letsencrypt_privkey_path }}"
+    csr: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
+    fullchain_dest: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
+    challenge: http-01
+    # Force regeneration if CSR has changed
+    remaining_days: "{% if item[2] is changed %}99999{% else %}{{ https_termination_letsencrypt_remaining_days }}{% endif %}"
+    data: "{{ item[1] }}"
+    acme_version: 2
+    terms_agreed: yes
+  when: item[0].letsencrypt | default(False) and item[1] is changed
+  with_together:
+    - "{{ https_termination_hosts }}"
+    - "{{ https_termination_acme.results }}"
+    - "{{ https_termination_csrs.results }}"
+  loop_control:
+    label: "{{ item[0].server_name }}"
+  notify:
+    - reload httpd
+
+

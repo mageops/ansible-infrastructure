@@ -1,0 +1,26 @@
+fastcgi_param  PHP_VALUE        "memory_limit=${PHP_MEMORY_LIMIT} \n max_execution_time=${PHP_MAX_EXECUTION_TIME}";
+fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+fastcgi_param  PHP_IDE_CONFIG   serverName=$PROJ_NAME;
+fastcgi_param  MAGE_MODE        $MAGE_MODE;
+fastcgi_param  ORIGINAL_URI     $request_uri;
+fastcgi_param  REMOTE_PORT      $http_x_remote_port;
+fastcgi_param  HTTPS            "{{ mageops_https_enable | ternary('on', 'off') }}";
+
+{% if nginx_magento_run_type in ('store', 'website') %}
+fastcgi_param MAGE_RUN_CODE $MAGE_RUN_CODE;
+fastcgi_param MAGE_RUN_TYPE $MAGE_RUN_TYPE;
+{% endif %}
+
+fastcgi_read_timeout {{ nginx_fcgi_read_timeout }};
+fastcgi_connect_timeout {{ nginx_fcgi_connect_timeout }};
+
+fastcgi_buffers 256 16k;
+fastcgi_buffer_size 32k;
+
+{% if nginx_magento_fastci_params_extra | default(false, true) %}
+# --- START CUSTOM APPLICATION {{ mageops_app_name }} PARAMS ---
+
+{{ nginx_magento_fastci_params_extra }}
+
+# --- END CUSTOM APPLICATION {{ mageops_app_name }} PARAMS ---
+{% endif %}

@@ -1,0 +1,9 @@
+- name: Make bin files executable
+  file:
+    path: "{{ magento_release_dir }}/bin"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+    state: directory
+    recurse: yes
+    mode: 0770
+

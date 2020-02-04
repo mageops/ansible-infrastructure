@@ -1,0 +1,11 @@
+# Run this playbook with --ask-sudo-pass
+- hosts: "all"
+  become: yes
+  roles:
+    - role: cs.unison-guest
+
+- hosts: localhost
+  connection: local
+  gather_facts: yes
+  roles:
+    - role: cs.unison-host

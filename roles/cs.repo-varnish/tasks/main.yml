@@ -1,0 +1,17 @@
+- name: Ensure Varnish repo release package is installed and up-to-date
+  yum:
+    name: "{{ repo_varnish_package_name }}"
+
+- name: Ensure chosen varnish repo variants are enabled
+  ini_file:
+    state: present
+    create: no
+    path: "/etc/yum.repos.d/{{ repo_varnish_filename }}.repo"
+    section: "{{ repo_varnish_name_prefix }}{{ variant }}"
+    option: enabled
+    value: "{{ (variant in repo_varnish_variants_enabled) | ternary('1', '0') }}"
+    no_extra_spaces: yes
+  loop: "{{ repo_varnish_variants }}"
+  loop_control:
+    loop_var: variant
+

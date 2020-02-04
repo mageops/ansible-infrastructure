@@ -1,0 +1,12 @@
+repo_varnish_package_name: varnish-release
+repo_varnish_name_prefix: varnish
+repo_varnish_variants:
+  - '60lts'
+  - '60'
+  - '61'
+  - '62'
+  - '63'
+
+repo_varnish_variants_enabled:
+  - 60lts
+

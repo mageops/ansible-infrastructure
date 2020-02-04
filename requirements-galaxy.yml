@@ -1,0 +1,16 @@
+- src: geerlingguy.mysql
+- src: geerlingguy.composer
+- src: geerlingguy.ntp
+
+- src: pinkeen.postfix
+  version: v1.1
+
+- src: pinkeen.postfix-relay
+  version: v1.1
+
+- src: pinkeen.selinux-disable
+  version: v1.1
+
+- src: zauberpony.mysql-query
+  version: v0.5.1
+

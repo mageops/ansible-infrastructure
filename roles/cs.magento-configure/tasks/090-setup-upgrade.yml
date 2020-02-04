@@ -1,0 +1,4 @@
+- name: Run setup:upgrade
+  become: yes
+  become_user: "{{ magento_user }}"
+  command: "php {{ magento_release_dir }}/bin/magento setup:upgrade"

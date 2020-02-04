@@ -1,0 +1,16 @@
+- name: Install sudo package
+  yum: 
+    name: sudo
+
+- name: Add superuser group
+  group: 
+    name: wheel
+    state: present
+
+- name: Allow superuser group to do anything without password
+  lineinfile:
+    line: "%wheel ALL=(ALL) NOPASSWD:ALL"
+    regexp: "^\\s*%wheel\\s+ALL\\s*="
+    dest: /etc/sudoers
+    state: present
+    validate: "visudo -cf %s"

@@ -1,0 +1,61 @@
+
+- name: Ensure proper permissions of the artifact temp dir
+  file:
+    state: directory
+    path: "{{ deploy_artifact_temp_dir }}"
+    owner: "{{ deploy_app_user }}"
+    group: "{{ deploy_app_group }}"
+    mode: "{{ deploy_directory_permissions }}"
+
+# Skip links and mounted filesystems; trailing slash on source is important!
+- name: Copy previous artifact to speed up rsync
+  shell: >
+    rsync \
+      --archive \
+      --no-links \
+      --inplace \
+      --one-file-system \
+      --compress-level 0 \
+      --quiet \
+      {% for exclude in deploy_copy_previous_excludes -%}
+        --exclude '{{ exclude }}' \
+      {% endfor %}
+      '{{ deploy_current_release_path.rstrip('/') }}/' \
+      '{{ deploy_artifact_temp_dir.rstrip('/') }}/'
+  when: deploy_current_release_path is defined and deploy_copy_previous_release
+  become: yes
+  become_user: "{{ deploy_app_user }}"
+
+# Save current deploy host, because during `delegate_to` ansible
+# started using localhost facts
+- name: Get deploy host
+  set_fact:
+    deploy_host: "{{ ansible_host }}"
+
+# Use rsync directly for speed up as ansible adds stuff like `--delay-updates`.
+# Also this fixes the problem where `synchronize` does not honor `become_user`.
+- name: Synchronize new artifact to remote temp dir
+  shell: >
+    rsync \
+      --rsh "ssh -i '{{ deploy_ssh_key_path }}' {{ deploy_rsync_ssh_opts | join(' ')|trim }}" \
+      --archive \
+      --executability \
+      --delete \
+      --delete-excluded \
+      --quiet \
+      {% for opt in (deploy_rsync_perf_opts + deploy_rsync_opts) -%}
+        '{{ opt }}' \
+      {% endfor %}
+      {% for pattern in deploy_rsync_excludes -%}
+      --exclude='{{ pattern }}' \
+      {% endfor %}
+      '{{ deploy_artifact_dir.rstrip('/') }}/' \
+      '{{ deploy_app_user }}@{{ deploy_host }}:{{ deploy_artifact_temp_dir.rstrip('/') }}/'
+  delegate_to: localhost
+  become: no
+
+- name: Install new artifact temp dir as new release
+  command: >
+    mv -v
+      '{{ deploy_artifact_temp_dir }}'
+      '{{ deploy_next_release_path }}'

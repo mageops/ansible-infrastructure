@@ -1,0 +1,28 @@
+# swap size in MB
+swap_size: 1024
+
+# usually don't change unless you want to put it on different, faster drive
+swap_file_location: /swapfile
+
+# how kernel will use swap, example values:
+# * 0 - swap only to prevent out of memory
+# * 1 - minimum amount of swapping
+# * 10 - some swapping, may improve performance even if enough memory
+# * 60 - system default (we don't want that)
+# * 100 - aggressive swapping (don't want that for sure, especially on EBS)
+swap_swappiness: 10
+
+# PERFORMANCE+STABILITY TODO Whether to enable zswap compression
+# - Not implemented yet, needs (tested manually):
+#   0) Make sure zswap is supported by kernel and we're not running in docker
+#      * This shall return `=y` for both: `cat "/boot/config-$(uname -r)"  | grep -ie 'CONFIG_ZSWAP\|CONFIG_HAVE_KERNEL_LZO'`
+#   1) Add "zswap.enabled=1 zswap.max_pool_percent=25 zswap.compressor=lzo zswap.zpool=zbud"
+#      to GRUB_CMDLINE_LINUX in `/etc/default/grub`
+#   2) Rebuild grub cfg: `grub2-mkconfig -o /boot/grub2/grub.cfg`
+#   3) Reboot system
+#   4) Wait for SSH to ssh come back up
+# - Ideally we'd use compressor=lz4 compressor and zpool=z3fold but they are 
+#   not present in CentOS 7 stock kernel.
+#
+# swap_enable_compression: no
+

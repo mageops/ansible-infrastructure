@@ -1,0 +1,7 @@
+- name: Install Varnish Packages
+  yum:
+    name: "{{ [varnish_package_name] + varnish_extra_packages }}"
+    state: present
+
+
+

@@ -1,0 +1,59 @@
+- hosts: localhost
+  connection: local
+  become: no
+  tasks:
+    - name: Get list of EC2 instances
+      ec2_instance_facts:
+        region: "{{ aws_region }}"
+        filters:
+          "tag:Role": "app"
+          "tag:Project": "{{ mageops_project }}"
+          "tag:Environment": "{{ mageops_environment }}"
+      register: _aws_ec2
+    - name: Add servers to app_servers
+      add_host:
+        groups:  app_servers
+        host: "{{ item }}"
+      with_items: "{{ _aws_ec2|json_query('instances[].public_ip_address')}}"
+  vars_files:
+      - vars/app/env.yml
+      - vars/aws/env.yml
+
+- hosts: "app_servers"
+  tasks:
+      - name: Flush cache
+        become: yes
+        become_user: "{{ magento_user }}"
+        command: "bin/magento cache:flush"
+        args:
+            chdir: "{{ magento_live_release_dir }}"
+  vars_files:
+      - vars/app/env.yml
+      - vars/aws/env.yml
+
+- hosts: localhost
+  connection: local
+  become: no
+  tasks:
+      - name: Blackfire profile with empty cache
+        shell: "blackfire --json curl --samples=1 --metadata='app={{ mageops_app_name }}' --metadata='cache=no' {{ magento_base_url }}"
+        register: tmp_blackfire_out_nocache
+        failed_when: false
+      - name: Link to profile
+        debug:
+          var: (tmp_blackfire_out_nocache.stdout | from_json)._links.graph_url
+      - name: Blackfire profile selected pages with Magento cache
+        shell: "blackfire --json curl --metadata='app={{ mageops_app_name }}' --metadata='cache=yes' {{ item }}"
+        with_items: "{{ blackfire_urls + blackfire_extra_urls | default([]) }}"
+        register: tmp_blackfire_out_cache
+      - name: Store links to profiles
+        template:
+          src: templates/vars/blackfire_profiles.j2
+          dest: vars/generated/blackfire_profiles.yml
+          force: yes
+  vars_files:
+      - vars/app/env.yml
+      - vars/aws/env.yml
+  vars:
+    blackfire_urls:
+      - "{{ magento_base_url }}"

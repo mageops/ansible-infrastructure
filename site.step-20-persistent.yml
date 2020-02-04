@@ -1,0 +1,76 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: persistent:&current:!immutable
+  roles:
+    - role: cs.aws-node-facts
+      delegate_to: localhost
+      become: no
+      when: aws_use
+    - role: pinkeen.selinux-disable
+    - role: cs.swap
+    - role: cs.earlyoom
+      when: mageops_earlyoom_enable
+    - role: cs.provisioning-migrations
+    - role: cs.packages
+      packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
+      packages_install: "{{ mageops_packages_common + mageops_packages_persistent + mageops_packages_persistent_extra }}"
+      packages_remove: "{{ mageops_packages_banned }}"
+    - role: cs.mageops-cli-profile
+    - role: cs.mageops-cli-user
+      mageops_cli_user: root
+      mageops_cli_user_bashrc_fragments:
+        - elasticsearch
+        - redis
+    - role: cs.mageops-authorize-keys
+    - role: cs.aws-cli
+      when: aws_use
+    - role: cs.cron
+    - role: geerlingguy.ntp
+    - role: cs.elasticsearch
+      tags: elasticsearch
+      when: mageops_elasticsearch_create
+    - role: cs.redis
+      when: mageops_redis_create and not redis_aws_elasticache_use
+    - role: cs.redis
+      redis_instance_name: sessions
+      redis_databases: 1
+      redis_port: "{{ mageops_redis_sessions_port }}"
+      redis_maxmemory_policy: "{{ redis_sessions_maxmemory_policy }}"
+      redis_maxmemory: "{{ redis_sessions_maxmemory }}"
+      redis_persistence_enable: "{{ redis_sessions_persistence_enable }}"
+      when: mageops_redis_sessions_create
+    - role: cs.varnish-purge-proxy
+      varnish_pp_listen_port: "{{ varnish_port }}"
+      when: varnish_is_in_autoscaling_group
+    - role: cs.aws-logs
+      aws_logs_stream_name: "{{ mageops_node_role }}"
+      aws_logs_log_magento_crash_reports: no
+      aws_logs_loggers: "{{ aws_logs_loggers_persistent_default | combine(aws_logs_loggers_persistent_extra | default({}), recursive=True) }}"
+      when: aws_use
+    - role: cs.sftp-access
+      sftp_authorized_keys: "{{ mageops_root_ssh_keys_global + mageops_sftp_ssh_keys }}"
+      when: sftp_access_enabled
+    - role: cs.aws-efs
+      efs_name: "{{ magento_efs_app_node_name }}"
+      efs_subnet_id: "{{ aws_vpc_subnet_id }}"
+      efs_aws_security_group_id: "{{ aws_security_group_efs_id }}"
+      efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_shared_storage }}"
+      efs_mounts: "{{ magento_sftp_basic_efs_mounts + magento_sftp_efs_mounts}}"
+      when: aws_use and sftp_access_enabled
+    - role: cs.rabbitmq
+      rabbitmq_enable_management: yes
+      rabbitmq_virtual_hosts: ["{{ magento_rabbitmq_virtual_host }}"]
+      rabbitmq_users:
+        - vhost: "{{ magento_rabbitmq_virtual_host }}"
+          username: "{{ magento_rabbitmq_username }}"
+          password: "{% if magento_rabbitmq_queue %}{{ magento_rabbitmq_password | mandatory }}{% endif %}"
+      when: mageops_rabbitmq_create
+    - role: cs.magento-cron-http-trigger
+      when: mageops_app_is_magesuite
+
+  tasks:
+    - include_tasks: "{{ extra_tasks_persistent }}"
+      when: extra_tasks_persistent is defined
+
+  vars:
+    mageops_node_role: persistent

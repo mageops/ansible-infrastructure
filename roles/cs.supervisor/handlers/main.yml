@@ -1,0 +1,10 @@
+- name: Reload supervisord
+  service:
+    name: supervisord
+    state: reloaded
+
+- name: Restart supervisord
+  service:
+    name: supervisord
+    state: restarted
+  listen: PHP Configuration Changed

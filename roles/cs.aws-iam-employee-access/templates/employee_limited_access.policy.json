@@ -1,0 +1,39 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "acm:ListCertificates",
+                "autoscaling:Describe*",
+                "cloudfront:Get*",
+                "cloudfront:List*",
+                "cloudwatch:Describe*",
+                "cloudwatch:Get*",
+                "cloudwatch:List*",
+                "cloudfront:CreateInvalidation",
+                "ec2:Describe*",
+                "elasticache:Describe*",
+                "elasticloadbalancing:Describe*",
+                "iam:ListServerCertificates",
+                "logs:Get*",
+                "logs:List*",
+                "logs:Describe*",
+                "logs:Filter*",
+                "logs:TestMetricFilter",
+                "rds:Describe*",
+                "rds:ListTagsForResource",
+                "route53:List*",
+                "s3:Get*",
+                "s3:List*",
+                "ses:Get*",
+                "ses:List*",
+                "sns:Get*",
+                "sns:List*",
+                "waf:GetWebACL",
+                "waf:ListWebACLs"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+- name: Install nodejs and yarn
+  yum:
+    name:
+      - nodejs
+      - yarn
+
+- name: Install user-global NPM packages
+  npm:
+    state: present
+    global: yes
+    name: "{{ item }}"
+  loop: "{{ nodejs_packages }}"
+  when: not nodejs_use_yarn
+
+- name: Install user-global Yarn packages
+  yarn:
+    state: present
+    global: yes
+    name: "{{ item }}"
+  loop: "{{ nodejs_packages }}"
+  when: nodejs_use_yarn

@@ -1,0 +1,9 @@
+- name: Check if database is initialized
+  command: mysql -u {{ mageops_app_mysql_user }} -p{{ mageops_app_mysql_pass }} -h {{ mageops_mysql_host }} -e "SELECT 1 FROM {{ mageops_app_mysql_db }}.admin_user LIMIT 1;"
+  failed_when: false
+  changed_when: false
+  register: admins
+
+- name: Set database existence fact
+  set_fact:
+    database_exists: "{{ admins.rc is defined and admins.rc == 0 and admins.stdout_lines | length > 0}}"

@@ -1,0 +1,61 @@
+- name: Print base AMI id used for spinning up the builder instance
+  debug:
+    msg: "Using AMI {{ builder_base_ami_id }} for builder {{ builder_instance_name }}"
+
+- name: Create builder instance
+  ec2:
+    region: "{{ aws_region }}"
+    assign_public_ip: yes
+    monitoring: no
+    vpc_subnet_id: "{{ builder_instance_vpc_subnet_id }}"
+    image: "{{ builder_base_ami_id }}"
+    key_name: "{{ builder_instance_ssh_key_name }}"
+    group_id: "{{ builder_instance_security_groups }}"
+    instance_type: "{{ builder_instance_type }}"
+    user_data: "{{ builder_instance_user_data }}"
+    instance_profile_name: "{{ builder_instance_iam_role}}"
+    instance_tags: >-
+      {{
+          aws_tags_default | combine(
+            aws_tags_role_app,
+            aws_tags_node_app,
+            builder_instance_tags,
+            builder_instance_name_tags
+          )
+      }}
+    volumes:
+      - device_name: "{{ builder_instance_root_device }}"
+        volume_size: "{{ builder_instance_volume_size }}"
+        volume_type: gp2
+        delete_on_termination: yes
+    exact_count: 1
+    count_tag: "{{ builder_instance_name_tags }}"
+    wait: yes
+    wait_timeout: "{{ builder_create_instance_timeout }}"
+    # This has zero costs on current-gen instances
+    ebs_optimized: yes
+  vars:
+    builder_instance_name_tags:
+      Name: "{{ builder_instance_name }}"
+  register: builder_ec2
+
+- name: Add builder host to inventory
+  add_host:
+    hostname: "{{ item.public_ip }}"
+    groups:
+      - "{{ builder_instance_inventory_group }}"
+      - "{{ mageops_app_host_group }}"
+
+  loop: '{{ builder_ec2.tagged_instances }}'
+  loop_control:
+    label: "{{ item.public_ip }}"
+
+- name: Wait for builder node instance to get up
+  wait_for:
+    port: 22
+    host: "{{ item.public_ip }}"
+  loop: '{{ builder_ec2.tagged_instances }}'
+  loop_control:
+    label: "{{ item.public_dns_name }}"
+
+

@@ -1,0 +1,3 @@
+aws_node_facts_base_tags: "{{ aws_tags_base }}"
+aws_node_facts_base_filters:
+  instance-state-name: running

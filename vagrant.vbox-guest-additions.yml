@@ -1,0 +1,32 @@
+- name: Update virtualbox guest additions
+  hosts: vagrant
+  tasks:
+    # If the VBox guest additions CD is not inserted this playbook will fail!
+    - name: Mount Guest Additions DVD
+      mount:
+        path: /mnt/dvd
+        src: /dev/sr0
+        fstype: iso9660
+        state: mounted
+
+    - name: Install development tools
+      yum:
+        name:
+            - "dkms"
+            - "@Development tools"
+            - "kernel-devel"
+
+    - name: Run guest additions installer
+      command: /mnt/dvd/VBoxLinuxAdditions.run
+      args:
+        chdir: /mnt/dvd
+        # Say yes if it asks to reinstall
+        stdin: "{{ 'yes' }}"
+
+    - name: Unmount Guest Additions DVD
+      mount:
+        path: /mnt/dvd
+        src: /dev/sr0
+        state: absent
+
+    # Now vagrant needs to be rebooted

@@ -1,0 +1,21 @@
+{
+    "ErrorDocument": {
+        "Key": "index.html"
+    },
+    "IndexDocument": {
+        "Suffix": "index.html"
+    },
+    "RoutingRules": [
+        {
+            "Condition": {
+                "HttpErrorCodeReturnedEquals": "404"
+            },
+            "Redirect": {
+                "HostName": "{{ magento_hostname }}",
+                "HttpRedirectCode": "307",
+                "Protocol": "https",
+                "ReplaceKeyPrefixWith": "media/"
+            }
+        }
+    ]
+}

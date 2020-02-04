@@ -1,0 +1,2 @@
+aws_sg_facts_filters: {}
+aws_sg_facts_tags: "{{ aws_tags_base }}"

@@ -1,0 +1,20 @@
+# Throttling shall work only for requests which come from the user-facing nginx
+# so they will have the X-Real-Ip header. We cannot use client.identity or client.ip
+# for the same reason.
+
+if (req.http.X-Real-Ip) {
+    {% for rule in varnish_throttling_rules %}
+
+        ### Throttling rule - {{ rule.id }} ###
+
+        if (req.url ~ "{{ rule.path_pattern }}") {
+            set req.http.X-RateLimit-Identity = req.http.x-real-ip + "{{ rule.id }}";
+            set req.http.X-RateLimit-Remaining = vsthrottle.remaining(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }});
+
+            if (vsthrottle.is_denied(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }})) {
+                return (synth(429, "{{ rule.error_message | default('Too many requests') }}"));
+            }
+        }
+
+    {% endfor %}
+}

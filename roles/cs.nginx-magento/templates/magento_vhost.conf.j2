@@ -1,0 +1,38 @@
+{% if nginx_magento_run_type in ('store', 'website') %}
+map $http_host $MAGE_RUN_CODE {
+{% if nginx_mage_default_run_code %}
+   default {{ nginx_mage_default_run_code }};
+{% endif %}
+
+{% for hostname, code in nginx_mage_run_code_map.items() %}
+    {{ hostname }} {{ code }};
+{% endfor %}
+}
+{% endif %}
+
+{% if nginx_custom_redirects %}
+map $request_uri $perm_redirect_uri {
+{% for src, dst in nginx_custom_redirects.items(): %}
+    {{ src }} {{ dst }};
+{% endfor %}
+}
+{% endif %}
+
+server {
+    listen {{ nginx_app_port }};
+
+{% if nginx_custom_redirects %}
+    if ($perm_redirect_uri) {
+        return 301 $scheme://$host$perm_redirect_uri;
+    }
+{% endif %}
+
+    set $MAGE_ROOT {{ nginx_app_root_dir }};
+    set $MAGE_MODE {{ nginx_magento_mode }}; # or production or default
+    set $PROJ_NAME {{ mageops_project }};
+{% if nginx_magento_run_type in ('store', 'website') %}
+    set $MAGE_RUN_TYPE {{ nginx_magento_run_type }};
+{% endif %}
+
+    include {{ nginx_magento_server_body_conf_path }};
+}

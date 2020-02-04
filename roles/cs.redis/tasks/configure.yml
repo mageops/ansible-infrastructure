@@ -1,0 +1,103 @@
+- name: Ensure var directories always exist
+  lineinfile:
+    state: present
+    create: yes
+    path: /etc/tmpfiles.d/{{ redis_daemon }}.conf
+    regexp: "\\s+{{ entry.path | regex_escape }}\\s+"
+    line: >-
+      {{ entry.type | default('d') }}
+      {{ entry.path }}
+      {{ entry.mode | default('0755') }}
+      {{ entry.user | default('redis') }}
+      {{ entry.group | default('redis') }}
+      {{ entry.age | default('-') }}
+      {{ entry.argument | default('-') }}
+  loop:
+    - path: "{{ redis_dbdir }}"
+    - path: "{{ redis_piddir }}"
+    - path: "{{ redis_logdir }}"
+    - path: "{{ redis_logdir }}/*.log"
+      mode: '0644'
+      type: z
+  loop_control:
+    loop_var: entry
+    label: "{{ entry.path }}"
+  register: tmpfiles_config
+
+- name: Ensure var directory changes are applied at once
+  command: systemd-tmpfiles --create
+  when: tmpfiles_config is changed
+
+- name: Install systemd service file
+  template:
+    src: redis.service
+    dest: "/etc/systemd/system/{{ redis_daemon }}.service"
+  notify:
+    - Reload systemctl daemon
+    - Restart {{ redis_daemon }}
+
+- name: Install redis configuration
+  template:
+    src: redis.conf
+    dest: "{{ redis_conf_path }}"
+    mode: 0644
+  notify:
+    - Restart {{ redis_daemon }}
+
+# This avoids OOM errors when redis saves to disk!
+#
+# Please see "Background saving fails with a fork() error under Linux even if I have a lot of free RAM!"
+# here https://redis.io/topics/faq
+#
+# This needs to be enabled only when we have snapshotting.
+- name: Enable memory overcommit kernel param
+  sysctl:
+    name: vm.overcommit_memory
+    value: 1
+    reload: yes
+    state: present
+  when: redis_persistence_enable
+
+- name: Increase somaxconn kernel param
+  sysctl:
+    name: net.core.somaxconn
+    value: "{{ redis_somaxconn }}"
+    reload: yes
+    state: present
+
+- name: Ensure Redis service is enabled
+  service:
+    name: "{{ redis_daemon }}"
+    enabled: yes
+
+- name: Make sure rc.local is executable
+  file:
+    path: /etc/rc.d/rc.local
+    state: file
+    mode: 0750
+
+- name: Disable Transparent Huge Pages on boot to help latency
+  lineinfile:
+    path: /etc/rc.d/rc.local
+    state: present
+    line: "{{ item }}"
+  with_items:
+    - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+    - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
+  register: _redis_enabled_thd
+  notify: Restart {{ redis_daemon }}
+
+- name: Disable THP now if just added
+  shell: "{{ item }}"
+  with_items:
+    - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+    - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
+  when: _redis_enabled_thd.changed
+
+- name: Ensure Redis service is started
+  service:
+    name: "{{ redis_daemon }}"
+    state: started
+    enabled: yes
+
+

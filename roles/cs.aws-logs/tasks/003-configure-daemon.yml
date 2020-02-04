@@ -1,0 +1,45 @@
+- name: Define metrics configuration for Cloudwatch Agent
+  set_fact:
+    aws_cloudwatch_agent_metrics: "{{ lookup('template', 'config_metrics.yml')|from_yaml }}"
+
+- name: Define logs configuration for Cloudwatch Agent
+  set_fact:
+    aws_cloudwatch_agent_logs: "{{ aws_cloudwatch_agent_logs | default([]) +  [lookup('template', 'config_logfile.yml') | from_yaml] }}"
+  when: item.enabled and item.filename is defined
+  with_items: "{{ _aws_logs_loggers }}"
+  loop_control:
+    label: "{{ item.group_name }}"
+
+- name: Assemble full Cloudwatch Agent config
+  set_fact:
+    aws_cloudwatch_agent_config:
+      agent:
+        metrics_collection_interval: 60
+        region: "{{ aws_region }}"
+        debug: false
+      metrics:
+        metrics_collected: "{{ aws_cloudwatch_agent_metrics }}"
+        append_dimensions:
+          InstanceId: "${aws:InstanceId}"
+          AutoScalingGroupName: "${aws:AutoScalingGroupName}"
+          CSAppName: "{{ mageops_app_name }}"
+          CSNodeType: "{{ mageops_node_role }}"
+        aggregation_dimensions:
+          - [AutoScalingGroupName]
+          - [CSAppName, CSNodeType]
+      logs:
+        logs_collected:
+          files:
+            collect_list: "{{ aws_cloudwatch_agent_logs }}"
+
+- name: Install awslogs daemon config
+  copy:
+    content: "{{ aws_cloudwatch_agent_config | to_nice_json }}"
+    dest: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+  notify: Restart Amazon Cloudwatch Agent
+
+- name: Ensure CloudWatch Agent service is started and enabled
+  service:
+    name: amazon-cloudwatch-agent
+    state: started
+    enabled: yes

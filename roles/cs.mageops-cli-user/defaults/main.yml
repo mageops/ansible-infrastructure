@@ -1,0 +1,11 @@
+mageops_cli_user_group: "{{ mageops_cli_user }}"
+mageops_cli_user_groups: []
+mageops_cli_user_authorize_local_key: no
+mageops_cli_user_authorized_keys: []
+mageops_cli_user_ssh_config: no
+mageops_cli_user_default_editor: nano
+mageops_cli_user_bashrc_fragments_default:
+  - 000-common
+  - 001-mageops
+
+mageops_cli_user_bashrc_fragments: []
