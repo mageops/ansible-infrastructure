@@ -43,5 +43,48 @@
           set_fact:
             magento_core_config_settings: "{{ magento_core_config_settings + magento_advanced_js_bundling_core_config }}"
       when: magento_perform_advanced_js_bundling
-  when: magento_scd_advanced_js_bundling
+  when: magento_scd_advanced_js_bundling and not magento_scd_baler_js_bundling
+
+- name: Configure baler JS bundling task hook
+  block:
+    - name: Configure deploy for bundling
+      block:
+        - name: Create bundling configs
+          set_fact:
+            magento_baler_js_bundling_task:
+              name: "magesuite-baler-bundle"
+              image: "mageops/magesuite-baler:v0.1.5"
+              workdir: "{{ magento_release_dir }}"
+              commandline: ""
+              container_workdir: "/workdir"
+              user: "{{ magento_uid }}:{{ magento_gid }}"
+
+            magento_baler_js_bundling_core_config:
+              - name: Enable baler bundling
+                path: "dev/js/enable_baler_js_bundling"
+                value: "1"
+              - name: Disable JS merging (because baler bundling is enabled)
+                path: "dev/js/merge_files"
+                value: "0"
+              - name: Disable JS minification (because baler bundling is enabled)
+                path: "dev/js/minify_files"
+                value: "0"
+              - name: Disable JS bundling (baler bundling is enabled)
+                path: "dev/js/enable_js_bundling"
+                value: "0"
+              - name: Disable MageSuite JavaScript defer.
+                path: "deferjs/general/active"
+                value: "0"
+              - name: Enable native Magento JavaScript defer.
+                path: "dev/js/move_script_to_bottom"
+                value: "1"
+
+        - name: Append the bundling task config to the task list
+          set_fact:
+            magento_scd_containerized_tasks: "{{ magento_scd_containerized_tasks + [magento_baler_js_bundling_task] }}"
+
+        - name: Ensure that Magento's js minification, merging and bundling is disabled
+          set_fact:
+            magento_core_config_settings: "{{ magento_core_config_settings + magento_baler_js_bundling_core_config }}"
+  when: magento_scd_baler_js_bundling
 
