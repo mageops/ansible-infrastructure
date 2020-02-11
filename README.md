@@ -8,6 +8,14 @@
 
 # Infrastructure Provisioning
 
+## CI/CD Automation
+
+**This code handles infrastucture provisioning, maintenance and deployment only**. 
+This repository does not contain any CI/CD automation for building, testing or
+running the provisioning itself. We do that internally with reusable Jenkins
+pipelines (as libraries) - as this setup is very specific to our workflow we are 
+not planning to open-source it in the near future.
+
 ## MageSuite ecosystem
 
 Altough it's possible to use this code to host any Magento-based shop,

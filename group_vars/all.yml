@@ -1122,7 +1122,7 @@ elasticsearch_node_name: master
 
 elasticsearch_http_port: 9200
 elasticsearch_transport_tcp_port: 9300
-elasticsearch_heap_size: "{{ es_heap_size|default((ansible_memtotal_mb / 2)|int ~ 'm') }}"
+elasticsearch_heap_size: "{{ ((ansible_memtotal_mb / 2) | int ) ~ 'm' }}"
 elasticsearch_plugins:
     - analysis-icu
     - analysis-phonetic
@@ -1310,6 +1310,9 @@ mageops_rabbitmq_create: "{{ magento_rabbitmq_queue }}"
 
 # Default AMQP port - this is the only port used by magento
 rabbitmq_amqp_port: 5672
+
+# Whether to enable Management UI
+rabbitmq_enable_management: yes
 
 # This port will provide an HTTP API and management UI
 # - might be useful for debugging and will be accessible from `mageops_trusted_cidr_blocks`
