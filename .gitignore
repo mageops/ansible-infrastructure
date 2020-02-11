@@ -8,8 +8,7 @@
 /vars/*
 /vars/global/*
 /vars/project/*
-!/var/global/.gitkeep
-!/var/project/.gitkeep
+!/vars/README.md
 
 *.pyc
 __pycache__/
