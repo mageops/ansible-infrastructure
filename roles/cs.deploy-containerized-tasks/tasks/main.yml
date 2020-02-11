@@ -25,6 +25,10 @@
       # Skip preparation if it has already been done on this host during the run
       when: not containerized_tasks_env_is_prepared
 
+    - name: Pull latest container
+      command: docker pull {{ item.image | mandatory }}
+      loop: "{{ containerized_tasks }}"
+
     - name: Execute containerized tasks
       command: >
         docker run

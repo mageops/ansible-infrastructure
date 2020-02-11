@@ -1,47 +1,45 @@
 # This step shall gather, normalize and extend any configuration
 # that should be ready for the next ones.
-
-- name: Configure advanced JS bundling task hook
+- name: Configure baler JS bundling task hook
   block:
-    - name: Check if bundling is supported by project
-      stat:
-        path: "{{ magento_release_dir }}/build.js"
-      register: _magento_advanced_js_bundling_build_file
-
-    - name: Determine if we shall enable JS bundling
-      set_fact:
-        magento_perform_advanced_js_bundling: "{{ magento_scd_advanced_js_bundling and _magento_advanced_js_bundling_build_file.stat.exists is defined and _magento_advanced_js_bundling_build_file.stat.exists }}"
-
     - name: Configure deploy for bundling
       block:
         - name: Create bundling configs
           set_fact:
-            magento_advanced_js_bundling_task:
-              name: "magesuite-bundle-theme-js"
-              image: "magesuite/bundle-theme-js:stable"
+            magento_baler_js_bundling_task:
+              name: "magesuite-baler-bundle"
+              image: "mageops/magesuite-baler:stable"
               workdir: "{{ magento_release_dir }}"
-              commandline: "Creativestyle"
+              commandline: ""
               container_workdir: "/workdir"
               user: "{{ magento_uid }}:{{ magento_gid }}"
 
-            magento_advanced_js_bundling_core_config:
-              - name: Disable JS merging (because advanced bundling is enabled)
+            magento_baler_js_bundling_core_config:
+              - name: Enable baler bundling
+                path: "dev/js/enable_baler_js_bundling"
+                value: "1"
+              - name: Disable JS merging (because baler bundling is enabled)
                 path: "dev/js/merge_files"
                 value: "0"
-              - name: Disable JS minification (because advanced bundling is enabled)
+              - name: Disable JS minification (because baler bundling is enabled)
                 path: "dev/js/minify_files"
                 value: "0"
-              - name: Disable JS bundling (advanced bundling is enabled)
+              - name: Disable JS bundling (baler bundling is enabled)
                 path: "dev/js/enable_js_bundling"
                 value: "0"
+              - name: Disable MageSuite JavaScript defer.
+                path: "deferjs/general/active"
+                value: "0"
+              - name: Enable native Magento JavaScript defer.
+                path: "dev/js/move_script_to_bottom"
+                value: "1"
 
         - name: Append the bundling task config to the task list
           set_fact:
-            magento_scd_containerized_tasks: "{{ magento_scd_containerized_tasks + [magento_advanced_js_bundling_task] }}"
+            magento_scd_containerized_tasks: "{{ magento_scd_containerized_tasks + [magento_baler_js_bundling_task] }}"
 
         - name: Ensure that Magento's js minification, merging and bundling is disabled
           set_fact:
-            magento_core_config_settings: "{{ magento_core_config_settings + magento_advanced_js_bundling_core_config }}"
-      when: magento_perform_advanced_js_bundling
+            magento_core_config_settings: "{{ magento_core_config_settings + magento_baler_js_bundling_core_config }}"
   when: magento_scd_advanced_js_bundling
 
