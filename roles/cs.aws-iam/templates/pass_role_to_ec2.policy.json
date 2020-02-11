@@ -8,7 +8,9 @@
                 "iam:PassRole"
             ],
             "Resource": [
-                "arn:aws:iam::*:role/{{ aws_iam_name_prefix }}*"
+                "arn:aws:iam::*:role/{{ aws_iam_name_prefix }}*",
+                "arn:aws:iam::*:role/{{ aws_iam_role_app_node }}",
+                "arn:aws:iam::*:role/{{ aws_iam_role_persistent_node }}"
             ]
         }
     ]
