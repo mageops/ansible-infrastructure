@@ -8,7 +8,7 @@
           set_fact:
             magento_baler_js_bundling_task:
               name: "magesuite-baler-bundle"
-              image: "mageops/magesuite-baler:stable"
+              image: "mageops/magesuite-baler:v0.1.1"
               workdir: "{{ magento_release_dir }}"
               commandline: ""
               container_workdir: "/workdir"
