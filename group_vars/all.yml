@@ -665,7 +665,6 @@ magento_node_warmup_script_path: /bin/node-warmup.sh
 # ------------------------------
 
 magento_scd_advanced_js_bundling: no
-magento_scd_baler_js_bundling: no
 
 
 # --------------------------------
