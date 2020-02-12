@@ -1,0 +1,35 @@
+- name: Install vmtouch
+  yum:
+    name: vmtouch
+    state: latest
+
+- name: Preffer to keep metadata about filesystem in memory
+  sysctl:
+    name: vm.vfs_cache_pressure
+    value: "10"
+    reload: yes
+    state: present
+
+- name: Prevent direct small write under 16K
+  sysctl:
+    name: vm.dirty_bytes
+    value: "16384"
+    reload: yes
+    state: present
+
+- name: Prevent background small write under 16K
+  sysctl:
+    name: vm.dirty_background_bytes
+    value: "16384"
+    reload: yes
+    state: present
+
+- name: Install preload daemon
+  template:
+    src: magento-preload.service.j2
+    dest: /etc/systemd/system/magento-preload.service
+
+- name: Start preload daemon
+  service:
+    name: magento-preload
+    state: restarted

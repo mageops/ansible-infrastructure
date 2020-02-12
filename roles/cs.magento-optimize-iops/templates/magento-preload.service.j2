@@ -1,0 +1,9 @@
+[Unit]
+Description=Preload magento small PHP files into memory
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/magento/current/
+ExecStart=/usr/bin/vmtouch -L -I '*.php' -m 16K vendor generated
+Restart=always
+RestartSec=5min

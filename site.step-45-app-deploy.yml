@@ -68,6 +68,9 @@
           role: cs.magento-configure
           tasks_from: 200-static-symlink.yml
 
+    - role: cs.magento-optimize-iops
+      when: aws_use
+
     - role: cs.magento-import-dispatcher
       when: magento_import_dispatcher_enable
 
