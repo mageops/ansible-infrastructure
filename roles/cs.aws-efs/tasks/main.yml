@@ -49,6 +49,7 @@
     state: mounted
     opts: "defaults,{{ efs_mount_opts }}"
   register: efs_root_mount
+  until: efs_root_mount is not failed
   retries: 300
   delay: 30
 

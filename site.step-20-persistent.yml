@@ -11,6 +11,11 @@
       delegate_facts: no
       become: no
       when: aws_use
+    - role: cs.aws-security-group-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
     - role: pinkeen.selinux-disable
     - role: cs.swap
     - role: cs.earlyoom

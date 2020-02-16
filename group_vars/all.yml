@@ -930,6 +930,8 @@ sftp_home: "{{ sftp_user_home }}"
 # Set this in project config to the keys of your choice
 mageops_sftp_ssh_keys: []
 
+magento_sftp_efs_mounts: []
+
 # EFS -> SFTP mounts can be configured per project here
 sftp_efs_mounts_project: "{{ sftp_efs_mounts|default([]) }}"
 
