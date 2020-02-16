@@ -1,3 +1,2 @@
 dependencies:
   - cs.repo-mageops
-  - cs.aws-vpc-facts
