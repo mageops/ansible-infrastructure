@@ -28,8 +28,11 @@ magento_session_max_redis_concurrency: 15
 magento_app_etc_config_template: magento_app_etc_config.php.j2
 magento_app_etc_env_template: magento_app_etc_env.php.j2
 
-magento_consumer_workers_enable: no
-magento_consumer_workers: []
+magento_consumer_workers_enable: yes
+magento_consumer_workers: 
+   - consumer: codegeneratorProcessor
+     batch_size: 100
+     process_count: 1
 magento_consumer_workers_max_messages: 500
 # Example:
 #  - consumer: async.operations.all
