@@ -18,6 +18,15 @@
       - dnf-plugins-core
     state: present
 
+- name: Set dnf configuration
+  copy:
+    src: dnf.conf
+    dest: /etc/dnf/dnf.conf
+
+- name: Switch package manager to dnf
+  set_fact:
+    ansible_pkg_mgr: dnf
+
 - name: Perform one-time package maintenance
   block:
     - name: Set localized yum mirrorlist for core repos
