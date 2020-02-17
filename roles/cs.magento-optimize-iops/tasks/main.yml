@@ -32,4 +32,5 @@
 - name: Start preload daemon
   service:
     name: magento-preload
+    enabled: yes
     state: restarted
