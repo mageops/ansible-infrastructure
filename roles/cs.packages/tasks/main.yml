@@ -25,7 +25,8 @@
 
 - name: Switch package manager to dnf
   set_fact:
-    ansible_pkg_mgr: dnf
+    ansible_facts:
+      pkg_mgr: dnf
 
 - name: Perform one-time package maintenance
   block:
