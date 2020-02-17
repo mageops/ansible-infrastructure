@@ -94,6 +94,7 @@
 
     - role: cs.s3-fuse-s3fs
       when: aws_use and not s3fs_mount_use_goofys | default(false)
+      
     - role: cs.s3-fuse-goofys
       when: aws_use and s3fs_mount_use_goofys | default(false)
 
@@ -115,8 +116,8 @@
     - role: cs.mageops-cli-profile
 
   tasks:
-    - include_tasks: "{{ extra_tasks_webnode }}"
-      when: extra_tasks_webnode is defined
+    - include_tasks: "{{ mageops_extra_tasks_app_node }}"
+      when: mageops_extra_tasks_app_node is defined
 
   vars:
     mageops_node_role: app

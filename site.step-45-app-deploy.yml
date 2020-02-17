@@ -76,8 +76,8 @@
 
   tasks:
     - name: Execute custom post deploy tasks
-      include_tasks: "{{ extra_tasks_deploy }}"
-      when: extra_tasks_deploy is defined and extra_tasks_deploy
+      include_tasks: "{{ mageops_extra_tasks_deploy }}"
+      when: mageops_extra_tasks_deploy is defined and mageops_extra_tasks_deploy
 
   vars:
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"

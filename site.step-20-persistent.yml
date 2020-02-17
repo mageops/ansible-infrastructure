@@ -78,8 +78,8 @@
       when: mageops_app_is_magesuite
 
   tasks:
-    - include_tasks: "{{ extra_tasks_persistent }}"
-      when: extra_tasks_persistent is defined
+    - include_tasks: "{{ mageops_extra_tasks_persistent_node }}"
+      when: mageops_extra_tasks_persistent_node is defined
 
   vars:
     mageops_node_role: persistent

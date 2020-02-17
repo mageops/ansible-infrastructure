@@ -467,6 +467,9 @@ mageops_global_vars_dir: "{{ playbook_dir }}/vars/global"
 # Where to load project configuration vars from
 mageops_project_vars_dir: "{{ playbook_dir }}/vars/project"
 
+# Where to load project configuration vars from
+mageops_project_tasks_dir: "{{ mageops_project_vars_dir }}/tasks"
+
 # Where to load project templates from
 mageops_project_certs_dir: "{{ mageops_project_vars_dir }}/certs"
 
@@ -933,7 +936,7 @@ mageops_sftp_ssh_keys: []
 magento_sftp_efs_mounts: []
 
 # EFS -> SFTP mounts can be configured per project here
-sftp_efs_mounts_project: "{{ sftp_efs_mounts|default([]) }}"
+sftp_efs_mounts_project: []
 
 # Magento Import/Export
 magento_sftp_import_data_path: "{{ sftp_user_home }}/import"
