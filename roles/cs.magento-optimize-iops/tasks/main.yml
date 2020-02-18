@@ -10,17 +10,38 @@
     reload: yes
     state: present
 
-- name: Prevent direct small write under 16K
+- name: Prevent direct small write under 1M
   sysctl:
     name: vm.dirty_bytes
-    value: "16384"
+    value: "1048576"
     reload: yes
     state: present
 
-- name: Prevent background small write under 16K
+- name: Prevent background small write under 512KB
   sysctl:
     name: vm.dirty_background_bytes
-    value: "16384"
+    value: "524288"
+    reload: yes
+    state: present
+
+- name: Flush pages older than 5m
+  sysctl:
+    name: vm.dirty_expire_centisecs
+    value: "30000"
+    reload: yes
+    state: present
+
+- name: Allow some amount of memory to be used by dirty pages in background
+  sysctl:
+    name: vm.dirty_background_ratio
+    value: "5"
+    reload: yes
+    state: present
+
+- name: Allow some amount of memory to be used by dirty pages in foreground
+  sysctl:
+    name: vm.dirty_ratio
+    value: "10"
     reload: yes
     state: present
 
