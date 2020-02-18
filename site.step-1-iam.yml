@@ -3,4 +3,4 @@
   gather_facts: false
   roles:
     - role: cs.aws-iam
-    # - role: cs.aws-iam-employee-access
+    - role: cs.aws-iam-employee-access

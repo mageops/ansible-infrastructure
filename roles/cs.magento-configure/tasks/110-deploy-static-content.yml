@@ -44,13 +44,6 @@
   register: magento22_scd
   when: magento_version is version('2.3', '<')
 
-- name: Set information about Magento SCD (Magento 2.1 and 2.2)
-  when: magento_version is version('2.3', '<')
-  set_fact:
-    magento_scd_duration: "{{ magento22_scd.delta }}"
-    magento_scd_command: "{{ magento22_scd.cmd | join(' ') }}"
-    magento_scd_output: "{{ magento22_scd.stdout }}"
-
 - name: Deploy static content (Magento 2.3+)
   become: yes
   become_user: "{{ magento_user }}"
@@ -73,6 +66,7 @@
     magento_scd_output: "{{ magento_scd.stdout }}"
 
 - name: Show static content deployment logs
+  when: magento_version is version('2.3', '>=')
   debug:
     msg: |
       ============================================
