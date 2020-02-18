@@ -11,23 +11,6 @@
   changed_when: false
   failed_when: no
 
-- name: Install dnf for speedup when installing packages (ansible should use it automatically)
-  yum:
-    name:
-      - dnf
-      - dnf-plugins-core
-    state: present
-
-- name: Set dnf configuration
-  copy:
-    src: dnf.conf
-    dest: /etc/dnf/dnf.conf
-
-- name: Switch package manager to dnf
-  set_fact:
-    ansible_facts:
-      pkg_mgr: dnf
-
 - name: Perform one-time package maintenance
   block:
     - name: Set localized yum mirrorlist for core repos

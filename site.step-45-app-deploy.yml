@@ -44,6 +44,7 @@
       become: no
       when: aws_use
 
+    - role: cs.switch-to-dnf
     - role: cs.deploy
       deploy_install_actions:
         - name: Configure Magento

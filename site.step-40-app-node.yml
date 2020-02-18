@@ -22,6 +22,8 @@
       become: no
       when: aws_use
 
+    - role: cs.switch-to-dnf
+    
     - role: pinkeen.selinux-disable
 
     - role: cs.swap
