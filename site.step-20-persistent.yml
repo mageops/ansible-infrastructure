@@ -6,6 +6,16 @@
       delegate_to: localhost
       become: no
       when: aws_use
+    - role: cs.aws-vpc-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+    - role: cs.aws-security-group-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
     - role: cs.switch-to-dnf
     - role: pinkeen.selinux-disable
     - role: cs.swap
@@ -55,8 +65,8 @@
       efs_name: "{{ magento_efs_app_node_name }}"
       efs_subnet_id: "{{ aws_vpc_subnet_id }}"
       efs_aws_security_group_id: "{{ aws_security_group_efs_id }}"
-      efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_shared_storage }}"
-      efs_mounts: "{{ magento_sftp_basic_efs_mounts + magento_sftp_efs_mounts}}"
+      efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_role_shared_storage) }}"
+      efs_mounts: "{{ magento_sftp_basic_efs_mounts + magento_sftp_efs_mounts }}"
       when: aws_use and sftp_access_enabled
     - role: cs.rabbitmq
       rabbitmq_virtual_hosts: ["{{ magento_rabbitmq_virtual_host }}"]
@@ -69,8 +79,8 @@
       when: mageops_app_is_magesuite
 
   tasks:
-    - include_tasks: "{{ extra_tasks_persistent }}"
-      when: extra_tasks_persistent is defined
+    - include_tasks: "{{ mageops_extra_tasks_persistent_node }}"
+      when: mageops_extra_tasks_persistent_node is defined
 
   vars:
     mageops_node_role: persistent
