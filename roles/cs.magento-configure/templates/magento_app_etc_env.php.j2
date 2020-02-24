@@ -150,7 +150,8 @@ return [
                 ],
         ],
     {% endif %}
-    {% if magento_consumer_workers_enable and magento_rabbitmq_queue %}
+    {% if magento_version is version('2.3', '>=') %}
+    {% if magento_consumer_workers_enable %}
     'cron_consumers_runner' =>
         [
             'cron_run' => false,
@@ -165,5 +166,6 @@ return [
         [
             'cron_run' => false,
         ],
+    {% endif %}
     {% endif %}
 ];
