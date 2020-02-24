@@ -8,7 +8,6 @@
             state: present
           notify:
             - Clean packages
-            - Clean yum cache
         - name: Install ansible docker support
           pip:
             name: docker
