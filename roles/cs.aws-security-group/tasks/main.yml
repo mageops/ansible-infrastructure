@@ -132,11 +132,6 @@
             - "{{ mageops_redis_port }}"
             - "{{ mageops_redis_sessions_port }}"
         group_name: "{{ aws_security_group_app_name }}"
-      - proto: tcp
-        ports:
-          - "{{ mageops_redis_port }}"
-          - "{{ mageops_redis_sessions_port }}"
-        cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
       # TODO: We have reached SG limits - that's why rabbitmq
       # is added to redis SG. The whole SG approach needs to be
       # rethinked and refactored - probably we should use subnets
@@ -146,11 +141,6 @@
           - "{{ rabbitmq_amqp_port }}"
           - "{{ rabbitmq_http_port }}"
         group_name: "{{ aws_security_group_app_name }}"
-      - proto: tcp
-        ports:
-          - "{{ rabbitmq_amqp_port }}"
-          - "{{ rabbitmq_http_port }}"
-        cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
