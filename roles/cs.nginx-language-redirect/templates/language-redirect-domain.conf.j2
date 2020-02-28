@@ -1,0 +1,5 @@
+{% for lang, domain in nginx_language_redirect_domain_mapping.items() %}
+  if ( $target_domain != "{{ domain }}" ) {
+    rewrite / $scheme://$target_domain/ redirect;
+  }
+{% endfor %}

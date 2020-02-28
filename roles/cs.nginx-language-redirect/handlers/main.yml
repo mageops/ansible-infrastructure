@@ -1,0 +1,3 @@
+- name: Reload nginx configuration
+  service: name=nginx state=restarted
+  listen: "reload nginx"
