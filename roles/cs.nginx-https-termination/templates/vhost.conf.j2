@@ -1,10 +1,40 @@
+{% if item.extra_config | default('') %}
+# ---  [BEGIN] Custom Project Config [BEGIN]  ---
+{{ varnish_vcl_synth_extra }}
+# ---  [END] Custom Project Config [END]  ---
+{% endif %}
+
+{% set vhost_id = item.name | trim | lower | regex_replace('[^a-z0-9]+', '_') %}
+
+{% if item.permanent_path_redirect_map | default([]) %}
+map $request_uri $perm_redirect_uri_{{ vhost_id }} {
+{% for src, dst in item.permanent_path_redirect_map.items(): %}
+    {{ src }} {{ dst }};
+{% endfor %}
+}
+{% endif %}
+
+{% if redirect_aliases and item.aliases | default([]) %}
+server {
+{% if https_termination_hide_varnish %}
+    listen 80;
+{% endif %}
+
+    listen 443 ssl http2;
+
+    server_name {{ item.aliases | default([])|join(' ') }};
+
+    return 301 $scheme://{{ item.server_name }}$request_uri;
+}
+{% endif %}
+
 server {
 {% if https_termination_hide_varnish %}
     listen 80;
 {% endif %}
 
 {% if item.server_name != '*' %}
-    server_name {{ item.server_name }} {{ item.aliases | default([])|join(' ') }};
+    server_name {{ item.server_name }}{% if not redirect_aliases %} {{ item.aliases | default([])|join(' ') }}{% endif %};
 {% endif %}
 
     listen 443 ssl http2;
@@ -25,7 +55,19 @@ server {
     include "{{ nginx_blacklist_vhost_check_config_file }}";
 {% endif %}
 
-    {{ item.extra_vhost_config | default('') }}
+{% if item.extra_vhost_config | default('') %}
+    # ---  [BEGIN] Custom Project Server Config [BEGIN]  ---
+    {% filter indent(width=4) -%}
+    {{ extra_vhost_config }}
+    {% endfilter %}
+    # ---  [END] Custom Project Server Config [END]  ---
+{% endif %}
+
+{% if item.permanent_path_redirect_map | default([]) %}
+    if ($perm_redirect_uri_{{ vhost_id }}) {
+        return 301 $scheme://$host$perm_redirect_uri_{{ vhost_id }};
+    }
+{% endif %}
 
     location / {
         proxy_pass http://{{ https_termination_varnish_upstream }};
