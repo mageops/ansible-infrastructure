@@ -14,7 +14,7 @@ map $request_uri $perm_redirect_uri_{{ vhost_id }} {
 }
 {% endif %}
 
-{% if redirect_aliases and item.aliases | default([]) %}
+{% if item.redirect_aliases | default(false) and item.aliases | default([]) %}
 server {
 {% if https_termination_hide_varnish %}
     listen 80;
@@ -34,7 +34,7 @@ server {
 {% endif %}
 
 {% if item.server_name != '*' %}
-    server_name {{ item.server_name }}{% if not redirect_aliases %} {{ item.aliases | default([])|join(' ') }}{% endif %};
+    server_name {{ item.server_name }}{% if not item.redirect_aliases | default(false) %} {{ item.aliases | default([])|join(' ') }}{% endif %};
 {% endif %}
 
     listen 443 ssl http2;
