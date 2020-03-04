@@ -1,0 +1,57 @@
+- name: Install vmtouch
+  yum:
+    name: vmtouch
+    state: latest
+
+- name: Preffer to keep metadata about filesystem in memory
+  sysctl:
+    name: vm.vfs_cache_pressure
+    value: "10"
+    reload: yes
+    state: present
+
+- name: Prevent direct small write under 1M
+  sysctl:
+    name: vm.dirty_bytes
+    value: "1048576"
+    reload: yes
+    state: present
+
+- name: Prevent background small write under 512KB
+  sysctl:
+    name: vm.dirty_background_bytes
+    value: "524288"
+    reload: yes
+    state: present
+
+- name: Flush pages older than 5m
+  sysctl:
+    name: vm.dirty_expire_centisecs
+    value: "30000"
+    reload: yes
+    state: present
+
+- name: Allow some amount of memory to be used by dirty pages in background
+  sysctl:
+    name: vm.dirty_background_ratio
+    value: "5"
+    reload: yes
+    state: present
+
+- name: Allow some amount of memory to be used by dirty pages in foreground
+  sysctl:
+    name: vm.dirty_ratio
+    value: "10"
+    reload: yes
+    state: present
+
+- name: Install preload daemon
+  template:
+    src: magento-preload.service.j2
+    dest: /etc/systemd/system/magento-preload.service
+
+- name: Start preload daemon
+  service:
+    name: magento-preload
+    enabled: yes
+    state: restarted
