@@ -16,6 +16,7 @@
       delegate_facts: no
       become: no
       when: aws_use
+    - role: cs.switch-to-dnf
     - role: pinkeen.selinux-disable
     - role: cs.swap
     - role: cs.earlyoom
