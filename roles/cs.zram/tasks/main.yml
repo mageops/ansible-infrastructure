@@ -1,0 +1,9 @@
+- name: Load zram on boot
+  copy:
+    content: zram
+    dest: /etc/modules-load.d/zram.conf
+
+- name: Use zram0 as swap device
+  template:
+    src: zram.rules.j2
+    dest: /etc/udev/rules.d/90-zram.rules

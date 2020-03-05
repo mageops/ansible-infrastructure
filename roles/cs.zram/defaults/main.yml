@@ -1,0 +1,6 @@
+#
+# Avg compression level is 3:1
+# Rule of thumb: set it to 3/4 of available memory
+# this will consume 1/4 or real memory
+#
+zram_size: 768M
