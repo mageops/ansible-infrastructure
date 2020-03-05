@@ -21,7 +21,7 @@ mount-watchdog::log() {
 }
 
 mount-watchdog::is_mounted() {
-  findmnt --kernel --all /var/www/magento/shared/pub/media >/dev/null
+  findmnt --kernel --all "${MOUNTPOINT}" >/dev/null
 }
 
 mount-watchdog::is_usable() {
