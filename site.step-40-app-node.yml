@@ -27,10 +27,6 @@
     - role: pinkeen.selinux-disable
 
     - role: cs.swap
-      when: mageops_swap_app_node_enable
-
-    - role: cs.zram
-      when: mageops_zram_app_node_enable
 
     - role: cs.earlyoom
       when: mageops_earlyoom_enable

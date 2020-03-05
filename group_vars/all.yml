@@ -561,10 +561,6 @@ mageops_install_development_tools: yes
 # Preload files into memory and tune sysctl to reduce iops
 mageops_reduce_iops: "{{ aws_use }}"
 
-# App node swap config
-mageops_swap_app_node_enable: yes
-mageops_zram_app_node_enable: "{{ mageops_reduce_iops }}"
-
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
