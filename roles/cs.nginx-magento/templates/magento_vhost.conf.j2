@@ -35,4 +35,5 @@ server {
 {% endif %}
 
     include {{ nginx_magento_server_body_conf_path }};
+    include server.d/default/*.conf;
 }

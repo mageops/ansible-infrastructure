@@ -98,6 +98,11 @@ server {
         proxy_busy_buffers_size 24k;
         proxy_buffers           32 8k;
         {% endif %}
+
+{% if item.server_name != '*' %}
+        include server.d/{{item.server_name}}/*.conf;
+{% endif %}
+        include server.d/default/*.conf;
     }
 
 {% if item.letsencrypt | default(False) %}

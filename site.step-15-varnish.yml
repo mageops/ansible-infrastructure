@@ -33,6 +33,8 @@
     - role: cs.nginx-https-termination
       varnish_port: "{{ mageops_varnish_port }}"
       when: mageops_https_termination_enable
+    - role: cs.nginx-language-redirect
+      when: mageops_language_redirect_enable
     - role: cs.varnish
       varnish_port: "{{ mageops_varnish_port }}"
       varnish_backend_port: "{{ mageops_varnish_backend_port }}"

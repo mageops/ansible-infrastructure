@@ -1,0 +1,34 @@
+# Name of server.d include
+nginx_language_redirect_site: default
+
+# Site style used for redirection
+# dir - languages are detetmined by top level dir
+#   eg: example.com/en, example.com/de
+# domain - language is determined by different domain
+#   eg: example.com, example.de
+nginx_language_redirect_style: dir
+
+# With method use for country detection
+# geoip - use GeoIP location data to determine location
+#   language codes are uppercase 2 letter codes
+#   eg: PL, US
+# accept_language - use accept-language header send by browser
+#   language codes are represented as "locale identifier"
+#   they may be 2-3 letter codes with optional specifier
+#   eg: en, en-US, fr-CA
+nginx_language_redirect_detection_method: geoip
+
+# domain mapping used when nginx_language_redirect_style = domain
+# use detected language for key, and domain as value
+# there is special key named default, that match there is no other match
+nginx_language_redirect_domain_mapping:
+  default: example.com
+  PL: example.pl
+
+# directory name mapping used when nginx_language_redirect_style = dir
+# use detected language for key, and top level directory name ad value
+# there is special key named default, that match there is no other match
+nginx_language_redirect_directory_mapping:
+  default: en
+  PL: pl
+
