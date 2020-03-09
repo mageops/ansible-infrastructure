@@ -92,3 +92,5 @@ varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
 varnish_vcl_recv_extra: ""
 varnish_vcl_synth_extra: ""
 varnish_vcl_backend_error_extra: ""
+
+varnish_strip_params: ['gclid']
