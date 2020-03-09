@@ -1,0 +1,34 @@
+- name: "Install latest GeoIP packages"
+  yum:
+    name: "{{ packages }}"
+    state: latest
+  vars:
+    packages:
+      - GeoIP
+      - GeoIP-data
+      - nginx-module-geoip
+  when: nginx_language_redirect_detection_method == 'geoip'
+
+- name: "Create config directories"
+  file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    owner: root
+    group: root
+  loop:
+    - /etc/nginx/server.d/default
+    - /etc/nginx/modules
+
+- name: Add loading of geoip module to nginx
+  template:
+    src: geoip_module.conf.j2
+    dest: /etc/nginx/modules/geoip_module.conf
+  when: nginx_language_redirect_detection_method == 'geoip'
+
+- name: "Generate language detection config"
+  template:
+    src: language-redirect.conf.j2
+    dest: /etc/nginx/conf.d/30-language-redirect.conf
+  notify:
+    - reload nginx

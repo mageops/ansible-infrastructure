@@ -558,6 +558,9 @@ mageops_secure_site_user: "{{ mageops_project }}"
 # Install additional development and debugging tools like Blackfire?
 mageops_install_development_tools: yes
 
+# setup language redirect
+mageops_language_redirect_enable: no
+
 # Preload files into memory and tune sysctl to reduce iops
 mageops_reduce_iops: "{{ aws_use }}"
 

@@ -33,17 +33,42 @@
 - name: Ensure var directory changes are applied at once
   command: systemd-tmpfiles --create
   when: tmpfiles_config is changed
-    
-- name: Configure elasticsearch
+
+- name: Detect current elasticsearch major version
+  command: "sh -c \"/usr/share/elasticsearch/bin/elasticsearch -V | sed 's/^Version: \\([0-9]*\\)\\..*/\\1/'\""
+  register: elasticsearch_major_version_command
+  changed_when: false
+
+- name: Store elasticsearch major version
+  set_fact:
+    elasticsearch_major_version: "{{ elasticsearch_major_version_command.stdout | trim | int }}"
+
+# Note: (elasticsearch_major_version | int) is needed hack for issue in older ansible versions (before 2.8)
+# without that set_fact templates integers to strings and makes comparison impossible
+
+- name: Configure elasticsearch 5
   template:
-    src: "{{ item }}"
-    dest: /etc/elasticsearch/{{ item }}
+    src: "{{ item.key }}"
+    dest: /etc/elasticsearch/{{ item.value }}
     owner: root
     group: elasticsearch
-  with_items:
-    - jvm.options
-    - elasticsearch.yml
+  with_dict:
+    es5-jvm.options: jvm.options
+    elasticsearch.yml: elasticsearch.yml
   notify: Restart elasticsearch
+  when: (elasticsearch_major_version | int) == 5
+
+- name: Configure elasticsearch 6 or higher
+  template:
+    src: "{{ item.key }}"
+    dest: /etc/elasticsearch/{{ item.value }}
+    owner: root
+    group: elasticsearch
+  with_dict:
+    es6-jvm.options: jvm.options
+    elasticsearch.yml: elasticsearch.yml
+  notify: Restart elasticsearch
+  when: (elasticsearch_major_version | int) >= 6
 
 - name: Ensure elasticsearch systemd config override directory exists
   file:
