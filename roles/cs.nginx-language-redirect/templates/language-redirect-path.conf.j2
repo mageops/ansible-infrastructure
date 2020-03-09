@@ -1,5 +1,6 @@
 {%- for lang, path in nginx_language_redirect_directory_mapping.items() %}
 if ( $target = "{{ path }}" ) {
     rewrite /({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }}) /$target/ redirect;
+    rewrite ^/$ /$target/ redirect;
 }
 {% endfor -%}
