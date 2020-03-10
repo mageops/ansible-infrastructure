@@ -1244,8 +1244,15 @@ varnish_error_page_color_primary: "#444"
 # Max-age (in seconds) returned in Cache-Control header for HTML pages
 # (this header is rewritted by varnish as magento sets it unappropriately)
 varnish_html_cache_control_max_age: 60
-varnish_strip_google_gclid_params: yes
-
+varnish_strip_params:
+  - "gclid"
+  - "utm_[^=&]+"
+  - "gdftrk"
+  - "_ga"
+  - "mc_[^=&]+"
+  - "trk_[^=&]+"
+  - "dm_i"
+  - "fbclid"
 
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------
