@@ -1,7 +1,8 @@
-# Warning! Each maintenance playbook shall run without generated vars being present!
-# It should fetch this information as needed, without the need to run whole infra step.
+- import_playbook: site.common.group-current-hosts.yml
+
 - hosts: localhost
   connection: local
   roles:
+    - role: cs.aws-rds.facts
     - role: cs.aws-rds-gfs-backup
       rds_gfs_instance_id: "{{ aws_rds_instance_name }}"
