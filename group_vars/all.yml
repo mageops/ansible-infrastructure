@@ -597,7 +597,7 @@ mageops_http_pipeline_request_timeout_list:
 # without increasing `php_http_request_max_execution_time`
 # globally. Usually you don't need to touch this as it is set
 # automatically to the highest app timeout configured.
-mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_request_timeout_list|max }}"
+mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_request_timeout_list | map('int') | max }}"
 
 
 # ---------------------------------
