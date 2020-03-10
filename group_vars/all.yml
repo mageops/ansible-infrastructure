@@ -405,7 +405,7 @@ aws_s3_bucket_policies: []
 # -------------------------------
 
 # AWS Logs + slack notifications settings
-aws_logs_slack_hook_url: "https://hooks.slack.com/services/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"
+aws_logs_slack_hook_url: "{{ mageops_notifications_slack_hook_url | default(None) }}"
 aws_logs_slack_channel: "{{ mageops_notifications_slack_channel }}"
 
 aws_logs_loggers_persistent_default:
