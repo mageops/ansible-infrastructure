@@ -716,9 +716,7 @@ magento_post_deploy_commands: "{{ magento_post_deploy_commands_basic + magento_p
 # ----------------------------------
 
 # Whether to enable import dispatcher supervisor job
-# Always enable it by default since we have an automatic check for it's presence
-# if the corresponding Magento command is absent supervisord job will not be created.
-magento_import_dispatcher_enable: yes
+magento_import_dispatcher_enable: no
 
 # Absolute path to import dispatcher script - never change this!
 magento_import_dispatcher_switch_script_path: /usr/bin/import_dispatcher_switch
@@ -882,9 +880,7 @@ magento_cron_request_php_max_execution_time: "{{ php_http_request_max_execution_
 # ---------------------------------------------
 
 # Enable it?
-# Always enable it by default since we have an automatic check for it's presence
-# if the corresponding Magento command is absent supervisord job will not be created.
-magento_page_cache_warmer_enable: yes
+magento_page_cache_warmer_enable: no
 
 # Requests made by crawler simulatenously; this param will be throttled first
 magento_page_cache_warmer_concurrency: 4
