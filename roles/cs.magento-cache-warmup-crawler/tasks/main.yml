@@ -2,12 +2,17 @@
   set_fact:
     magento_cache_warmup_crawler_is_supported: "{{ 'cache:warm:pages-crawl-worker' in magento_commands }}"
 
-- name: Inform about lack of page cache warmup crawler support
+- name: Fail if enabled but not supported
   when: not magento_cache_warmup_crawler_is_supported
-  debug:
+  fail:
     msg: |
-      Warning! Skipping page cache warmup crawler setup as it's
-      not installed in the current release.
+      *** ERROR! *** 
+      
+      Page Cache Warmup Crawler is enabled but the command is not supported
+      in the current Magento release.
+
+      Install the Page Cache Warmer extension or disable this feature
+      in project's infrastructure settings.
 
 - import_tasks: supervisord.yml
   when: magento_cache_warmup_crawler_is_supported
