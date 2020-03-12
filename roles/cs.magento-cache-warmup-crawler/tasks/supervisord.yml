@@ -1,0 +1,7 @@
+- name: Create supervisor config for cache warmup crawler
+  template:
+    src: supervisord_program.conf.j2
+    dest: /etc/supervisor.d/cache_warmup_crawler.conf
+    owner: "root"
+    force: yes
+    mode: 0600
