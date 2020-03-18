@@ -1,16 +1,11 @@
-# Warning! Each maintenance playbook shall run without generated vars being present!
-# It should fetch this information as needed, without the need to run whole infra step.
+- import_playbook: site.common.group-current-hosts.yml
 
-- hosts: "tag_Name_{{ ec2_varnish_instance_name | default(mageops_app_name ~ '-varnish') | regex_replace('-', '_') }}"
-  become: yes
+- hosts: "loadbalancer:&varnish:&current"
   roles:
     - role: cs.nginx-url-blacklist
     - role: cs.nginx-https-termination
-      when: https_termination
+      varnish_port: "{{ mageops_varnish_port }}"
+      when: mageops_https_termination_enable
   vars:
     nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
-  vars_files:
-    - vars/app/credentials.yml
-    - vars/app/env.yml
-    - vars/aws/env.yml
-    
+

@@ -1,0 +1,36 @@
+- name: Get commands supported by the Magento installation
+  shell: >-
+    bin/magento list --format=json | jq -r '.commands | .[] | .name'
+  args:
+    chdir: "{{ magento_live_release_dir }}"
+  become: yes
+  become_user: "{{ magento_user }}"
+  register: magento_bin_list_commands_result
+  changed_when: false
+
+- name: Get installed Magento composer packages
+  shell: >-
+    cat composer.lock | jq '.packages | map({(.name): .version}) | add'
+  args:
+    chdir: "{{ magento_live_release_dir }}"
+  register: magento_composer_lock_packages_result
+  changed_when: false
+
+- name: Get enabled Magento modules
+  shell: >-
+      php -r 'echo(implode(array_keys(array_filter((include("app/etc/config.php"))["modules"])), "\n"));'
+  args:
+    chdir: "{{ magento_live_release_dir }}"
+  register: magento_config_php_enabled_modules_result
+  changed_when: false
+
+- name: Set Magento facts
+  set_fact:
+    # List of bin/magento command names
+    magento_commands: "{{ magento_bin_list_commands_result.stdout_lines }}"
+    # A dict of package name => package version
+    magento_packages: "{{ magento_composer_lock_packages_result.stdout | from_json }}"
+    # A list of *enabled* modules
+    magento_modules: "{{ magento_config_php_enabled_modules_result.stdout_lines }}"
+
+

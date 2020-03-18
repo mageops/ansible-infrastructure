@@ -564,6 +564,10 @@ mageops_language_redirect_enable: no
 # Preload files into memory and tune sysctl to reduce iops
 mageops_reduce_iops: "{{ aws_use }}"
 
+# App node swap config
+mageops_swap_app_node_enable: yes
+mageops_zram_app_node_enable: "{{ mageops_reduce_iops }}"
+
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
@@ -597,7 +601,7 @@ mageops_http_pipeline_request_timeout_list:
 # without increasing `php_http_request_max_execution_time`
 # globally. Usually you don't need to touch this as it is set
 # automatically to the highest app timeout configured.
-mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_request_timeout_list|max }}"
+mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_request_timeout_list | map('int') | max }}"
 
 
 # ---------------------------------
@@ -887,7 +891,7 @@ magento_page_cache_warmer_target_ttfb: 3
 # Shared password for fake user accounts used to warm-up pages for each customer-group.
 # Shall be unique per deployment, we reuse the crypt key and hash it just so it cannot be reversed.
 magento_page_cache_warmer_fake_account_email_host: "{{ magento_hostname }}"
-magento_page_cache_warmer_fake_account_password: "{{ (magento_page_cache_warmer_fake_account_email_host ~ magento_crypt_key)|hash('sha1') }}"
+magento_page_cache_warmer_fake_account_password: "{{ (magento_page_cache_warmer_fake_account_email_host ~ magento_crypt_key) | hash('sha1') }}"
 
 # -------------------------------------------------------------
 # --------  Magento S3 mounts and buckets  --------
@@ -1240,8 +1244,15 @@ varnish_error_page_color_primary: "#444"
 # Max-age (in seconds) returned in Cache-Control header for HTML pages
 # (this header is rewritted by varnish as magento sets it unappropriately)
 varnish_html_cache_control_max_age: 60
-varnish_strip_google_gclid_params: yes
-
+varnish_strip_params:
+  - "gclid"
+  - "utm_[^=&]+"
+  - "gdftrk"
+  - "_ga"
+  - "mc_[^=&]+"
+  - "trk_[^=&]+"
+  - "dm_i"
+  - "fbclid"
 
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------

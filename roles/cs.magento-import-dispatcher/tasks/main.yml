@@ -1,20 +1,19 @@
-- name: Make sure supervisord config fragment dir exists
-  file:
-    path: "{{ magento_import_dispatcher_supervisor_config_off_path | dirname }}"
-    state: directory
+- name: Check if import dispatcher is supported by the Magento installation
+  set_fact:
+    magento_import_dispatcher_is_supported: "{{ 'importer:import:dispatcher' in magento_commands }}"
 
-- name: Create supervisord config for import dispatcher
-  template:
-    src: import_dispatcher.conf.j2
-    dest: "{{ magento_import_dispatcher_supervisor_config_off_path }}"
-    owner: "root"
-    force: yes
-    mode: 0600
+- name: Fail if enabled but not supported
+  when: not magento_import_dispatcher_is_supported
+  fail:
+    msg: |
+      *** ERROR! *** 
+      
+      Import Dispatcher is enabled but the command is not supported
+      in the current Magento release.
 
-- name: Install import dispatcher switch script
-  template:
-    src: import_dispatcher_switch
-    dest: "{{ magento_import_dispatcher_switch_script_path }}"
-    owner: "root"
-    force: yes
-    mode: 0755
+      Install the Import Dispatcher extension or disable this feature
+      in project's infrastructure settings.
+
+- import_tasks: supervisord.yml
+  when: magento_import_dispatcher_is_supported
+

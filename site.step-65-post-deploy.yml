@@ -1,0 +1,23 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: app:&current
+  tasks:
+    - name: Run Magento post-deploy commands
+      command: "{{ item.cmd | default(item) }}"
+      args:
+        chdir: "{{ item.dir | default(magento_live_release_dir) }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+      loop: "{{ magento_post_deploy_commands | default([]) }}"
+      loop_control:
+        label: "{{ item.cmd | default(item) }}"
+      register: out
+
+    - name: Show Magento post-deploy command output
+      debug:
+        msg: "{{ result.stdout | default('--- N/A ---') }}"
+      loop: "{{ out.results }}"
+      loop_control:
+        loop_var: result
+        label: "{{ result.cmd | default([]) | join(' ') }}"
