@@ -4,7 +4,7 @@
 
 - name: Gather bucket names to process
   set_fact:
-    aws_s3_bucket_names: "{{ aws_s3_bucket_policies | map(attribute='bucket')|list | unique }}"
+    aws_s3_bucket_names: "{{ aws_s3_bucket_policies | map(attribute='bucket') | list | unique }}"
 
 - name: Create temporary s3 bucket policy build directory
   tempfile:

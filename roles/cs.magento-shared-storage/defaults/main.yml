@@ -1,0 +1,56 @@
+# What to use for storing Magento media that must be shared across nodes
+# Possible values: 
+#   - aws-s3 (default if `aws_use`) - store on AWS S3 media bucket and mount it via s3fs
+#   - aws-efs - store on AWS EFS and mount it as NFS share on the node
+#   - local-fs (default if not `aws_use`) - do nothing, just store the files on the local fs
+# Note: If you set this to `aws-efs` then the media S3 bucket will not be created, but
+# already existing buckets will not be removed.
+# Someday: We may want to add plain NFS-based storage in the future to support non-AWS
+# use cases or just allow using one of the persistent nodes for shared storage. As EFS is just
+# plain NFS under the hood this should be relatively easy as most of the hard work is done.
+magento_media_storage_strategy: local-fs
+
+magento_s3_app_mounts_basic: []
+
+magento_s3_app_mounts_media:
+  - name: "Media"
+    mountpoint: "{{ magento_media_dir }}"
+    bucket: "{{ aws_s3_media_bucket }}"
+  - name: "Static asset cache"
+    mountpoint: "{{ magento_static_cache_dir }}"
+    bucket: "{{ aws_s3_media_bucket }}:/static/_cache-{{ deploy_release_id }}/"
+
+magento_s3_app_mounts_extra: []
+  
+magento_efs_app_mounts_basic:
+  - local_mountpoint: "{{ magento_efs_import_data_app_path }}"
+    remote_path: "{{ magento_efs_import_data_remote_path }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+  - local_mountpoint: "{{ magento_efs_export_data_app_path }}"
+    remote_path: "{{ magento_efs_export_data_remote_path }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+  - local_mountpoint: "{{ magento_efs_publicly_shared_app_path }}"
+    remote_path: "{{ magento_efs_publicly_shared_remote_path }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+
+magento_efs_static_cache_release_remote_path: "{{ magento_efs_static_cache_releases_remote_path }}/{{ deploy_release_id }}"
+
+magento_efs_app_mounts_media:
+  - local_mountpoint: "{{ magento_media_dir }}"
+    remote_path: "{{ magento_efs_media_remote_path }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+  - local_mountpoint: "{{ magento_static_cache_dir }}"
+    remote_path: "{{ magento_efs_static_cache_release_remote_path }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+
+magento_efs_app_mounts_extra: []
+
+# How many latest Magento static cache release dirs to keep (must be >=2)
+# It weighs nothing so lets protect ourselves in case deploy starts failing
+# or some strange stuff happens. Seven is the magic number ;)
+magento_static_cache_releases_to_keep: 7
