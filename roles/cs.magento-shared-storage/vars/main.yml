@@ -1,0 +1,18 @@
+magento_media_storage_strategies_generic:
+  - local-fs
+
+# Note: 'local-fs' is not supported on AWS since it does not
+# work with multiple app nodes. Until we have a legit use case
+# lets fail this setting when AWS is used.
+magento_media_storage_strategies_aws:
+  - aws-efs
+  - aws-s3
+
+magento_media_storage_strategies_all: >-
+  {{
+    (
+      magento_media_storage_strategies_generic +
+      magento_media_storage_strategies_aws
+    ) | unique 
+  }}
+

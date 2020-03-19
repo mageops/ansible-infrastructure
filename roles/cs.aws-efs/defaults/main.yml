@@ -30,3 +30,11 @@ efs_root_mountpoint: /mnt/efs
 
 efs_lifecycle_policies:
   - { TransitionToIA: AFTER_7_DAYS }
+
+# Whether to enable cronjob that remounts EFS
+# Note: Normally this is not needed, but this was a workaround
+# for problems with S3FS mounts. Some EFS mounts were overlayed over
+# directories mounted with S3FS. When S3FS was broken the EFS mount
+# would be broken too. Amazon-efs-utils already have buil-in watch dog
+# but it didn't seem to handle this scenario.
+efs_mount_watchdog_cron_enable: no

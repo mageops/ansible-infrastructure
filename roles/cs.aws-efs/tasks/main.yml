@@ -114,6 +114,7 @@
   with_items: "{{ efs_mounts }}"
 
 - name: Make sure EFS is always in case the filesystem it's mounted over disappears (S3FS?)
+  when: efs_mount_watchdog_cron_enable
   cron:
     name: "Ensure {{ item.local_mountpoint }} is mounted"
     job: "/bin/bash -c 'mountpoint {{ item.local_mountpoint }} || mount {{ item.local_mountpoint }}'"

@@ -1,0 +1,57 @@
+- name: Validate the current configuration
+  include_tasks: fact-check.yml
+
+- name: Gather facts about any preexisting setup
+  include_tasks: fact-gather.yml
+
+- name: Prepare configuration facts for running the actual setup
+  include_tasks: fact-compute.yml
+
+- name: Print shared storage debugging information
+  debug:
+    msg: |
+      =============================================
+      ==       Magento Shared Storage Setup      ==
+      =============================================
+
+      ----------- Media storage strategy  ---------
+      *** {{ magento_media_storage_strategy }} ***
+      {% if magento_shared_storage_s3_enabled %}
+      -----------------  S3 Mounts  ---------------
+
+      {{ magento_s3_app_mounts | to_nice_yaml }}
+      {% endif %}
+      {% if magento_shared_storage_efs_enabled %}
+
+      -----------------  EFS Mounts  --------------
+
+      {{ magento_efs_app_mounts | to_nice_yaml }}
+      {% endif %}
+
+      ---------------------------------------------
+
+- name: Setup S3 buckets and mounts
+  include_role:
+    name: cs.s3-mount
+  when: magento_shared_storage_s3_enabled
+  vars:
+    s3fs_iam_role: "{{ aws_iam_role_app_node }}"
+    s3fs_owner_user: "{{ magento_user }}"
+    s3fs_owner_group: "{{ magento_group }}"
+    s3fs_owner_uid: "{{ magento_uid }}"
+    s3fs_owner_gid: "{{ magento_gid }}"
+    s3fs_buckets: "{{ magento_s3_app_mounts }}"
+
+- name: Setup EFS and its mounts
+  include_role: 
+    name: cs.aws-efs
+  when: magento_shared_storage_efs_enabled
+  vars:
+    efs_name: "{{ magento_efs_app_node_name }}"
+    efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_role_shared_storage) }}"
+    efs_mounts: "{{ magento_efs_app_mounts }}"
+    # This is a workaround for EFS mounts overlaying the crappy S3FS mounts
+    efs_mount_watchdog_cron_enable: "{{ magento_media_storage_strategy == 'aws-s3' }}"
+
+- name: Clean up shared Magento asset cache
+  include: cleanup-static-cache-releases.yml

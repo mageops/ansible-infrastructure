@@ -3,6 +3,10 @@ aws_cloudfront_origin_access_identity_name: "S3Website-{{ mageops_project }}-{{ 
 aws_cloudfront_ditribution_tags: "{{ aws_tags_default | combine(aws_tags_role_cdn, aws_tags_role_cdn_cloudfront) }}"
 aws_cloudfront_optimizing_edge_lambda_enable: yes
 
+# This setup is used only when media is stored on S3
+# - With all other setups the origin is the primary site's URL
+aws_cloudfront_use_s3_website_origin: yes
+
 # Warning the certificate has to be in N. Virginia aws_region!
 aws_cloudfront_custom_certificate_arn: no
 aws_cloudfront_domain_aliases: []
