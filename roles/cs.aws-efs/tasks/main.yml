@@ -2,7 +2,6 @@
   delegate_to: localhost
   become: no
   block:
-    
     - name: Create EFS
       efs:
         state: present
