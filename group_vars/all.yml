@@ -394,6 +394,8 @@ aws_rds_instance_name: "{{ mageops_app_name }}-db"
 # --------  AWS S3  --------
 # --------------------------
 
+aws_s3_media_bucket_create: "{{ magento_media_storage_strategy == 'aws-s3' }}"
+
 aws_s3_secret_bucket: "{{ mageops_app_name }}-secret"
 aws_s3_media_bucket: "{{ mageops_app_name }}-media"
 
@@ -403,6 +405,10 @@ aws_s3_bucket_policies: []
 # --------------------------
 # --------  AWS EFS  --------
 # --------------------------
+
+# The main EFS root directory mountpoin on each node 
+# Note: Not used directly by app bu as helper during provisioning and conveience for users
+efs_root_mountpoint: /mnt/efs
 
 # Create EFS mount target in all AZ subnets of the current region
 efs_aws_subnet_ids: "{{ aws_vpc_subnet_ids }}"
@@ -904,9 +910,18 @@ magento_page_cache_warmer_target_ttfb: 3
 magento_page_cache_warmer_fake_account_email_host: "{{ magento_hostname }}"
 magento_page_cache_warmer_fake_account_password: "{{ (magento_page_cache_warmer_fake_account_email_host ~ magento_crypt_key) | hash('sha1') }}"
 
-# -------------------------------------------------------------
+# -------------------------------------------------
 # --------  Magento S3 mounts and buckets  --------
-# -------------------------------------------------------------
+# -------------------------------------------------
+
+# How to store shared Magento media files
+# - See the `cs.magento-shared-storage` role for more info
+# - Possible values: aws-s3, aws-efs, local-fs
+magento_media_storage_strategy: "{{ aws_use | ternary('aws-s3', 'local-fs') }}"
+
+# -------------------------------------------------
+# --------  Magento S3 mounts and buckets  --------
+# -------------------------------------------------
 
 # Any extra buckets you want for you app
 magento_s3fs_buckets_extra: []
@@ -914,6 +929,19 @@ magento_s3fs_buckets_extra: []
 # -------------------------------------------------------------
 # --------  Magento Import/Export AWS EFS file shares  --------
 # -------------------------------------------------------------
+
+# WARNING! Please store any publicly-accessible files under `/pub`
+# dir on EFS remote filesystem so we clearly know where not to place
+# any secrets.
+
+# Remote directory for media mount
+# Note: used only if `magento_media_storage_strategy` is set to `aws-efs`
+magento_efs_media_remote_path: "/pub/media"
+
+# Remote root directory for magento static cache **versions*
+# Note: used only if `magento_media_storage_strategy` is set to `aws-efs`
+magento_efs_static_cache_releases_remote_path: "/pub/static/_cache-releases"
+
 
 # WARNING! Do not mount efs in a directory that has symlink in any part of the path!
 # The symlink will be dereferenced in fstab config - this will cause the mount

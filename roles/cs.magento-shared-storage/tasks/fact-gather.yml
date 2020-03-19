@@ -1,0 +1,5 @@
+- name: Not implemented
+  debug:
+    msg: |
+      TODO: Check if S3 media bucket is already present and contain media files
+      so we can automatically migrate from the previous setup, etc.

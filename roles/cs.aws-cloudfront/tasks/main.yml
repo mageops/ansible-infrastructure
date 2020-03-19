@@ -1,5 +1,9 @@
 # Setup s3 website config and add cloudfront access policy
-- import_tasks: setup-s3.yml
+- name: Setup S3 website for Cloudfront origin
+  import_tasks: setup-s3.yml
+  when: aws_cloudfront_use_s3_website_origin
+
 # Create/update the cloudfront distribution
-- import_tasks: setup-distribution.yml
+- name: Setup Cloudfront distribution
+  import_tasks: setup-distribution.yml
 

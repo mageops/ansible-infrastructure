@@ -95,7 +95,7 @@
                         ],
                         "Quantity": 3
                     },
-                    "OriginProtocolPolicy": "http-only",
+                    "OriginProtocolPolicy": "https-only",
                     "OriginReadTimeout": 30,
                     "HTTPPort": 80,
                     "HTTPSPort": 443,
