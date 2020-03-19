@@ -3,6 +3,16 @@
   gather_facts: no
   tags: always
   tasks:
+    - name: Fail with readable warning if group is not found
+      when: not mageops_app_host_group in groups.keys()
+      fail:
+        msg: |
+          ERROR! The primary host group "{{ mageops_app_host_group }}" was
+          not found. 
+          
+          TIP: Check if correct AWS credentials and project ocnfiguration
+          is used. Maybe the EC2 instances are down?
+
     - name: Create virtual inventory group with hosts limited to current project/env (AWS)
       group_by: 
         key: current

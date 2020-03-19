@@ -18,8 +18,8 @@ efs_tags: []
 # Mandatory - name of the fs resource
 # efs_name:
 
-# Mandatory - id of the target subnet
-# efs_subnet_id:
+# Mandatory - ids of the target subnets
+# efs_aws_subnet_ids: "{{ aws_vpc_subnet_ids }}"
 
 # Mandatory - sg for EFS mount
 # efs_aws_security_group_id:
@@ -27,3 +27,6 @@ efs_tags: []
 # Where to mount EFS root directory
 # This mount is needed for creating directories on remove
 efs_root_mountpoint: /mnt/efs
+
+efs_lifecycle_policies:
+  - { TransitionToIA: AFTER_7_DAYS }
