@@ -6,13 +6,13 @@
       setup:
         gather_subset: min
   roles:
-    # - role: cs.aws-vpc
-    # - role: cs.aws-security-group
-    #   aws_security_group_rds_create: "{{ aws_rds_create }}"
-    #   aws_security_group_redis_create: "{{ mageops_redis_create or mageops_redis_sessions_create }}"
-    #   aws_security_group_rabbitmq_create: "{{ mageops_rabbitmq_create and magento_rabbitmq_queue }}"
-    #   aws_security_group_elasticsearch_create: "{{ mageops_elasticsearch_create }}"
-    # - role: cs.aws-s3
+    - role: cs.aws-vpc
+    - role: cs.aws-security-group
+      aws_security_group_rds_create: "{{ aws_rds_create }}"
+      aws_security_group_redis_create: "{{ mageops_redis_create or mageops_redis_sessions_create }}"
+      aws_security_group_rabbitmq_create: "{{ mageops_rabbitmq_create and magento_rabbitmq_queue }}"
+      aws_security_group_elasticsearch_create: "{{ mageops_elasticsearch_create }}"
+    - role: cs.aws-s3
     - role: cs.aws-cloudfront
       aws_cloudfront_use_lambda: "{{ aws_cloudfront_optimizing_edge_lambda_enable }}"
       aws_cloudfront_lambda_arn: "{{ aws_cloudfront_lambda_latest_arn | default(omit, true) }}"
