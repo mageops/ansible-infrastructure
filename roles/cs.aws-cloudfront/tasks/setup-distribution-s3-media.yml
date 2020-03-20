@@ -1,3 +1,7 @@
+# Note: This is a legacy way of doing things. When this was developed
+# ansible did not have a cloudfront distribution module at all.
+# EFS: This is kept for now not to break things for the S3 media setup (and to save work) 
+# and should be rewritten ten same way EFS setup is done now.
 - name: Create temporary distribution config build directory
   tempfile:
     state: directory
@@ -6,7 +10,7 @@
 
 - name: Build cloudfront distribution config
   template:
-    src: distribution-config.json
+    src: s3-media-distribution-config.json
     dest: "{{ aws_cloudfront_distribution_temp_dir.path }}/config.json"
 
 - name: Create cloudfront distribution
