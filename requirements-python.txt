@@ -15,7 +15,7 @@ netaddr
 mysql
 
 # needed for running docker (e.g. building aws lambda artifacts)
-docker-py
+docker
 
 # some tasks call aws command on localhost
 awscli

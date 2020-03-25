@@ -6,6 +6,7 @@
         state: present
         name: php-pecl-xdebug
       when: xdebug_enable | bool
+      
     - name: Reconfigure xdebug
       lineinfile:
         path: /etc/php.d/15-xdebug.ini
@@ -19,15 +20,18 @@
         - value: "xdebug.remote_connect_back = 1"
           regexp: "xdebug.remote_connect_back ="
       when: xdebug_enable | bool
+
     - name: Remove xdebug extension
       yum:
         state: absent
         name: php-pecl-xdebug
-      when: not xdebug_enable | bool      
+      when: not xdebug_enable | bool     
+
     - name: Restart php-fpm
       service:
         name: php-fpm
         state: restarted
+        
   vars: 
     remote_enabled: 1
     xdebug_enable: True

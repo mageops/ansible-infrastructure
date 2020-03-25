@@ -1,0 +1,37 @@
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Initialize the docker builder image
+      import_role: 
+        name: pinkeen.docker-provision
+        tasks_from: build-initialize
+
+  vars:
+    docker_builder_project_name: raccoon
+
+    docker_builder_image: alpine #mageops/centos-systemd
+    docker_builder_image_push: no
+
+    docker_builder_container_ssh_support: yes
+    docker_builder_container_privileged: yes
+    docker_builder_container_force_create: no
+
+    docker_builder_container_tmpfs_mounts: 
+      # Elasticsearch needs exec in tmp
+      - /tmp:exec
+    
+    docker_builder_container_volumes_keep: no
+    docker_builder_container_volumes:
+      # Mount vols here so we don't have this dirs in the final image
+      - /var/run
+      - /var/log
+      - /var/tmp
+
+    # Just for testing reuse the same container
+    docker_builder_job_id: testing
+
+- hosts: "{{ docker_builder_hosts }}"
+  any_errors_fatal: yes
+  tasks:
+    - debug:
+        msg: test
