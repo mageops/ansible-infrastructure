@@ -70,17 +70,17 @@
           - header_name: X-MageOps-Cloudfront-Origin
             header_value: WebsiteMedia
 
-    cache_behaviors:
-      # To maintain backwards compatibility with the previous setup
-      # all CDN requests go by default to "/media" website path. 
-      - >-
+    
+    # To maintain backwards compatibility with the previous setup
+    # all CDN requests go by default to "/media" website path. 
+    default_cache_behavior: >-
         {{
           cloudfront_distribution_cache_behaviour_defaults | combine({
-            "target_origin_id": "WebsiteMedia",
-            "path_pattern": "*"
+            "target_origin_id": "WebsiteMedia"
           })
         }}
 
+    cache_behaviors:
       # Requests to Magento Static Cache should go to website root
       # to maintain the original URL
       - >- 
