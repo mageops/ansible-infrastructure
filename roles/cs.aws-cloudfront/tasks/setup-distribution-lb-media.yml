@@ -105,6 +105,7 @@
         items:
           - HEAD
           - GET
+          - OPTIONS
         cached_methods:
           - HEAD
           - GET
