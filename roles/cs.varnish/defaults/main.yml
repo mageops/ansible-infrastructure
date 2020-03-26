@@ -94,3 +94,11 @@ varnish_vcl_synth_extra: ""
 varnish_vcl_backend_error_extra: ""
 
 varnish_strip_params: ['gclid']
+
+# Set to unique, secret value in order to enable
+# pass-through request debugging
+varnish_debug_request_token: ~
+varnish_debug_request_query_param_name: ___varnish_debug_token___
+varnish_debug_request_cookie_name: ___varnish_debug_token___
+varnish_debug_request_header_name: X-Varnish-Debug-Token
+varnish_debug_request_info_header_name: X-Varnish-Debug-Request-Info

@@ -81,6 +81,7 @@
       nginx_app_root_dir: "{{ magento_live_release_dir }}"
       nginx_blacklist_urls: "{{ mageops_app_node_https_termination_enable | ternary([], mageops_app_node_nginx_blacklist_urls) }}"
       nginx_fcgi_backend_socket: "{{ php_fpm_pool_fcgi_socket_path }}"
+      nginx_fcgi_backend_debug_socket: "{{ php_fpm_debug_pool_fcgi_socket_path }}"
 
     - role: cs.nginx-https-termination
       when: mageops_app_node_https_termination_enable
