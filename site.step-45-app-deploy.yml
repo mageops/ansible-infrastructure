@@ -2,6 +2,39 @@
 
 - hosts: app:&current:!immutable
   pre_tasks:
+    - name: Release artifact sanity check failed
+      fail:
+        msg: |
+          ====================================================
+          ==   FATAL! No valid release artifacts were found ==
+          ====================================================
+      
+            No valid composer.json has been found at:
+            {{ deploy_artifact_composer_json_local_path }}
+
+            TIPS:
+            - Is local artifact dir path is correct?
+            - Was the project built at least once successfully?
+        
+          ----------------------------------------------------
+      when: deploy_artifact_composer_json_data.require is not defined
+
+    - name: Print artifact composer package information
+      debug:
+        msg: |
+          =============================================
+          ==  Artifact Composer Package Information  ==
+          =============================================
+
+          {% if deploy_artifact_composer_json_data.name is defined -%}
+          Main Package: {{ deploy_artifact_composer_json_data.name }}
+          {% endif %}
+
+          Dependencies:
+          {{ deploy_artifact_composer_json_data.require | to_nice_yaml }}
+
+          ---------------------------------------------
+
     - name: Check if previous release exists
       stat:
         path: "{{ deploy_current_release_dir }}"
@@ -121,6 +154,10 @@
     deploy_restarted_services:
       - php-fpm
       - nginx
+
+    # Helper variables for sanity checks and messages
+    deploy_artifact_composer_json_local_path: "{{ deploy_artifact_local_path ~ '/composer.json' }}"
+    deploy_artifact_composer_json_data: "{{ lookup('file', deploy_artifact_composer_json_local_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"
 
     magento_core_config_settings: "{{ magento_core_config_settings_default + magento_core_config_settings_extra }}"
     magento_core_config_settings_to_remove: "{{ magento_core_config_settings_to_remove_default + magento_core_config_settings_to_remove_extra }}"
