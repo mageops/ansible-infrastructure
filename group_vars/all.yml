@@ -406,7 +406,8 @@ aws_s3_bucket_policies: []
 
 # AWS Logs + slack notifications settings
 aws_logs_slack_hook_url: "{{ mageops_notifications_slack_hook_url | default(None) }}"
-aws_logs_slack_channel: "{{ mageops_notifications_slack_channel }}"
+aws_logs_slack_channel: "{{ mageops_notifications_slack_channel | default(none, true) }}"
+aws_logs_slack_notifications: "{{ mageops_notifications_slack_enable }}"
 
 aws_logs_loggers_persistent_default:
   syslog: { enabled: yes }
@@ -1481,4 +1482,5 @@ ntp_timezone: "{{ mageops_timezone }}"
 # --------  Notifications Common Settings  --------
 # -------------------------------------------------
 
-mageops_notifications_slack_channel: "#mage-errors"
+mageops_notifications_slack_channel: ~
+mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}" 
