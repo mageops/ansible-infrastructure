@@ -10,6 +10,9 @@ php_fpm_terminate_timeout: 600
 php_fpm_pool_listen_user: "{{ nginx_user }}"
 php_fpm_pool_listen_group: "{{ nginx_group }}"
 
+php_fpm_pool_ping_path: /___php-fpm___/ping
+php_fpm_pool_ping_response: pong
+
 php_fpm_daemon_conf_file_path: "/etc/php-fpm.conf"
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
 php_fpm_run_dir_path: "/var/run/php-fpm"
@@ -18,3 +21,8 @@ php_fpm_log_dir_path: "/var/log/php-fpm"
 php_fpm_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/php-fpm.backend.conf"
 php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/php-fcgi-php-fpm-backend.sock"
 php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
+
+php_fpm_debug_pool_enable: yes
+php_fpm_debug_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/php-fcgi-php-fpm-debug.sock"
+php_fpm_debug_pm_max_children: 3
+php_fpm_debug_pm_max_requests: 10

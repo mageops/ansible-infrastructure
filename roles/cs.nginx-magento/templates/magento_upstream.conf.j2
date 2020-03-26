@@ -1,3 +1,7 @@
 upstream fastcgi_backend {
     server unix:{{ nginx_fcgi_backend_socket }};
 }
+
+upstream fastcgi_backend_debug {
+    server unix:{{ nginx_fcgi_backend_debug_socket }};
+}

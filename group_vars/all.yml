@@ -585,6 +585,60 @@ mageops_reduce_iops: "{{ aws_use }}"
 mageops_swap_app_node_enable: yes
 mageops_zram_app_node_enable: "{{ mageops_reduce_iops }}"
 
+# Secret token used for accessing internal non-sensitive APIs and debugging
+# facilities.
+#
+# WARNING! This is a secret thus must be project-unique and placed in
+# an encrypted project's credentials configuration file.
+#
+# WARNING! Must be safe to be used as a HTTP request query argument value
+# so stick to alphanumeric characters only!
+#
+# mageops_secret_token:
+
+# Prefix used for internal status / debugging / healtchecks APIs
+# NOTE: This APIs are not exposide outside infra and filtered out
+# from any ingress HTTP traffic.
+mageops_internal_api_http_path: /___mageops___
+
+# Name prefix of all custom MageOps-specific HTTP start with this
+mageops_http_header_prefix: "X-MageOps"
+
+# Name prefix of custom MageOps query parameters that are to be used
+# outside of the infrastructure (via ingress requests / on the public site) 
+mageops_query_param_prefix: "__mgo"
+
+# Name prefix of custom MageOps cookies
+mageops_cookie_prefix: "MageOps"
+
+# ---------------------------------------------
+# --------  MageOps General Debugging  --------
+# ---------------------------------------------
+
+# Secret, unique string used for authorizing debugging sessions 
+# and for accessing other debug functionality
+#
+# WARNING! Must be safe to be used as a HTTP request query argument value
+# so stick to alphanumeric characters only!
+mageops_debug_token: "{{ mageops_secret_token }}"
+
+# Name of the HTTP requests's query parameter that triggers debugging mode
+mageops_debug_token_query_param: "{{ mageops_query_param_prefix }}_debug_token"
+
+# Name of the HTTP Cookie that triggers debugging mode
+mageops_debug_token_request_cookie: "{{ mageops_cookie_prefix }}DebugToken"
+
+# Prefix for all HTTP headers related to debugging information or behavior
+# - This is nice to have in a variable in case we need to do special processing
+#   of all requests containing any of these headers.
+mageops_debug_http_header_prefix: "{{ mageops_http_header_prefix }}-Debug"
+
+# Name of the header that enables debugging mode (cache passthrough, xdebug pool routing, ...)
+mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
+
+# Name of the header that will carry useful PHP-specific debugging information
+mageops_debug_info_php_http_header: "{{ mageops_debug_http_header_prefix }}-Info-PHP"
+
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
@@ -1038,8 +1092,17 @@ php_fpm_run_dir_path: "/var/run/php-fpm"
 php_fpm_log_dir_path: "/var/log/php-fpm"
 
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
-php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ mageops_app_type|default('app') }}.sock"
+php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ mageops_app_type }}.sock"
+php_fpm_debug_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ mageops_app_type }}.debug.sock"
 php_fpm_service: php-fpm
+
+# Enable the separate PHP-FPM pool with xdebug support (among others)
+php_fpm_debug_pool_enable: yes
+
+# Configure the status and ping internal PHP-FPM pool endpoints
+php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
+php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"
+php_fpm_pool_ping_response: "HEALTHY"
 
 php_date_timezone: "{{ mageops_timezone }}"
 php_memory_limit: "-1"
@@ -1293,6 +1356,8 @@ varnish_strip_params:
   - "trk_[^=&]+"
   - "dm_i"
   - "fbclid"
+
+varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
 
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------
