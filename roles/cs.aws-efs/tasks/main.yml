@@ -33,6 +33,7 @@
       when: efs_lifecycle_policies and efs_lifecycle_policies | length > 0
       command: >-
         aws efs put-lifecycle-configuration 
+          --region '{{ aws_region }}'
           --file-system-id '{{ _aws_efs.efs.file_system_id }}'
           --lifecycle-policies '{{ efs_lifecycle_policies | to_json }}'
 
