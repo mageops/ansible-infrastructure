@@ -44,6 +44,10 @@
       varnish_secure_site_trusted_ips: "{{ mageops_trusted_cidr_blocks }}"
       varnish_purge_trusted_ips: "{{ (aws_vpc_subnet_prefix is defined)|ternary([aws_vpc_subnet_prefix ~ '.0.0/16'], []) }}"
       varnish_purge_logging: "{{ mageops_varnish_purge_logging }}"
+      varnish_debug_request_token: "{{ mageops_debug_token }}"
+      varnish_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
+      varnish_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
+      varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
     - role: cs.varnish-manager
       when: varnish_standalone and aws_use
     - role: cs.mageops-cli-profile

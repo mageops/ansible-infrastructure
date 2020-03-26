@@ -10,6 +10,7 @@ php_packages:
   - php-opcache
 
 php_install_fpm_package: no
+php_fpm_package: 'php-fpm'
 
 # --- Basic default PHP INI configuration ---
 
@@ -90,6 +91,20 @@ php_cli_max_execution_time: 3600
 php_cli_opcache_memory_consumption: "{{ php_opcache_memory_consumption * 2 }}"
 
 php_cli_error_log_path: /var/log/php-cli-error.log
+
+
+# --- XDebug settings ---
+
+# Install and enable XDebug but create a separate php.ini that loads
+# and configures it so it's not laoded for normal site operation but
+# can be used when needed - e.g. for a special separate debugging php-fpm pool.
+php_xdebug_enable_with_separate_inifile: yes
+
+# Name of xdebug package to install when `php_xdebug_enable_with_separate_inifile` is enabled
+php_xdebug_package: php-xdebug
+
+# Path to the special ini file that enables xdebug
+php_xdebug_inifile: /etc/php-xdebug.ini
 
 
 # As all of the defaults are tuned for production setups you'll

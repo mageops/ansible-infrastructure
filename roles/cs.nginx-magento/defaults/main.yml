@@ -8,7 +8,8 @@ nginx_magento_mode: "{{ magento_mode | default('production') }}"
 nginx_fcgi_upstream_conf_file: "{{ nginx_confd_dir }}/000-php-fpm-upstream.conf"
 nginx_fcgi_read_timeout: '600s'
 nginx_fcgi_connect_timeout: '600s'
-nginx_fcgi_backend_socket: '/var/run/php-fpm/magento.sock'
+nginx_fcgi_backend_socket: '/var/run/php-fpm/backend.sock'
+nginx_fcgi_backend_debug_socket: "{{ nginx_fcgi_backend_socket }}"
 
 nginx_magento_fastcgi_params_conf_path: "{{ nginx_etc_dir }}/magento_fastcgi_params"
 nginx_magento_server_body_conf_path: "{{ nginx_etc_dir }}/magento_server_body"

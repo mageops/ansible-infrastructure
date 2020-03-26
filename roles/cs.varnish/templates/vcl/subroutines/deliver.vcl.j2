@@ -20,6 +20,11 @@ if (resp.http.X-Rewrite-HTML-Maxage) {
     {% endif %}
 }
 
+if (req.{{ varnish_debug_request_info_header_name }}) {
+    set resp.{{ varnish_debug_request_info_header_name }} = 
+        req.{{ varnish_debug_request_info_header_name }} "; Backend-Response-Delivered";
+}
+
 if (resp.status == 502 || resp.status == 504) {
     return(synth(resp.status));
 }
