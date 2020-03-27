@@ -9,7 +9,7 @@
   vars:
     docker_builder_project_name: raccoon
 
-    docker_builder_image: alpine #mageops/centos-systemd
+    docker_builder_image: mageops/centos-systemd
     docker_builder_image_push: no
 
     docker_builder_container_ssh_support: yes
@@ -27,11 +27,22 @@
       - /var/log
       - /var/tmp
 
+    docker_builder_container_ansible_groups:
+      - builder
+      - vagrant
+      - dev
+      - app
+      - database
+      - redis
+      - elasticsearch
+      - persistent
+
     # Just for testing reuse the same container
     docker_builder_job_id: testing
 
-- hosts: "{{ docker_builder_hosts }}"
+- hosts: builder
   any_errors_fatal: yes
   tasks:
     - debug:
-        msg: test
+        msg: YEAH!
+          
