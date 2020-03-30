@@ -15,16 +15,14 @@
   register: ami_output
 
 - name: Wait until AMI is accessible
-  ec2_ami_find:
+  ec2_ami_info:
     region: "{{ aws_region }}"
     owner: self
-    sort: creationDate
-    sort_order: descending
-    no_result_action: fail
-    ami_tags: "{{ aws_tags_base | combine(ami_tags) }}"
-  register: ami_found
-  until: ami_found.results is defined and ami_found.results[0].ami_id == ami_output.image_id and ami_found.results[0].state == "available"
+    filters: "{{ aws_tags_base | prefix_keys('tag:') | combine(ami_facts_tag_filters) }}"
+  vars:
+    ami_facts_tag_filters: "{{ ami_tags | prefix_keys('tag:') }}"
+  register: ami_facts
+  until: "ami_facts.images is defined and ami_facts.images|length > 0"
   retries: 60
   delay: 5
   when: ami_output is changed
-
