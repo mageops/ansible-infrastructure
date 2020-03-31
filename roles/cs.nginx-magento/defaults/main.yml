@@ -11,10 +11,30 @@ nginx_fcgi_connect_timeout: '600s'
 nginx_fcgi_backend_socket: '/var/run/php-fpm/backend.sock'
 nginx_fcgi_backend_debug_socket: "{{ nginx_fcgi_backend_socket }}"
 
-nginx_magento_fastcgi_params_conf_path: "{{ nginx_etc_dir }}/magento_fastcgi_params"
-nginx_magento_server_body_conf_path: "{{ nginx_etc_dir }}/magento_server_body"
-nginx_magento_vhost_conf_path: "{{ nginx_confd_dir }}/magento.conf"
+# Template files are configurable in case per-project overrides are needed
+# NOTE: Overriding core configs in project is strongly discouraged
+# as this often will cause non-trivial regressions when any of these
+# configs is modified here and not updated in project.
+nginx_magento_fastcgi_pass_template: magento_fastcgi_pass.conf.j2
+nginx_magento_fastcgi_params_template: magento_fastcgi_params.conf.j2
+nginx_magento_server_body_template: magento_server_body.conf.j2
+nginx_magento_vhost_template: magento_vhost.conf.j2
+nginx_magento_fcgi_upstream_template: magento_upstream.conf.j2
 
+# These are optional config partials that are explicitly included
+nginx_magento_fastcgi_pass_include_path: "{{ nginx_include_dir }}/magento_fastcgi_pass"
+nginx_magento_fastcgi_params_include_path: "{{ nginx_include_dir }}/magento_fastcgi_params"
+nginx_magento_server_body_include_path: "{{ nginx_include_dir }}/magento_server_body"
+
+# Old variable names kept for compatibility with custom templates in projects
+nginx_magento_fastcgi_params_conf_path: "{{ nginx_magento_fastcgi_params_include_path }}"
+nginx_magento_server_body_conf_path: "{{ nginx_magento_server_body_include_path }}"
+
+# These are nginx configs that are *automatically* included.
+# NOTE: Order is often important thus numeric file name prefixes
+# are used to ensure it as nginx loads includes in alphabetical order.
+nginx_magento_vhost_conf_path: "{{ nginx_confd_dir }}/090-magento.conf"
+nginx_magento_fcgi_upstream_conf_path: "{{ nginx_confd_dir }}/010-magento-fastcgi-upstream.conf"
 
 # Can be `website` or `store` depending on what do you want to switch.
 # Warning! Store means actually means "store view", so you should use store view codes with this setting.
@@ -29,10 +49,7 @@ nginx_mage_default_run_code: no
 # A dictionary of paths which produces 301 redirects in the form key => value
 nginx_custom_redirects: {}
 
-nginx_magento_fastcgi_params_template: magento_fastcgi_params.j2
-nginx_magento_server_body_template: magento_server_body.j2
-nginx_magento_vhost_template: magento_vhost.conf.j2
-
+# Debug mode trigger configuration
 nginx_debug_request_token: ~
 nginx_debug_request_query_param_name: ___nginx_debug_token___
 nginx_debug_request_cookie_name: __nginx_debug_token___

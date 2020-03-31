@@ -31,4 +31,4 @@
     src: language-redirect.conf.j2
     dest: /etc/nginx/conf.d/30-language-redirect.conf
   notify:
-    - reload nginx
+    - Reload nginx

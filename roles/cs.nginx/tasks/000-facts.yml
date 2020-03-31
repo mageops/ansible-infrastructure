@@ -1,0 +1,6 @@
+# We maintain a list of conf.d files that were provisioned during this urn
+# so later we can remove any old leftovers via `099-cleanup.yml` as they
+# could potentially break environments as they are loaded automatically.
+- name: Set list of provisioned nginx conf.d files
+  set_fact:
+    nginx_provisioned_confd_files: []

@@ -44,5 +44,5 @@
   template:
     src: vhost.conf
     dest: "{{ nginx_confd_dir }}/goaccess.conf"
-  notify: reload nginx
+  notify: Reload nginx
   when: goaccess_vhost_port is defined

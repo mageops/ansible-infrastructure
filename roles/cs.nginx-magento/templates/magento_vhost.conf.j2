@@ -34,6 +34,6 @@ server {
     set $MAGE_RUN_TYPE {{ nginx_magento_run_type }};
 {% endif %}
 
-    include {{ nginx_magento_server_body_conf_path }};
+    include {{ nginx_magento_server_body_include_path }};
     include server.d/default/*.conf;
 }

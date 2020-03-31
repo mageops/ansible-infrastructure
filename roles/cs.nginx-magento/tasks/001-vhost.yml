@@ -4,19 +4,31 @@
     dest: "{{ config.filepath }}"
   loop:
     - template: "{{ nginx_magento_fastcgi_params_template }}"
-      filepath: "{{ nginx_magento_fastcgi_params_conf_path }}"
+      filepath: "{{ nginx_magento_fastcgi_params_include_path }}"
 
     - template: "{{ nginx_magento_server_body_template }}"
-      filepath: "{{ nginx_magento_server_body_conf_path }}"
+      filepath: "{{ nginx_magento_server_body_include_path }}"
+
+    - template: "{{ nginx_magento_fastcgi_pass_template }}"
+      filepath: "{{ nginx_magento_fastcgi_pass_include_path }}"
 
     - template: "{{ nginx_magento_vhost_template }}"
       filepath: "{{ nginx_magento_vhost_conf_path }}"
 
-    - template: magento_upstream.conf.j2
-      filepath: "{{ nginx_fcgi_upstream_conf_file }}"
-
+    - template: "{{ nginx_magento_fcgi_upstream_template }}"
+      filepath: "{{ nginx_magento_fcgi_upstream_conf_path }}"
   loop_control:
     loop_var: config
     label: "{{ config.template }} -> {{ config.filepath }}"
+  notify: Reload nginx configs
 
-  notify: Reload nginx
+- name: Register provisioned nginx conf.d configs (so they are kept during cleanup)
+  set_fact:
+    nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files + nginx_magento_provisioned_nginx_confd_files }}"
+  vars:
+    nginx_magento_provisioned_nginx_confd_files:
+      - "{{ nginx_magento_vhost_conf_path | basename }}"
+      - "{{ nginx_magento_fcgi_upstream_conf_path | basename }}"
+
+
+
