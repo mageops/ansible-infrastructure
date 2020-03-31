@@ -621,7 +621,7 @@ mageops_internal_api_http_path: /___mageops___
 mageops_http_header_prefix: "X-MageOps"
 
 # Name prefix of custom MageOps query parameters that are to be used
-# outside of the infrastructure (via ingress requests / on the public site) 
+# outside of the infrastructure (via ingress requests / on the public site)
 mageops_query_param_prefix: "__mgo"
 
 # Name prefix of custom MageOps cookies
@@ -631,7 +631,12 @@ mageops_cookie_prefix: "MageOps"
 # --------  MageOps General Debugging  --------
 # ---------------------------------------------
 
-# Secret, unique string used for authorizing debugging sessions 
+# NOTE: All header/param/cookie names must use only alphanumeric characters
+# and underscores only! Any other character may and probably will break stuff.
+# This is due to intricacies of nginx / varnish configuration languages,
+# various HTTP considerations, better be safe than sorry!
+
+# Secret, unique string used for authorizing debugging sessions
 # and for accessing other debug functionality
 #
 # WARNING! Must be safe to be used as a HTTP request query argument value
@@ -1239,7 +1244,7 @@ nginx_blacklist_map_variable_name: "magento_blacklisted_url"
 nginx_blacklist_map_config_file: "{{ nginx_confd_dir }}/000-magento-url-blacklist-map.conf"
 
 # Path to the partial nginx config to be included in vhost
-nginx_blacklist_vhost_check_config_file: "{{ nginx_etc_dir }}/magento_url_blacklist_check"
+nginx_blacklist_vhost_check_include_file: "{{ nginx_etc_dir }}/magento_url_blacklist_check"
 
 
 

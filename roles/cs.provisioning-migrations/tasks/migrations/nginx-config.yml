@@ -3,5 +3,15 @@
     path: "{{ item }}"
     state: absent
   loop:
+    # Now all conf.d files must have a numeric prefix to guarantee order, new name is `090-magento.conf`
+    - "{{ nginx_confd_dir }}/magento.conf"
+    # Very old name, Magento is always 2.x now, so no version suffix
     - "{{ nginx_confd_dir }}/magento2.conf"
+    # Old name with a typo
     - "{{ nginx_confd_dir }}/upsteram.conf"
+    # New name is `010-magento-fastcgi-upstream.conf` for consisteny
+    - "{{ nginx_confd_dir }}/000-php-fpm-upstream.conf"
+    # Our config partials are stored now in /etc/nginx/inc.d
+    - "/etc/nginx/magento_fastcgi_params"
+    - "/etc/nginx/magento_server_body"
+    - "/etc/nginx/magento_url_blacklist_check"

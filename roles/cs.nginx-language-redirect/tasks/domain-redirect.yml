@@ -1,6 +1,6 @@
 - name: "Create directory for domain redirect"
   file:
-    path: /etc/nginx/server.d/{{item.value}}/
+    path: /etc/nginx/server.d/{{ item.value }}/
     state: directory
     recurse: yes
     owner: root
@@ -9,7 +9,7 @@
 - name: "Generate server config for domain redirect"
   template:
     src: language-redirect-domain.conf.j2
-    dest: /etc/nginx/server.d/{{item.value}}/30-language-redirect.conf
+    dest: /etc/nginx/server.d/{{ item.value }}/30-language-redirect.conf
   notify:
-    - reload nginx
+    - Reload nginx
   with_dict: "{{ nginx_language_redirect_domain_mapping }}"

@@ -1,3 +1,6 @@
+- name: Reload nginx configs
+  include_tasks: 099-cleanup.yml
+
 - name: Restart nginx
   service: name=nginx state=restarted
 
