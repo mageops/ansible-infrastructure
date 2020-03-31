@@ -1,6 +1,6 @@
 if ((resp.status == 301 || resp.status == 302) && req.http.location) {
     set resp.http.location = req.http.location;
-    set resp.http.set-cookie = "vrredir=" + req.http.location + "; Secure";
+    set resp.http.Set-Cookie = "vrredir=" + req.http.location + "; Secure";
     return (deliver);
 }
 
