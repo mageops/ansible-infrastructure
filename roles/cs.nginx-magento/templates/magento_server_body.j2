@@ -8,12 +8,6 @@ set $PHP_MEMORY_LIMIT {{ php_http_request_memory_limit }};
 set $PHP_MAX_EXECUTION_TIME {{ php_http_request_max_execution_time }};
 set $PHP_FASTCGI_UPSTREAM fastcgi_backend;
 
-# if (
-#     req.url ~ "[?&]{{ varnish_debug_request_token_query_param_pattern }}[$?&]"
-#     || req.http.{{ varnish_debug_request_header_name }} == "{{ varnish_debug_request_token }}"
-#     || req.http.Cookie ~ "(^|;\s*){{ varnish_debug_request_token_cookie_pattern }}(;|$)"
-# ) {
-
 {% set debug_cookie_var  = nginx_debug_request_cookie_name | lower | regex_replace('[^_a-z0-9]', '_') %}
 {% set debug_header_var  = nginx_debug_request_header_name | lower | regex_replace('[^_a-z0-9]', '_') %}
 {% set debug_query_esc   = nginx_debug_request_query_param_name | regex_escape %}
