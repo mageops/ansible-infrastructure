@@ -1,10 +1,10 @@
 - name: Install PHP and dependency packages
   yum:
     name: >-
-      {{ 
+      {{
           (
-            php_packages + php_extra_packages | default([]) 
-              + php_install_fpm_package | ternary([php_fpm_package], []) 
+            php_packages + php_extra_packages | default([])
+              + php_install_fpm_package | ternary([php_fpm_package], [])
               + php_xdebug_enable_with_separate_inifile | ternary([php_xdebug_package], [])
           ) | unique
       }}
@@ -45,13 +45,12 @@
 - name: Disable unwanted PHP INI overrides
   copy:
     content: |
-      ; {{ ansible_managed }}
       ; WARNING! Do not add any settings here!
       ;
       ; This file is empty on purpose to allow
       ; settings for this module to be set in
-      ; the main /etc/php*.ini files. This is 
-      ; a must since /etc/php.d/*.ini files 
+      ; the main /etc/php*.ini files. This is
+      ; a must since /etc/php.d/*.ini files
       ; always take precedence and thus disallow
       ; any conditional customization for core
       ; modules.
