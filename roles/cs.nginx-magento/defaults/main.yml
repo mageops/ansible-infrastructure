@@ -33,4 +33,9 @@ nginx_magento_fastcgi_params_template: magento_fastcgi_params.j2
 nginx_magento_server_body_template: magento_server_body.j2
 nginx_magento_vhost_template: magento_vhost.conf.j2
 
+nginx_debug_request_token: ~
+nginx_debug_request_query_param_name: ___nginx_debug_token___
+nginx_debug_request_cookie_name: __nginx_debug_token___
+nginx_debug_request_header_name: X-NGINX-Debug-Token
+
 
