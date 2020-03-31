@@ -51,8 +51,8 @@ server {
     ssl_certificate {{ https_termination_certificate_dir }}/{{ item.name }}.cer;
     ssl_certificate_key {{ https_termination_private_dir }}/{{ item.name }}.pem;
 
-{% if nginx_blacklist_vhost_check_config_file is defined %}
-    include "{{ nginx_blacklist_vhost_check_config_file }}";
+{% if nginx_blacklist_vhost_check_include_file is defined %}
+    include "{{ nginx_blacklist_vhost_check_include_file }}";
 {% endif %}
 
 {% if item.extra_vhost_config | default('') %}
@@ -100,7 +100,7 @@ server {
         {% endif %}
 
 {% if item.server_name != '*' %}
-        include server.d/{{item.server_name}}/*.conf;
+        include server.d/{{ item.server_name }}/*.conf;
 {% endif %}
         include server.d/default/*.conf;
     }

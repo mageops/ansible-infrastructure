@@ -3,4 +3,4 @@
     src: language-redirect-path.conf.j2
     dest: /etc/nginx/server.d/default/30-language-redirect.conf
   notify:
-    - reload nginx
+    - Reload nginx

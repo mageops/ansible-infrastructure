@@ -1,3 +1,10 @@
+###############################################################
+# Partial configuration to be included in every server block
+# of a Magento shop. This is separated into an include because
+# usually it will be repeated multiple times in case of a more
+# complicated multi-shop setup.
+###############################################################
+
 root $MAGE_ROOT/pub;
 
 index index.php;
@@ -6,22 +13,6 @@ charset off;
 
 set $PHP_MEMORY_LIMIT {{ php_http_request_memory_limit }};
 set $PHP_MAX_EXECUTION_TIME {{ php_http_request_max_execution_time }};
-set $PHP_FASTCGI_UPSTREAM fastcgi_backend;
-
-{% set debug_cookie_var  = nginx_debug_request_cookie_name | lower | regex_replace('[^_a-z0-9]', '_') %}
-{% set debug_header_var  = nginx_debug_request_header_name | lower | regex_replace('[^_a-z0-9]', '_') %}
-{% set debug_query_esc   = nginx_debug_request_query_param_name | regex_escape %}
-{% set debug_token_esc   = nginx_debug_request_token | regex_escape %}
-
-map "#$cookie_{{ debug_cookie_var }}#$http_{{ debug_header_var }}#$query_string#" $php_backend {
-    ~ "#{{ debug_token_esc }}#|[&#]{{ debug_query_esc }}={{ debug_token_esc }}[&#]" fastcgi_backend_debug;
-    default fastcgi_backend;
-}
-
-if ($php_backend = fastcgi_backend_debug) {
-    add_header "Set-Cookie" "{{ nginx_debug_request_cookie_name }}={{ nginx_debug_request_token }}; HttpOnly; SameSite=Strict; MaxAge=3600"
-    add_header "{{ nginx_debug_request_header_name }}" "Token-Verified; Enabled"
-}
 
 location = /WARMUP {
     # This ensures that requests to /WARMUP file are never rewritten
@@ -33,8 +24,8 @@ location = /WARMUP {
     try_files $uri =404;
 }
 
-{% if nginx_blacklist_vhost_check_config_file is defined %}
-include "{{ nginx_blacklist_vhost_check_config_file }}";
+{% if nginx_blacklist_vhost_check_include_file is defined %}
+include "{{ nginx_blacklist_vhost_check_include_file }}";
 {% endif %}
 
 {% if magento_enable_setup_url | default(False) %}
@@ -42,12 +33,8 @@ location ~* ^/setup($|/) {
     root $MAGE_ROOT;
 
     location ~ ^/setup/index.php {
-        fastcgi_pass $PHP_FASTCGI_UPSTREAM;
-
         fastcgi_index index.php;
-
-        include fastcgi_params;
-        include {{ nginx_magento_fastcgi_params_conf_path }};
+        include {{ nginx_magento_fastcgi_pass_include_path}};
     }
 
     location ~ ^/setup/(?!pub/). {
@@ -65,12 +52,9 @@ location ~* ^/update($|/) {
 
     location ~ ^/update/index.php {
         fastcgi_split_path_info ^(/update/index.php)(/.+)$;
-        fastcgi_pass PHP_FASTCGI_UPSTREAM;
-        fastcgi_index index.php;
         fastcgi_param PATH_INFO $fastcgi_path_info;
-
-        include fastcgi_params;
-        include {{ nginx_magento_fastcgi_params_conf_path }};
+        fastcgi_index index.php;
+        include {{ nginx_magento_fastcgi_pass_include_path}};
     }
 
     # Deny everything but index.php
@@ -257,9 +241,6 @@ location /media/import/ {
 location ~ (resize|index|get|static|report|404|503)\.php$ {
     try_files $uri =404;
 
-    fastcgi_pass PHP_FASTCGI_UPSTREAM;
-    fastcgi_index index.php;
-
     if ($request_uri ~ ^/rest/.*$) {
         set $PHP_MEMORY_LIMIT {{ magento_api_request_php_memory_limit }};
         set $PHP_MAX_EXECUTION_TIME {{ magento_api_request_php_max_execution_time }};
@@ -278,8 +259,8 @@ location ~ (resize|index|get|static|report|404|503)\.php$ {
         }
     {% endfor %}
 
-    include fastcgi_params;
-    include {{ nginx_magento_fastcgi_params_conf_path }};
+    fastcgi_index index.php;
+    include {{ nginx_magento_fastcgi_pass_include_path}};
 }
 
 location ~ cron\.php {
@@ -288,23 +269,17 @@ location ~ cron\.php {
     auth_basic "Cron Authentication";
     auth_basic_user_file /etc/nginx/htpasswd;
 
-    fastcgi_pass PHP_FASTCGI_UPSTREAM;
-    fastcgi_index cron.php;
-
     set $PHP_MEMORY_LIMIT {{ magento_cron_request_php_memory_limit }};
     set $PHP_MAX_EXECUTION_TIME {{ magento_cron_request_php_max_execution_time }};
 
-    include fastcgi_params;
-    include {{ nginx_magento_fastcgi_params_conf_path }};
+    fastcgi_index cron.php;
+    include {{ nginx_magento_fastcgi_pass_include_path}};
 }
 
 {% if nginx_custom_php_scripts_path_pattern %}
 # Custom PHP scripts
 location ~ {{ nginx_custom_php_scripts_path_pattern }} {
-    fastcgi_pass PHP_FASTCGI_UPSTREAM;
-
-    include fastcgi_params;
-    include {{ nginx_magento_fastcgi_params_conf_path }};
+    include {{ nginx_magento_fastcgi_pass_include_path}};
 }
 {% endif %}
 

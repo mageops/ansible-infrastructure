@@ -10,8 +10,14 @@ nginx_package: nginx
 nginx_packages_extra: []
 
 nginx_www_dir: "/var/www"
-nginx_etc_dir: "/etc/nginx"
 nginx_log_dir: "/var/log/nginx"
 nginx_run_dir: "/var/run"
+nginx_etc_dir: "/etc/nginx"
+nginx_include_dir: "{{ nginx_etc_dir }}/inc.d"
 nginx_confd_dir: "{{ nginx_etc_dir }}/conf.d"
+
+# List of conf.d files provisioned with this run stored as fact
+# to later remove any old configs that could mess up stuff.
+nginx_provisioned_confd_files: []
+
 
