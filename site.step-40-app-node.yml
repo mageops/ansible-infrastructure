@@ -23,7 +23,7 @@
       when: aws_use
 
     - role: cs.switch-to-dnf
-    
+
     - role: pinkeen.selinux-disable
 
     - role: cs.swap
@@ -101,7 +101,7 @@
 
     - role: cs.s3-fuse-s3fs
       when: aws_use and not s3fs_mount_use_goofys | default(false)
-      
+
     - role: cs.s3-fuse-goofys
       when: aws_use and s3fs_mount_use_goofys | default(false)
 
@@ -130,3 +130,8 @@
     mageops_node_role: app
     mageops_app_node_nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
     mageops_app_node_https_termination_enable: "{{ mageops_https_termination_enable and not varnish_standalone }}"
+
+    nginx_debug_request_token: "{{ mageops_debug_token }}"
+    nginx_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
+    nginx_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
+    nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
