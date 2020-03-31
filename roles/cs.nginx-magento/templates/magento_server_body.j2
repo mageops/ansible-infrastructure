@@ -8,9 +8,25 @@ set $PHP_MEMORY_LIMIT {{ php_http_request_memory_limit }};
 set $PHP_MAX_EXECUTION_TIME {{ php_http_request_max_execution_time }};
 set $PHP_FASTCGI_UPSTREAM fastcgi_backend;
 
-map "$cookie_xdebug" $php_backend {
-    "cookie=token" fastcgi_backend_debug;
+# if (
+#     req.url ~ "[?&]{{ varnish_debug_request_token_query_param_pattern }}[$?&]"
+#     || req.http.{{ varnish_debug_request_header_name }} == "{{ varnish_debug_request_token }}"
+#     || req.http.Cookie ~ "(^|;\s*){{ varnish_debug_request_token_cookie_pattern }}(;|$)"
+# ) {
+
+{% set debug_cookie_var  = nginx_debug_request_cookie_name | lower | regex_replace('[^_a-z0-9]', '_') %}
+{% set debug_header_var  = nginx_debug_request_header_name | lower | regex_replace('[^_a-z0-9]', '_') %}
+{% set debug_query_esc   = nginx_debug_request_query_param_name | regex_escape('posix_basic') %}
+{% set debug_token_esc   = nginx_debug_request_token | regex_escape('posix_basic') %}
+
+map "#$cookie_{{ debug_cookie_var }}#$http_{{ debug_header_var }}#$query_string#" $php_backend {
+    ~ "#{{ debug_token_esc }}#|[&#]{{ debug_query_esc }}={{ debug_token_esc }}[&#]" fastcgi_backend_debug;
     default fastcgi_backend;
+}
+
+if ($php_backend = fastcgi_backend_debug) {
+    add_header "Set-Cookie" "{{ nginx_debug_request_cookie_name }}={{ nginx_debug_request_token }}; HttpOnly; SameSite=Strict; MaxAge=3600"
+    add_header "{{ nginx_debug_request_header_name }}" "Token-Verified; Enabled"
 }
 
 location = /WARMUP {
