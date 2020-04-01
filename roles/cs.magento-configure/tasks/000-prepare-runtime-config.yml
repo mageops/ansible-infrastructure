@@ -1,5 +1,28 @@
 # This step shall gather, normalize and extend any configuration
 # that should be ready for the next ones.
+- name: Configure magepack JS bundling task hook
+  block:
+    - name: Configure deploy for bundling
+      block:
+        - name: Create bundling configs
+          set_fact:
+            magento_magepack_js_bundling_task:
+              name: "magesuite-magepack-bundle"
+              image: "mageops/magesuite-magepack"
+              workdir: "{{ magento_release_dir }}"
+              commandline: ""
+              container_workdir: "/workdir"
+              user: "{{ magento_uid }}:{{ magento_gid }}"
+              # If magepack fails, it should keep magento in working condition
+              # we want to continue deployment even if magepack couldn't succeed
+              ignore_error: yes
+
+        - name: Append the bundling task config to the task list
+          set_fact:
+            magento_scd_containerized_tasks: "{{ magento_scd_containerized_tasks + [magento_magepack_js_bundling_task] }}"
+
+  when: magento_scd_advanced_js_bundling and magento_scd_advanced_js_bundling_strategy == 'magepack'
+
 - name: Configure baler JS bundling task hook
   block:
     - name: Configure deploy for bundling
@@ -41,5 +64,4 @@
         - name: Ensure that Magento's js minification, merging and bundling is disabled
           set_fact:
             magento_core_config_settings: "{{ magento_core_config_settings + magento_baler_js_bundling_core_config }}"
-  when: magento_scd_advanced_js_bundling
-
+  when: magento_scd_advanced_js_bundling and magento_scd_advanced_js_bundling_strategy == 'baler'

@@ -679,6 +679,7 @@ magento_node_warmup_script_path: /bin/node-warmup.sh
 # ------------------------------
 
 magento_scd_advanced_js_bundling: no
+magento_scd_advanced_js_bundling_strategy: baler
 
 
 # --------------------------------
@@ -1483,4 +1484,4 @@ ntp_timezone: "{{ mageops_timezone }}"
 # -------------------------------------------------
 
 mageops_notifications_slack_channel: ~
-mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}" 
+mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}"
