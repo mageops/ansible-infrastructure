@@ -209,8 +209,6 @@
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
-    ports_basic:
-      - "{{  }}"
     ec2_sg_tags:
       Name: "{{ aws_security_group_varnish_name }}"
 
