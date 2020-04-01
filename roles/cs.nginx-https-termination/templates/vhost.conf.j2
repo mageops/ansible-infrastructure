@@ -100,9 +100,9 @@ server {
         {% endif %}
 
 {% if item.server_name != '*' %}
-        include server.d/{{ item.server_name }}/*.conf;
+        include {{ nginx_serverd_dir }}/{{ item.server_name }}/*.conf;
 {% endif %}
-        include server.d/default/*.conf;
+        include {{ nginx_serverd_defaults_dir }}/*.conf;
     }
 
 {% if item.letsencrypt | default(False) %}

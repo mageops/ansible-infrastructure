@@ -1,7 +1,7 @@
 https_termination_varnish_upstream: "127.0.0.1:{{ varnish_port | default(80) }}"
 https_termination_proxy_read_timeout: 90
 https_termination_hide_varnish: yes
-https_termination_nginx_confd_dir: "{{ nginx_confd_dir }}"
+https_termination_nginx_extra_logging_conf_file: "{{ nginx_confd_dir }}/000-logging-extra.conf"
 https_termination_ssl_dir: /etc/ssl
 https_termination_certificate_dir: "{{ https_termination_ssl_dir }}/certs"
 https_termination_private_dir: "{{ https_termination_ssl_dir }}/private"
@@ -75,4 +75,6 @@ https_termination_hosts:
     - name: "default-https-termination"
       server_name: "*"
 
+# Internal helper var for storing runtime computed configuration
+https_termination_cfg_vhosts: []
 

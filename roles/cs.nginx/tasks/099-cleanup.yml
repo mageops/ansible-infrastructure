@@ -1,13 +1,11 @@
 # IMPORTANT! Read on how to use this process!
 #
-# This task list removes any nginx conf.d configs which were not
+# This task list removes any nginx configs which were not
 # provisioned during this run - which are not listed in the
-# fact `nginx_provisioned_confd_files`.
+# fact `nginx_config_cleanup_provisioned_files`.
 #
-# Note: The paths shall be relative to /etc/nginx/conf.d dir.
-#
-# After any of your role adds new configs into /etc/nginx/conf.d it should
-# register them by extending this fact and calling this cleanup.
+# After any of your role adds new configs into `nginx_config_cleanup_dirs`
+# directories it must register them by extending this fact and calling this cleanup.
 #
 # You should do this before reloading nginx as any leftover configs
 # may prevent nginx from starting.
@@ -16,11 +14,11 @@
 #
 #    - name: Register provisioned nginx configs
 #      set_fact:
-#        nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files + nginx_role_provisioned_nginx_confd_files }}"
+#        nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + nginx_role_provisioned_nginx_confd_files }}"
 #      vars:
 #        nginx_role_provisioned_nginx_confd_files:
-#          - 005-map-something.conf
-#          - 094-some-vhost.conf
+#          - /etc/nginx/conf.d/005-map-something.conf
+#          - /etc/nginx/conf.d/094-some-vhost.conf
 #
 #    - name: Remove deprecated nginx configs not added in this run
 #      include_role:
@@ -37,7 +35,7 @@
 #
 #    - name: Register provisioned nginx configs
 #      set_fact:
-#        nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files + ['090-main-vhost.conf'] }}"
+#        nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + ['/etc/nginx/conf.d/090-main-vhost.conf'] }}"
 #
 #    - name: Perform nginx config cleanup and reload at once
 #      meta: flush_handlers
@@ -45,55 +43,60 @@
 
 - name: Find existing nginx conf.d files
   find:
-    paths: "{{ nginx_confd_dir }}"
+    paths: "{{ nginx_config_cleanup_dirs }}"
     recurse: yes
     follow: yes
     file_type: file
     patterns: '*.conf'
-  register: nginx_installed_confd_files_find
+  register: nginx_config_cleanup_installed_files_find
 
 - name: Set list of nginx conf.d files to remove
   set_fact:
-    nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files }}"
-    nginx_installed_confd_files: "{{ nginx_installed_confd_files }}"
-    nginx_deprecated_confd_files: "{{ nginx_installed_confd_files | difference(nginx_provisioned_confd_files) }}"
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files }}"
+    nginx_config_cleanup_installed_files: "{{ nginx_config_cleanup_installed_files }}"
+    nginx_config_cleanup_deprecated_files: "{{ nginx_config_cleanup_installed_files | difference(nginx_config_cleanup_provisioned_files) }}"
   vars:
-    nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files | unique }}"
-    nginx_installed_confd_files: >-
+    nginx_config_cleanup_provisioned_files: >-
+      {{ nginx_config_cleanup_provisioned_files
+          | select('match', '^' ~ nginx_etc_dir | regex_escape)
+          | unique
+          | sort
+          | list
+      }}
+    nginx_config_cleanup_installed_files: >-
       {{
-        nginx_installed_confd_files_find.files
-            | sort(attribute='path')
-            | map(attribute='path')
-            | map('regex_replace', '^' ~ nginx_confd_dir | regex_escape, '')
-            | map('regex_replace', '^/*', '')
-            | list
+        nginx_config_cleanup_installed_files_find.files
+          | map(attribute='path')
+          | sort
+          | list
       }}
 
 - name: Print readable information about files that will be removed
-  when: nginx_deprecated_confd_files | length > 0
+  when: nginx_config_cleanup_deprecated_files | length > 0
   debug:
     msg: |
       =============================================
       ==     Deprecated nginx configs cleanup    ==
       =============================================
 
-      Auto-included config dirs: {{ nginx_confd_dir }}
+      --- Config dirs SCANNED for files ---
+      {{ nginx_config_cleanup_dirs | to_nice_yaml }}
 
-      Configs present on the host:
-      {{ nginx_installed_confd_files | to_nice_yaml }}
+      --- Config files FOUND on the host ---
+      {{ nginx_config_cleanup_installed_files | to_nice_yaml }}
 
-      Currently provisioned - will be KEPT:
-      {{ nginx_provisioned_confd_files | to_nice_yaml }}
+      --- Currently provisioned configs to KEEP ---
+      {{ nginx_config_cleanup_provisioned_files | to_nice_yaml }}
 
-      Deprecated configs - will be REMOVED:
-      {{ nginx_deprecated_confd_files | to_nice_yaml }}
+      --- Deprecated configs to REMOVE ({{ nginx_config_cleanup_deprecated_files | length }}) ---
+      {{ nginx_config_cleanup_deprecated_files | to_nice_yaml }}
 
 - name: Remove deprecated nginx conf.d files
   file:
-    name: "{{ nginx_confd_dir }}/{{ filename }}.conf"
+    path: "{{ confpath }}"
     state: absent
-  loop: "{{ nginx_deprecated_confd_files }}"
+  loop: "{{ nginx_config_cleanup_deprecated_files }}"
   loop_control:
-    label: "{{ nginx_confd_dir }}/{{ filename }}"
-    loop_var: filename
+    label: "{{ confpath | regex_replace('^' ~ nginx_etc_dir | regex_escape ~ '/', '') }}"
+    loop_var: confpath
   notify: Reload nginx

@@ -22,13 +22,13 @@
     label: "{{ config.template }} -> {{ config.filepath }}"
   notify: Reload nginx configs
 
-- name: Register provisioned nginx conf.d configs (so they are kept during cleanup)
+- name: Register provisioned nginx config files
   set_fact:
-    nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files + nginx_magento_provisioned_nginx_confd_files }}"
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
   vars:
-    nginx_magento_provisioned_nginx_confd_files:
-      - "{{ nginx_magento_vhost_conf_path | basename }}"
-      - "{{ nginx_magento_fcgi_upstream_conf_path | basename }}"
+    provisioned_configs:
+      - "{{ nginx_magento_vhost_conf_path }}"
+      - "{{ nginx_magento_fcgi_upstream_conf_path }}"
 
 
 

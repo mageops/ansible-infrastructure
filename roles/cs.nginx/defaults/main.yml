@@ -13,11 +13,25 @@ nginx_www_dir: "/var/www"
 nginx_log_dir: "/var/log/nginx"
 nginx_run_dir: "/var/run"
 nginx_etc_dir: "/etc/nginx"
-nginx_include_dir: "{{ nginx_etc_dir }}/inc.d"
-nginx_confd_dir: "{{ nginx_etc_dir }}/conf.d"
 
-# List of conf.d files provisioned with this run stored as fact
-# to later remove any old configs that could mess up stuff.
-nginx_provisioned_confd_files: []
+nginx_confd_dir: "{{ nginx_etc_dir }}/conf.d"
+nginx_included_dir: "{{ nginx_etc_dir }}/include.d"
+nginx_serverd_dir: "{{ nginx_etc_dir }}/server.d"
+nginx_serverd_defaults_dir: "{{ nginx_etc_dir }}/server.d/defaults"
+nginx_modules_conf_dir: "{{ nginx_etc_dir }}/modules"
+
+# --- Automatic auto-loaded config file cleanup ---
+# See comment in `tasks/099-cleanup.yml` for details.
+
+# Directories to look for config files to be cleaned up if
+# they were not provisioned with this run. These should be
+# directories from which files are loaded automatically thus
+# leftovers from previous provisioning versions could break
+# the current setup. Other leftovers should not pose problems
+# as they would not be used anyway.
+nginx_config_cleanup_dirs:
+  - "{{ nginx_confd_dir }}"
+  - "{{ nginx_serverd_dir }}"
+  - "{{ nginx_modules_conf_dir }}"
 
 
