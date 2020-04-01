@@ -12,7 +12,6 @@
 {% set debug_query_esc   = nginx_debug_request_query_param_name | regex_escape %}
 {% set debug_token_esc   = nginx_debug_request_token | regex_escape %}
 
-
 map "/$cookie_{{ debug_cookie_var }}/$http_{{ debug_header_var }}/$query_string/" $PHP_IS_DEBUG_REQUEST {
     ~*(/{{ debug_token_esc }}/|[/&]{{ debug_query_esc }}={{ debug_token_esc }}[/&]) 1;
     default 0;

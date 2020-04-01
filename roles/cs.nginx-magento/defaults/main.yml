@@ -54,5 +54,6 @@ nginx_debug_request_token: ~
 nginx_debug_request_query_param_name: ___nginx_debug_token___
 nginx_debug_request_cookie_name: __nginx_debug_token___
 nginx_debug_request_header_name: X-NGINX-Debug-Token
+nginx_debug_request_info_header_name: X-NGINX-Debug-Info
 
 
