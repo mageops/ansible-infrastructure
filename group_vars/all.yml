@@ -1210,7 +1210,7 @@ nginx_fcgi_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}s"
 nginx_fcgi_connect_timeout: "5s"
 
 # Name of extra header returning info about debug request (if triggered)
-nginx_debug_request_info_header_name: "{{ mageops_debug_token_http_header }}-Info-NGINX"
+nginx_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-NGINX"
 
 # List of nginx request path patterns to block completely by default
 # (See: `cs.nginx-url-blacklist` role)
