@@ -3,4 +3,4 @@
 # could potentially break environments as they are loaded automatically.
 - name: Set list of provisioned nginx conf.d files
   set_fact:
-    nginx_provisioned_confd_files: []
+    nginx_config_cleanup_provisioned_files: []

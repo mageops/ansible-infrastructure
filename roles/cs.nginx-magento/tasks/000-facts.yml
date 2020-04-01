@@ -3,7 +3,7 @@
     nginx_magento_vhost_template: "{{ mageops_project_templates_dir }}/{{ nginx_magento_vhost_template_custom }}"
   when: nginx_magento_vhost_template_custom is defined
 
-- name: Use custom Magento server body  nginx configtemplate
+- name: Use custom Magento server body nginx config template
   set_fact:
     nginx_magento_server_body_template: "{{ mageops_project_templates_dir }}/{{ nginx_magento_server_body_template_custom }}"
   when: nginx_magento_server_body_template_custom is defined

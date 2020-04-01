@@ -8,7 +8,7 @@ nginx_blacklist_urls_response_code: 410
 nginx_blacklist_map_config_file: "{{ nginx_confd_dir }}/010-url-blacklist-map.conf"
 
 # Path to the partial nginx config to be included in vhost
-nginx_blacklist_vhost_check_include_file: "{{ nginx_include_dir }}/url_blacklist_check"
+nginx_blacklist_vhost_check_include_file: "{{ nginx_included_dir }}/url_blacklist_check"
 
 # Nginx variable name used for the final check
 nginx_blacklist_map_variable_name: "blacklisted_url"

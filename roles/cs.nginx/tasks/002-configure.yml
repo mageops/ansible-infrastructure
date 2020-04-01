@@ -6,7 +6,10 @@
     - "{{ nginx_www_dir }}"
     - "{{ nginx_log_dir }}"
     - "{{ nginx_confd_dir }}"
-    - "{{ nginx_include_dir }}"
+    - "{{ nginx_included_dir }}"
+    - "{{ nginx_serverd_dir }}"
+    - "{{ nginx_serverd_defaults_dir }}"
+    - "{{ nginx_modules_conf_dir }}"
 
 - name: Ensure var directories always exist
   lineinfile:
@@ -40,10 +43,12 @@
   template:
     src: nginx.conf
     dest: "{{ nginx_etc_dir }}/nginx.conf"
-  notify: Reload nginx
+  notify: Reload nginx configs
 
-- name: Restart and enable nginx
+- name: Enable nginx service
   service:
     name: nginx
     enabled: yes
+
+
 
