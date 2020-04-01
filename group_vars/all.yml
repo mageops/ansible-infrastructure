@@ -657,9 +657,6 @@ mageops_debug_http_header_prefix: "{{ mageops_http_header_prefix }}-Debug"
 # Name of the header that enables debugging mode (cache passthrough, xdebug pool routing, ...)
 mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
 
-# Name of the header that will carry useful PHP-specific debugging information
-mageops_debug_info_php_http_header: "{{ mageops_debug_http_header_prefix }}-Info-PHP"
-
 # If we have a central ingress node, set this to its internal network hostname
 # to enable proxying xdebug remote connections to it so developer doesn't have to
 # forward it from every app node at once or guess to which one the request goes.
@@ -1229,7 +1226,7 @@ nginx_fcgi_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}s"
 nginx_fcgi_connect_timeout: "5s"
 
 # Name of extra header returning info about debug request (if triggered)
-nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}-Info-NGINX"
+nginx_debug_request_info_header_name: "{{ mageops_debug_token_http_header }}-Info-NGINX"
 
 # List of nginx request path patterns to block completely by default
 # (See: `cs.nginx-url-blacklist` role)
