@@ -644,10 +644,17 @@ mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
 # Name of the header that will carry useful PHP-specific debugging information
 mageops_debug_info_php_http_header: "{{ mageops_debug_http_header_prefix }}-Info-PHP"
 
+# Whether to proxy all xdebug connections to ingress node, auto-enabled if we have single central varnish node
+mageops_php_xdebug_remote_proxy_host: "{{ (varnish_standalone and varnish_as_loadbalancer) | ternary(mageops_varnish_host, false) }}"
+
+# Port to proxy xdebug connections to on the ingress node
+mageops_php_xdebug_remote_proxy_port: "{{ php_xdebug_remote_port }}"
+
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
 
+# This vars should be set in global company-wide settings
 mageops_root_ssh_keys_global: []
 mageops_app_ssh_keys_global: "{{ mageops_root_ssh_keys_global }}"
 
@@ -657,6 +664,7 @@ mageops_root_ssh_keys_project: []
 # SSH keys to authorize for access to app user customizable per project
 mageops_app_ssh_keys_project: "{{ mageops_root_ssh_keys_project }}"
 
+# Final runtime SSH authorized keys lists
 mageops_root_ssh_keys: "{{ mageops_root_ssh_keys_global + mageops_root_ssh_keys_project }}"
 mageops_app_ssh_keys: "{{ mageops_app_ssh_keys_global + mageops_app_ssh_keys_project }}"
 
@@ -1109,6 +1117,8 @@ php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
 php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"
 php_fpm_pool_ping_response: "HEALTHY"
 
+php_xdebug_remote_port: 9000
+
 php_date_timezone: "{{ mageops_timezone }}"
 php_memory_limit: "-1"
 
@@ -1197,6 +1207,9 @@ nginx_site_htpasswd_file: "{{ nginx_etc_dir }}/sitepasswd"
 nginx_app_port: "{{ mageops_varnish_backend_port }}"
 nginx_fcgi_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}s"
 nginx_fcgi_connect_timeout: "5s"
+
+# Name of extra header returning info about debug request (if triggered)
+nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}-Info-NGINX"
 
 # List of nginx request path patterns to block completely by default
 # (See: `cs.nginx-url-blacklist` role)

@@ -1,4 +1,4 @@
-- name: Reload ssh daemon
+- name: Reload SSH Daemon
   service:
     name: sshd
     state: reloaded

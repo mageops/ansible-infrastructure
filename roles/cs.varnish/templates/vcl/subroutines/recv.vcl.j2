@@ -129,7 +129,7 @@ if (
     || req.http.{{ varnish_debug_request_header_name }} == "{{ varnish_debug_request_token }}"
     || req.http.Cookie ~ "(^|;\s*){{ varnish_debug_request_token_cookie_pattern }}(;|$)"
 ) {
-    set req.http.{{ varnish_debug_request_info_header_name }} = "Token-Verified-Matching; Request-Passed-Through";
+    set req.http.{{ varnish_debug_request_info_header_name }} = "Token-Verified; Cache-Bypassed";
 
     return (pass);
 }

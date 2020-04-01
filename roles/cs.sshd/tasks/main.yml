@@ -1,33 +1,48 @@
-- name: Install sshd packages
+- name: Install SSH Daemon packages
   yum:
     name: openssh-server
     state: present
+  notify: Reload SSH Daemon
 
-- name: Ensure sshd configuration
-  lineinfile:
+- name: Compute final SSH Daemon configuration
+  set_fact:
+    sshd_config_file_content: "{{ lookup('template', 'sshd_config.j2') }}"
+  vars:
+    config_global: "{{ sshd_config_base | combine(sshd_config) }}"
+    config_users: "{{ sshd_config_users_base | combine(sshd_config_users) }}"
+
+- name: Show SSH Daemon configuration to be applied
+  debug:
+    msg: |
+      ===============================================
+      ==     Applying SSH Daemon Configuration     ==
+      ===============================================
+
+      {{ sshd_config_file_content | indent(width=2, first=true) }}
+
+- name: Configure SSH Daemon
+  copy:
+    content: "{{ sshd_config_file_content }}"
     dest: /etc/ssh/sshd_config
-    line: "{{ entry.key }} {{ entry.value }}"
-    regexp: "#?\\s*{{ entry.key }}\\s+"
-    state: present
-  loop:
-    - key: PasswordAuthentication
-      value: "{% if sshd_password_auth %}yes{% else %}no{% endif %}"
-    - key: PubkeyAuthentication
-      value: "yes"
-    - key: PermitRootLogin
-      value: "{% if sshd_permit_root_login %}yes{% else %}no{% endif %}"
-    - key: PermitEmptyPasswords
-      value: "no"
-    - key: MaxAuthTries
-      value: "{{ ssh_max_auth_tries }}"
-    - key: TCPKeepAlive
-      value: "yes"
-    - key: ClientAliveInterval
-      value: "60"
-    - key: AuthorizedKeysFile
-      value: ".ssh/authorized_keys"
-  loop_control:
-    loop_var: entry
-    label: "{{ entry.key }}={{ entry.value }}"
-  notify:
-    - Reload ssh daemon
+    validate: /usr/sbin/sshd -t -f '%s'
+  register: sshd_service_configured
+
+- name: Start and enable SSH Daemon
+  systemd:
+    name: sshd
+    enabled: yes
+    state: started
+  register: sshd_service_enabled
+
+# This better than force flushing all handlers... /FS
+- name: Apply new SSH Daemon configuration at once
+  when: not sshd_service_enabled is changed and sshd_service_configured is changed
+  systemd:
+    name: sshd
+    state: reloaded
+  register: sshd_service_reloaded
+  until: sshd_service_reloaded is success
+  retries: 5
+  delay: 5
+
+
