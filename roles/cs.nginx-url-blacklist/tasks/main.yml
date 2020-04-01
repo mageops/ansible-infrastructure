@@ -22,7 +22,7 @@
   template:
     src: magento_url_blacklist_map.j2
     dest: "{{ nginx_blacklist_map_config_file }}"
-  notify: Reload nginx
+  notify: Reload nginx configs
 
 - name: Create URL blacklist vhost nginx config include
   template:
@@ -30,10 +30,10 @@
     dest: "{{ nginx_blacklist_vhost_check_include_file }}"
   notify: Reload nginx
 
-- name: Register provisioned nginx conf.d configs (so they are kept during cleanup)
+- name: Register provisioned nginx config files
   set_fact:
-    nginx_provisioned_confd_files: "{{ nginx_provisioned_confd_files + nginx_magento_provisioned_nginx_confd_files }}"
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
   vars:
-    nginx_magento_provisioned_nginx_confd_files:
-      - "{{ nginx_blacklist_map_config_file | basename }}"
+    provisioned_configs:
+      - "{{ nginx_blacklist_map_config_file }}"
 

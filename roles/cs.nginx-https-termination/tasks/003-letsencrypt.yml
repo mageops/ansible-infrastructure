@@ -160,4 +160,6 @@
   loop_control:
     label: "{{ item[0].server_name }}"
   notify:
-    - reload httpd
+    - Reload nginx
+
+

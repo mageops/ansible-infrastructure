@@ -1,0 +1,16 @@
+- name: "Generate language detection config"
+  template:
+    src: language-redirect.conf.j2
+    dest: "{{ nginx_language_redirect_global_conf_path }}"
+  notify: Reload nginx configs
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
+  vars:
+    provisioned_configs:
+      - "{{ nginx_language_redirect_global_conf_path }}"
+
+- name: Configure redirect with the selected style
+  when: nginx_language_redirect_style == 'domain'
+  import_tasks: "redirect-style/{{ nginx_language_redirect_style }}.yml"
