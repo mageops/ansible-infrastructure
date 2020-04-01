@@ -23,6 +23,10 @@ php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/php-fcgi-php-fpm-back
 php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
 
 php_fpm_debug_pool_enable: yes
+php_fpm_debug_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/php-fpm.debug.conf"
 php_fpm_debug_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/php-fcgi-php-fpm-debug.sock"
 php_fpm_debug_pm_max_children: 3
 php_fpm_debug_pm_max_requests: 10
+
+php_fpm_debug_pool_xdebug_remote_host: "unix:///{{ php_fpm_run_dir_path }}/php-xdebug-remote.sock"
+php_fpm_debug_pool_xdebug_remote_port: "{{ php_xdebug_remote_port }}"

@@ -58,7 +58,7 @@ php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.black
 # --- File-based opcache settings for CLI scripts ---
 
 # Warning! This is an experimental feature. Currenly it does
-# not work correctly with Magento - standalone Magento cron 
+# not work correctly with Magento - standalone Magento cron
 # processes are not being run - until the issue is fixed it's not
 # recommended to enable this.
 
@@ -69,7 +69,7 @@ php_cli_opcache_file_cache_consistency_checks: 1
 # Even though the source does not change in some cases (e.g. during deploy)
 # there are commands ran which can (re)generate code at runtime. As it's
 # very tricky to invalidate the file cache for this cases, it's better
-# to turn this on, performance impact should be neglible and anyway it's 
+# to turn this on, performance impact should be neglible and anyway it's
 # offset by the gains of having the CLI file cache on.
 php_cli_opcache_validate_timestamps: 1
 
@@ -83,7 +83,7 @@ php_cli_opcache_file_update_protection: 5
 # enable GC for CLi as these processes can be long-running
 php_cli_zend_enable_gc: "On"
 
-# make sure CLI processes are restarted once in a while to avoid 
+# make sure CLI processes are restarted once in a while to avoid
 # memory leaks which could happen with bad code even though GC is on
 php_cli_max_execution_time: 3600
 
@@ -91,6 +91,20 @@ php_cli_max_execution_time: 3600
 php_cli_opcache_memory_consumption: "{{ php_opcache_memory_consumption * 2 }}"
 
 php_cli_error_log_path: /var/log/php-cli-error.log
+
+
+# --- Suggested OPCache INI Settings for Local Dev Env ---
+
+# As all of the defaults are tuned for production setups you'll
+# usually want to override these settings for development envs:
+#
+# php_opcache_validate_timestamps: 1
+# php_opcache_consistency_checks: 1
+# php_opcache_file_update_protection: 2
+# php_opcache_revalidate_path: 1
+# php_opcache_revalidate_freq: 0
+# php_cli_opcache_file_cache_enable: yes
+# php_cli_opcache_file_cache_consistency_checks: 1
 
 
 # --- XDebug settings ---
@@ -106,21 +120,19 @@ php_xdebug_package: php-xdebug
 # Path to the special ini file that enables xdebug
 php_xdebug_inifile: /etc/php-xdebug.ini
 
+# --- Xdebug INI settings ---
 
-# As all of the defaults are tuned for production setups you'll
-# usually want to override these settings for development envs:
-#
-# php_opcache_validate_timestamps: 1
-# php_opcache_consistency_checks: 1
-# php_opcache_file_update_protection: 2
-# php_opcache_revalidate_path: 1
-# php_opcache_revalidate_freq: 0
-# php_cli_opcache_file_cache_enable: yes
-# php_cli_opcache_file_cache_consistency_checks: 1
+php_xdebug_max_nesting_level: 256
+php_xdebug_remote_autostart: "true"
+php_xdebug_remote_host: localhost
+php_xdebug_remote_port: 9000
+php_xdebug_remote_log: "/var/log/php-xdebug-remote.log"
+php_xdebug_remote_timeout: 500
 
 
 # --- Performance Tuning ---
-# PERFORMANCE TODO Enable hugepages use in opcache for better performance
+
+# TODO: PERFORMANCE - Enable hugepages use in opcache for better performance
 #
 #   1) Make sure THP is supported and enabled and we're not running in a container (docker / LXC / openvz / whateva)
 #      See: roles/cs.redis/tasks/configure.yml for enabling THP

@@ -38,6 +38,17 @@
     force: yes
   notify: Restart PHP-FPM
 
+- name: Create application debugging pool
+  template:
+    src: pool.debug.conf
+    dest: "{{ php_fpm_debug_pool_conf_file_path }}"
+    owner: root
+    group: root
+    mode: 0644
+    force: yes
+  notify: Restart PHP-FPM
+  when: php_fpm_debug_pool_enable
+
 - name: Ensure PHP-FPM configuration changes are applied
   meta: flush_handlers
 
