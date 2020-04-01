@@ -2,7 +2,7 @@
   template:
     src: logging-extra.nginx.conf
     dest: "{{ https_termination_nginx_extra_logging_conf_file }}"
-  notify: Reload nginx
+  notify: Reload nginx configs
 
 - name: Register provisioned nginx config files
   set_fact:

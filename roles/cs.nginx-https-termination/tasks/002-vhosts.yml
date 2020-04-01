@@ -10,7 +10,7 @@
       cert_chain_file: "{{ https_termination_certificate_dir }}/{{ vhost.name }}.d/002-chain.cer"
       cert_bundle_file: "{{ https_termination_certificate_dir }}/{{ vhost.name }}.cer"
       cert_key_file: "{{ https_termination_private_dir }}/{{ vhost.name }}.pem"
-  loop: "{{ https_termination_cfg_vhosts }}"
+  loop: "{{ https_termination_hosts }}"
   loop_control:
     label: "{{ vhost.name }}"
     loop_var: vhost
