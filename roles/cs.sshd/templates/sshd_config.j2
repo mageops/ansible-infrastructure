@@ -1,0 +1,26 @@
+{%- macro directives(config) %}
+{% for directive_name, config_value in config | dictsort -%}
+{% set directive_values = (config_value is iterable and config_value is not string) | ternary(config_value, [config_value]) -%}
+{% for directive_value in directive_values -%}
+{{ directive_name }} {{ directive_value }}
+{% endfor %}
+{% endfor %}
+{% endmacro %}
+
+### Global Configuration
+
+{{ directives(config_global) }}
+
+### Conditional Match Configuration
+
+{% for username, user_config in config_users.items() -%}
+
+### [START] User {{ username }}
+
+Match User {{ username }}
+{{ directives(user_config) | indent(width=4, first=true) }}
+
+### [END] User {{ username }}
+{% endfor %}
+
+

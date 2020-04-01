@@ -76,6 +76,9 @@
       - proto: tcp
         ports: 22
         group_name: "{{ aws_security_group_lambda_ssh_name }}"
+      - proto: tcp
+        ports: "{{ mageops_php_xdebug_remote_proxy_port }}"
+        group_name: "{{ aws_security_group_app_name }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:

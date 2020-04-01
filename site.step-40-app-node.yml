@@ -134,4 +134,5 @@
     nginx_debug_request_token: "{{ mageops_debug_token }}"
     nginx_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
     nginx_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
-    nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
+
+
