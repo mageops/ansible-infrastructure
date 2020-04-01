@@ -76,9 +76,6 @@
       - proto: tcp
         ports: 22
         group_name: "{{ aws_security_group_lambda_ssh_name }}"
-      - proto: tcp
-        ports: "{{ mageops_php_xdebug_remote_proxy_port }}"
-        group_name: "{{ aws_security_group_app_name }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
@@ -200,12 +197,23 @@
     purge_rules: no
     rules:
       - proto: tcp
-        ports: "{{ mageops_varnish_port }}"
+        ports: >-
+          {{
+            [ mageops_varnish_port ]
+              + mageops_xdebug_proxy_remote_connection_to_loadbalancer | ternary(
+                  [ php_fpm_debug_pool_xdebug_remote_port ],
+                  []
+                )
+          }}
         group_name: "{{ aws_security_group_app_name }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
+    ports_basic:
+      - "{{  }}"
     ec2_sg_tags:
       Name: "{{ aws_security_group_varnish_name }}"
+
+
 
 

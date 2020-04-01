@@ -660,11 +660,10 @@ mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
 # Name of the header that will carry useful PHP-specific debugging information
 mageops_debug_info_php_http_header: "{{ mageops_debug_http_header_prefix }}-Info-PHP"
 
-# Whether to proxy all xdebug connections to ingress node, auto-enabled if we have single central varnish node
-mageops_php_xdebug_remote_proxy_host: "{{ (varnish_standalone and varnish_as_loadbalancer) | ternary(mageops_varnish_host, false) }}"
-
-# Port to proxy xdebug connections to on the ingress node
-mageops_php_xdebug_remote_proxy_port: "{{ php_xdebug_remote_port }}"
+# If we have a central ingress node, set this to its internal network hostname
+# to enable proxying xdebug remote connections to it so developer doesn't have to
+# forward it from every app node at once or guess to which one the request goes.
+mageops_xdebug_proxy_remote_connection_to_loadbalancer: "{{ varnish_as_loadbalancer }}"
 
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
@@ -1128,15 +1127,20 @@ php_fpm_service: php-fpm
 # Enable the separate PHP-FPM pool with xdebug support (among others)
 php_fpm_debug_pool_enable: yes
 
+# Special XDebug directive overrides for debugging PHP-FPM pool
+php_fpm_debug_pool_xdebug_remote_host: "{{ mageops_xdebug_proxy_remote_connection_to_loadbalancer | ternary(mageops_varnish_host, 'localhost') }}"
+php_fpm_debug_pool_xdebug_remote_port: "{{ php_xdebug_remote_port }}"
+
 # Configure the status and ping internal PHP-FPM pool endpoints
 php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
 php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"
 php_fpm_pool_ping_response: "HEALTHY"
 
-php_xdebug_remote_port: 9000
-
 php_date_timezone: "{{ mageops_timezone }}"
 php_memory_limit: "-1"
+
+# XDebug configuration
+php_xdebug_remote_port: 9000
 
 # This value is unlimited (0) for CLI by default, not matter the php.ini setting!
 php_max_execution_time: "600"
