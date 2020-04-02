@@ -107,21 +107,31 @@ php_cli_error_log_path: /var/log/php-cli-error.log
 # php_cli_opcache_file_cache_consistency_checks: 1
 
 
-# --- XDebug settings ---
+# --- Settings for the extra debug helper injectable phar ---
+
+php_debug_helper_version: "1.0.5"
+php_debug_helper_phar_path: "/usr/local/share/mageops/php/debug-helper.phar"
+php_debug_helper_phar_url: "https://github.com/mageops/php-debug-helper/releases/download/{{ php_debug_helper_version }}/mageops-debug-helper.phar"
+
+# --- Debugging settings ---
 
 # Install and enable XDebug but create a separate php.ini that loads
 # and configures it so it's not laoded for normal site operation but
 # can be used when needed - e.g. for a special separate debugging php-fpm pool.
-php_xdebug_enable_with_separate_inifile: yes
+php_debug_ini_enable: yes
 
-# Name of xdebug package to install when `php_xdebug_enable_with_separate_inifile` is enabled
-php_xdebug_package: php-xdebug
+# Set up auto-prepending the injectable error handler in the separate ini file
+php_debug_ini_prepend_debug_helper: yes
 
 # Path to the special ini file that enables xdebug
-php_xdebug_inifile: /etc/php-xdebug.ini
+php_debug_ini_path: /etc/php-xdebug.ini
 
-# --- Xdebug INI settings ---
+# --- XDebug settings ---
 
+# Name of xdebug package to install when enabled
+php_xdebug_package: php-xdebug
+
+# XDebug extension INI settings
 php_xdebug_max_nesting_level: 256
 php_xdebug_remote_autostart: "true"
 php_xdebug_remote_host: localhost
@@ -138,6 +148,6 @@ php_xdebug_remote_timeout: 500
 #      See: roles/cs.redis/tasks/configure.yml for enabling THP
 #   2) Set hugepages to PHP opcache size / hugepage size (2MB default), e.h. `sysctl -w vm.nr_hugepages=128`
 #   3) Enable in opcache cfg - set `opcache.huge_code_pages=1` in `/etc/php.dń/10-opcache.ini`
-#   4) Restart PHP-FPM
+#   4) Restart php-fpm
 #
 # php_opcache_use_thp: yes
