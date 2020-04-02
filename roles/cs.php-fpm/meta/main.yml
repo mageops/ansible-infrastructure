@@ -1,4 +1,4 @@
 dependencies:
   - role: cs.php
     php_install_fpm_package: yes
-    php_xdebug_enable_with_separate_inifile: "{{ php_fpm_debug_pool_enable }}"
+    php_debug_ini_enable: "{{ php_fpm_debug_pool_enable }}"

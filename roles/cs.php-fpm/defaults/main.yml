@@ -1,3 +1,10 @@
+# --- Base configuration ---
+  
+php_fpm_daemon_conf_file_path: "/etc/php-fpm.conf"
+php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
+php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
+php_fpm_run_dir_path: "/var/run/php-fpm"
+php_fpm_log_dir_path: "/var/log/php-fpm"
 
 php_fpm_listen_allowed_clients: "127.0.0.1"
 php_fpm_pm_type: ondemand
@@ -7,26 +14,31 @@ php_fpm_pm_min_spare_servers: 5
 php_fpm_pm_max_spare_servers: 5
 php_fpm_pm_max_requests: 500
 php_fpm_terminate_timeout: 600
+
+# Used for naming files, directories and services
+php_fpm_pool_name: "app"
+
 php_fpm_pool_listen_user: "{{ nginx_user }}"
 php_fpm_pool_listen_group: "{{ nginx_group }}"
 
 php_fpm_pool_ping_path: /___php-fpm___/ping
 php_fpm_pool_ping_response: pong
+php_fpm_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/{{ php_fpm_pool_name }}.conf"
+php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ php_fpm_pool_name }}.sock"
 
-php_fpm_daemon_conf_file_path: "/etc/php-fpm.conf"
-php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
-php_fpm_run_dir_path: "/var/run/php-fpm"
-php_fpm_log_dir_path: "/var/log/php-fpm"
 
-php_fpm_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/php-fpm.backend.conf"
-php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/php-fcgi-php-fpm-backend.sock"
-php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
+# --- Extra configuration for the special debug pool ---
+
+# Note: This pool is ran by separate PHP-FPM master daemon because it requires
+# a completely separate php.ini config which is not possible to change per-pool.
+php_fpm_debug_daemon_conf_file_path: "/etc/php-fpm.debug.conf"
+php_fpm_debug_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.debug.pid"
 
 php_fpm_debug_pool_enable: yes
-php_fpm_debug_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/php-fpm.debug.conf"
-php_fpm_debug_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/php-fcgi-php-fpm-debug.sock"
+php_fpm_debug_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/{{ php_fpm_pool_name }}.debug.conf"
+php_fpm_debug_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ php_fpm_pool_name }}.debug.sock"
 php_fpm_debug_pm_max_children: 3
 php_fpm_debug_pm_max_requests: 10
 
-php_fpm_debug_pool_xdebug_remote_host: "unix:///{{ php_fpm_run_dir_path }}/php-xdebug-remote.sock"
+php_fpm_debug_pool_xdebug_remote_host: "{{ php_xdebug_remote_host }}"
 php_fpm_debug_pool_xdebug_remote_port: "{{ php_xdebug_remote_port }}"
