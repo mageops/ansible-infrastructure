@@ -1,60 +1,8 @@
-- name: Ensure php-fpm systemd config override directory exists
-  file:
-    path: /etc/systemd/system/php-fpm.service.d/
-    state: directory
+- name: Configure daemons
+  include_tasks: 001-daemon.yml
 
-- name: Configure php-fpm systemd service overrides
-  template:
-    src: systemd.service.overrides.conf
-    dest: /etc/systemd/system/php-fpm.service.d/mageops.conf
-    trim_blocks: no
-  notify:
-    - Reload systemctl daemon
-    - Restart PHP-FPM
+- name: Configure pools
+  include_tasks: 002-pool.yml
 
-- name: Configure PHP FPM
-  template:
-    src: daemon.conf
-    dest: "{{ php_fpm_daemon_conf_file_path }}"
-    owner: root
-    group: root
-    mode: 0644
-    force: yes
-  notify: Restart PHP-FPM
-
-- name: Remove the default pool
-  file:
-    path: "{{ php_fpm_pool_conf_dir_path }}/www.conf"
-    state: absent
-  notify: Restart PHP-FPM
-
-- name: Create application pool
-  template:
-    src: pool.conf
-    dest: "{{ php_fpm_pool_conf_file_path }}"
-    owner: root
-    group: root
-    mode: 0644
-    force: yes
-  notify: Restart PHP-FPM
-
-- name: Create application debugging pool
-  template:
-    src: pool.debug.conf
-    dest: "{{ php_fpm_debug_pool_conf_file_path }}"
-    owner: root
-    group: root
-    mode: 0644
-    force: yes
-  notify: Restart PHP-FPM
-  when: php_fpm_debug_pool_enable
-
-- name: Ensure PHP-FPM configuration changes are applied
-  meta: flush_handlers
-
-- name: Start and enable PHP FPM service
-  service:
-    name: php-fpm
-    enabled: yes
-    state: started
-
+- name: Configure system services
+  include_tasks: 003-service.yml

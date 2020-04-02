@@ -1,8 +1,11 @@
 - name: Reload systemctl daemon
   systemd:
     daemon_reload: yes
+    daemon_reexec: yes
 
-- name: Restart PHP-FPM
+# Note: We don't need to explicitly restart the `php-fpm-debug` service
+# as it should be linked with `php-fpm` via `PartOf` systemd unit directive.
+- name: Restart php-fpm
   service:
     name: php-fpm
     state: restarted
