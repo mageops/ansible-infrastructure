@@ -53,9 +53,6 @@
               - name: Disable MageSuite JavaScript defer.
                 path: "deferjs/general/active"
                 value: "0"
-              - name: Enable native Magento JavaScript defer.
-                path: "dev/js/move_script_to_bottom"
-                value: "1"
 
         - name: Append the bundling task config to the task list
           set_fact:

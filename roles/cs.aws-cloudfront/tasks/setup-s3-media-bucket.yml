@@ -6,7 +6,7 @@
 
 - name: Build s3 website config
   template:
-    src: bucket-website-config.json
+    src: s3-bucket-website-config.json
     dest: "{{ aws_cloudfront_s3_temp_dir.path }}/s3-website-config.json"
 
 - name: Enable s3 website config for media bucket

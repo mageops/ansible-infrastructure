@@ -1,4 +1,5 @@
 allow_duplicates: no
+
 dependencies:
   - role: cs.ansible-plugins
   # Needed to compute the preferred AZ

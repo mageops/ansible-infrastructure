@@ -1,4 +1,5 @@
 - name: Create S3 Media bucket
+  when: aws_s3_media_bucket_create
   s3_bucket:
     state: present
     region: "{{ aws_region }}"
@@ -52,6 +53,6 @@
               - HEAD
               - GET
             max_age_seconds: "{{ aws_s3_bucket_media_cors_max_age }}"
-  when: aws_s3_bucket_media_enable_cors
+  when: aws_s3_bucket_media_enable_cors and aws_s3_media_bucket_create
 
 - import_tasks: policy.yml

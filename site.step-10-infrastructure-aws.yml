@@ -2,7 +2,9 @@
   connection: local
   gather_facts: false
   pre_tasks:
-    - debug: var=mageops_trusted_cidr_blocks_global
+    - name: Collect minimum facts (we need date time stuff)
+      setup:
+        gather_subset: min
   roles:
     - role: cs.aws-vpc
     - role: cs.aws-security-group
@@ -14,7 +16,7 @@
     - role: cs.aws-cloudfront
       aws_cloudfront_use_lambda: "{{ aws_cloudfront_optimizing_edge_lambda_enable }}"
       aws_cloudfront_lambda_arn: "{{ aws_cloudfront_lambda_latest_arn | default(omit, true) }}"
-      when: aws_cloudfront_distribution_create
+      when: aws_cloudfront_distribution_create | bool
     - role: cs.aws-rds
       when: aws_rds_create
     - role: cs.aws-loadbalancer

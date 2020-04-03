@@ -1,5 +1,14 @@
 # Setup s3 website config and add cloudfront access policy
-- import_tasks: setup-s3.yml
-# Create/update the cloudfront distribution
-- import_tasks: setup-distribution.yml
+- name: Setup S3 Website (S3 Media)
+  import_tasks: setup-s3-media-bucket.yml
+  when: aws_cloudfront_use_s3_website_origin
 
+- name: Setup Cloudfront distribution (S3 Media)
+  import_tasks: setup-distribution-s3-media.yml
+  when: aws_cloudfront_use_s3_website_origin
+
+# Media is loaded from our load balancer / varnish / ingress
+# Used when media is stored on the servers (on the local FS or as EFS/NFS mount)
+- name: Setup Cloudfront distribution (LB Media)
+  import_tasks: setup-distribution-lb-media.yml
+  when: not aws_cloudfront_use_s3_website_origin

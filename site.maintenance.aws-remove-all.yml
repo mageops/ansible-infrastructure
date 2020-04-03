@@ -37,7 +37,7 @@
     - name: Remove other EC2 Servers
       block:
         - name: Get list of EC2 instances
-          ec2_instance_facts:
+          ec2_instance_info:
             region: "{{ aws_region }}"
             filters:
               "vpc-id": "{{ _aws_vpc_id }}"
