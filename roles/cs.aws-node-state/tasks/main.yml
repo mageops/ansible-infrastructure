@@ -1,13 +1,13 @@
 - name: Find EC2 instances to be processed
-  ec2_instance_facts:
+  ec2_instance_info:
     region: "{{ aws_region }}"
     filters: "{{ node_state_instance_filters | combine(node_state_instance_tags | prefix_keys('tag:')) }}"
-  register: node_state_ec2_instance_facts
+  register: node_state_ec2_instance_info
 
 - name: Enforce target state instances found
   ec2:
     region: "{{ aws_region }}"
     state: "{{ node_state_target }}"
-    instance_ids: "{{ node_state_ec2_instance_facts.instances | map(attribute='instance_id') | list }}"
+    instance_ids: "{{ node_state_ec2_instance_info.instances | map(attribute='instance_id') | list }}"
     wait: yes
-  when: node_state_ec2_instance_facts.instances | length > 0
+  when: node_state_ec2_instance_info.instances | length > 0
