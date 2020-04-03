@@ -2,6 +2,39 @@
 
 - hosts: app:&current:!immutable
   pre_tasks:
+    - name: Release artifact sanity check failed
+      fail:
+        msg: |
+          ====================================================
+          ==   FATAL! No valid release artifacts were found ==
+          ====================================================
+      
+            No valid composer.json has been found at:
+            {{ deploy_artifact_composer_json_local_path }}
+
+            TIPS:
+            - Is local artifact dir path is correct?
+            - Was the project built at least once successfully?
+        
+          ----------------------------------------------------
+      when: deploy_artifact_composer_json_data.require is not defined
+
+    - name: Print artifact composer package information
+      debug:
+        msg: |
+          =============================================
+          ==  Artifact Composer Package Information  ==
+          =============================================
+
+          {% if deploy_artifact_composer_json_data.name is defined -%}
+          Main Package: {{ deploy_artifact_composer_json_data.name }}
+          {% endif %}
+
+          Dependencies:
+          {{ deploy_artifact_composer_json_data.require | to_nice_yaml }}
+
+          ---------------------------------------------
+
     - name: Check if previous release exists
       stat:
         path: "{{ deploy_current_release_dir }}"
@@ -59,12 +92,8 @@
           role: cs.magento-configure
           tasks_from: 060-flush-cache.yml
       deploy_release_actions:
-        - name: Setup S3FS mounts
-          role: cs.s3-mount
-          when: "{{ aws_use }}"
-        - name: Setup EFS mounts
-          role: cs.aws-efs
-          when: "{{ aws_use }}"
+        - name: Setup shared storage mounts
+          role: cs.magento-shared-storage
       deploy_release_abort:
         - name: Failed deploy release stage - get rid of possible corrupted cache
           role: cs.magento-configure
@@ -122,42 +151,17 @@
       - php-fpm
       - nginx
 
+    # Helper variables for sanity checks and messages
+    deploy_artifact_composer_json_local_path: "{{ deploy_artifact_local_path ~ '/composer.json' }}"
+    deploy_artifact_composer_json_data: "{{ lookup('file', deploy_artifact_composer_json_local_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"
+
     magento_core_config_settings: "{{ magento_core_config_settings_default + magento_core_config_settings_extra }}"
     magento_core_config_settings_to_remove: "{{ magento_core_config_settings_to_remove_default + magento_core_config_settings_to_remove_extra }}"
     magento_varnish_host: "{{ mageops_varnish_host }}"
     magento_varnish_port: "{{ mageops_varnish_port }}"
-    magento_static_cache_dir: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static/_cache/"
-    magento_media_dir: "{{ mageops_app_web_dir }}/shared/pub/media/"
-    magento_s3fs_buckets_base:
-      - name: "Media"
-        mountpoint: "{{ magento_media_dir }}"
-        bucket: "{{ aws_s3_media_bucket }}"
-      - name: "Static asset cache"
-        mountpoint: "{{ magento_static_cache_dir }}"
-        bucket: "{{ aws_s3_media_bucket }}:/static/_cache-{{ deploy_release_id }}/"
-    magento_efs_app_node_basic_mounts:
-      - local_mountpoint: "{{ magento_efs_import_data_app_path }}"
-        remote_path: "{{ magento_efs_import_data_remote_path }}"
-        owner: "{{ magento_user }}"
-        group: "{{ magento_group }}"
-      - local_mountpoint: "{{ magento_efs_export_data_app_path }}"
-        remote_path: "{{ magento_efs_export_data_remote_path }}"
-        owner: "{{ magento_user }}"
-        group: "{{ magento_group }}"
-      - local_mountpoint: "{{ magento_efs_publicly_shared_app_path }}"
-        remote_path: "{{ magento_efs_publicly_shared_remote_path }}"
-        owner: "{{ magento_user }}"
-        group: "{{ magento_group }}"
+    magento_static_cache_dir: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static/_cache"
+    magento_media_dir: "{{ mageops_app_web_dir }}/shared/pub/media"
+    
+    magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
+    magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
 
-    s3fs_iam_role: "{{ aws_iam_role_app_node }}"
-    s3fs_owner_user: "{{ magento_user }}"
-    s3fs_owner_group: "{{ magento_group }}"
-    s3fs_owner_uid: "{{ magento_uid }}"
-    s3fs_owner_gid: "{{ magento_gid }}"
-    s3fs_buckets: "{{ magento_s3fs_buckets_base + magento_s3fs_buckets_extra }}"
-
-    efs_name: "{{ magento_efs_app_node_name }}"
-    efs_subnet_id: "{{ aws_vpc_subnet_id }}"
-    efs_aws_security_group_id: "{{ aws_security_group_efs_id | default(omit, true) }}"
-    efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_role_shared_storage) }}"
-    efs_mounts: "{{ magento_efs_app_node_basic_mounts + magento_efs_app_node_mounts }}"

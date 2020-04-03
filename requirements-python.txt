@@ -23,3 +23,6 @@ awscli
 
 # required for awscli
 PyYAML<5.3
+
+# required for `cs.ansible-plugins` role
+jq

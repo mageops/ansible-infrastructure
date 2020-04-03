@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function)
 
 __metaclass__ = type
 
+
 from ansible.errors import AnsibleError, AnsibleFilterError
 
 
@@ -24,8 +25,10 @@ def prefix_keys(object={}, prefix=''):
 def pick_prefixed_keys(object={}, prefix=''):
     return dict([(key, object[key]) for key in object if key.startswith(prefix)])
 
+
 def dict_to_tag_list(object={}):
     return [ {k: v} for k, v in object.items() ]
+
 
 class FilterModule(object):
     def filters(self):

@@ -1,2 +1,3 @@
 dependencies:
   - cs.repo-mageops
+  - cs.ansible-plugins

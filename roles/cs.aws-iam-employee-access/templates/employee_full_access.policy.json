@@ -284,6 +284,13 @@
                 "support:*"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "aws-marketplace:ViewSubscriptions"
+            ],
+            "Resource": "*"
         }
     ]
 }

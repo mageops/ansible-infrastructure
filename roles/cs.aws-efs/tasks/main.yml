@@ -16,14 +16,26 @@
                 efs_tags_name) }}
         performance_mode: "{{ efs_performance_mode }}"
         region: "{{ aws_region }}"
-        targets:
-            - subnet_id: "{{ efs_subnet_id }}"
-              security_groups:
-                - "{{ efs_aws_security_group_id }}"
+        targets: "{{ efs_aws_subnet_ids | jq(efs_targets_jq) }}"
       vars:
+        efs_targets_jq: >-
+          map({
+            subnet_id: ., 
+            security_groups: [
+              "{{ efs_aws_security_group_id }}"
+            ]
+          })
         efs_tags_name:
           Name: "{{ efs_name }}"
       register: _aws_efs
+
+    - name: Set EFS LifeCycle Policies
+      when: efs_lifecycle_policies and efs_lifecycle_policies | length > 0
+      command: >-
+        aws efs put-lifecycle-configuration 
+          --region '{{ aws_region }}'
+          --file-system-id '{{ _aws_efs.efs.file_system_id }}'
+          --lifecycle-policies '{{ efs_lifecycle_policies | to_json }}'
 
 - name: Install AWS EFS utils
   yum:
@@ -52,7 +64,6 @@
   until: efs_root_mount is not failed
   retries: 300
   delay: 30
-
 
 - name: Make sure remote mount points exist with proper permissions
   file:
@@ -104,6 +115,7 @@
   with_items: "{{ efs_mounts }}"
 
 - name: Make sure EFS is always in case the filesystem it's mounted over disappears (S3FS?)
+  when: efs_mount_watchdog_cron_enable
   cron:
     name: "Ensure {{ item.local_mountpoint }} is mounted"
     job: "/bin/bash -c 'mountpoint {{ item.local_mountpoint }} || mount {{ item.local_mountpoint }}'"
