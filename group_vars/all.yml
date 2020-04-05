@@ -1442,6 +1442,7 @@ mageops_packages_base:
   - python2-pip
   - python36-mysql
   - MySQL-python
+  - python2-PyMySQL
   - unzip
   - yum-utils
   - git
