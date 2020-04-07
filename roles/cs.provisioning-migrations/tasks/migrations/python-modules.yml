@@ -17,12 +17,13 @@
 
 - name: Uninstall conflicting python modules (RPM packages)
   yum:
-    name: pyOpenSSL
+    name:
+      - pyOpenSSL
     state: absent
 
 - name: Ensure python modules are installed as system packages
   yum:
     name:
-      - python-cryptography
-      - python-paramiko
+      - python2-cryptography
+      - python2-paramiko
     state: present
