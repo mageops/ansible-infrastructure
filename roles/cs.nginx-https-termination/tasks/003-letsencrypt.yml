@@ -94,6 +94,7 @@
 
 - name: Initiate ACME validation
   acme_certificate:
+    select_crypto_backend: cryptography
     acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
     account_key: "{{ https_termination_letsencrypt_privkey_path }}"
     csr: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
@@ -156,6 +157,7 @@
 
 - name: Get the certs
   acme_certificate:
+    select_crypto_backend: cryptography
     acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
     account_key: "{{ https_termination_letsencrypt_privkey_path }}"
     csr: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
