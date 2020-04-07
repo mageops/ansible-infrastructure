@@ -63,7 +63,7 @@
   openssl_certificate:
     select_crypto_backend: cryptography
     path: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
-    privatekey_path: "{{ https_termination_letsencrypt_privkey_path }}"
+    privatekey_path: "{{ https_termination_private_dir }}/{{ item[0].name }}.pem"
     csr_path: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
     provider: selfsigned
   when: item[0].letsencrypt | default(False) and not item[1].stat.exists | default(False)
