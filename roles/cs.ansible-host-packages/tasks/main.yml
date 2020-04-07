@@ -9,8 +9,14 @@
 #   not via PIP to avoid conflicts.
 #
 
+
+- name: Bootstrap PIP by installing it from RPM
+  yum:
+    name: python2-pip
+    state: present
+
 # With old PIP so pip_package_info doesn't wokr
-- name: Make sure we have latest PIP
+- name: Self-upgrade PIP
   pip:
     name: pip
     state: latest
