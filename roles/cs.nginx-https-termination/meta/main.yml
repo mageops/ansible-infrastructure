@@ -1,4 +1,4 @@
 allow_duplicates: false
 dependencies:
   - role: cs.nginx
-  - role: cs.provisioning-migrations
+  - role: cs.ansible-python-packages

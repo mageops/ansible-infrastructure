@@ -3,5 +3,3 @@
   loop_control:
     loop_var: migration
 
-- name: Ensure the current connection has all the changes
-  meta: reset_connection

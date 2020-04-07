@@ -1,0 +1,71 @@
+- name: "Set runtime information for processing package {{ package.pip_name }}"
+  set_fact:
+    mageops_ansible_pip_package:
+      rpm: "{{ package.rpm_name | default(none, true) }}"
+      pip: "{{ package.pip_name | default(none, true) }}"
+      reinstall: >-
+        {{
+          package.reinstall_when_version is defined | ternary(
+            package_info.version | default('0.0.0') is version(
+              package_reinstall_version_constraint.threshold,
+              package_reinstall_version_constraint.operator
+            ),
+            false
+          )
+        }}
+      uninstall: "{{ package.state | default('present') == 'absent' }}"
+      origin: "{{ package_info.source | default('unknown') }}"
+      version: "{{ package_info.version | default('unknown') }}"
+      source: "{{ package.source | default('any') }}"
+  vars:
+    package_info: "{{ ( mageops_ansible_pip_package_info.packages.pip[package.pip_name] | default([{}]) | first ) }}"
+    package_reinstall_version_constraint: "{{ package.reinstall_when_version | default({'threshold': '0.0.0', 'operator': '<='}) }}"
+
+- name: Package {{ mageops_ansible_pip_package.pip }} reinstallation notice
+  debug:
+    msg: >-
+      NOTICE: Package {{ mageops_ansible_pip_package.pip }} will be reinstalled
+      because installed version {{ mageops_ansible_pip_package.version }} is
+      {{ package.reinstall_when_version.operator }} {{ package.reinstall_when_version.threshold }}
+  when: mageops_ansible_pip_package.reinstall
+
+# Warning: Order is quite important here!
+- name: Uninstall {{ mageops_ansible_pip_package.rpm }} RPM package
+  yum:
+    name: "{{ mageops_ansible_pip_package.rpm }}"
+    state: absent
+  when: >-
+    (
+      mageops_ansible_pip_package.reinstall
+      or mageops_ansible_pip_package.uninstall
+    )
+    and mageops_ansible_pip_package.rpm
+
+- name: Uninstall {{ mageops_ansible_pip_package.pip }} PIP package
+  pip:
+    name: "{{ mageops_ansible_pip_package.pip }}"
+    state: absent
+  when: >-
+    (
+      mageops_ansible_pip_package.reinstall
+      or mageops_ansible_pip_package.uninstall
+    )
+    and mageops_ansible_pip_package.pip
+    and mageops_ansible_pip_package.origin == 'pip'
+
+- name: Ensure that {{ mageops_ansible_pip_package.rpm }} RPM package is {{ package.state }}
+  yum:
+    name: "{{ mageops_ansible_pip_package.rpm }}"
+    state: "{{ package.state }}"
+  when: >-
+    mageops_ansible_pip_package.source == 'rpm'
+    and mageops_ansible_pip_package.rpm
+
+- name: Ensure that {{ mageops_ansible_pip_package.pip }} PIP package is {{ package.state }}
+  pip:
+    name: "{{ mageops_ansible_pip_package.pip }}"
+    state: "{{ package.state }}"
+  when: >-
+    mageops_ansible_pip_package.source in ['any', 'pip']
+    and mageops_ansible_pip_package.rpm
+
