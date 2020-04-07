@@ -38,6 +38,19 @@ mageops_ansible_pip_packages:
     source: any
     state: absent
 
+  - pip_name: docker-py
+    rpm_name: python-docker-py
+    source: rpm
+    state: present
+    reinstall_when_rpm_broken: yes
 
+
+  - pip_name: docker-pycreds
+    rpm_name: python-docker-pycreds
+    source: rpm
+    state: present
+    reinstall_when_version:
+      threshold: '0.3.0'
+      operator: '>'
 
 

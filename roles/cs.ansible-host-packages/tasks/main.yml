@@ -15,6 +15,11 @@
     name: pip
     state: latest
 
+- name: Install yum rpm verify plugin
+  yum:
+    name: yum-plugin-verify
+    state: present
+
 - name: Get installed PIP packages info
   pip_package_info: ~
   register: mageops_ansible_pip_package_info
