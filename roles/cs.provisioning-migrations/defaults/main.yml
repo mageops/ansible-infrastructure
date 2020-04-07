@@ -22,5 +22,5 @@ mageops_migrations:
   - title: Old custom nginx packages
     name: nginx-creativeshop
 
-  - title: Python OpenSSL/Cryptography modules
-    name: python-openssl
+  - title: Python modules needed for running ansible modules
+    name: python-modules

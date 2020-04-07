@@ -1,0 +1,28 @@
+# This is to ensure ansible `openssl_*` module work correctly.
+# Before we installed `pyOpenSSL` from PIP and it worked fine but now it
+# breaks `openssl_privatekey` module because of upgrade to ansible 2.9.
+# It seems that ansible loads newer pyOpenSSL, however it also loads
+# old `cryptography` module from system instead of the newerr version
+# pulled as dependency by PIP.
+# The fix is to force ansible to use `cryptography` module and get rid of pyopenssl
+# We also need to make sure the paramiko version is compatible.
+
+- name: Uninstall conflicting PIP python module packages (py crypto)
+  pip:
+    name:
+      - pyOpenSSL
+      - cryptography
+      - paramiko
+    state: absent
+
+- name: Uninstall conflicting RPM python module packages (py crypto)
+  yum:
+    name: pyOpenSSL
+    state: absent
+
+- name: Ensure python cryptography and paramiko are installed as system packages
+  yum:
+    name:
+      - python-cryptography
+      - python-paramiko
+    state: present

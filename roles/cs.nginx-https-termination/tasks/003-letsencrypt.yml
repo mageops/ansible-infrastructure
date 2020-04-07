@@ -1,8 +1,3 @@
-- name: Ensure ansible openssl module deps
-  include_role:
-    name: cs.provisioning_migrations
-    tasks_from: migrations/python-openssl.yml
-
 - name: Create main private key
   openssl_privatekey:
     select_crypto_backend: cryptography
