@@ -1,3 +1,4 @@
 dependencies:
+  - role: cs.ansible-host-packages
   - role: cs.aws-rds-facts
     when: aws_use | default(false)
