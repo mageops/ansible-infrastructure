@@ -1,24 +1,7 @@
-# Before we installed `pyOpenSSL` from PIP and it worked fine but now it
-# breaks `openssl_privatekey` module because of upgrade to ansible 2.9.
-# It seems that ansible loads newer pyOpenSSL, however it also loads
-# old `cryptography` module from system instead of the newerr version
-# pulled as dependency by PIP.
-# See related ansible bug: https://github.com/ansible/ansible/issues/68701
-# /FS
-- name: Uninstall conflicting RPM python module packages
-  yum:
-    name: pyOpenSSL
-    state: absent
-
-- name: Uninstall conflicting PIP python module packages
-  pip:
-    name: pyOpenSSL
-    state: absent
-
-- name: Install latest python cryptography module via PIP
-  pip:
-    name: cryptography
-    state: present
+- name: Ensure ansible openssl module deps
+  include_role:
+    name: cs.provisioning_migrations
+    tasks_from: migrations/python-openssl.yml
 
 - name: Create main private key
   openssl_privatekey:
