@@ -7,7 +7,7 @@
 # The fix is to force ansible to use `cryptography` module and get rid of pyopenssl
 # We also need to make sure the paramiko version is compatible.
 
-- name: Uninstall conflicting PIP python module packages (py crypto)
+- name: Uninstall conflicting python modules (PIP packages)
   pip:
     name:
       - pyOpenSSL
@@ -15,12 +15,12 @@
       - paramiko
     state: absent
 
-- name: Uninstall conflicting RPM python module packages (py crypto)
+- name: Uninstall conflicting python modules (RPM packages)
   yum:
     name: pyOpenSSL
     state: absent
 
-- name: Ensure python cryptography and paramiko are installed as system packages
+- name: Ensure python modules are installed as system packages
   yum:
     name:
       - python-cryptography
