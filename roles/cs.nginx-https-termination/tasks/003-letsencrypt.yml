@@ -11,7 +11,7 @@
     state: absent
 
 - name: Uninstall conflicting PIP python module packages
-  yum:
+  pip:
     name: pyOpenSSL
     state: absent
 
