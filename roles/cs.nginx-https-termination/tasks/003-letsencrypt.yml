@@ -42,7 +42,7 @@
 - name: Generate self-signed certificates for letsencrypt hosts so nginx properly reloads
   openssl_certificate:
     path: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
-    privatekey_path: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
+    privatekey_path: "{{ https_termination_private_dir }}/{{ item[0].name }}.pem"
     csr_path: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
     provider: selfsigned
   when: item[0].letsencrypt | default(False) and not item[1].stat.exists | default(False)
