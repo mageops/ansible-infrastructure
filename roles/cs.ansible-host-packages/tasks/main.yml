@@ -8,27 +8,14 @@
 # - Make sure that all modules are installed from system packages and
 #   not via PIP to avoid conflicts.
 #
-
-
-- name: Bootstrap PIP by installing it from RPM
+- name: Install dependencies
   yum:
-    name: python2-pip
+    name:
+      - python2-pip
+      - yum-plugin-verify
     state: present
 
-# With old PIP so pip_package_info doesn't wokr
-- name: Self-upgrade PIP
-  pip:
-    name: pip
-    state: latest
-
-- name: Install yum rpm verify plugin
-  yum:
-    name: yum-plugin-verify
-    state: present
-
-- name: Get installed PIP packages info
-  pip_package_info: ~
-  register: mageops_ansible_pip_package_info
+- include_tasks: list-packages.yml
 
 - name: Ensure proper PIP package state
   include_tasks: process-package.yml
@@ -37,21 +24,17 @@
     loop_var: package
     label: "{{ package.pip_name }}"
 
-- name: Get final installed PIP packages info
-  pip_package_info: ~
-  register: mageops_ansible_pip_package_info
+- include_tasks: list-packages.yml
 
 - name: Print debugging information about installed packages
   debug:
     msg: |
       ==========================================================
-      ==     Currently Installed Ansible Python Packages      ==
+      ==          Installed Ansible Module Python Deps        ==
       ==========================================================
 
-      {% for name, infos in mageops_ansible_pip_package_info.packages.pip.items() if name in package_names -%}
-      {% for info in infos -%}
-      - {{ name }} - version: {{ info.version }}
-      {% endfor %}
+      {% for name, version in mageops_ansible_pip_package_versions.items() if name in package_names -%}
+      - {{ name }} - version: {{ version }}
       {% endfor %}
 
       ==========================================================

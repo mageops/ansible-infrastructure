@@ -406,7 +406,7 @@ aws_s3_bucket_policies: []
 # --------  AWS EFS  --------
 # --------------------------
 
-# The main EFS root directory mountpoin on each node 
+# The main EFS root directory mountpoin on each node
 # Note: Not used directly by app bu as helper during provisioning and conveience for users
 efs_root_mountpoint: /mnt/efs
 
@@ -1440,11 +1440,10 @@ mageops_packages_banned:
 mageops_packages_base:
   - python
   - python2-pip
-  - python36-mysql
-  - MySQL-python
   - python2-PyMySQL
-  - unzip
   - yum-utils
+  - yum-plugin-verify
+  - unzip
   - git
   - rsync
   - jq

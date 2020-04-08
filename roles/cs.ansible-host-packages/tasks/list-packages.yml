@@ -1,0 +1,22 @@
+# We cannot use `pip list` as it has unstable output which
+# cannot be formatted in PIP 8.x in CentOS 7. For the same
+# reason the ansible module `pip_package_info` does not work.
+- name: Get installed PIP packages info
+  command: pip freeze --disable-pip-version-check
+  register: mageops_ansible_pip_freeze_cmd
+
+- name: Compute list of current package versions
+  set_fact:
+    mageops_ansible_pip_package_versions: >-
+      {{
+          mageops_ansible_pip_freeze_cmd.stdout_lines
+            | map(
+                'regex_replace',
+                '^([^=]+)=+(.*)$',
+                '{"name": "\1", "version": "\2"}'
+              )
+            | map('from_yaml')
+            | sort(attribute='name')
+            | list
+            | items2dict(key_name='name', value_name='version')
+      }}

@@ -44,7 +44,6 @@ mageops_ansible_pip_packages:
     state: present
     reinstall_when_rpm_broken: yes
 
-
   - pip_name: docker-pycreds
     rpm_name: python-docker-pycreds
     source: rpm
