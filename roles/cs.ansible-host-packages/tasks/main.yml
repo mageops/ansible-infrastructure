@@ -1,0 +1,59 @@
+# This tasks will ensure that whole PIP/Python environment
+# and packages needed for running ansible are installed in proper
+# versions and conflicting ones are absent.
+#
+# - PyOpenSSL is deprecated and doesn't work properly with ansible 2.9
+#   openssl_* modules, thus uninstall it to force using cryptography module.
+#
+# - Make sure that all modules are installed from system packages and
+#   not via PIP to avoid conflicts.
+#
+
+
+- name: Bootstrap PIP by installing it from RPM
+  yum:
+    name: python2-pip
+    state: present
+
+# With old PIP so pip_package_info doesn't wokr
+- name: Self-upgrade PIP
+  pip:
+    name: pip
+    state: latest
+
+- name: Install yum rpm verify plugin
+  yum:
+    name: yum-plugin-verify
+    state: present
+
+- name: Get installed PIP packages info
+  pip_package_info: ~
+  register: mageops_ansible_pip_package_info
+
+- name: Ensure proper PIP package state
+  include_tasks: process-package.yml
+  loop: "{{ mageops_ansible_pip_packages }}"
+  loop_control:
+    loop_var: package
+    label: "{{ package.pip_name }}"
+
+- name: Get final installed PIP packages info
+  pip_package_info: ~
+  register: mageops_ansible_pip_package_info
+
+- name: Print debugging information about installed packages
+  debug:
+    msg: |
+      ==========================================================
+      ==     Currently Installed Ansible Python Packages      ==
+      ==========================================================
+
+      {% for name, infos in mageops_ansible_pip_package_info.packages.pip.items() if name in package_names -%}
+      {% for info in infos -%}
+      - {{ name }} - version: {{ info.version }}
+      {% endfor %}
+      {% endfor %}
+
+      ==========================================================
+  vars:
+    package_names: "{{ mageops_ansible_pip_packages | map(attribute='pip_name') | list }}"
