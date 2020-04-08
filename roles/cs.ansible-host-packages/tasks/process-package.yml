@@ -30,7 +30,7 @@
       version: "{{ package_version }}"
       source: "{{ package.source | default('any') }}"
   vars:
-    package_present: "{{ package.pip_name in mageops_ansible_pip_package_versions }}"
+    package_present: "{{ package.pip_name in mageops_ansible_pip_package_names }}"
     package_version: "{{ ( mageops_ansible_pip_package_versions[package.pip_name] | default('0.0.0') ) }}"
     package_rpm_broken: "{{ mageops_ansible_pip_package_yum_verify_command.rc is defined and mageops_ansible_pip_package_yum_verify_command.rc != 0 }}"
     package_version_constraint: "{{ package.reinstall_when_version | default({'threshold': '0.0.0', 'operator': '<='}) }}"
@@ -65,10 +65,13 @@
         state: absent
       when: mageops_ansible_pip_package.pip
 
-- name: Ensure target package state
+- name: Update, install or reinstall the package
   when: >-
-    package.state != 'absent'
-    and (package.state != 'present' or not mageops_ansible_pip_package.present)
+    not mageops_ansible_pip_package.uninstall
+    and (
+      mageops_ansible_pip_package.reinstall
+      or not mageops_ansible_pip_package.present
+    )
   block:
     - name: Ensure that {{ mageops_ansible_pip_package.rpm }} RPM package is {{ package.state }}
       yum:

@@ -2,12 +2,15 @@
 # cannot be formatted in PIP 8.x in CentOS 7. For the same
 # reason the ansible module `pip_package_info` does not work.
 - name: Get installed PIP packages info
-  command: pip freeze --disable-pip-version-check
+  command: pip freeze --disable-pip-version-check --no-cache-dir
   register: mageops_ansible_pip_freeze_cmd
 
 - name: Compute list of current package versions
   set_fact:
-    mageops_ansible_pip_package_versions: >-
+    mageops_ansible_pip_package_versions: "{{ package_versions }}"
+    mageops_ansible_pip_package_names: "{{ package_versions | dict2items | map(attribute='key') | list }}"
+  vars:
+    package_versions: >-
       {{
           mageops_ansible_pip_freeze_cmd.stdout_lines
             | map(

@@ -52,4 +52,42 @@ mageops_ansible_pip_packages:
       threshold: '0.3.0'
       operator: '>'
 
+  - pip_name: urllib3
+    rpm_name: python2-urllib3
+    source: rpm
+    state: present
+    reinstall_when_version:
+      threshold: '1.12'
+      operator: '>='
 
+  - pip_name: requests
+    rpm_name: python-requests
+    source: rpm
+    state: present
+    reinstall_when_version:
+      threshold: '2.7.0'
+      operator: '>='
+
+  - pip_name: six
+    rpm_name: python-six
+    source: rpm
+    state: present
+    reinstall_when_version:
+      threshold: '1.10.0'
+      operator: '>='
+
+  - pip_name: idna
+    rpm_name: python-idna
+    source: rpm
+    state: present
+    reinstall_when_version:
+      threshold: '2.5'
+      operator: '>='
+
+  - pip_name: chardet
+    rpm_name: python-chardet
+    source: rpm
+    state: present
+    reinstall_when_version:
+      threshold: '2.3'
+      operator: '>='
