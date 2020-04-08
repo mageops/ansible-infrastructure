@@ -42,7 +42,7 @@
 - name: Generate self-signed certificates for letsencrypt hosts so nginx properly reloads
   openssl_certificate:
     path: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
-    privatekey_path: "{{ https_termination_letsencrypt_privkey_path }}"
+    privatekey_path: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
     csr_path: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
     provider: selfsigned
   when: item[0].letsencrypt | default(False) and not item[1].stat.exists | default(False)
@@ -52,7 +52,7 @@
     - "{{ https_termination_certs_stat.results }}"
   loop_control:
     label: "{{ item[0].server_name }}"
-  
+
 - name: Reload nginx immediately for the letsencrypt stage so acme challenge dirs are available
   service:
     name: nginx
@@ -70,7 +70,7 @@
   loop_control:
     label: "{{ item[0].server_name }}"
 
-    
+
 - name: Initiate ACME validation
   acme_certificate:
     acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
