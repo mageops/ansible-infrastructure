@@ -406,7 +406,7 @@ aws_s3_bucket_policies: []
 # --------  AWS EFS  --------
 # --------------------------
 
-# The main EFS root directory mountpoin on each node 
+# The main EFS root directory mountpoin on each node
 # Note: Not used directly by app bu as helper during provisioning and conveience for users
 efs_root_mountpoint: /mnt/efs
 
@@ -695,6 +695,7 @@ magento_node_warmup_script_path: /bin/node-warmup.sh
 # ------------------------------
 
 magento_scd_advanced_js_bundling: no
+magento_scd_advanced_js_bundling_strategy: baler
 
 
 # --------------------------------
@@ -1439,10 +1440,10 @@ mageops_packages_banned:
 mageops_packages_base:
   - python
   - python2-pip
-  - python36-mysql
-  - MySQL-python
-  - unzip
+  - python2-PyMySQL
   - yum-utils
+  - yum-plugin-verify
+  - unzip
   - git
   - rsync
   - jq
@@ -1524,4 +1525,4 @@ ntp_timezone: "{{ mageops_timezone }}"
 # -------------------------------------------------
 
 mageops_notifications_slack_channel: ~
-mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}" 
+mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}"

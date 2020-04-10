@@ -1,9 +1,0 @@
-# Install dependencies required for deploy itself
-# This is needed for ansible to perform db queries
-- name: Install mysql module for python
-  yum:
-    name: MySQL-python
-
-- name: Install pymysql for latest ansible
-  pip:
-    name: pymysql

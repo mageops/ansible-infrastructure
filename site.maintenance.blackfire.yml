@@ -3,7 +3,7 @@
   become: no
   tasks:
     - name: Get list of EC2 instances
-      ec2_instance_facts:
+      ec2_instance_info:
         region: "{{ aws_region }}"
         filters:
           "tag:Role": "app"

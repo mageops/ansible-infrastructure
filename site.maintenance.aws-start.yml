@@ -10,11 +10,11 @@
       when: start_ec2
       block:
         - name: Get list of EC2 instances
-          ec2_instance_facts:
+          ec2_instance_info:
             region: "{{ aws_region }}"
             filters:
               "vpc-id": "{{ aws_vpc_id }}"
-          register: start_ec2_instance_facts
+          register: start_ec2_instance_info
 
         - name: Start instances
           ec2:
@@ -24,7 +24,7 @@
             wait_timeout: 600
             wait: yes
           vars:
-            start_ec2_instance_ids: "{{ start_ec2_instance_facts | json_query('instances[].instance_id') }}"
+            start_ec2_instance_ids: "{{ start_ec2_instance_info | json_query('instances[].instance_id') }}"
 
     - name: Scale up App Node ASGs
       when: start_asg
@@ -48,7 +48,7 @@
           with_items: "{{ start_asgs }}"
           vars:
             start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"
-      
+
     - name: Scale up Extra App Node ASGs
       when: start_asg and (aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable)
       block:
@@ -70,7 +70,7 @@
             wait_timeout: 600
           with_items: "{{ start_asgs }}"
           vars:
-            start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"      
+            start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"
 
   vars:
     start: yes

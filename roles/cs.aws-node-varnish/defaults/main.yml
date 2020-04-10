@@ -7,4 +7,4 @@ aws_varnish_node_launch_script_extra: ''
 aws_varnish_node_security_groups:
   - "{{ aws_security_group_ssh_id }}"
   - "{{ aws_security_group_varnish_id }}"
-
+aws_varnish_instance_id: false

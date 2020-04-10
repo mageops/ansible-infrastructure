@@ -8,9 +8,6 @@
             state: present
           notify:
             - Clean packages
-        - name: Install ansible docker support
-          pip:
-            name: docker
         - name: Ensure docker daemon is started
           service:
             name: docker
@@ -38,9 +35,8 @@
         {{ item.commandline | default('') }}
       args:
         warn: no
+      ignore_errors: item.ignore_error | bool
       register: containerized_tasks_result
       loop: "{{ containerized_tasks }}"
     - debug: var=containerized_tasks_result
   when: containerized_tasks | length > 0
-
-
