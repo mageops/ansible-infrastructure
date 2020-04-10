@@ -13,18 +13,3 @@ mageops_migrations:
   - title: Fix python modules installed globally with PIP
     name: pip-packages
 
-  # This has already been migrated everywhere
-  # - title: Make sure old incompatible awsci package and its leftovers are absent
-  #   name: awscli
-
-  # This is handled by `pip-packages` and shall be fixed after the one-time fixup
-  # - title: Python PIP fixes for urllib
-  #   name: urllib3
-
-  # This has already been migrated everywhere
-  # - title: Old elasticsearch prov
-  #   name: elasticsearch
-
-  # This has already been migrated everywhere
-  # - title: Old custom nginx packages
-  #   name: nginx-creativeshop
