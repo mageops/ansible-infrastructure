@@ -125,13 +125,13 @@ if (req.url ~ "^/cron.php$") {
 %}
 
 if (
-    req.url ~ "[?&]{{ varnish_debug_request_token_query_param_pattern }}[$?&]"
+    req.url ~ "{{ varnish_debug_request_token_query_param_pattern }}"
     || req.http.{{ varnish_debug_request_header_name }} == "{{ varnish_debug_request_token }}"
     || req.http.Cookie ~ "(^|;\s*){{ varnish_debug_request_token_cookie_pattern }}(;|$)"
 ) {
-    set req.http.{{ varnish_debug_request_info_header_name }} = "Token-Verified; Cache-Bypassed";
+    set req.http.{{ varnish_debug_request_info_header_name }} = "Token-Verified; Cache-Bypassed; Xid=" + req.xid + "";
 
-    return (pass);
+    return (pipe);
 }
 {% endif %}
 
