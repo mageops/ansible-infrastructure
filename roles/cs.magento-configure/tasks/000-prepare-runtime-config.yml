@@ -62,3 +62,9 @@
           set_fact:
             magento_core_config_settings: "{{ magento_core_config_settings + magento_baler_js_bundling_core_config }}"
   when: magento_scd_advanced_js_bundling and magento_scd_advanced_js_bundling_strategy == 'baler'
+
+- name: Install required python modules
+  yum:
+    # Required for the `mysql_query` module
+    name: python2-PyMySQL
+    state: present
