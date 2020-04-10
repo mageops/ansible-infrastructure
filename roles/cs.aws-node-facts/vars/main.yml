@@ -1,3 +1,7 @@
 aws_node_facts_base_tags: "{{ aws_tags_base }}"
 aws_node_facts_base_filters:
-  instance-state-name: running
+  instance-state-name: 
+    - "running"
+    - "stopped"
+    - "stopping"
+    - "shutting-down"
