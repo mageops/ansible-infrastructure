@@ -7,6 +7,12 @@ mageops_migrations:
   - title: Make sure deprecated repositories are absent
     name: repository
 
+  - title: Renamed nginx configs
+    name: nginx-config
+
+  - title: Fix python modules installed globally with PIP
+    name: pip-packages
+
   # This has already been migrated everywhere
   # - title: Make sure old incompatible awsci package and its leftovers are absent
   #   name: awscli
@@ -14,9 +20,6 @@ mageops_migrations:
   # This is handled by ansible-host-packages role
   # - title: Python PIP fixes for urllib
   #   name: urllib3
-
-  - title: Renamed nginx configs
-    name: nginx-config
 
   # This has already been migrated everywhere
   # - title: Old elasticsearch prov
