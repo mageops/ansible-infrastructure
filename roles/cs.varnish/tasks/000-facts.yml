@@ -3,15 +3,15 @@
     - name: Get VPC IP addresses of backend app instances
       delegate_to: localhost
       become: no
-      ec2_instance_facts:
+      ec2_instance_info:
         region: "{{ aws_region }}"
         filters: "{{ varnish_backend_instances_filter_base | combine(varnish_backend_instances_aws_tags | prefix_keys('tag:')) }}"
-      register: _varnish_backends_ec2_instance_facts
+      register: _varnish_backends_ec2_instance_info
 
     - name: Set Varnish backend instances if any are running (AWS)
       set_fact:
-        varnish_backend_instances_app: "{{ _varnish_backends_ec2_instance_facts.instances }}"
-      when: _varnish_backends_ec2_instance_facts.instances | length > 0
+        varnish_backend_instances_app: "{{ _varnish_backends_ec2_instance_info.instances }}"
+      when: _varnish_backends_ec2_instance_info.instances | length > 0
   when: varnish_standalone and aws_use
 
 - name: Check if throttling shall be enabled

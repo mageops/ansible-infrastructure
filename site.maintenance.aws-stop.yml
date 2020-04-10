@@ -27,16 +27,16 @@
           with_items: "{{ stop_asgs }}"
           vars:
             stop_asgs: "{{ stop_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"
-      
+
     - name: Stop standalone EC2 instances
       when: stop_ec2
       block:
         - name: Get list of EC2 instances
-          ec2_instance_facts:
+          ec2_instance_info:
             region: "{{ aws_region }}"
             filters:
               "vpc-id": "{{ aws_vpc_id }}"
-          register: stop_ec2_instance_facts
+          register: stop_ec2_instance_info
 
         - name: Stop instances
           ec2:
@@ -45,7 +45,7 @@
             state: stopped
             wait: no
           vars:
-            stop_ec2_instance_ids: "{{ stop_ec2_instance_facts | json_query('instances[].instance_id') }}"
+            stop_ec2_instance_ids: "{{ stop_ec2_instance_info | json_query('instances[].instance_id') }}"
   vars:
     stop: yes
     stop_ec2: "{{ stop }}"

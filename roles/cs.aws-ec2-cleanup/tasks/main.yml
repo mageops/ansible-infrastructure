@@ -32,15 +32,12 @@
     msg: "Keeping {{ _aws_ec2_cleanup_ami_ids_to_keep | count }} AMIs: {{ _aws_ec2_cleanup_ami_ids_to_keep | join(', ') }}"
 
 - name: Get list of App AMIs
-  ec2_ami_find:
+  ec2_ami_info:
     region: "{{ aws_region }}"
     owner: self
-    sort: creationDate
-    sort_order: descending
-    ami_tags:
-      "Role": "app"
-      "Project": "{{ mageops_project }}"
-      "Environment": "{{ mageops_environment }}"
+    filters: "{{ aws_tags_base | prefix_keys('tag:') | combine(aws_tags_role_app_filter) }}"
+  vars:
+    aws_tags_role_app_filter: "{{ aws_tags_role_app | prefix_keys('tag:') }}"
   register: _aws_ec2_cleanup_env_amis
 
 - name: "Remove Launch Configurations not longer required"
@@ -56,9 +53,8 @@
      region: "{{ aws_region }}"
      state: absent
      delete_snapshot: yes
-     image_id: "{{ item.ami_id }}"
-  with_items: "{{ _aws_ec2_cleanup_env_amis.results }}"
+     image_id: "{{ item.image_id }}"
+  with_items: "{{ _aws_ec2_cleanup_env_amis.images }}"
   when:
-    - not item | skipped
-    - item.ami_id not in _aws_ec2_cleanup_ami_ids_to_keep
-
+    - item is not skipped
+    - item.image_id not in _aws_ec2_cleanup_ami_ids_to_keep

@@ -43,9 +43,9 @@ only for local development though and not yet supported_.
 - Customizable multi-website / multi-shop deployments
 - Letsencrypt certificates support
 - Cloudfront CDN
-  - Media stored on S3
+  - Media stored and shared across nodes using AWS EFS or AWS S3 (and possible plain NFS soonish)
   - Seamless image optimization via Lambda@Edge (with webp support)
-- Support for file sharing across nodes via AWS EFS
+- Support for arbitrary file sharing across nodes via AWS EFS
 - Per path pattern customizable PHP limits
 - Customizable request throttling (rate-limiting)
 - On-demand import instance 
@@ -60,6 +60,9 @@ only for local development though and not yet supported_.
 - Logs pushed to CloudWatch with slack notifications for critical errors
 - VPC and SG-based network communication rules allowing internal service communication 
   strictly on a need-to basis
+- Language and country-based redirects
+- On-demand PHP debugging on production without affecting the shop's performance or configuration
+- Advanced JavaScript Bundling support (via [Dockerized](https://github.com/mageops/magesuite-baler) AMD module bundler / preloader - [Baler](https://github.com/magento/baler))
 - ... any many more!
 
 <sup>1</sup> Needs at least 2 app nodes and requires certain MageSuite extensions. Also it might not be

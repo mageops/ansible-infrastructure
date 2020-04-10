@@ -1,5 +1,6 @@
-# highest version provisioning runs fully on
-ansible>=2.7,<2.8
+# DO NOT upgrade to >=2.9.3 until
+# https://github.com/ansible/ansible/issues/66641
+ansible==2.9.2
 
 # needed for inventory and aws modules
 boto3
