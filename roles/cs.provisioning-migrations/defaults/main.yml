@@ -17,7 +17,7 @@ mageops_migrations:
   # - title: Make sure old incompatible awsci package and its leftovers are absent
   #   name: awscli
 
-  # This is handled by ansible-host-packages role
+  # This is handled by `pip-packages` and shall be fixed after the one-time fixup
   # - title: Python PIP fixes for urllib
   #   name: urllib3
 

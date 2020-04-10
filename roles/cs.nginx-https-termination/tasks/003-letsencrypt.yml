@@ -1,3 +1,9 @@
+- name: Make sure required python modules are present
+  yum:
+    # Required for `openssl_*` modules
+    name: python2-cryptography
+    state: present
+
 - name: Create main private key
   openssl_privatekey:
     select_crypto_backend: cryptography

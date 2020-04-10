@@ -8,6 +8,7 @@
             state: present
           notify:
             - Clean packages
+            
         - name: Ensure docker daemon is started
           service:
             name: docker

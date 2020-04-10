@@ -1,3 +1,2 @@
 allow_duplicates: false
-dependencies:
-  - role: cs.ansible-host-packages
+dependencies: []
