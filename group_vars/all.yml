@@ -385,7 +385,7 @@ aws_extra_app_asg_passthrough_ip_pattern:
 aws_rds_create: "{{ mageops_mysql_create|default(true) and aws_use }}"
 
 # Type of the cloud DB instance
-aws_rds_instance_type: db.t3a.micro
+aws_rds_instance_type: db.t3.micro
 
 # Name of this instance
 aws_rds_instance_name: "{{ mageops_app_name }}-db"
