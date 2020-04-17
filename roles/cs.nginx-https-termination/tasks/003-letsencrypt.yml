@@ -1,16 +1,18 @@
-- name: Install python modules
-  pip:
-    extra_args: "--user"
-    name: pyOpenSSL
-    state: latest
+- name: Make sure required python modules are present
+  yum:
+    # Required for `openssl_*` modules
+    name: python2-cryptography
+    state: present
 
 - name: Create main private key
   openssl_privatekey:
+    select_crypto_backend: cryptography
     path: "{{ https_termination_letsencrypt_privkey_path }}"
     type: RSA
 
 - name: Create host private keys
   openssl_privatekey:
+    select_crypto_backend: cryptography
     path: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
     type: RSA
   when: item.letsencrypt | default(False)
@@ -20,6 +22,7 @@
 
 - name: Create CSR for each host
   openssl_csr:
+    select_crypto_backend: cryptography
     path: "{{ https_termination_csr_dir }}/{{ item.name }}.csr"
     privatekey_path: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
     common_name: "{{ item.server_name }}"
@@ -42,6 +45,7 @@
 
 - name: Generate self-signed certificates for letsencrypt hosts so nginx properly reloads
   openssl_certificate:
+    select_crypto_backend: cryptography
     path: "{{ https_termination_certificate_dir }}/{{ item[0].name }}.cer"
     privatekey_path: "{{ https_termination_private_dir }}/{{ item[0].name }}.pem"
     csr_path: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
@@ -74,6 +78,7 @@
 
 - name: Initiate ACME validation
   acme_certificate:
+    select_crypto_backend: cryptography
     acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
     account_key: "{{ https_termination_letsencrypt_privkey_path }}"
     csr: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"
@@ -136,6 +141,7 @@
 
 - name: Get the certs
   acme_certificate:
+    select_crypto_backend: cryptography
     acme_directory: "{{ https_termination_letsencrypt_acme_directory }}"
     account_key: "{{ https_termination_letsencrypt_privkey_path }}"
     csr: "{{ https_termination_csr_dir }}/{{ item[0].name }}.csr"

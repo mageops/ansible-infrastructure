@@ -1,6 +1,11 @@
 # Name of server.d include
 nginx_language_redirect_site: default
 
+# kind of redirect we want to have
+# geofence - blocks access completly
+# home-redirect - redirect is performed only for single url
+nginx_language_redirect_mode: geofence
+
 # Site style used for redirection
 # dir - languages are detetmined by top level dir
 #   eg: example.com/en, example.com/de
@@ -31,4 +36,3 @@ nginx_language_redirect_domain_mapping:
 nginx_language_redirect_directory_mapping:
   default: en
   PL: pl
-

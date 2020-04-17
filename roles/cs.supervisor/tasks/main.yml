@@ -1,3 +1,7 @@
+# TODO: WE cannot install global PIP packages,
+# this should be installed from yum. Current PIP version is 4.1
+# while official CentOS repo have 3.4.0. We need to check if
+# we're compatible with 3.4.0 before the downgrade.
 - name: Install supervisor
   pip:
     name: supervisor
@@ -51,5 +55,4 @@
     name: supervisord
     enabled: yes
     state: started
-  
-  
+

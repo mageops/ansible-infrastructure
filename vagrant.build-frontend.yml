@@ -10,5 +10,5 @@
       args:
         chdir: "{{ project_dir }}/vendor/creativestyle/{{ theme }}"
   vars:
-    theme: "theme-{{ mageops_project }}"
+    theme: "{{ theme_dir }}"
     project_dir: "{{ mageops_app_web_dir }}/{{ mageops_project }}"

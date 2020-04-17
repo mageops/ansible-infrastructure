@@ -13,7 +13,8 @@ ipaddress
 netaddr
 
 # needed for managing databases (e.g. creating project db in infra step)
-mysql
+# mysql
+PyMySQL
 
 # needed for running docker (e.g. building aws lambda artifacts)
 docker-py

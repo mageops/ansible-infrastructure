@@ -8,9 +8,7 @@
             state: present
           notify:
             - Clean packages
-        - name: Install ansible docker support
-          pip:
-            name: docker
+            
         - name: Ensure docker daemon is started
           service:
             name: docker
