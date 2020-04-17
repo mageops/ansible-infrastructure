@@ -6,6 +6,16 @@
     description: "{{ aws_rds_subnet_group_name }}"
     subnets: "{{ aws_rds_subnet_group_subnets }}"
 
+- name: Create RDS parameter group
+  rds_param_group:
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ aws_rds_param_group_name }}"
+    description: "{{ aws_rds_param_group_desc }}"
+    engine: "{{ aws_rds_param_group_engine }}"
+    tags: "{{ aws_tags_default }}"
+    params: "{{ aws_rds_param_group_params | default(omit) }}"
+
 - name: Create MySQL RDS
   rds:
     command: create
@@ -13,6 +23,8 @@
     publicly_accessible: true
     instance_name: "{{ aws_rds_instance_name }}"
     db_engine: "{{ aws_rds_db_engine }}"
+    parameter_group: "{{ aws_rds_param_group_name }}"
+    engine_version: "{{ aws_rds_db_engine_version }}"
     size: "{{ aws_rds_storage_size }}"
     instance_type: "{{ aws_rds_instance_type }}"
     username: "{{ mageops_mysql_root_user }}"
