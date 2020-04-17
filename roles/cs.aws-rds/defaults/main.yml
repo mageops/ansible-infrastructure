@@ -9,4 +9,7 @@ aws_rds_subnet_group_name: "{{ mageops_app_name }}"
 aws_rds_subnet_group_subnets: "{{ aws_vpc_subnet_ids }}"
 aws_rds_security_groups:
   - "{{ aws_security_group_rds_id }}"
-
+aws_rds_param_group_name: "{{ mageops_app_name }}"
+aws_rds_param_group_desc: "MageOps parameter group"
+aws_rds_db_engine_version: 5.7
+aws_rds_param_group_engine: "mysql{{ aws_rds_db_engine_version }}"
