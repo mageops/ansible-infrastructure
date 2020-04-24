@@ -1,0 +1,36 @@
+- name: Install
+  block:
+    - name: Install required files
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        mode: "{{ item.mode }}"
+      with_items: "{{ aws_magento_cron_files_install }}"
+
+    - name: Install required templated
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items: "{{ aws_magento_cron_files_install_templated }}"
+
+    - name: Enable cron service
+      service:
+        name: magento-cron-aws
+        state: started
+        enabled: yes
+  when: "aws_magento_cron_enabled and not magento_cron_disabled"
+
+- name: Remove
+  block:
+    - name: Disable cron service
+      service:
+        name: magento-cron-aws
+        state: stopped
+        enabled: no
+
+    - name: Remove files
+      file:
+        state: absent
+        path: "{{ item.dest }}"
+      with_items: "{{ aws_magento_cron_files_install + aws_magento_cron_files_install_templated }}"
+  when: "not aws_magento_cron_enabled or magento_cron_disabled"

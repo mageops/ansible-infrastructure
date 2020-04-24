@@ -8,18 +8,17 @@
       fail:
         msg: |
           ERROR! The primary host group "{{ mageops_app_host_group }}" was
-          not found. 
-          
+          not found.
+
           TIP: Check if correct AWS credentials and project configuration
           is used. Maybe the EC2 instances are down (environment is stopped)?
 
     - name: Create virtual inventory group with hosts limited to current project/env (AWS)
-      group_by: 
+      group_by:
         key: current
       when: aws_use and inventory_hostname in groups[mageops_app_host_group]
 
     - name: Create virtual inventory group with all hosts (non-AWS)
-      group_by: 
-        key: current 
+      group_by:
+        key: current
       when: not aws_use
-

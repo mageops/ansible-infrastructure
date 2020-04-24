@@ -1,0 +1,4 @@
+aws_lambda_node_coordinator_package_url: "https://github.com/mageops/aws-lambda-node-coordinator/releases/download/v0.1.4/lambda.zip"
+aws_lambda_node_coordinator_package_path: "{{ mageops_ansible_temp_dir }}/node_coordinator_lambda_v0.1.4.zip"
+aws_lambda_node_coordinator_runtime: nodejs12.x
+aws_lambda_handle_node_coordinator_autoscaling_event_name: "handleNodeCoordinatorAutoscalingEvent-{{ mageops_app_name }}"

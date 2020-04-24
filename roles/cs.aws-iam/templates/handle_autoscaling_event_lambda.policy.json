@@ -21,6 +21,7 @@
             ],
             "Resource": [
                 "arn:aws:lambda:{{ aws_region }}:{{ aws_account_id }}:function:updateVarnishBackends*",
+                "arn:aws:lambda:{{ aws_region }}:{{ aws_account_id }}:function:nodeCoordinator*",
                 "arn:aws:autoscaling:*:*:autoScalingGroup:*:autoScalingGroupName/*"
             ]
         }

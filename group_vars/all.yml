@@ -41,6 +41,8 @@ aws_iam_role_basic_lambda_execution: "{{ aws_iam_name_prefix }}BasicLambdaExecut
 aws_iam_role_autoscaling_event_lambda: "{{ aws_iam_name_prefix }}HandleAutoscalingEventLambdaExecution"
 aws_iam_role_update_varnish_backend_lambda_execution: "{{ aws_iam_name_prefix }}UpdateVarnishBackendsLambdaExecution"
 aws_iam_role_import_scaling_lambda_execution: "{{ aws_iam_name_prefix }}HandleImportScalingLambdaExecution"
+aws_iam_policy_node_coordinator_lambda: "{{ aws_iam_name_prefix }}HandleNodeCoordinatorLambda"
+aws_iam_role_node_coordinator_lambda_execution: "{{ aws_iam_name_prefix }}HandleNodeCoordinatorLambdaExecution"
 
 # ----------------------------
 # --------  AWS Tags  --------
@@ -406,7 +408,7 @@ aws_s3_bucket_policies: []
 # --------  AWS EFS  --------
 # --------------------------
 
-# The main EFS root directory mountpoin on each node 
+# The main EFS root directory mountpoin on each node
 # Note: Not used directly by app bu as helper during provisioning and conveience for users
 efs_root_mountpoint: /mnt/efs
 
@@ -705,6 +707,8 @@ magento_cron_user: "{{ mageops_app_id }}"
 # magento_cron_password:
 
 magento_cron_disabled: no
+magento_cron_http: "{{ not aws_use }}"
+aws_magento_cron_enabled: "{{ aws_use }}"
 magento_cron_observer_relative_path: vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 
 
@@ -1524,4 +1528,9 @@ ntp_timezone: "{{ mageops_timezone }}"
 # -------------------------------------------------
 
 mageops_notifications_slack_channel: ~
-mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}" 
+mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}"
+
+
+# Misc
+aws_autoscaling_triggers_list: []
+aws_autoscaling_lambda_functions_list: []

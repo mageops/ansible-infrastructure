@@ -8,14 +8,14 @@
           ====================================================
           ==   FATAL! No valid release artifacts were found ==
           ====================================================
-      
+
             No valid composer.json has been found at:
             {{ deploy_artifact_composer_json_local_path }}
 
             TIPS:
             - Is local artifact dir path is correct?
             - Was the project built at least once successfully?
-        
+
           ----------------------------------------------------
       when: deploy_artifact_composer_json_data.require is not defined
 
@@ -50,7 +50,7 @@
         deploy_release_id: "{{ ansible_date_time.iso8601_basic_short }}"
         deploy_keep_current_release: "{{ deploy_skip_installation | default(false) and deploy_previous_release_exists }}"
         deploy_previous_release_id: "{{ deploy_previous_release_exists | ternary((_current_release_check.stat.lnk_target | default('')).split('/') | last, false) }}"
-    
+
     - name: "Skipping instalation: reusing previous release"
       set_fact:
         deploy_release_id: "{{ deploy_previous_release_id }}"
@@ -102,6 +102,8 @@
         - name: Link static files version dir
           role: cs.magento-configure
           tasks_from: 200-static-symlink.yml
+
+    - role: cs.aws-magento-cron
 
     - role: cs.magento-optimize-iops
       when: mageops_reduce_iops
@@ -161,7 +163,6 @@
     magento_varnish_port: "{{ mageops_varnish_port }}"
     magento_static_cache_dir: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static/_cache"
     magento_media_dir: "{{ mageops_app_web_dir }}/shared/pub/media"
-    
+
     magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
     magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
-

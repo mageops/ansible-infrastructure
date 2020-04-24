@@ -23,7 +23,7 @@
       when: aws_use
 
     - role: cs.switch-to-dnf
-    
+
     - role: pinkeen.selinux-disable
 
     - role: cs.swap
@@ -100,7 +100,7 @@
 
     - role: cs.s3-fuse-s3fs
       when: aws_use and not s3fs_mount_use_goofys | default(false)
-      
+
     - role: cs.s3-fuse-goofys
       when: aws_use and s3fs_mount_use_goofys | default(false)
 
