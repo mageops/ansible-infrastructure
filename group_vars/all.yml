@@ -1099,6 +1099,7 @@ php_packages:
   - php-pecl-apcu-bc
   - php-pecl-redis
   - php-gd
+  - php-gmp
   - php-mcrypt
   - php-imagick
   - php-xml
