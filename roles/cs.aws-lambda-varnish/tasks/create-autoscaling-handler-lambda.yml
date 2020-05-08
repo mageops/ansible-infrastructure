@@ -8,7 +8,7 @@
 
 - name: Register lambda handler for autoscaling event
   lambda:
-    name: "{{ aws_lambda_handle_autoscaling_event_name }}"
+    name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
     state: present
     zip_file: "{{ aws_lambda_varnish_deploy_package_path }}"
     runtime: "{{ aws_lambda_varnish_runtime }}"
@@ -28,24 +28,18 @@
         UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
   register: handle_autoscaling_event_lambda
 
-- name: Setup autoscaling event trigger
-  cloudwatchevent_rule:
-    name: "trigger-autoscaling-lambda-{{ mageops_app_name }}"
-    region: "{{ aws_region }}"
-    state: present
-    event_pattern: "{{ aws_lambda_update_varnish_vcl_autoscaling_event_pattern | to_json }}"
-    targets:
-        - id: "{{ aws_lambda_handle_autoscaling_event_name }}-target"
-          arn: "{{ handle_autoscaling_event_lambda.configuration.function_arn }}"
-  register: varnish_autoscaling_event
+- name: Register autoscaling trigger
+  set_fact:
+    varnish_autoscaling_trigger:
+      id: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}-target"
+      arn: "{{ handle_autoscaling_event_lambda.configuration.function_arn }}"
 
-- name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
-  lambda_policy:
-    state: present
-    region: "{{ aws_region }}"
-    function_name: "{{ aws_lambda_handle_autoscaling_event_name }}"
-    action: "lambda:InvokeFunction"
-    principal: "events.amazonaws.com"
-    statement_id: "AWSEvents-handleAutoscalingEvent-{{ mageops_app_name }}"
-    source_arn: "{{ varnish_autoscaling_event.rule.arn }}"
+- name: Append trigger to list
+  set_fact:
+    aws_autoscaling_triggers_list: "{{ aws_autoscaling_triggers_list + [varnish_autoscaling_trigger] }}"
+    aws_autoscaling_lambda_functions_list: "{{ aws_autoscaling_lambda_functions_list + [aws_lambda_handle_varnish_autoscaling_event_name] }}"
 
+
+- name: Require cs.aws-autoscaling-triggers finalizer
+  set_fact:
+    finalize_roles: "{{ finalize_roles + ['cs.aws-autoscaling-triggers'] }}"

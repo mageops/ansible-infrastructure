@@ -1,0 +1,26 @@
+[Unit]
+Description=Magento AWS coordinated cron service
+
+[Service]
+User={{ magento_user }}
+Group={{ magento_group }}
+
+Type=simple
+Environment=MAGENTO_ROOT_DIR={{ magento_live_release_dir }}
+WorkingDirectory={{ magento_live_release_dir }}
+ExecStart=/usr/local/libexec/aws-cron-service.sh
+
+Restart=always
+# Give system time to recover after crash
+RestartSec=300
+
+# QoS options
+MemoryAccounting=true
+# Throttle cron jobs when they consume more than 256M of memory
+MemoryHigh=256M
+CPUAccounting=true
+# Limit cpu usage to 50% (of single core)
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

@@ -22,8 +22,3 @@
     environment_variables:
       BACKEND_TEMPLATE: "{{ lookup('file', 'roles/cs.varnish/templates/vcl/backends.vcl.j2')|to_json }}"
       BACKEND_TEMPLATE_VARS: "{{ varnish_backend_template_vars | to_json }}"
-
-
-
-
-

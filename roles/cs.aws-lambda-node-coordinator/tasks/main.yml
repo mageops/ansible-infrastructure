@@ -1,0 +1,34 @@
+- name: Download lambda deploy packages
+  get_url:
+    url: "{{ aws_lambda_node_coordinator_package_url }}"
+    dest: "{{ aws_lambda_node_coordinator_package_path }}"
+
+- name: Register lambda handler for coordinating nodes
+  lambda:
+    name: "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}"
+    state: present
+    zip_file: "{{ aws_lambda_node_coordinator_package_path }}"
+    runtime: "{{ aws_lambda_node_coordinator_runtime }}"
+    role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_node_coordinator_lambda_execution }}"
+    handler: index.handler
+    region: "{{ aws_region }}"
+    timeout: 15
+    environment_variables:
+      ENVIRONMENT: "{{ mageops_environment }}"
+      PROJECT: "{{ mageops_project }}"
+  register: handle_autoscaling_event_lambda
+
+- name: Register autoscaling trigger
+  set_fact:
+    coordinator_autoscaling_trigger:
+      id: "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}-target"
+      arn: "{{ handle_autoscaling_event_lambda.configuration.function_arn }}"
+
+- name: Append trigger to list
+  set_fact:
+    aws_autoscaling_triggers_list: "{{ aws_autoscaling_triggers_list + [coordinator_autoscaling_trigger] }}"
+    aws_autoscaling_lambda_functions_list: "{{ aws_autoscaling_lambda_functions_list + [aws_lambda_handle_node_coordinator_autoscaling_event_name] }}"
+
+- name: Require cs.aws-autoscaling-triggers finalizer
+  set_fact:
+    finalize_roles: "{{ finalize_roles + ['cs.aws-autoscaling-triggers'] }}"

@@ -18,7 +18,7 @@
           '--language={{ magento_language }}' \
           '--currency={{ magento_currency }}' \
           '--key={{ magento_crypt_key }}' \
-          {% if elasticsuite_version is version_compare('2.5', '>=') -%}
+          {% if elasticsuite_version is defined and elasticsuite_version is version_compare('2.5', '>=') -%}
             '--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}' \
           {% endif %}
           '--base-url={{ magento_base_url }}'

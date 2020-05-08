@@ -1,0 +1,21 @@
+aws_autoscaling_event_pattern:
+    source:
+        - aws.autoscaling
+    detail-type:
+        - "EC2 Instance Launch Successful"
+        - "EC2 Instance-terminate Lifecycle Action"
+        - "EC2 Instance Terminate Successful"
+
+# Those we don't handle for now
+# XXX(Szpadel): Why we cannot handle those?
+#        - "EC2 Instance-launch Lifecycle Action"
+#        - "EC2 Instance Terminate Successful"
+#        - "EC2 Instance Launch Unsuccessful"
+#        - "EC2 Instance Terminate Unsuccessful"
+
+
+aws_autoscaling_triggers_list: []
+# - id:
+#   arn:
+
+aws_autoscaling_lambda_functions_list: []

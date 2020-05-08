@@ -1,0 +1,20 @@
+- name: Setup autoscaling event trigger
+  cloudwatchevent_rule:
+    name: "trigger-autoscaling-lambda-{{ mageops_app_name }}"
+    region: "{{ aws_region }}"
+    state: present
+    event_pattern: "{{ aws_autoscaling_event_pattern | to_json }}"
+    targets: "{{ aws_autoscaling_triggers_list }}"
+
+  register: aws_autoscaling_event
+
+- name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
+  lambda_policy:
+    state: present
+    region: "{{ aws_region }}"
+    function_name: "{{ item }}"
+    action: "lambda:InvokeFunction"
+    principal: "events.amazonaws.com"
+    statement_id: "AWSEvents-handleAutoscalingEvent-{{ mageops_app_name }}"
+    source_arn: "{{ aws_autoscaling_event.rule.arn }}"
+  with_items: "{{ aws_autoscaling_lambda_functions_list }}"
