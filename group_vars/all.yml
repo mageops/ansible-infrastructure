@@ -395,13 +395,6 @@ aws_rds_param_group_params_default:
       log_bin_trust_function_creators: 1
       max_heap_table_size: 67108864
       tmp_table_size: 67108864
-      # Force 1 on 1-2G instances.
-      # Force 1-8 on bigger instances.
-      # Value needs to be force because of the described bug. https://bugs.mysql.com/bug.php?id=79379
-      innodb_buffer_pool_instances: 1
-      innodb_buffer_pool_chunk_size: 134217728
-      # 2 * (NumCPUs + NumDisks)
-      innodb_thread_concurrency: 2
 
 # Parameters to tune MySQL configuration
 aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws_rds_param_group_params_extra | default({}), recursive=True) }}"
