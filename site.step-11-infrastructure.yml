@@ -5,6 +5,8 @@
 
 - hosts: database
   roles:
+    - role: cs.packages
+
     - role: cs.mysql
       mysql_root_user: "{{ mageops_mysql_root_user }}"
       mysql_root_pass: "{{ mageops_mysql_root_pass }}"
@@ -12,3 +14,6 @@
       
     - role: cs.mysql-configure
       when: mageops_mysql_host is defined
+
+  vars:
+    packages_install: "{{ mageops_packages_common }}"

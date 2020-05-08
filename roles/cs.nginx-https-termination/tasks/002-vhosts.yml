@@ -1,3 +1,20 @@
+- name: Compute runtime vhost configuration
+  set_fact:
+    https_termination_cfg_vhosts: "{{ https_termination_cfg_vhosts + [ vhost | combine(vhost_cfg) ] }}"
+  vars:
+    vhost_cfg:
+      nginx_conf_file: "{{ nginx_confd_dir }}/050-vhost-{{ vhost.name }}.conf"
+      cert_dir: "{{ https_termination_certificate_dir }}/{{ vhost.name }}"
+      cert_fragment_dir: "{{ https_termination_certificate_dir }}/{{ vhost.name }}.d"
+      cert_public_file: "{{ https_termination_certificate_dir }}/{{ vhost.name }}.d/001-certificate.cer"
+      cert_chain_file: "{{ https_termination_certificate_dir }}/{{ vhost.name }}.d/002-chain.cer"
+      cert_bundle_file: "{{ https_termination_certificate_dir }}/{{ vhost.name }}.cer"
+      cert_key_file: "{{ https_termination_private_dir }}/{{ vhost.name }}.pem"
+  loop: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
 - name: Fail if varnish should be hidden but is bound to port 80
   fail:
     msg: Varnish should be hidden, but is on port 80, set `varnish_port` to some other value
@@ -5,69 +22,79 @@
 
 - name: Make sure cert fragment dir is existing
   file:
-    path: "{{ https_termination_certificate_dir }}/{{ item.name }}.d"
+    path: "{{ vhost.cert_fragment_dir }}"
     state: directory
     mode: 0700
-  with_items: "{{ https_termination_hosts }}"
+  loop: "{{ https_termination_cfg_vhosts }}"
   loop_control:
-    label: "{{ item.name }}"
-  when: item.cert_path | default(False) or item.cert_chain_path | default(False)
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+  when: vhost.cert_path | default(false) or vhost.cert_chain_path | default(false)
 
 - name: Copy public certficate
+  when: vhost.cert_path | default(false)
   copy:
-    src: "{{ mageops_project_certs_dir }}/{{ item.cert_path }}"
-    dest: "{{ https_termination_certificate_dir }}/{{ item.name }}.d/001-certificate.cer"
+    src: "{{ mageops_project_certs_dir }}/{{ vhost.cert_path }}"
+    dest: "{{ vhost.cert_public_file }}"
     mode: 0600
-  with_items: "{{ https_termination_hosts }}"
+  loop: "{{ https_termination_cfg_vhosts }}"
   loop_control:
-    label: "{{ item.name }}"
-  when: item.cert_path | default(False)
+    label: "{{ vhost.name }}"
+    loop_var: vhost
 
 - name: Copy certificate chain
+  when: vhost.cert_chain_path | default(false)
   copy:
-    src: "{{ mageops_project_certs_dir }}/{{ item.cert_chain_path }}"
-    dest: "{{ https_termination_certificate_dir }}/{{ item.name }}.d/002-chain.cer"
+    src: "{{ mageops_project_certs_dir }}/{{ vhost.cert_chain_path }}"
+    dest: "{{ vhost.cert_chain_file }}"
     mode: 0600
-  with_items: "{{ https_termination_hosts }}"
+  loop: "{{ https_termination_cfg_vhosts }}"
   loop_control:
-    label: "{{ item.name }}"
-  when: item.cert_chain_path | default(False)
+    label: "{{ vhost.name }}"
+    loop_var: vhost
 
 - name: Bundle the certificates
+  when: vhost.cert_path | default(false) or vhost.cert_chain_path | default(false)
   assemble:
-    src: "{{ https_termination_certificate_dir }}/{{ item.name }}.d"
-    dest: "{{ https_termination_certificate_dir }}/{{ item.name }}.cer"
+    src: "{{ vhost.cert_fragment_dir }}"
+    dest: "{{ vhost.cert_bundle_file }}"
     mode: 0600
     validate: 'openssl x509 -in %s -text -noout'
-  notify:
-    - reload httpd
-  with_items: "{{ https_termination_hosts }}"
+  notify: Reload nginx
+  loop: "{{ https_termination_cfg_vhosts }}"
   loop_control:
-    label: "{{ item.name }}"
-  when: item.cert_path | default(False) or item.cert_chain_path | default(False)
+    label: "{{ vhost.name }}"
+    loop_var: vhost
 
 - name: Copy certificate key
+  when: vhost.cert_key_path | default(false)
   copy:
-    src: "{{ mageops_project_certs_dir }}/{{ item.cert_key_path }}"
-    dest: "{{ https_termination_private_dir }}/{{ item.name }}.pem"
+    src: "{{ mageops_project_certs_dir }}/{{ vhost.cert_key_path }}"
+    dest: "{{ vhost.cert_key_file }}"
     mode: 0600
-  notify:
-    - reload httpd
-  with_items: "{{ https_termination_hosts }}"
+  notify: Reload nginx
+  loop: "{{ https_termination_cfg_vhosts }}"
   loop_control:
-    label: "{{ item.name }}"
-  when: item.cert_key_path | default(False)
+    label: "{{ vhost.name }}"
+    loop_var: vhost
 
 - name: Install vhost config
   template:
     src: vhost.conf.j2
-    dest: "{{ nginx_confd_dir }}/{{ item.name }}.conf"
+    dest: "{{ vhost.nginx_conf_file }}"
   register: https_termination_vhost_config
-  notify:
-    - reload httpd
-  with_items: "{{ https_termination_hosts }}"
+  notify: Reload nginx configs
+  loop: "{{ https_termination_cfg_vhosts }}"
   loop_control:
-    label: "{{ item.name }}"
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + https_termination_cfg_vhosts | map(attribute='nginx_conf_file') | list }}"
+
+
+
 
 
 

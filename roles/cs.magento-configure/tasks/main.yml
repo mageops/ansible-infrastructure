@@ -1,6 +1,5 @@
 
 - import_tasks: 000-prepare-runtime-config.yml
-- import_tasks: 001-install-deploy-deps.yml
 
 - name: Execute Magento setup
   block:

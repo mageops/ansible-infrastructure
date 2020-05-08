@@ -387,10 +387,19 @@ aws_extra_app_asg_passthrough_ip_pattern:
 aws_rds_create: "{{ mageops_mysql_create|default(true) and aws_use }}"
 
 # Type of the cloud DB instance
-aws_rds_instance_type: db.t3a.micro
+aws_rds_instance_type: db.t3.micro
 
 # Name of this instance
 aws_rds_instance_name: "{{ mageops_app_name }}-db"
+
+# Default configuration tunes for MySQL
+aws_rds_param_group_params_default:
+      log_bin_trust_function_creators: 1
+      max_heap_table_size: 67108864
+      tmp_table_size: 67108864
+
+# Parameters to tune MySQL configuration
+aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws_rds_param_group_params_extra | default({}), recursive=True) }}"
 
 # --------------------------
 # --------  AWS S3  --------
@@ -587,10 +596,72 @@ mageops_reduce_iops: "{{ aws_use }}"
 mageops_swap_app_node_enable: yes
 mageops_zram_app_node_enable: "{{ mageops_reduce_iops }}"
 
+# Secret token used for accessing internal non-sensitive APIs and debugging
+# facilities.
+#
+# WARNING! This is a secret thus must be project-unique and placed in
+# an encrypted project's credentials configuration file.
+#
+# WARNING! Must be safe to be used as a HTTP request query argument value
+# so stick to alphanumeric characters only!
+#
+# mageops_secret_token:
+
+# Prefix used for internal status / debugging / healtchecks APIs
+# NOTE: This APIs are not exposide outside infra and filtered out
+# from any ingress HTTP traffic.
+mageops_internal_api_http_path: /___mageops___
+
+# Name prefix of all custom MageOps-specific HTTP start with this
+mageops_http_header_prefix: "X-MageOps"
+
+# Name prefix of custom MageOps query parameters that are to be used
+# outside of the infrastructure (via ingress requests / on the public site)
+mageops_query_param_prefix: "__mgo"
+
+# Name prefix of custom MageOps cookies
+mageops_cookie_prefix: "MageOps"
+
+# ---------------------------------------------
+# --------  MageOps General Debugging  --------
+# ---------------------------------------------
+
+# NOTE: All header/param/cookie names must use only alphanumeric characters
+# and underscores only! Any other character may and probably will break stuff.
+# This is due to intricacies of nginx / varnish configuration languages,
+# various HTTP considerations, better be safe than sorry!
+
+# Secret, unique string used for authorizing debugging sessions
+# and for accessing other debug functionality
+#
+# WARNING! Must be safe to be used as a HTTP request query argument value
+# so stick to alphanumeric characters only!
+mageops_debug_token: "{{ mageops_secret_token }}"
+
+# Name of the HTTP requests's query parameter that triggers debugging mode
+mageops_debug_token_query_param: "{{ mageops_query_param_prefix }}_debug_token"
+
+# Name of the HTTP Cookie that triggers debugging mode
+mageops_debug_token_request_cookie: "{{ mageops_cookie_prefix }}DebugToken"
+
+# Prefix for all HTTP headers related to debugging information or behavior
+# - This is nice to have in a variable in case we need to do special processing
+#   of all requests containing any of these headers.
+mageops_debug_http_header_prefix: "{{ mageops_http_header_prefix }}-Debug"
+
+# Name of the header that enables debugging mode (cache passthrough, xdebug pool routing, ...)
+mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
+
+# If we have a central ingress node, set this to its internal network hostname
+# to enable proxying xdebug remote connections to it so developer doesn't have to
+# forward it from every app node at once or guess to which one the request goes.
+mageops_xdebug_proxy_remote_connection_to_loadbalancer: "{{ varnish_as_loadbalancer }}"
+
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
 
+# This vars should be set in global company-wide settings
 mageops_root_ssh_keys_global: []
 mageops_app_ssh_keys_global: "{{ mageops_root_ssh_keys_global }}"
 
@@ -600,6 +671,7 @@ mageops_root_ssh_keys_project: []
 # SSH keys to authorize for access to app user customizable per project
 mageops_app_ssh_keys_project: "{{ mageops_root_ssh_keys_project }}"
 
+# Final runtime SSH authorized keys lists
 mageops_root_ssh_keys: "{{ mageops_root_ssh_keys_global + mageops_root_ssh_keys_project }}"
 mageops_app_ssh_keys: "{{ mageops_app_ssh_keys_global + mageops_app_ssh_keys_project }}"
 
@@ -697,6 +769,7 @@ magento_node_warmup_script_path: /bin/node-warmup.sh
 # ------------------------------
 
 magento_scd_advanced_js_bundling: no
+magento_scd_advanced_js_bundling_strategy: baler
 
 
 # --------------------------------
@@ -1037,15 +1110,35 @@ php_packages:
 
 php_conf_fragment_dir_path: "/etc/php.d"
 
+php_fpm_pool_name: "{{ mageops_app_type }}"
+
 php_fpm_run_dir_path: "/var/run/php-fpm"
 php_fpm_log_dir_path: "/var/log/php-fpm"
 
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
-php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ mageops_app_type|default('app') }}.sock"
+
+php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ php_fpm_pool_name }}.sock"
+php_fpm_debug_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ php_fpm_pool_name }}.debug.sock"
+
 php_fpm_service: php-fpm
+
+# Enable the separate PHP-FPM pool with xdebug support (among others)
+php_fpm_debug_pool_enable: yes
+
+# Special XDebug directive overrides for debugging PHP-FPM pool
+php_fpm_debug_pool_xdebug_remote_host: "{{ mageops_xdebug_proxy_remote_connection_to_loadbalancer | ternary(mageops_varnish_host, 'localhost') }}"
+php_fpm_debug_pool_xdebug_remote_port: "{{ php_xdebug_remote_port }}"
+
+# Configure the status and ping internal PHP-FPM pool endpoints
+php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
+php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"
+php_fpm_pool_ping_response: "HEALTHY"
 
 php_date_timezone: "{{ mageops_timezone }}"
 php_memory_limit: "-1"
+
+# XDebug configuration
+php_xdebug_remote_port: 9000
 
 # This value is unlimited (0) for CLI by default, not matter the php.ini setting!
 php_max_execution_time: "600"
@@ -1133,6 +1226,9 @@ nginx_app_port: "{{ mageops_varnish_backend_port }}"
 nginx_fcgi_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}s"
 nginx_fcgi_connect_timeout: "5s"
 
+# Name of extra header returning info about debug request (if triggered)
+nginx_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-NGINX"
+
 # List of nginx request path patterns to block completely by default
 # (See: `cs.nginx-url-blacklist` role)
 # --
@@ -1163,7 +1259,7 @@ nginx_blacklist_map_variable_name: "magento_blacklisted_url"
 nginx_blacklist_map_config_file: "{{ nginx_confd_dir }}/000-magento-url-blacklist-map.conf"
 
 # Path to the partial nginx config to be included in vhost
-nginx_blacklist_vhost_check_config_file: "{{ nginx_etc_dir }}/magento_url_blacklist_check"
+nginx_blacklist_vhost_check_include_file: "{{ nginx_etc_dir }}/magento_url_blacklist_check"
 
 
 
@@ -1296,6 +1392,8 @@ varnish_strip_params:
   - "trk_[^=&]+"
   - "dm_i"
   - "fbclid"
+
+varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
 
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------
@@ -1443,10 +1541,10 @@ mageops_packages_banned:
 mageops_packages_base:
   - python
   - python2-pip
-  - python36-mysql
-  - MySQL-python
-  - unzip
+  - python2-PyMySQL
   - yum-utils
+  - yum-plugin-verify
+  - unzip
   - git
   - rsync
   - jq
@@ -1530,7 +1628,7 @@ ntp_timezone: "{{ mageops_timezone }}"
 mageops_notifications_slack_channel: ~
 mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}"
 
-
 # Misc
 aws_autoscaling_triggers_list: []
 aws_autoscaling_lambda_functions_list: []
+

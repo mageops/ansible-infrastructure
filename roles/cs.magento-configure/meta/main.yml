@@ -1,2 +1,2 @@
 dependencies:
-  - { role: zauberpony.mysql-query }
+  - role: zauberpony.mysql-query

@@ -2,3 +2,4 @@
   loop: "{{ mageops_migrations }}"
   loop_control:
     loop_var: migration
+

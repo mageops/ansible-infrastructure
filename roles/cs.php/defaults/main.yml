@@ -10,6 +10,7 @@ php_packages:
   - php-opcache
 
 php_install_fpm_package: no
+php_fpm_package: 'php-fpm'
 
 # --- Basic default PHP INI configuration ---
 
@@ -57,7 +58,7 @@ php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.black
 # --- File-based opcache settings for CLI scripts ---
 
 # Warning! This is an experimental feature. Currenly it does
-# not work correctly with Magento - standalone Magento cron 
+# not work correctly with Magento - standalone Magento cron
 # processes are not being run - until the issue is fixed it's not
 # recommended to enable this.
 
@@ -68,7 +69,7 @@ php_cli_opcache_file_cache_consistency_checks: 1
 # Even though the source does not change in some cases (e.g. during deploy)
 # there are commands ran which can (re)generate code at runtime. As it's
 # very tricky to invalidate the file cache for this cases, it's better
-# to turn this on, performance impact should be neglible and anyway it's 
+# to turn this on, performance impact should be neglible and anyway it's
 # offset by the gains of having the CLI file cache on.
 php_cli_opcache_validate_timestamps: 1
 
@@ -82,7 +83,7 @@ php_cli_opcache_file_update_protection: 5
 # enable GC for CLi as these processes can be long-running
 php_cli_zend_enable_gc: "On"
 
-# make sure CLI processes are restarted once in a while to avoid 
+# make sure CLI processes are restarted once in a while to avoid
 # memory leaks which could happen with bad code even though GC is on
 php_cli_max_execution_time: 3600
 
@@ -91,6 +92,8 @@ php_cli_opcache_memory_consumption: "{{ php_opcache_memory_consumption * 2 }}"
 
 php_cli_error_log_path: /var/log/php-cli-error.log
 
+
+# --- Suggested OPCache INI Settings for Local Dev Env ---
 
 # As all of the defaults are tuned for production setups you'll
 # usually want to override these settings for development envs:
@@ -104,13 +107,47 @@ php_cli_error_log_path: /var/log/php-cli-error.log
 # php_cli_opcache_file_cache_consistency_checks: 1
 
 
+# --- Settings for the extra debug helper injectable phar ---
+
+php_debug_helper_version: "1.0.5"
+php_debug_helper_phar_path: "/usr/local/share/mageops/php/debug-helper.phar"
+php_debug_helper_phar_url: "https://github.com/mageops/php-debug-helper/releases/download/{{ php_debug_helper_version }}/mageops-debug-helper.phar"
+
+# --- Debugging settings ---
+
+# Install and enable XDebug but create a separate php.ini that loads
+# and configures it so it's not laoded for normal site operation but
+# can be used when needed - e.g. for a special separate debugging php-fpm pool.
+php_debug_ini_enable: yes
+
+# Set up auto-prepending the injectable error handler in the separate ini file
+php_debug_ini_prepend_debug_helper: yes
+
+# Path to the special ini file that enables xdebug
+php_debug_ini_path: /etc/php-xdebug.ini
+
+# --- XDebug settings ---
+
+# Name of xdebug package to install when enabled
+php_xdebug_package: php-xdebug
+
+# XDebug extension INI settings
+php_xdebug_max_nesting_level: 256
+php_xdebug_remote_autostart: "true"
+php_xdebug_remote_host: localhost
+php_xdebug_remote_port: 9000
+php_xdebug_remote_log: "/var/log/php-xdebug-remote.log"
+php_xdebug_remote_timeout: 500
+
+
 # --- Performance Tuning ---
-# PERFORMANCE TODO Enable hugepages use in opcache for better performance
+
+# TODO: PERFORMANCE - Enable hugepages use in opcache for better performance
 #
 #   1) Make sure THP is supported and enabled and we're not running in a container (docker / LXC / openvz / whateva)
 #      See: roles/cs.redis/tasks/configure.yml for enabling THP
 #   2) Set hugepages to PHP opcache size / hugepage size (2MB default), e.h. `sysctl -w vm.nr_hugepages=128`
 #   3) Enable in opcache cfg - set `opcache.huge_code_pages=1` in `/etc/php.dń/10-opcache.ini`
-#   4) Restart PHP-FPM
+#   4) Restart php-fpm
 #
 # php_opcache_use_thp: yes

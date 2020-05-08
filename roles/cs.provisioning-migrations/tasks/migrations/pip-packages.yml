@@ -1,0 +1,22 @@
+# This shall be ran only on varnish/persistent nodes
+# as clean install will fix it on app nodes anyway
+- name: Perform fixup on every node except app
+  when: mageops_node_role | default('unknown') != 'app'
+  block:
+    - name: Execute one-time pip-installed global packages fixup script
+      script:
+        cmd: fix-broken-python-packages.sh
+        creates: /var/mageops-pip-packages-fixed.lock
+        executable: /bin/bash
+      register: pip_fixup_script
+
+    - name: Print pip packages fixup script result
+      debug:
+        msg: |
+          OUT
+          "{{ pip_fixup_script.stdout | default('N/A') }}"
+
+          ERR
+          "{{ pip_fixup_script.stderr | default('N/A') }}"
+
+

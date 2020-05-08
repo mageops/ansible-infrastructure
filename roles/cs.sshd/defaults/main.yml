@@ -6,3 +6,102 @@ sshd_permit_root_login: yes
 # and don't allow password authentication anyway so this shall be
 # not have any security implications.
 ssh_max_auth_tries: "{{ sshd_password_auth | ternary(1, 20) }}"
+
+# List of values to set for directive `PermitListen` in the for "host:port"
+# We could allow everything (sshd default) since user has shell anyway so
+# he can forward any port using other means, however, lets stick only to
+# the local network.
+sshd_permit_open: "127.0.0.1:* {{ ansible_default_ipv4.network | default('0.0.0.0') }}:*"
+
+# PITA: There is no `PermitListen` directive in OpenSSH 7.4 (latest on CentOS 7)
+# This option should be present since OpenSSH 7.8, so maybe in CentOS 8...
+# So we have to rely on the firewall / virtual network restrictions for the the
+# publicly bindable ports. Anyway if user connects as root it doesn't really matter.
+
+# That's why we'll enable gateway ports (listening on public ports via reverse forward)
+# only for the root user.
+
+# Value of `GatewayPorts` directive
+sshd_gateway_ports: "no"
+
+# Whether to allow gateway ports and unlimited forwarding when logged in as root
+sshd_root_user_allow_all_forwards: yes
+
+# Via `man 4 sshd_config`:
+#  Specifies the maximum number of concurrent unauthenticated connections to the SSH daemon.  Additional connections will be dropped until authentication succeeds or
+#  the LoginGraceTime expires for a connection. Alternatively, random early drop can be enabled by specifying the three colon separated values start:rate:full
+# (e.g. "10:30:60").  sshd(8) will refuse connection attempts with a probability of rate/100 (30%) if there are currently start (10) unauthenticated connections.
+# The probability increases linearly and all connection attempts are refused if the number of unauthenticated connections reaches full (60).
+sshd_max_startups: "10:30:100"
+
+# Value of AllowTcpForwarding directive - when user has shell then this
+# makes no difference from security standpoint whatsoever
+sshd_allow_tcp_forwarding: "yes"
+
+# Required authentication methods
+sshd_authentication_methods: "publickey"
+
+# Base configuration as convenience
+sshd_config_base:
+    AcceptEnv:
+      - LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
+      - LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
+      - LC_IDENTIFICATION LC_ALL LANGUAGE
+      - XMODIFIERS
+    AllowAgentForwarding: "yes"
+    AllowStreamLocalForwarding: "yes"
+    AllowTcpForwarding: "{{ sshd_allow_tcp_forwarding }}"
+    AuthenticationMethods: "{{ sshd_authentication_methods }}"
+    AuthorizedKeysFile: ".ssh/authorized_keys"
+    ChallengeResponseAuthentication: "yes"
+    ClientAliveInterval: "60"
+    ClientAliveCountMax: "30"
+    GSSAPIAuthentication: "no"
+    GatewayPorts: "{{ sshd_gateway_ports }}"
+    HostKey:
+      - /etc/ssh/ssh_host_ecdsa_key
+      - /etc/ssh/ssh_host_rsa_key
+      - /etc/ssh/ssh_host_ed25519_key
+    LoginGraceTime: 15s
+    MaxAuthTries: "{{ ssh_max_auth_tries }}"
+    MaxSessions: 10
+    MaxStartups: "{{ sshd_max_startups }}"
+    PasswordAuthentication: "{{ sshd_password_auth | ternary('yes', 'no') }}"
+    PermitEmptyPasswords: "no"
+    PermitOpen: "{{ sshd_permit_open }}"
+    PermitRootLogin: "{{ sshd_permit_root_login | ternary('yes', 'no') }}"
+    PermitTTY: "yes"
+    PermitTunnel: "no"
+    PrintMotd: "yes"
+    Port: 22
+    PubkeyAuthentication: "yes"
+    Subsystem:
+      - sftp /usr/libexec/openssh/sftp-server
+    SyslogFacility: AUTHPRIV
+    TCPKeepAlive: "yes"
+    UsePAM: "yes"
+
+
+# Override any sshd config directives here
+# Note: keys with multiple values will be repeated for each of them.
+sshd_config: {}
+
+# Directives that will be configured as default for root user
+# if `sshd_config_user_root_allow_all_forwards` is enabled
+sshd_config_user_root_allow_all_forwards:
+  AllowAgentForwarding: "yes"
+  AllowStreamLocalForwarding: "yes"
+  AllowTcpForwarding: "yes"
+  GatewayPorts: "yes"
+  PermitOpen: "*:*"
+  DisableForwarding: "no"
+
+# Configuration for connections matching the root user
+sshd_config_user_root: "{{ sshd_root_user_allow_all_forwards | ternary(sshd_config_user_root_allow_all_forwards, {}) }}"
+
+# Default per user configuration
+sshd_config_users_base:
+  root: "{{ sshd_config_user_root }}"
+
+# Per user configuration
+sshd_config_users: {}

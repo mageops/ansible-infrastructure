@@ -1,6 +1,13 @@
 - name: Install PHP and dependency packages
   yum:
-    name: "{{ php_packages + php_extra_packages | default([]) + php_install_fpm_package | ternary(['php-fpm'], []) }}"
+    name: >-
+      {{
+          (
+            php_packages + php_extra_packages | default([])
+              + php_install_fpm_package | ternary([php_fpm_package], [])
+              + php_debug_ini_enable | ternary([php_xdebug_package], [])
+          ) | unique
+      }}
     state: present
 
 - name: Configure PHP tmpfiles
@@ -13,9 +20,9 @@
   command: systemd-tmpfiles --create
   when: tmpfiles_config is changed
 
-- name: Configure PHP INI
+- name: Configure Web Request PHP INI
   template:
-    src: php.ini
+    src: php-web.ini
     dest: /etc/php.ini
   notify: PHP Configuration Changed
 
@@ -26,6 +33,13 @@
     force: yes
   notify: PHP Configuration Changed
 
+- name: Configure separate PHP Debug INI
+  template:
+    src: php-xdebug.ini
+    dest: "{{ php_debug_ini_path }}"
+  notify: PHP Configuration Changed
+  when: php_debug_ini_enable
+
 # This is needed so specific /etc/php*.ini settings are not
 # overrided by package provided defaults.
 - name: Disable unwanted PHP INI overrides
@@ -35,11 +49,18 @@
       ;
       ; This file is empty on purpose to allow
       ; settings for this module to be set in
-      ; the main /etc/php*.ini files.
-    dest: /etc/php.d/{{ item }}.ini
+      ; the main /etc/php*.ini files. This is
+      ; a must since /etc/php.d/*.ini files
+      ; always take precedence and thus disallow
+      ; any conditional customization for core
+      ; modules.
+    dest: "/etc/php.d/{{ item }}.ini"
     force: yes
-  with_items:
-    - 10-opcache
+  with_items: >-
+    {{
+       ['10-opcache']
+        + php_debug_ini_enable | ternary(['15-xdebug'], [])
+    }}
   notify: PHP Configuration Changed
 
 - name: Create cache cleaning service

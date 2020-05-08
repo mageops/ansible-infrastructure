@@ -12,5 +12,5 @@
   version: v1.1
 
 - src: zauberpony.mysql-query
-  version: v0.5.1
+  version: v0.6.1
 

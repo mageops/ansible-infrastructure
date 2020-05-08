@@ -1,6 +1,12 @@
 {%- for lang, path in nginx_language_redirect_directory_mapping.items() %}
 if ( $target = "{{ path }}" ) {
+    {%- if nginx_language_redirect_mode == 'geofence' %}
     rewrite /({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }}) /$target/ redirect;
     rewrite ^/$ /$target/ redirect;
+    {% endif %}
+    {%- if nginx_language_redirect_mode == 'home-redirect' %}
+    rewrite ^/({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }})/?$ /$target/ redirect;
+    rewrite ^/$ /$target/ redirect;
+    {% endif %}
 }
 {% endfor -%}

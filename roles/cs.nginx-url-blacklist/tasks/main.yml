@@ -16,17 +16,24 @@
     recurse: yes
   with_items:
     - "{{ nginx_blacklist_map_config_file | dirname }}"
-    - "{{ nginx_blacklist_vhost_check_config_file | dirname }}"
+    - "{{ nginx_blacklist_vhost_check_include_file | dirname }}"
 
 - name: Create URL blacklist main nginx config include
   template:
     src: magento_url_blacklist_map.j2
     dest: "{{ nginx_blacklist_map_config_file }}"
-  notify: reload nginx
-
+  notify: Reload nginx configs
 
 - name: Create URL blacklist vhost nginx config include
   template:
     src: magento_url_blacklist_check.j2
-    dest: "{{ nginx_blacklist_vhost_check_config_file }}"
-  notify: reload nginx
+    dest: "{{ nginx_blacklist_vhost_check_include_file }}"
+  notify: Reload nginx
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
+  vars:
+    provisioned_configs:
+      - "{{ nginx_blacklist_map_config_file }}"
+

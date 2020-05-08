@@ -1,5 +1,5 @@
 - name: Get EC2 instance information for nodes
-  ec2_instance_facts:
+  ec2_instance_info:
     region: "{{ aws_region }}"
     filters: "{{ aws_node_facts_base_filters | combine(aws_node_facts_base_tags | combine(node.tags) | prefix_keys('tag:')) }}"
   loop:
@@ -72,4 +72,3 @@
   set_fact:
     mageops_redis_sessions_host: "{{ aws_nodes_info.redis.private_ip_address }}"
   when: not mageops_redis_sessions_host | default(false, true) and aws_nodes_info.redis
-

@@ -1,5 +1,9 @@
 - name: Configure extra nginx logging
   template:
     src: logging-extra.nginx.conf
-    dest: "{{ https_termination_nginx_confd_dir }}/000-logging-extra.conf"
-  notify: Reload nginx
+    dest: "{{ https_termination_nginx_extra_logging_conf_file }}"
+  notify: Reload nginx configs
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + [ https_termination_nginx_extra_logging_conf_file ] }}"

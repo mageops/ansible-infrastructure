@@ -112,6 +112,29 @@ if (req.url ~ "^/cron.php$") {
     return (pass);
 }
 
+{% if varnish_debug_request_token | default(false, true) %}
+# Debugging passthrough conditions
+{% set varnish_debug_request_token_query_param_pattern =
+    ( varnish_debug_request_query_param_name | regex_escape )
+    ~ '=' ~ ( varnish_debug_request_token | regex_escape )
+%}
+
+{% set varnish_debug_request_token_cookie_pattern =
+    ( varnish_debug_request_cookie_name | regex_escape )
+    ~ '=' ~ ( varnish_debug_request_token | regex_escape )
+%}
+
+if (
+    req.url ~ "{{ varnish_debug_request_token_query_param_pattern }}"
+    || req.http.{{ varnish_debug_request_header_name }} == "{{ varnish_debug_request_token }}"
+    || req.http.Cookie ~ "(^|;\s*){{ varnish_debug_request_token_cookie_pattern }}(;|$)"
+) {
+    set req.http.{{ varnish_debug_request_info_header_name }} = "Token-Verified; Cache-Bypassed; Xid=" + req.xid + "";
+
+    return (pipe);
+}
+{% endif %}
+
 if (req.http.X-Blackfire-Query) {
     if (req.esi_level > 0) {
         unset req.http.X-Blackfire-Query;

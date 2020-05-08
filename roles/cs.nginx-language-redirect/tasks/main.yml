@@ -1,8 +1,6 @@
-- name: Prepare
-  import_tasks: prepare.yml
-- name: Domain redirect
-  when: "nginx_language_redirect_style == 'domain'"
-  import_tasks: domain-redirect.yml
-- name: Path redirect
-  when: "nginx_language_redirect_style == 'dir'"
-  import_tasks: path-redirect.yml
+- name: Install dependencies
+  import_tasks: 000-install.yml
+
+- name: Configure redirects
+  import_tasks: 001-configure.yml
+

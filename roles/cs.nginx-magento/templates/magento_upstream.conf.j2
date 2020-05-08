@@ -1,3 +1,31 @@
-upstream fastcgi_backend {
-    server unix:{{ nginx_fcgi_backend_socket }};
+####################################################################
+# Sets up the Magento FastCGI upstreams and chooses the appropriate
+# one based on whether the request is authorized as a debugging one.
+#
+# Note: This needs to be placed in /etc/nginx/conf.d to be included
+# automatically before any Magento app server block (vhost) - this
+# shall be achieved by using a low numeric filename prefix.
+####################################################################
+
+{% set debug_cookie_var  = nginx_debug_request_cookie_name | lower | regex_replace('[^_a-z0-9]', '_') %}
+{% set debug_header_var  = nginx_debug_request_header_name | lower | regex_replace('[^_a-z0-9]', '_') %}
+{% set debug_query_esc   = nginx_debug_request_query_param_name | regex_escape %}
+{% set debug_token_esc   = nginx_debug_request_token | regex_escape %}
+
+map "/$cookie_{{ debug_cookie_var }}/$http_{{ debug_header_var }}/$query_string/" $PHP_IS_DEBUG_REQUEST {
+    ~*(/{{ debug_token_esc }}/|[/&]{{ debug_query_esc }}={{ debug_token_esc }}[/&]) 1;
+    default 0;
+}
+
+map $PHP_IS_DEBUG_REQUEST $PHP_FASTCGI_UPSTREAM {
+    1       magento_fastcgi_debug_backend;
+    default magento_fastcgi_backend;
+}
+
+upstream magento_fastcgi_backend {
+    server "unix:{{ nginx_fcgi_backend_socket }}";
+}
+
+upstream magento_fastcgi_debug_backend {
+    server "unix:{{ nginx_fcgi_backend_debug_socket }}";
 }

@@ -29,10 +29,12 @@
     - role: cs.aws-node-varnish
       aws_varnish_node_root_device: "{{ aws_ami_root_device }}"
       aws_varnish_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+      aws_varnish_instance_id: "{{ aws_varnish_node_instance.instance_id | default(false) }}"
       when: varnish_standalone
     - role: cs.aws-node-persistent
       aws_persistent_node_root_device: "{{ aws_ami_root_device }}"
       aws_persistent_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+      aws_persistent_instance_id: "{{ aws_persistent_node_instance.instance_id | default(false) }}"
     - role: cs.mysql-configure
     - role: cs.aws-lambda-varnish
       when: varnish_standalone

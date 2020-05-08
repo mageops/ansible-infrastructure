@@ -1,0 +1,12 @@
+- name: Create Primary Application Pool
+  template:
+    src: php-fpm.pool.conf
+    dest: "{{ php_fpm_pool_conf_file_path }}"
+  notify: Restart php-fpm
+
+- name: Create Application Debug Pool
+  template:
+    src: php-fpm.pool.debug.conf
+    dest: "{{ php_fpm_debug_pool_conf_file_path }}"
+  notify: Restart php-fpm
+  when: php_fpm_debug_pool_enable

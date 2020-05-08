@@ -1,20 +1,20 @@
-{% if item.extra_config | default('') %}
+{% if vhost.extra_config | default('') %}
 # ---  [BEGIN] Custom Project Config [BEGIN]  ---
 {{ varnish_vcl_synth_extra }}
 # ---  [END] Custom Project Config [END]  ---
 {% endif %}
 
-{% set vhost_id = item.name | trim | lower | regex_replace('[^a-z0-9]+', '_') %}
+{% set vhost_id = vhost.name | trim | lower | regex_replace('[^a-z0-9]+', '_') %}
 
-{% if item.permanent_path_redirect_map | default([]) %}
+{% if vhost.permanent_path_redirect_map | default([]) %}
 map $request_uri $perm_redirect_uri_{{ vhost_id }} {
-{% for src, dst in item.permanent_path_redirect_map.items(): %}
+{% for src, dst in vhost.permanent_path_redirect_map.items(): %}
     {{ src }} {{ dst }};
 {% endfor %}
 }
 {% endif %}
 
-{% if item.redirect_aliases | default(false) and item.aliases | default([]) %}
+{% if vhost.redirect_aliases | default(false) and vhost.aliases | default([]) %}
 server {
 {% if https_termination_hide_varnish %}
     listen 80;
@@ -22,9 +22,9 @@ server {
 
     listen 443 ssl http2;
 
-    server_name {{ item.aliases | default([])|join(' ') }};
+    server_name {{ vhost.aliases | default([])|join(' ') }};
 
-    return 301 $scheme://{{ item.server_name }}$request_uri;
+    return 301 $scheme://{{ vhost.server_name }}$request_uri;
 }
 {% endif %}
 
@@ -33,8 +33,8 @@ server {
     listen 80;
 {% endif %}
 
-{% if item.server_name != '*' %}
-    server_name {{ item.server_name }}{% if not item.redirect_aliases | default(false) %} {{ item.aliases | default([])|join(' ') }}{% endif %};
+{% if vhost.server_name != '*' %}
+    server_name {{ vhost.server_name }}{% if not vhost.redirect_aliases | default(false) %} {{ vhost.aliases | default([])|join(' ') }}{% endif %};
 {% endif %}
 
     listen 443 ssl http2;
@@ -48,14 +48,14 @@ server {
     ssl_stapling on;
     ssl_stapling_verify on;
 
-    ssl_certificate {{ https_termination_certificate_dir }}/{{ item.name }}.cer;
-    ssl_certificate_key {{ https_termination_private_dir }}/{{ item.name }}.pem;
+    ssl_certificate {{ https_termination_certificate_dir }}/{{ vhost.name }}.cer;
+    ssl_certificate_key {{ https_termination_private_dir }}/{{ vhost.name }}.pem;
 
-{% if nginx_blacklist_vhost_check_config_file is defined %}
-    include "{{ nginx_blacklist_vhost_check_config_file }}";
+{% if nginx_blacklist_vhost_check_include_file is defined %}
+    include "{{ nginx_blacklist_vhost_check_include_file }}";
 {% endif %}
 
-{% if item.extra_vhost_config | default('') %}
+{% if vhost.extra_vhost_config | default('') %}
     # ---  [BEGIN] Custom Project Server Config [BEGIN]  ---
     {% filter indent(width=4) -%}
     {{ extra_vhost_config }}
@@ -63,7 +63,7 @@ server {
     # ---  [END] Custom Project Server Config [END]  ---
 {% endif %}
 
-{% if item.permanent_path_redirect_map | default([]) %}
+{% if vhost.permanent_path_redirect_map | default([]) %}
     if ($perm_redirect_uri_{{ vhost_id }}) {
         return 301 $scheme://$host$perm_redirect_uri_{{ vhost_id }};
     }
@@ -99,15 +99,15 @@ server {
         proxy_buffers           32 8k;
         {% endif %}
 
-{% if item.server_name != '*' %}
-        include server.d/{{item.server_name}}/*.conf;
+{% if vhost.server_name != '*' %}
+        include {{ nginx_serverd_dir }}/{{ vhost.server_name }}/*.conf;
 {% endif %}
-        include server.d/default/*.conf;
+        include {{ nginx_serverd_defaults_dir }}/*.conf;
     }
 
-{% if item.letsencrypt | default(False) %}
+{% if vhost.letsencrypt | default(False) %}
     location /{{ https_termination_letsencrypt_challenge_dir }}/ {
-        root {{ https_termination_letsencrypt_challenge_root }}/{{ item.name }};
+        root {{ https_termination_letsencrypt_challenge_root }}/{{ vhost.name }};
     }
 {% endif %}
 }

@@ -1,0 +1,23 @@
+- name: Remove the default pool
+  file:
+    path: "{{ php_fpm_pool_conf_dir_path }}/www.conf"
+    state: absent
+  notify: Restart php-fpm
+
+- name: Install logrotate configuration
+  template:
+    src: php-fpm.logrotate.conf
+    dest: /etc/logrotate.d/php-fpm.conf
+
+- name: Configure Primary Master Daemon
+  template:
+    src: php-fpm.daemon.conf
+    dest: "{{ php_fpm_daemon_conf_file_path }}"
+  notify: Restart php-fpm
+
+- name: Configure Debug Master Daemon
+  template:
+    src: php-fpm.daemon.debug.conf
+    dest: "{{ php_fpm_debug_daemon_conf_file_path }}"
+  notify: Restart php-fpm
+  when: php_fpm_debug_pool_enable
