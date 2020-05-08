@@ -56,15 +56,10 @@
         chdir: "{{ cs_vagrant_dir }}"
 
     - name: Ensure ssh identity exists
-      command: "ssh-keygen -f '{{ cs_vagrant_ssh_identity_path }}' -t ed25519 -q -N ''"
-      args:
-        creates: "{{ cs_vagrant_ssh_identity_path }}"
-
-      # TODO: Uncomment once ansible 2.8 migration is done - module not available in 2.7
-      # openssh_keypair:
-      #   path: "{{ cs_vagrant_ssh_identity_path }}"
-      #   type: ed25519
-      #   force: no
+      openssh_keypair:
+        path: "{{ cs_vagrant_ssh_identity_path }}"
+        type: ed25519
+        force: no
 
     - name: Authorize ssh identity
       authorized_key:
@@ -94,6 +89,6 @@
       file:
         path: "{{ _cs_vagrant_init_temp_dir }}"
         state: absent
-  when: cs_vagrant_initialize and _cs_vagrant_status.stdout is search('default,state,not_created')
+  when: cs_vagrant_initialize or _cs_vagrant_status.stdout is search('default,state,not_created')
 
 
