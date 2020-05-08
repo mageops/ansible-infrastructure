@@ -10,5 +10,5 @@ if ($PHP_IS_DEBUG_REQUEST) {
 
 fastcgi_pass $PHP_FASTCGI_UPSTREAM;
 
-include {{ nginx_magento_fastcgi_params_include_path }};
 include fastcgi_params;
+include {{ nginx_magento_fastcgi_params_include_path }};

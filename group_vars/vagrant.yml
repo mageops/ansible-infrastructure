@@ -59,6 +59,8 @@ mageops_packages_vagrant_node:
   - kernel-devel
   # Required for patching Magento
   - patch
+  # Required for some yarn modules
+  - automake
 
 nodejs_use_yarn: yes
 nodejs_packages:
