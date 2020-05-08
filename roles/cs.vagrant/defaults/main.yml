@@ -43,3 +43,7 @@ cs_vagrant_vm_private_ip: 192.168.100.100
 
 # Perform vagrant machine initialization if it does not exist
 cs_vagrant_initialize: no
+
+# Vagrant plugins to ensure are installed
+cs_vagrant_plugins:
+  - vagrant-disksize
