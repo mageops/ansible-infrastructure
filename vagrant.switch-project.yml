@@ -13,11 +13,11 @@
         force: yes
         state: link
         src: "{{ mageops_app_web_dir }}/{{ mageops_project }}"
-        dest: "{{ mageops_app_web_dir }}/current"
+        dest: "{{ magento_live_release_dir }}"
         owner: "{{ magento_user }}"
         group: "{{ magento_group }}"
 
-    - name: Save projects info to file
+    - name: Save project info to file
       copy:
         dest: "{{ mageops_app_web_dir }}/current_project.json"
         content: "{{ mageops_current_project_info | to_nice_json }}"
@@ -27,7 +27,7 @@
 
     - name: Change project name in nginx config
       lineinfile:
-        path: "{{ nginx_confd_dir }}/magento.conf"
+        path: "{{ nginx_confd_dir }}/050-vhost-magento.conf"
         regexp: '^\s*set\s+\$PROJ_NAME\s+[\w\-_]+;\s*$'
         line: '    set $PROJ_NAME {{ mageops_project }};'
         create: no
