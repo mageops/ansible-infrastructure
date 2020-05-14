@@ -24,3 +24,11 @@ Match User {{ username }}
 {% endfor %}
 
 
+{% if sshd_lockdown_untrusted_networks -%}
+### [START] Trusted networks configuration
+
+Match Address {{ sshd_trusted_networks | join(',') }}
+{{ directives(config_trusted) | indent(width=4, first=true) }}
+
+### [END] Trusted networks configuration
+{% endif %}
