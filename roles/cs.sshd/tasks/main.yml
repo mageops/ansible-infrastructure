@@ -4,12 +4,41 @@
     state: present
   notify: Reload SSH Daemon
 
-- name: Compute final SSH Daemon configuration
+- name: Resolve SSH Daemon global configuration
+  set_fact:
+    sshd_config_global: "{{ sshd_config_default | combine(sshd_config) }}"
+
+- name: Resolve SSH Daemon trusted configuration
+  set_fact:
+    sshd_config_trusted: "{{ sshd_config_trusted | combine({ setting_name: setting_value }) }}"
+  when: setting_value is not none
+  vars:
+    setting_value: >-
+      {{ sshd_config_trusted[setting_name] is none
+          | ternary(
+              sshd_config_global[setting_name] | default(None),
+              sshd_config_trusted[setting_name]
+          )
+      }}
+  loop: "{{ sshd_config_trusted.keys() | list }}"
+  loop_control:
+    loop_var: setting_name
+    label: "{{ setting_name }} {{ setting_value }}"
+
+- name: Generate SSH Daemon configuration file content
   set_fact:
     sshd_config_file_content: "{{ lookup('template', 'sshd_config.j2') }}"
   vars:
-    config_global: "{{ sshd_config_base | combine(sshd_config) }}"
+    config_global: >-
+      {{ sshd_config_global
+          | combine(sshd_lockdown_untrusted_networks | ternary(
+              sshd_config_lockdown,
+              []
+          ))
+      }}
+    config_trusted: "{{ sshd_config_trusted }}"
     config_users: "{{ sshd_config_users_base | combine(sshd_config_users) }}"
+
 
 - name: Show SSH Daemon configuration to be applied
   debug:

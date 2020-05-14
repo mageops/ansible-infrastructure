@@ -6,10 +6,10 @@ firewall_public_services:
 # Ports open to public (use this if service for selected port is not predefined)
 firewall_public_ports: []
 
-# If false then ssh is unrestricted else set to list of trusted source IPs which can SSH.
+# If no or empty then ssh is unrestricted else set to list of trusted source IPs which can SSH.
 # If set to a list of IPs then public zone is stripped of all "guarded" services (if added) for security.
 # Trusted IPs shall be specified using CIDR notation. For single IPs use X.X.X.X/32.
-firewall_restrict_to_trusted_public_ips: false
+firewall_trusted_networks: []
 
 # Interface used for the "internal" network, change if not the main public interface
 firewall_internal_interface: "{{ ansible_default_ipv4.interface }}"

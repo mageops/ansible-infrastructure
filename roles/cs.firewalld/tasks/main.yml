@@ -3,7 +3,7 @@
     name: firewalld
 
 - name: Start & enable firewalld
-  service: 
+  service:
     name: firewalld
     state: started
     enabled: yes
@@ -42,7 +42,7 @@
     permanent: yes
     immediate: yes
     state: enabled
-  when: not firewall_restrict_to_trusted_public_ips
+  when: not firewall_trusted_networks
 
 
 ### --- Trusted zone setup restricting all non-public access (including SSH) to selected IPs ---
@@ -54,8 +54,8 @@
     permanent: yes
     immediate: yes
     state: enabled
-  with_items: "{{ firewall_restrict_to_trusted_public_ips }}"
-  when: firewall_restrict_to_trusted_public_ips
+  with_items: "{{ firewall_trusted_networks }}"
+  when: firewall_trusted_networks | default([], true) | length > 0
 
 - name: Enable trusted zone
   firewalld:
@@ -63,7 +63,7 @@
     permanent: yes
     immediate: yes
     state: enabled
-  when: firewall_restrict_to_trusted_public_ips
+  when: firewall_trusted_networks | default([], true) | length > 0
 
 # By default SSH is always added to public zone so we need to remove it.
 - name: Remove SSH access from public zone
@@ -73,7 +73,7 @@
     permanent: yes
     immediate: yes
     state: disabled
-  when: firewall_restrict_to_trusted_public_ips
+  when: firewall_trusted_networks | default([], true) | length > 0
 
 
 ## --- Guarded services ---

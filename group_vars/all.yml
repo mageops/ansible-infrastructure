@@ -1424,7 +1424,7 @@ varnish_lang_redirect_only_on_initial_visit: yes
 # Firewall settings for noaws nodes
 firewall_enable: yes
 
-firewall_restrict_to_trusted_public_ips: "{{ mageops_trusted_cidr_blocks }}"
+firewall_trusted_networks: "{{ mageops_trusted_cidr_blocks }}"
 firewall_internal_group: all
 firewall_internal_services:
     - mysql

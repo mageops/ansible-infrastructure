@@ -1,11 +1,23 @@
 sshd_password_auth: no
 sshd_permit_root_login: yes
 
+# If enabled then relaxed security like root login and password auth
+# will be allowed only on trusted networks - IPv4 private subnets as default
+# but can be configured via `ssh_trusted_networks` var.
+sshd_lockdown_untrusted_networks: no
+
+# Relaxed configuration for senstivie settings is applied to these networks
+sshd_trusted_networks:
+  - 192.168.0.0/16
+  - 172.16.0.0/12
+  - 127.0.0.0/8
+  - 10.0.0.0/8
+
 # People have many ssh keys in agent so increase this to a sane value.
 # Also we don't allow SSH access from outside trused CIDRs anywhere
 # and don't allow password authentication anyway so this shall be
 # not have any security implications.
-ssh_max_auth_tries: "{{ sshd_password_auth | ternary(1, 20) }}"
+sshd_max_auth_tries: "{{ sshd_password_auth | ternary(1, 20) }}"
 
 # List of values to set for directive `PermitListen` in the for "host:port"
 # We could allow everything (sshd default) since user has shell anyway so
@@ -38,11 +50,9 @@ sshd_max_startups: "10:30:100"
 # makes no difference from security standpoint whatsoever
 sshd_allow_tcp_forwarding: "yes"
 
-# Required authentication methods
-sshd_authentication_methods: "publickey"
-
 # Base configuration as convenience
-sshd_config_base:
+sshd_config_default:
+    ListenAddress: "0.0.0.0"
     AcceptEnv:
       - LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
       - LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT
@@ -51,7 +61,6 @@ sshd_config_base:
     AllowAgentForwarding: "yes"
     AllowStreamLocalForwarding: "yes"
     AllowTcpForwarding: "{{ sshd_allow_tcp_forwarding }}"
-    AuthenticationMethods: "{{ sshd_authentication_methods }}"
     AuthorizedKeysFile: ".ssh/authorized_keys"
     ChallengeResponseAuthentication: "yes"
     ClientAliveInterval: "60"
@@ -63,7 +72,7 @@ sshd_config_base:
       - /etc/ssh/ssh_host_rsa_key
       - /etc/ssh/ssh_host_ed25519_key
     LoginGraceTime: 15s
-    MaxAuthTries: "{{ ssh_max_auth_tries }}"
+    MaxAuthTries: "{{ sshd_max_auth_tries }}"
     MaxSessions: 10
     MaxStartups: "{{ sshd_max_startups }}"
     PasswordAuthentication: "{{ sshd_password_auth | ternary('yes', 'no') }}"
@@ -81,6 +90,24 @@ sshd_config_base:
     TCPKeepAlive: "yes"
     UsePAM: "yes"
 
+# Configuration applied to trusted networks
+# Note: None/null (`~`) means that the runtime config value or base config
+# will be used as default.
+sshd_config_trusted:
+  GatewayPorts: ~
+  PermitRootLogin: ~
+  PermitEmptyPasswords: ~
+  PasswordAuthentication: ~
+  MaxAuthTries: ~
+
+# List of settings to be locked for public networks and applied only
+# to private subnets when `sshd_lockdown_untrusted_networks` is on.
+sshd_config_lockdown:
+  GatewayPorts: "no"
+  PermitRootLogin: "no"
+  PermitEmptyPasswords: "no"
+  PasswordAuthentication: "no"
+  MaxAuthTries: 3
 
 # Override any sshd config directives here
 # Note: keys with multiple values will be repeated for each of them.
@@ -88,7 +115,7 @@ sshd_config: {}
 
 # Directives that will be configured as default for root user
 # if `sshd_config_user_root_allow_all_forwards` is enabled
-sshd_config_user_root_allow_all_forwards:
+sshd_config_allow_all_forwards:
   AllowAgentForwarding: "yes"
   AllowStreamLocalForwarding: "yes"
   AllowTcpForwarding: "yes"
@@ -97,7 +124,7 @@ sshd_config_user_root_allow_all_forwards:
   DisableForwarding: "no"
 
 # Configuration for connections matching the root user
-sshd_config_user_root: "{{ sshd_root_user_allow_all_forwards | ternary(sshd_config_user_root_allow_all_forwards, {}) }}"
+sshd_config_user_root: "{{ sshd_root_user_allow_all_forwards | ternary(sshd_config_allow_all_forwards, {}) }}"
 
 # Default per user configuration
 sshd_config_users_base:
