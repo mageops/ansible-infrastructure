@@ -4,10 +4,10 @@ cs_vagrant_distributable_box: no
 
 # The path to SSH identity file (key path)
 # If the file does not exist new keypair will be generated
-cs_vagrant_ssh_identity_path: "{{ lookup('env','HOME') }}/.ssh/cs_vagrant_raccoon"
+cs_vagrant_ssh_identity_path: "{{ lookup('env', 'HOME') }}/.ssh/cs_vagrant_raccoon"
 
 # The name of vagrant VM
-cs_vagrant_vm_name: "cs_vagrant_raccoon"
+cs_vagrant_vm_name: "raccoon"
 
 # Path to vagrantfile template
 cs_vagrantfile_template: "Vagrantfile.rb.j2"
@@ -26,7 +26,7 @@ cs_vagrant_vm_cpus: 2
 
 # Please change the name if you upload new box, as we don't have a registry vagrant
 # will use locally cached old box version if you change only the URL!
-cs_vagrant_vm_box: "centos/7"
+cs_vagrant_vm_box: "mageops/centos"
 
 # URL pointing to the base vagrant box
 cs_vagrant_vm_box_url: ~

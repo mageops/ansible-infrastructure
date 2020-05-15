@@ -1,0 +1,115 @@
+aws_use: no
+
+mageops_node_role: raccoon
+mageops_app_host_group: vagrant
+mageops_secure_site: no
+
+mageops_https_enable: no
+mageops_packages_full_update: yes
+mageops_trusted_cidr_blocks:
+  - 127.0.0.0/8         # All the loopbacks
+  - 192.168.100.0/24    # Our Vagrant Host-Only network
+  - 192.168.56.0/24     # Default Vagrant Host-Only network
+  - 10.0.2.0/24         # Default VirtualBox NAT network
+
+mageops_packages_app_node_extra:
+  - ghostscript
+
+php_opcache_validate_timestamps: 1
+php_opcache_consistency_checks: 1
+php_opcache_file_update_protection: 2
+
+php_opcache_revalidate_path: 1
+php_opcache_revalidate_freq: 0
+
+php_cli_opcache_file_cache_enable: yes
+php_cli_opcache_file_cache_consistency_checks: 1
+
+
+php_display_errors: On
+php_http_request_max_execution_time: 600
+
+
+
+
+mysql_public_root_access: yes
+mysql_mariadb_flavor: yes
+
+nginx_app_port: 80
+
+mageops_rabbitmq_host: 127.0.0.1
+mageops_mysql_host: 127.0.0.1
+mageops_redis_host: 127.0.0.1
+mageops_redis_sessions_host: 127.0.0.1
+mageops_elasticsearch_host: 127.0.0.1
+mageops_varnish_host: 127.0.0.1
+mageops_varnish_port: 8080
+mageops_varnish_backend_port: "{{ nginx_app_port }}"
+
+varnish_standalone: false
+
+magento_mode: default
+magento_redis_cache: yes
+magento_cron_disabled: yes
+magento_nginx_rewrite_static_assets_version: yes
+mageops_root_ssh_keys_global: []
+
+sshd_password_auth: yes
+sshd_max_auth_tries: 20
+sshd_permit_root_login: yes
+sshd_lockdown_untrusted_networks: yes
+sshd_trusted_networks: "{{ ['127.0.0.0/8'] + mageops_trusted_cidr_blocks }}"
+
+mageops_authorize_local_keys: "{{ mageops_ansible_provisioning_mode in ['remote_ssh', 'local_docker'] }}"
+mageops_cli_user_groups: [wheel]
+mageops_cli_user_authorize_local_key: "{{ mageops_authorize_local_keys }}"
+
+mageops_packages_mirrorlist_countrycode: de
+mageops_packages_vagrant_node:
+  # Required for installing Virtualbox Guest Addons
+  - kernel-devel
+  # Required for patching Magento
+  - patch
+  # Required for some yarn modules
+  - automake
+
+nodejs_use_yarn: yes
+nodejs_packages:
+  - gulp-cli
+
+# Allow sudoing without password for developer covenience
+sudo_wheel_nopasswd: yes
+
+firewall_enable: yes
+firewall_public_services:
+    - http
+    - https
+firewall_public_ports:
+    - 8080/tcp
+firewall_trusted_networks: "{{ mageops_trusted_cidr_blocks }}"
+firewall_guarded_services:
+    - mysql
+    - ftp
+    - dns
+    - smtp
+    - smtps
+    - nfs
+firewall_guarded_ports:
+    - 3306/tcp
+    - 21/tcp
+    - 53/tcp
+    - 53/udp
+    - 25/tcp
+    - 446/tcp
+    - 9200-9300/tcp
+    - 2049/tcp
+    - "{{ elasticsearch_http_port }}/tcp"
+    - "{{ elasticsearch_transport_tcp_port }}/tcp"
+    - "{{ mageops_redis_port }}/tcp"
+    - "{{ mageops_redis_sessions_port }}/tcp"
+    - "{{ mageops_redis_port }}/tcp"
+    - "{{ mageops_unison_server_port }}/tcp"
+    - "{{ mageops_unison_server_port }}/udp"
+    - "{{ rabbitmq_amqp_port }}/tcp"
+    - "{{ rabbitmq_amqp_port }}/udp"
+    - "{{ rabbitmq_http_port }}/tcp"

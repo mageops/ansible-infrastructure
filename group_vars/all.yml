@@ -501,6 +501,22 @@ aws_autoscaling_lambda_functions_list: []
 # --------  MageOps Basic Config  --------
 # ----------------------------------------
 
+# The provisioning mode that is used.
+#
+# Right now the only case where options other than `remote_ssh` are used
+# is provisioning of local-development machines or building images thereof.
+#
+# Available options:
+# - remote_ssh - standard - use remote SSH connection from controller node
+# - remote_docker - provision docker container on a remote docker daemon
+#   thus SSH connection might not be possible
+# - local_nested - provision from inside the machine -
+#   in this modesome steps are not possible and thus skipped
+# - local_docker - provision a docker machine using docker connection
+#   using local docker daemon which makes it possible to perform certain
+#   ssh-dependent tasks
+mageops_ansible_provisioning_mode: remote_ssh
+
 # Path to directory where provisioning caches / temporary files will be stored
 mageops_ansible_temp_dir: "{{ playbook_dir }}/tmp"
 

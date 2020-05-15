@@ -1,0 +1,89 @@
+# -------  Project Basic Config -------
+
+mageops_project: magento
+mageops_environment: raccoon
+
+mageops_app_is_magesuite: no
+mageops_install_development_tools: yes
+
+# For now we use bare HTTP by default...
+mageops_https_enable: no
+
+# Do not enable for generic setups
+mageops_https_termination_enable: no
+
+# Just a helper variable to avoid repetition, not used in provisioning directly
+mageops_magesuite_domain: "localhost"
+
+# -------  Magento Infrastructure Config  -------
+
+magento_base_url: "http://{{ mageops_magesuite_domain }}/"
+magento_bounce_email_address: bounce@example.com
+
+# -------  Magento Installation Config  -------
+
+magento_currency: EUR
+magento_language: en_US
+
+
+# -------  Magento Admin Config  -------
+
+magento_admin_path: admin
+magento_admin_user_username: admin
+magento_admin_user_email: admin@vagrant.local
+magento_admin_user_firstname: Roberto
+magento_admin_user_lastname: Raccoon
+
+
+# -------  Magento / Import -------
+
+magento_import_dispatcher_enable: no
+
+
+# -------  Magento / Deploy -------
+
+magento_post_deploy_commands_custom: []
+
+
+# -------  Magento / SCD  -------
+
+magento_scd_strategy: quick
+magento_scd_parallel_jobs: 1
+
+magento_scd_excluded_themes: []
+magento_scd_languages: ["en_US"]
+
+# -------  Database -------
+
+mageops_mysql_create: yes
+
+# -------  Redis -------
+
+redis_create: yes
+redis_maxmemory: 150M
+
+# -------  Elasticsearch -------
+
+elasticsearch_create: yes
+elasticsearch_heap_size: 512m
+
+# -------  Varnish -------
+
+varnish_memory: 128M
+
+# -------  PHP -------
+
+php_version: 7.3
+php_fpm_pm_max_children: 8
+php_admin_request_max_execution_time: 3600
+php_extra_packages: []
+
+# -------  Deploy General Settings -------
+
+deploy_rsync_excludes_extra: []
+
+# -------  Environment Access Whitelist  -------
+
+mageops_root_ssh_keys_project: []
+mageops_trusted_cidr_blocks_extra: []
+
