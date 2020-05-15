@@ -1,0 +1,29 @@
+unison_project_name: "{{ mageops_project }}"
+unison_project_slug: "{{ unison_project_name | trim | lower | regex_replace('[^a-z0-9]+', '_') }}"
+
+unison_server_port: "{{ mageops_unison_server_port | default(5566) }}"
+unison_server_address: "{{ hostvars[groups['vagrant'][0]]['ansible_host'] }}"
+
+# Skip installation, just set up the project configuration
+unison_project_skip_install: no
+
+unison_project_local_path: "{{ playbook_dir }}/../projects/{{ unison_project_name }}"
+unison_project_remote_path: "/{{ unison_project_name }}"
+
+unison_project_config_dir: ~/.unison
+unison_project_config_path: "{{ unison_project_config_dir }}/{{ unison_project_name }}.prf"
+
+unison_project_ignore_names:
+  - ".idea"
+  - ".history"
+  - ".DS_Store"
+  - "._.DS_Store"
+  - "node_modules"
+  - ".php_cs.cache"
+  - ".tmp"
+  - "*.log"
+
+unison_project_ignore_paths:
+  - "var/cache"
+  - "var/view_preprocessed"
+  - "var/log"

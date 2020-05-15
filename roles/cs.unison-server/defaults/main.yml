@@ -1,0 +1,14 @@
+unison_project_name: "{{ mageops_project }}"
+
+unison_server_port: "{{ mageops_unison_server_port | default(5566) }}"
+
+unison_server_version: 2.48.4
+unison_server_tarball_url: "http://www.cis.upenn.edu/~bcpierce/unison/download/releases/unison-{{ unison_server_version }}/unison-{{ unison_server_version }}.tar.gz"
+
+unison_server_user_create: yes
+unison_server_user: "{{ magento_user }}"
+unison_server_group: "{{ magento_group }}"
+
+unison_server_working_dir: "{{ mageops_app_web_dir }}"
+unison_server_project_dir: "{{ unison_server_working_dir }}/{{ unison_project_name }}"
+
