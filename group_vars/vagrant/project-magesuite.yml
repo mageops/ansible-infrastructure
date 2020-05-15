@@ -1,0 +1,48 @@
+# -------  Project Basic Config -------
+
+mageops_project: magesuite
+mageops_environment: raccoon
+
+# For now we use bare HTTP by default...
+mageops_https_enable: no
+
+# ...with option to use HTTPS as needed
+mageops_https_termination_enable: yes
+
+mageops_app_is_magesuite: yes
+mageops_magesuite_domain: "magesuite.me"
+
+# -------  Magento Admin Config  -------
+
+magento_admin_path: mgsadmin
+
+# -------  Magento / SCD  -------
+
+magento_scd_strategy: quick
+magento_scd_parallel_jobs: 1
+
+magento_scd_excluded_themes:
+  - "Magento/luma"
+
+magento_scd_languages:
+  - "en_US"
+  - "de_DE"
+
+# -------  HTTPS Termination / Varnish Loadbalancer  -------
+
+https_termination_hide_varnish: no
+https_termination_hosts:
+  - name: "magesuite.me"
+    server_name: "magesuite.me"
+    cert_path: "magesuite.me.cer"
+    cert_chain_path: "magesuite.me.chain.cer"
+    cert_key_path: "magesuite.me.key"
+
+# -------  Deploy General Settings -------
+
+deploy_rsync_excludes_extra:
+  - "/vendor/creativestyle/theme-*"
+
+
+
+

@@ -19,6 +19,7 @@
       authorize_local_keys_for_users:
         - root
         - "{{ magento_user }}"
+      when: mageops_authorize_local_keys | default(false) and ansible_connection != 'local'
     - role: cs.mageops-cli-user
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:
@@ -28,11 +29,13 @@
         - redis
         - varnish
   tasks:
-    - name: Install composer parallel download plugin globally
+    - name: Install composer parallel download plugin globally for magento user
       composer:
         command: require
         global_command: yes
         arguments: hirak/prestissimo
+      become_user: "{{ magento_user }}"
+      become: yes
 
     - include_tasks: "{{ mageops_project_vars_dir }}/{{ item }}"
       when: vagrant_tasks_project is defined
