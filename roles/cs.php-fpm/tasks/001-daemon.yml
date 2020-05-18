@@ -4,11 +4,6 @@
     state: absent
   notify: Restart php-fpm
 
-- name: Install logrotate configuration
-  template:
-    src: php-fpm.logrotate.conf
-    dest: /etc/logrotate.d/php-fpm.conf
-
 - name: Configure Primary Master Daemon
   template:
     src: php-fpm.daemon.conf

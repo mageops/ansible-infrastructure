@@ -2,6 +2,7 @@
     size 20M
     rotate 2
     create 0664 {{ magento_user }} {{ magento_group }}
+    su {{ magento_user }} {{ magento_group }}
     missingok
     notifempty
 }
