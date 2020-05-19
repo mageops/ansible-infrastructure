@@ -131,7 +131,7 @@ if (
 ) {
     set req.http.{{ varnish_debug_request_info_header_name }} = "Token-Verified; Cache-Bypassed; Xid=" + req.xid + "";
 
-    return (pipe);
+    return (pass);
 }
 {% endif %}
 
