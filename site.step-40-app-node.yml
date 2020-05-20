@@ -122,6 +122,7 @@
       postfix_relay_username: "{{ mageops_app_email_smtp_relay_user }}"
       postfix_relay_password: "{{ mageops_app_email_smtp_relay_pass }}"
       postfix_relay_port: "{{ mageops_app_email_smtp_relay_port }}"
+      when: mageops_app_email_smtp_relay_host | default(false, true) | bool
 
     - role: cs.magento-postfix
 

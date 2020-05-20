@@ -1696,6 +1696,4 @@ sshd_config_users:
 # public IP using this method should be used for informative purposes.
 mageops_public_ip_v4_api_url: "{{ aws_use | ternary('http://169.254.169.254/latest/meta-data/public-ipv4', 'https://api.ipify.org') }}"
 
-
-
 mageops_unison_server_port: 5566

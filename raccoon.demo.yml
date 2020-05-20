@@ -1,21 +1,21 @@
 - name: Provision system
-  import_playbook: vagrant.yml
+  import_playbook: raccoon.yml
   vars:
     mageops_project: magesuite
 
 - name: Configure project
-  import_playbook: vagrant.configure-project.yml
+  import_playbook: raccoon.configure-project.yml
   vars:
     mageops_project: magesuite
 
 - name: Switch project
-  import_playbook: vagrant.switch-project.yml
+  import_playbook: raccoon.switch-project.yml
   vars:
     mageops_project: magesuite
 
 - name: Build theme
-  import_playbook: vagrant.build-frontend.yml
+  import_playbook: raccoon.build-frontend.yml
   vars:
     mageops_project: magesuite
     theme: theme-demo
-  
+
