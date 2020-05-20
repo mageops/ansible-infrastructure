@@ -1,5 +1,5 @@
 - name: Update virtualbox guest additions
-  hosts: vagrant
+  hosts: raccoon
   tasks:
     # If the VBox guest additions CD is not inserted this playbook will fail!
     - name: Mount Guest Additions DVD
@@ -29,4 +29,4 @@
         src: /dev/sr0
         state: absent
 
-    # Now vagrant needs to be rebooted
+    # Now raccoon needs to be rebooted

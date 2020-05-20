@@ -9,9 +9,9 @@
     - name: Set up Magento application
       include_role:
         name: cs.magento-configure
-        tasks_from: vagrant.yml
+        tasks_from: raccoon.yml
 
-    # Normally deploy does it, but we don't deploy to vagrant
+    # Normally deploy does it, but we don't deploy to raccoon
     - name: Add nginx to magento group
       user:
         name: "{{ nginx_user }}"

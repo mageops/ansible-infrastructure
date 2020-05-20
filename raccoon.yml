@@ -7,11 +7,11 @@
 - name: Setup app services
   import_playbook: site.step-40-app-node.yml
 
-- hosts: vagrant
+- hosts: raccoon
   roles:
     - role: cs.packages
     - role: cs.sshd
-    - role: cs.vagrant-sudo
+    - role: cs.raccoon-sudo
     - role: geerlingguy.composer
     - role: cs.nodejs
     - role: cs.unison-server
@@ -38,9 +38,9 @@
       become: yes
 
     - include_tasks: "{{ mageops_project_vars_dir }}/{{ item }}"
-      when: vagrant_tasks_project is defined
-      loop: "{{ vagrant_tasks_project }}"
+      when: raccoon_tasks_project is defined
+      loop: "{{ raccoon_tasks_project }}"
 
   vars:
-    packages_install: "{{ mageops_packages_common + mageops_packages_vagrant_node }}"
-    mageops_node_role: vagrant
+    packages_install: "{{ mageops_packages_common + mageops_packages_raccoon_node }}"
+    mageops_node_role: raccoon
