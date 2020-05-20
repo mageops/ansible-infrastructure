@@ -479,6 +479,13 @@ aws_logs_loggers_persistent_extra: {}
 aws_logs_loggers_varnish_extra: {}
 aws_logs_log_magento_crash_reports: yes
 
+# ----------------------------------
+# --------  AWS Autoscaling --------
+# ----------------------------------
+
+aws_autoscaling_triggers_list: []
+aws_autoscaling_lambda_functions_list: []
+
 # ----------------------------------------
 # --------  MageOps Basic Config  --------
 # ----------------------------------------
@@ -1629,7 +1636,14 @@ ntp_timezone: "{{ mageops_timezone }}"
 mageops_notifications_slack_channel: ~
 mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}"
 
-# Misc
-aws_autoscaling_triggers_list: []
-aws_autoscaling_lambda_functions_list: []
+# ------------------------
+# --------  SSHD  --------
+# ------------------------
+
+sshd_config_users: 
+  root: "{{ sshd_config_allow_all_forwards }}"
+  magento: "{{ sshd_config_allow_all_forwards }}"
+
+
+
 
