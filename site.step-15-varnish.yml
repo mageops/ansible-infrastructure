@@ -21,14 +21,22 @@
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:
         - varnish
-        - nginx
+        - nginx    
+    - role: cs.mageops-cli-user
+      mageops_cli_user: "{{ magento_user }}"
+      mageops_cli_user_group: "{{ magento_group }}"
+      mageops_cli_user_uid: "{{ magento_uid }}"
+      mageops_cli_user_gid: "{{ magento_gid }}"
+      mageops_cli_user_bashrc_fragments:
+        - debug-tunnel.bash
+      when: mageops_xdebug_proxy_remote_connection_to_loadbalancer
     - role: cs.mageops-authorize-keys
+      mageops_ssh_authorize_app: yes
     - role: cs.aws-cli
       when: aws_use
     - role: cs.cron
     - role: geerlingguy.ntp
     - role: cs.nginx-url-blacklist
-      nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
     - role: cs.nginx
     - role: cs.nginx-https-termination
       varnish_port: "{{ mageops_varnish_port }}"
