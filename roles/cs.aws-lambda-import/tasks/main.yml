@@ -25,7 +25,7 @@
     handle_import_scaling_lambda_eventrule_targets:
       - id: "{{ aws_lambda_handle_import_scaling_name }}-schedule-target"
         # We need to remove the last part - version - because it doesn't work with it
-        arn: "{{ handle_import_scaling_lambda.configuration.function_arn.split(':')[:-1]|join(':') }}"
+        arn: "{{ handle_import_scaling_lambda.configuration.function_arn }}"
   when: magento_aws_ondemand_import_instance_enable
 
 - name: Setup schedule event trigger
