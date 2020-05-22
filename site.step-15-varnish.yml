@@ -28,7 +28,7 @@
       mageops_cli_user_uid: "{{ magento_uid }}"
       mageops_cli_user_gid: "{{ magento_gid }}"
       mageops_cli_user_bashrc_fragments:
-        - debug-tunnel.bash
+        - debug-tunnel
       when: mageops_xdebug_proxy_remote_connection_to_loadbalancer
     - role: cs.mageops-authorize-keys
       mageops_ssh_authorize_app: yes
