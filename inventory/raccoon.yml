@@ -1,0 +1,66 @@
+# You must limit hosts to the appropriate group when using this inventory
+all:
+  hosts:
+    raccoon_docker_container:
+      ansible_host: raccoon
+      ansible_connection: docker
+      ansible_become: no
+
+    raccoon_virtualbox_vm:
+      ansible_port: 22
+      ansible_host: 192.168.100.100
+
+    raccoon_local_system:
+      ansible_host: 127.0.0.1
+      ansible_connection: local
+
+  children:
+    raccoon_local:
+      hosts:
+        raccoon_local_system: ~
+
+    raccoon_virtualbox:
+      hosts:
+        raccoon_virtualbox_vm: ~
+      children:
+        raccoon_local: ~
+
+    raccoon_docker:
+      hosts:
+        raccoon_docker_container: ~
+      children:
+        raccoon_local: ~
+
+    raccoon:
+      children:
+        raccoon_docker:
+        raccoon_virtualbox:
+        raccoon_local:
+
+    dev:
+      children:
+        raccoon: ~
+
+    app:
+      children:
+        raccoon: ~
+
+    database:
+      children:
+        raccoon: ~
+
+    redis:
+      children:
+        raccoon: ~
+
+    elasticsearch:
+      children:
+        raccoon: ~
+
+    persistent:
+      children:
+        redis: ~
+        elasticsearch: ~
+        rabbitmq: ~
+        database: ~
+

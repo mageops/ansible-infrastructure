@@ -16,18 +16,7 @@ mageops_raccoon_use_vagrant: yes
 mageops_raccoon_nested_provisioning: no
 
 # The type of virtualization/containerization solution used to run raccoon
-mageops_raccoon_virt: virtualbox
-
-# Extra packages to install for each type of environment raccoon will be running in
-mageops_raccoon_virt_packages:
-  virtualbox:
-    # Required for installing Virtualbox Guest Addons
-    - kernel-devel
-    # Required for patching Magento
-    - patch
-    # Required for some yarn modules
-    - automake
-  docker: []
+mageops_raccoon_virt: generic-vm
 
 mageops_install_development_tools: yes
 
@@ -37,7 +26,6 @@ mageops_https_termination_enable: yes
 https_termination_hide_varnish: no
 
 mageops_packages_full_update: yes
-
 mageops_packages_app_node_extra:
   - ghostscript
 
@@ -97,13 +85,12 @@ sshd_permit_root_login: yes
 sshd_lockdown_untrusted_networks: no
 sshd_trusted_networks: "{{ ['127.0.0.0/8'] + mageops_trusted_cidr_blocks }}"
 
-mageops_authorize_local_keys: "{{ mageops_ansible_provisioning_mode in ['remote_ssh', 'local_docker'] }}"
+mageops_authorize_local_keys: "{{ not mageops_raccoon_nested_provisioning }}"
 mageops_cli_user_groups: [wheel]
 mageops_cli_user_authorize_local_key: "{{ mageops_authorize_local_keys }}"
 
 mageops_packages_mirrorlist_countrycode: de
-mageops_packages_raccoon_node: "{{ mageops_raccoon_virt_packages[mageops_raccoon_virt] | default([]) }}"
+mageops_packages_raccoon_node: []
 
 # Allow sudoing without password for developer covenience
 sudo_wheel_nopasswd: yes
-

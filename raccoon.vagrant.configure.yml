@@ -3,4 +3,4 @@
   become: no
   gather_facts: no
   roles:
-    - role: cs.raccoon
+    - role: cs.vagrant

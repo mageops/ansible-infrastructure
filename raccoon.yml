@@ -9,10 +9,10 @@
 
 - hosts: raccoon
   roles:
-    - role: cs.packages
-    - role: cs.sshd
-    - role: cs.raccoon-sudo
     - role: geerlingguy.composer
+    - role: cs.packages
+    - role: cs.raccoon-sudo
+    - role: cs.sshd
     - role: cs.nodejs
     - role: cs.unison-server
     - role: cs.authorize-local-keys
@@ -40,7 +40,6 @@
     - include_tasks: "{{ mageops_project_vars_dir }}/{{ item }}"
       when: raccoon_tasks_project is defined
       loop: "{{ raccoon_tasks_project }}"
-
   vars:
     packages_install: "{{ mageops_packages_common + mageops_packages_raccoon_node }}"
     mageops_node_role: raccoon
