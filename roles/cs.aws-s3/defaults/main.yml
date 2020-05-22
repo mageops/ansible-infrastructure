@@ -13,18 +13,20 @@ aws_s3_bucket_media_cors_max_age: 2678400
 # as you like, but you have to repeat the entry with same bucket name.
 aws_s3_bucket_policies: []
 
-aws_s3_bucket_policies_default:
-    - bucket: "{{ aws_s3_media_bucket }}"
-      policy_statement:
-        Sid: "Readonly public policy (needed by website hosting)"
-        Effect: "Allow"
-        Principal: "*"
-        Action: "s3:GetObject"
-        Resource: "arn:aws:s3:::{{ aws_s3_media_bucket }}/*"
-    - bucket: "{{ aws_s3_secret_bucket }}"
-      policy_statement:
-        Sid: "Stmt1494936728002"
-        Effect: "Allow"
-        Action: "s3:PutObject"
-        Resource: "arn:aws:s3:::{{ aws_s3_secret_bucket }}/logs/AWSLogs/{{ aws_account_id }}/*"
-        Principal: {AWS: "{{ aws_iam_s3_elb_account_id }}"}
+aws_s3_bucket_media_policy:
+  bucket: "{{ aws_s3_media_bucket }}"
+  policy_statement:
+    Sid: "Readonly public policy (needed by website hosting)"
+    Effect: "Allow"
+    Principal: "*"
+    Action: "s3:GetObject"
+    Resource: "arn:aws:s3:::{{ aws_s3_media_bucket }}/*"
+
+aws_s3_bucket_secret_policy:
+  bucket: "{{ aws_s3_secret_bucket }}"
+  policy_statement:
+    Sid: "Stmt1494936728002"
+    Effect: "Allow"
+    Action: "s3:PutObject"
+    Resource: "arn:aws:s3:::{{ aws_s3_secret_bucket }}/logs/AWSLogs/{{ aws_account_id }}/*"
+    Principal: {AWS: "{{ aws_iam_s3_elb_account_id }}"}
