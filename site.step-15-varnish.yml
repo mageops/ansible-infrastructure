@@ -37,6 +37,7 @@
     - role: cs.cron
     - role: geerlingguy.ntp
     - role: cs.nginx-url-blacklist
+      nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
     - role: cs.nginx
     - role: cs.nginx-https-termination
       varnish_port: "{{ mageops_varnish_port }}"
