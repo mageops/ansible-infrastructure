@@ -76,7 +76,9 @@ alias mageops-env="env | grep -e '^MAGEOPS_'"
 # --- Load MageOps modules ---
 
 if [[ -d "$HOME/.bashrc.d/" ]] ; then
-	source "$HOME/.bashrc.d/"*.sh
+	for FRAGMENT in "$HOME"/.bashrc.d/* ; do
+		source "$FRAGMENT"
+	done
 fi
 
 export PS1="$MAGEOPS_PS1"
