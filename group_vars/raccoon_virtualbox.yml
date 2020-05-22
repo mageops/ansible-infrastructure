@@ -1,0 +1,8 @@
+mageops_raccoon_virt: virtualbox
+mageops_packages_raccoon_node:
+    # Required for installing Virtualbox Guest Addons
+    - kernel-devel
+    # Required for patching Magento
+    - patch
+    # Required for some yarn modules
+    - automake
