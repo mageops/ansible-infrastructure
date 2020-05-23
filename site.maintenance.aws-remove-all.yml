@@ -45,6 +45,7 @@
           set_fact:
             _aws_ec2_to_remove: "{{ _aws_ec2|json_query('instances[].instance_id')}}"
         - name: Terminate instances
+          when: _aws_ec2_to_remove | length > 0
           ec2:
             instance_ids: "{{ _aws_ec2_to_remove }}"
             region: "{{ aws_region }}"
