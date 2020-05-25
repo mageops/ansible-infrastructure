@@ -131,9 +131,6 @@ aws_tags_role_rabbitmq_message_queue:
 aws_tags_role_loadbalancer:
   Role: "loadbalancer"
 
-aws_tags_role_nginx_loadbalancer:
-  RoleLoadBalancer: "nginx"
-
 aws_tags_role_elb_loadbalancer:
   RoleLoadBalancer: "elasticloadbalancer"
 
