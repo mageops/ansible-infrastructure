@@ -2,15 +2,9 @@
 
 ENV["LC_ALL"] = "en_US.UTF-8"
 
-unless Vagrant.has_plugin?("vagrant-disksize")
-    raise  Vagrant::Errors::VagrantError.new, "vagrant-disksize plugin is missing. Please install it using 'vagrant plugin install vagrant-disksize' and rerun 'vagrant up'"
-end
-
 Vagrant.require_version ">= 2.0.1"
 Vagrant.configure("2") do |config|
   config.vm.hostname = "raccoon"
-  config.disksize.size = '100GB'
-
   {# If building a base box for distribution then leave the default insecure
    # vagrant keys on the machine. Otherwise replace them with generated ones,
    # which will be too replaced during further provisioning. #}

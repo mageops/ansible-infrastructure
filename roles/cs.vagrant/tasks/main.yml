@@ -3,22 +3,6 @@
     path: "{{ cs_vagrant_dir }}"
     state: directory
 
-- name: List installed vagrant plugins
-  command: |
-    vagrant plugin list --machine-readable --no-tty
-  register: _cs_vagrant_plugin_list_cmd
-
-- name: Compute runtime facts about vagrant
-  set_fact:
-    cs_vagrant_plugins_installed: "{{ _cs_vagrant_plugin_list_cmd.stdout_lines | map('regex_search', '^[^ ]+') | list }}"
-
-- name: Install missing plugins
-  command: vagrant plugin install "{{ plugin }}"
-  when: plugin not in cs_vagrant_plugins_installed
-  loop: "{{ cs_vagrant_plugins }}"
-  loop_control:
-    loop_var: plugin
-
 - name: Install Vagrantfile
   template:
     backup: yes
@@ -100,34 +84,6 @@
         ansible_user: vagrant
         ansible_ssh_extra_args: "-F {{ _cs_vagrant_init_ssh_config }}"
         ansible_python_interpreter: /usr/bin/python
-
-    # We could probably do this during boot automatically using:
-    # - cloud-init - we don't have it installed and don't need it
-    # - initramfs / dracut - I don't see this module in CentOS 7
-    # - x-systemd-growfs - Systemd is too old :(
-    - name: Grow root partition to full disk size
-      block:
-        - name: Install tools for growing the disk
-          yum: 
-            name: 
-              - cloud-utils-growpart
-              - xfsprogs
-            state: present
-
-        - name: Grow the partition
-          command: growpart --update force /dev/sda 1
-
-        - name: Grow the filesystem
-          command: xfs_growfs /dev/sda1
-      become: yes
-      become_user: root
-      vars:
-        ansible_connection: ssh
-        ansible_host: default
-        ansible_user: vagrant
-        ansible_ssh_extra_args: "-F {{ _cs_vagrant_init_ssh_config }}"
-        ansible_python_interpreter: /usr/bin/python
-
   always:
     - name: Remove temporary directory
       file:
