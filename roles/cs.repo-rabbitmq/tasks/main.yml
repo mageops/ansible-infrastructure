@@ -1,6 +1,6 @@
 - name: Ensure RabbitMQ repo release package is installed and up-to-date
   yum:
-    name: "{{ repo_elasticsearch_package_name }}"
+    name: "{{ repo_rabbitmq_package_name }}"
 
 - name: Ensure chosen rabbitmq repo variants are enabled
   ini_file:
