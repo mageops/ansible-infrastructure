@@ -3,13 +3,6 @@ mageops_migrations_deprecated_yum_repos:
   - szpadel-centos-extras
   - elasticsearch-5.x
 
-mageops_migrations:
-  - title: Make sure deprecated repositories are absent
-    name: repository
+mageops_migrations: []
 
-  - title: Renamed nginx configs
-    name: nginx-config
-
-  - title: Fix python modules installed globally with PIP
-    name: pip-packages
 
