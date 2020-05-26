@@ -24,6 +24,9 @@ server {
 
     server_name {{ vhost.aliases | default([])|join(' ') }};
 
+    ssl_certificate {{ https_termination_certificate_dir }}/{{ vhost.name }}.cer;
+    ssl_certificate_key {{ https_termination_private_dir }}/{{ vhost.name }}.pem;
+
     return 301 $scheme://{{ vhost.server_name }}$request_uri;
 }
 {% endif %}
