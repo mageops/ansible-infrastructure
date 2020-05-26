@@ -44,7 +44,7 @@
     )
 
 - name: Make sure there are no open yum transactions
-  shell: yum-complete-transaction --cleanup-only
+  shell: yum-complete-transaction -y --cleanup-only
   args:
     warn: no
 
