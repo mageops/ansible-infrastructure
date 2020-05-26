@@ -14,13 +14,12 @@ cat<<ENDMSG
     -o ExitOnForwardFailure=yes \\
     -o GatewayPorts=yes \\
     -R {{ php_fpm_debug_pool_xdebug_remote_port }}:localhost:{{ php_fpm_debug_pool_xdebug_remote_port }} \\
-      $(whoami)@$(curl -sL https://api.ipify.org)$(echo -en "\033[0m")
-
+      $(whoami)@$(curl -sL '{{ mageops_public_ip_v4_api_url }}')$(echo -en "\033[0m")
   2. Start debugging by adding query parameter to the URL:
 
   $(echo -en "\033[0;35m")?{{mageops_debug_token_query_param }}={{ mageops_debug_token }}$(echo -en "\033[0m")
 
   ----------------------------------------------------------
-
+  
 ENDMSG
 {% endif %}
