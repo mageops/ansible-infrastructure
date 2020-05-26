@@ -1,11 +1,12 @@
-# Run this playbook with --ask-sudo-pass
-- hosts: "all"
+# Best run this playbook with --ask-sudo-pass
+- hosts: vagrant
   become: yes
+  gather_facts: yes
   roles:
-    - role: cs.unison-guest
+    - role: cs.unison-server
 
 - hosts: localhost
   connection: local
   gather_facts: yes
   roles:
-    - role: cs.unison-host
+    - role: cs.unison-project

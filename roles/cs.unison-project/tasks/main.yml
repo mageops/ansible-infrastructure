@@ -1,0 +1,15 @@
+- name: Create unison config dir
+  file:
+    path: "{{ unison_project_config_dir }}"
+    state: directory
+
+- name: Ensure local project dir exsits
+  file:
+    path: "{{ unison_project_local_path }}"
+    state: directory
+
+- name: Create unison profile
+  template:
+    src: project.prf
+    dest: "{{ unison_project_config_path }}"
+
