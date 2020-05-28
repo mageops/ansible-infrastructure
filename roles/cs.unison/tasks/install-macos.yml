@@ -30,8 +30,8 @@
       - "{{ unison_macos_brew_package }}"
       - "{{ unison_macos_brew_package_fsmonitor }}"
     install_options:
-      - --force
-      - --force-bottle
+      - force
+      - force-bottle
 
 # Homebrew module doesn't allow specifying link options
 - name: <macOS> Make sure unison binaries are linked properly
