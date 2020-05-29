@@ -1,6 +1,14 @@
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: app:&current
+  gather_facts: no
+  tasks:
+    - name: Wait app nodes to be reachble
+      wait_for_connection:
+        delay: 10
+        timeout: 90
+
+- hosts: app:&current
   tasks:
     - name: Run Magento post-deploy commands
       command: "{{ item.cmd | default(item) }}"
