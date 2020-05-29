@@ -33,7 +33,7 @@
 
 - name: Print info about running nodes
   debug:
-    msg: "{{ item.key }} instance: {% if item.value %}{{ item.value.instance_id }} ({{ item.value.private_ip_address }} / {{ item.value.public_ip_address }}){% else %}not found{% endif %}"
+    msg: "{{ item.key }} instance: {% if item.value %}{{ item.value.instance_id }} ({{ item.value.private_ip_address }} / {{ item.value.public_ip_address | default('N/A') }}){% else %}not found{% endif %}"
   loop: "{{ aws_nodes_info | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
