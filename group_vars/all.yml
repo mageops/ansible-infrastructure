@@ -193,6 +193,9 @@ aws_tags_node_extra_app:
 aws_tags_node_varnish:
   NodeVarnish: "{{ mageops_app_name }}"
 
+aws_tags_node_app_with_varnish:
+  NodeAppWithVarnish: "{{ mageops_app_name }}"
+
 aws_tags_node_persistent:
   NodePersistent: "{{ mageops_app_name }}"
 

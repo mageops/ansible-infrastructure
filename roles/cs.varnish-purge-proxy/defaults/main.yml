@@ -1,4 +1,4 @@
-varnish_pp_instance_tags: "varnish:{{ mageops_app_name }}"
+varnish_pp_instance_tags: "NodeAppWithVarnish:{{ mageops_app_name }}"
 
 varnish_pp_listen_address: "0.0.0.0"
 varnish_pp_listen_port: "80"
