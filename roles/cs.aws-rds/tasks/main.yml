@@ -16,7 +16,7 @@
     tags: "{{ aws_tags_default }}"
     params: "{{ aws_rds_param_group_params | default(omit) }}"
 
-- name: Create MySQL RDS
+- name: Create MySQL/MariaDB RDS
   rds:
     command: create
     region: "{{ aws_region }}"
