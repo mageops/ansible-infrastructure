@@ -1,4 +1,3 @@
-
 - hosts: localhost
   connection: local
   pre_tasks:
@@ -52,6 +51,38 @@
             state: absent
             wait: yes
       when: remove_ec2
+
+    - name: Remove RDS
+      block:
+        - name: Get list of RDS instances
+          rds_instance_facts:
+            region: "{{ aws_region }}"
+          register: _rds_instances_info
+        - name: Set list of rds instances
+          set_fact:
+            _aws_rds_instances: "{{ _rds_instances_info.instances }}"
+        - name: Filter rds instance list by tags
+          set_fact:
+            _aws_rds_instances: "{{ _aws_rds_instances | json_query(rds_instances_tag_filter_query) | default([]) }}"
+          vars:
+            rds_instances_tag_filter_query: "[?{% for k, v in aws_rds_facts_mysql_tags.items() -%}tags.{{ k }} == '{{ v }}'{% if not loop.last %} && {% endif %}{% endfor %}]"
+        - name: Warn when more than one instance has been found
+          debug:
+            msg: |
+              Warning! More than one matching rds instance found, using first one.
+              Found: {{ _aws_rds_instances | map(attribute='db_instance_identifier') | join(', ') }}
+          when: _aws_rds_instances | length > 1
+        - name: Set facts about project's rds instance
+          set_fact:
+            aws_rds_instance_id: "{{ (_aws_rds_instances | first).db_instance_identifier }}"
+          when: _aws_rds_instances | length > 0
+        - name: Terminate RDS instance
+          when: _aws_rds_instance_id == aws_rds_instance_name
+          rds:
+            command: delete
+            instance_name: "{{ aws_rds_instance_name }}"
+            # snapshot: "{{ aws_rds_instance_name }}-snapshot"
+      when: remove_rds
 
     - name: Remove Volumes
       # Currently not working. There seems to be a bug in Ansible and tags are required
@@ -165,7 +196,6 @@
         - "{{ mageops_app_name }}-extra-app-"
       when: remove_asg
 
-
   vars_files:
     - vars/app/credentials.yml
     - vars/app/env.yml
@@ -173,6 +203,7 @@
   vars:
     remove_asg: yes
     remove_ec2: yes
+    remove_rds: no
     remove_efs: yes
     remove_lambda: yes
     remove_sg: yes
