@@ -4,7 +4,7 @@
     region: "{{ aws_region }}"
     name: "{{ aws_elb_name }}"
     subnets: "{{ aws_vpc_subnet_ids }}"
-    aws_security_group_names:
+    security_group_names:
       - "{{ aws_security_group_lb_name }}"
     cross_az_load_balancing: "{{ lb_cross_az }}"
     idle_timeout: "{{ lb_timeout }}"
