@@ -809,6 +809,9 @@ mageops_trusted_cidr_blocks: "{{ mageops_trusted_cidr_blocks_global + mageops_tr
 # mageops_app_email_smtp_relay_pass:
 mageops_app_email_smtp_relay_port: 587
 
+mageops_email_use_ses: no
+mageops_email_ses_address: "{{ magento_bounce_email_address }}"
+
 
 # ---------------------------
 # --------  Magento  --------

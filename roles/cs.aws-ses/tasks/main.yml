@@ -1,0 +1,51 @@
+- name: Configure SNS for SES notifications
+  block:
+    - name: Create SNS topic for bounces
+      sns_topic:
+        name: "{{ ses_sns_topic_name_bounce }}"
+        state: present
+        region: "{{ aws_region }}"
+        display_name: "SES Bounces {{ mageops_project }}"
+      register: _aws_sns_bounce
+    - name: Create SNS topic for complaints
+      sns_topic:
+        name: "{{ ses_sns_topic_name_complaints }}"
+        state: present
+        region: "{{ aws_region }}"
+        display_name: "SES Complaints {{ mageops_project }}"
+      register: _aws_sns_complaints
+
+- name: Add e-mail to SES
+  #community.aws.aws_ses_identity:
+  aws_ses_identity:
+    identity: "{{ ses_email }}"
+    region: "{{ aws_region }}"
+    state: present
+    complaint_notifications:
+      topic: "{{ _aws_sns_complaints.sns_arn }}"
+      include_headers: True
+    bounce_notifications:
+      topic: "{{ _aws_sns_bounce.sns_arn }}"
+      include_headers: False
+    feedback_forwarding: False
+  when: ses_email is defined
+
+- name: Add domain to SES
+  #community.aws.aws_ses_identity:
+  aws_ses_identity:
+    identity: "{{ ses_domain }}"
+    region: "{{ aws_region }}"
+    state: present
+    complaint_notifications:
+      topic: "{{ _aws_sns_complaints.sns_arn }}"
+      include_headers: yes
+    bounce_notifications:
+      topic: "{{ _aws_sns_bounce.sns_arn }}"
+      include_headers: no
+    feedback_forwarding: False
+  when: ses_domain is defined
+  
+  # Could be falled back with
+  # "{{ ses_domain | default(ses_email.split('@')[1]) }}"    
+  # but it turns out we do not need domain.
+
