@@ -16,9 +16,10 @@ Vagrant.configure("2") do |config|
   # Do not sync any folders, we use unison directly for custom project sync
   config.vm.synced_folder '.', '/vagrant', disabled: true
 
-{% if cs_vagrant_vm_box_url %}
+  {% if cs_vagrant_vm_box_url %}
   config.vm.box_url = "{{ cs_vagrant_vm_box_url }}"
-{% endif %}
+  {% endif %}
+
   config.vm.provider :virtualbox do |vb|
     vb.gui = false
     vb.name = "{{ cs_vagrant_vm_name }}"
@@ -28,39 +29,37 @@ Vagrant.configure("2") do |config|
     # We don't need audio and it causes excessive CPU usage in some cases
     vb.customize ["modifyvm", :id, "--audio", "none"]
 
-{% if cs_vagrant_vm_cpu_cap and not cs_vagrant_distributable_box %}
-    vb.customize ["modifyvm", :id, "--cpuexecutioncap", "{{ cs_vagrant_vm_cpu_cap }}"]
-{% endif %}
+      {% if cs_vagrant_vm_cpu_cap and not cs_vagrant_distributable_box %}
+      vb.customize ["modifyvm", :id, "--cpuexecutioncap", "{{ cs_vagrant_vm_cpu_cap }}"]
+      {% endif %}
 
-{% if cs_vagrant_vm_box == 'mageops/centos' %}
-    vb.customize [
-      "storageattach", :id,
-        "--storagectl", "SATA",
-        "--device", "0",
-        "--port", "2",
-        "--type", "dvddrive",
-        "--medium", "additions"
-    ]
-{% else %}
-  {% if cs_vagrant_vm_enable_cd %}
-      # Empty CD drive for optional Guest Additions Installation
-      vb.customize ["storageattach", :id, 
-                    "--storagectl", "IDE", 
-                    "--port", "0", "--device", "1", 
-                    "--type", "dvddrive", 
-                    "--medium", "emptydrive"]
-  {% endif %}
+      {% if cs_vagrant_vm_enable_public_network and not cs_vagrant_distributable_box %}
+      # Bridge to public network, this is unsecure if not in a trusted LAN!
+      # TODO: Find a better method for getting adapter names
+      config.vm.network "public_network"
+      {% endif -%}
+
+      {% if cs_vagrant_vm_box == 'mageops/centos' %}
+      vb.customize [
+        "storageattach", :id,
+          "--storagectl", "SATA",
+          "--device", "0",
+          "--port", "2",
+          "--type", "dvddrive",
+          "--medium", "additions"
+      ]
+      {% else %}
+        {% if cs_vagrant_vm_enable_cd %}
+        # Empty CD drive for optional Guest Additions Installation
+        vb.customize ["storageattach", :id, 
+                      "--storagectl", "IDE", 
+                      "--port", "0", "--device", "1", 
+                      "--type", "dvddrive", 
+                      "--medium", "emptydrive"]
+        {% endif %}
+      {% endif %}
     end
 
-  {% if cs_vagrant_vm_enable_public_network and not cs_vagrant_distributable_box %}
-    # Bridge to public network, this is unsecure if not in a trusted LAN!
-    # TODO: Find a better method for getting adapter names
-    config.vm.network "public_network", bridge: [
-        "en0: Wi-Fi (AirPort)",
-        "en1: Wi-Fi (AirPort)",
-    ]
-  {% endif -%}
-{% endif %}
 
   config.vm.post_up_message = <<EOF_UP_MSG
          ____
