@@ -3,7 +3,7 @@
     - name: Install Magento
       shell: >
         php {{ magento_release_dir }}/bin/magento setup:install \
-          '--backend-frontname=admin' \
+          '--backend-frontname={{ magento_admin_path }}' \
           '--session-save=db' \
           '--db-host={{ mageops_mysql_host }}' \
           '--db-user={{ mageops_app_mysql_user }}' \
