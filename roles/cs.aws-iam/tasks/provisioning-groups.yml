@@ -5,8 +5,6 @@
       - "{{ aws_iam_policy_ec2_assign_iam_role }}"
       - "{{ aws_iam_policy_lambda_access }}"
       - "{{ aws_iam_policy_kms_access }}"
-      # Added here because we are already at policy limit in standard policies
-      - AmazonElasticFileSystemFullAccess
     state: present
 
 - name: Create standard IAM group for users running provisioning
@@ -22,4 +20,13 @@
       - AmazonVPCFullAccess
       - IAMReadOnlyAccess
       - CloudWatchEventsFullAccess
+    state: present
+
+- name: Create second standard IAM group for users running provisioning as there is a limit of 10 permissions per group
+  iam_group:
+    name: "{{ aws_iam_group_standard_policies }}_2"
+    managed_policy:
+      - AmazonElasticFileSystemFullAccess
+      - AmazonSNSFullAccess
+      - AmazonSESFullAccess
     state: present

@@ -1,0 +1,14 @@
+- name: Configure SNS for notifications
+  block:
+    - name: Create SNS topic for bounces
+      sns_topic:
+        name: "{{ ses_sns_topic_name_bounce }}"
+        state: present
+        region: "{{ aws_region }}"
+        display_name: "SES Bounces"
+    - name: Create SNS topic for complaints
+      sns_topic:
+        name: "{{ ses_sns_topic_name_complaints }}"
+        state: present
+        region: "{{ aws_region }}"
+        display_name: "SES Complaints"
