@@ -73,6 +73,13 @@ server {
 {% endif %}
 
     location / {
+        {% for cookie_js_name, cookie_server_name in https_termination_nginx_server_cookie_rewrite_map.items() %}
+            {% set cookie_js_name_var  = '$cookie_' ~ cookie_js_name | lower | regex_replace('[^_a-z0-9]', '_') %}
+            if ({{ cookie_js_name_var }}) {
+                add_header "Set-Cookie" "{{ cookie_server_name }}={{ cookie_js_name_var }}; Path=/; Max-Age={{ 60 * 60 * 24 * 365 }}; Secure";
+            }
+        {% endfor %}
+        
         proxy_pass http://{{ https_termination_varnish_upstream }};
 
         proxy_redirect off;
