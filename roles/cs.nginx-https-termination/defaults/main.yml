@@ -78,7 +78,7 @@ https_termination_hosts:
 # Internal helper var for storing runtime computed configuration
 https_termination_cfg_vhosts: []
 
-# Rewrite JS cookies into server HTTP-only cookies to work around
+# Rewrite JS cookies into server-created (first party) cookies to work around
 # short expiration time forced on JS cookies by some browsers (Safari, ...).
 # Shall be a mapping between JS cookie name -> HTTP cookie name.
 https_termination_nginx_server_cookie_rewrite_map:
