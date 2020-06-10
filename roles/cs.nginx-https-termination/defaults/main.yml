@@ -81,7 +81,7 @@ https_termination_cfg_vhosts: []
 # Rewrite JS cookies into server-created (first party) cookies to work around
 # short expiration time forced on JS cookies by some browsers (Safari, ...).
 # Shall be a mapping between JS cookie name -> HTTP cookie name.
-https_termination_nginx_server_cookie_rewrite_map: []
+https_termination_nginx_server_cookie_rewrite_map: {}
 
 # Example configuration:
 # https_termination_nginx_server_cookie_rewrite_map:
