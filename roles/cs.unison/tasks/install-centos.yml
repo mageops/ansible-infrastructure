@@ -4,10 +4,11 @@
     value: "{{ unison_linux_inotify_max_user_watches | string }}"
     reload: yes
     state: present
+  when: mageops_virtualization_full | default(true)
 
 - name: <CentOS> Make sure conflicting packages are absent
   yum:
-    name: 
+    name:
       - unison
       - unison-ocaml406
     state: absent

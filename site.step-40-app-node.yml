@@ -25,6 +25,7 @@
     - role: cs.switch-to-dnf
 
     - role: pinkeen.selinux-disable
+      when: mageops_virtualization_full | default(true)
 
     - role: cs.swap
       when: mageops_swap_app_node_enable
