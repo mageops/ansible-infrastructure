@@ -31,7 +31,7 @@
       when: mageops_swap_app_node_enable
 
     - role: cs.zram
-      when: mageops_zram_app_node_enable
+      when: mageops_zram_app_node_enable and mageops_virtualization_full | default(true)
 
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
