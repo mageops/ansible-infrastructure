@@ -22,6 +22,11 @@
   shell: "postmap /etc/postfix/generic"
   notify: Reload postfix
 
+- name: Check sasl_passwd file existence
+  stat:
+    path: "/etc/postfix/sasl_passwd"
+  register: sasl_passwd_stat
+
 - name: Ensure sasl_passwd owner
   file:
     path: "/etc/postfix/{{ item }}"
@@ -29,3 +34,4 @@
   with_items:
     - "sasl_passwd"
     - "sasl_passwd.db"
+  when: sasl_passwd_stat.exists | default(false)
