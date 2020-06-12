@@ -14,7 +14,9 @@
 
 - name: Ensure yum versionlock plugin is installed
   yum:
-    name: yum-plugin-versionlock
+    name:
+      - yum-plugin-versionlock
+      - dnf-command(versionlock)
   when: _rabbitmq_erlang_package is changed or _rabbitmq_server_package is changed
 
 # The versions need to be locked because the repository
@@ -22,11 +24,18 @@
 # could cause an unintended bump to a version with breaking changes.
 # Thus every upgrade has to be performed in controlled manner.
 - name: Lock RabbitMQ Package Versions
-  command: "yum versionlock {{ item }}"
-  with_items:
-    - "{{ rabbitmq_server_version }}"
-    - "{{ rabbitmq_erlang_version }}"
+  block:
+    - command: "yum versionlock {{ item }}"
+      with_items:
+        - "{{ rabbitmq_server_version }}"
+        - "{{ rabbitmq_erlang_version }}"
+    - command: "dnf versionlock {{ item }}"
+      with_items:
+        - "{{ rabbitmq_server_version }}"
+        - "{{ rabbitmq_erlang_version }}"
+      when: ansible_facts['pkg_mgr'] == "dnf"
   when: _rabbitmq_erlang_package is changed or _rabbitmq_server_package is changed
+
 
 - name: Install rabbitmq configuration file
   template:
