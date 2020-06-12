@@ -551,10 +551,10 @@ mageops_app_type: "magento"
 mageops_app_name: "{{ mageops_prefix }}-{{ mageops_project }}-{{ mageops_environment }}"
 
 # Extra identifier used for naming users and namespacing some resources
-mageops_app_id: "{{ mageops_project }}_{{ mageops_environment }}"
+mageops_app_id: "{{ ( mageops_project ~ '_' ~ mageops_environment ) | lower | regex_replace('[^a-z0-9]+', '_') }}"
 
 # Shorter version guaranteed to be at most 16 chars long (e.g. suitable for MySQL 5.6 username)
-mageops_app_id_short: "{{ mageops_project | truncate(10, true, '') }}_{{ mageops_environment | truncate(5, true, '') }}"
+mageops_app_id_short: "{{ mageops_project | lower | regex_replace('[^a-z0-9]+', '_') | truncate(10, true, '') }}_{{ mageops_environment | lower | regex_replace('[^a-z0-9]+', '_') | truncate(5, true, '') }}"
 
 # Enables special features that work with MageSuite only
 mageops_app_is_magesuite: yes
@@ -1368,6 +1368,9 @@ https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-ca
 
 repo_varnish_variants_enabled: ['60lts']
 
+varnish_port: "{{ mageops_varnish_port }}"
+varnish_backend_port: "{{ mageops_varnish_backend_port }}"
+
 varnish_instances_aws_tags: "{{ aws_tags_base | combine(aws_tags_node_varnish) }}"
 varnish_backend_instances_aws_tags: "{{ aws_tags_base | combine(aws_tags_node_app) }}"
 varnish_extra_instances_aws_tags: "{{ aws_tags_base | combine(aws_tags_node_extra_app) }}"
@@ -1417,6 +1420,8 @@ varnish_log_dir: /var/log/varnish
 # We already have nginx access log on this node
 varnish_ncsa_logging: no
 
+varnish_purge_trusted_ips: "{{ ( aws_vpc_subnet_prefix is defined ) | ternary([aws_vpc_subnet_prefix ~ '.0.0/16'], [] ) }}"
+
 # If enabled then Magento PURGE requests to varnish will be logged
 varnish_purge_logging: yes
 varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
@@ -1438,6 +1443,16 @@ varnish_strip_params:
   - "fbclid"
 
 varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
+
+varnish_secure_site: "{{ mageops_secure_site }}"
+varnish_secure_site_user: "{{ mageops_secure_site_user }}"
+varnish_secure_site_password: "{{ mageops_secure_site_password }}"
+varnish_secure_site_trusted_ips: "{{ mageops_trusted_cidr_blocks }}"
+
+varnish_debug_request_token: "{{ mageops_debug_token }}"
+varnish_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
+varnish_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
+varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
 
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------

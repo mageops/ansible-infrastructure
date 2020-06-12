@@ -67,7 +67,7 @@ alias pkill='pkill -f'
 alias grep='grep --color=auto'
 alias psa='ps axf'
 
-{% if magento_user is defined and mageops_cli_user == magento_user | default('magento') -%}
+{% if magento_user is defined and mageops_cli_user_name == magento_user | default('magento') -%}
 alias magento='{{ magento_live_release_dir }}/bin/magento'
 {% endif %}
 

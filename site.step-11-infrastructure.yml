@@ -8,11 +8,9 @@
     - role: cs.packages
 
     - role: cs.mysql
-      mysql_root_user: "{{ mageops_mysql_root_user }}"
-      mysql_root_pass: "{{ mageops_mysql_root_pass }}"
       when: mageops_mysql_create
-      
-    - role: cs.mysql-configure
+
+    - role: cs.mysql-configure-project
       when: mageops_mysql_host is defined
 
   vars:

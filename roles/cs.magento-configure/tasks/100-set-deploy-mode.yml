@@ -1,7 +1,7 @@
-- name: Set production mode
+- name: "Set deploy mode to {{ magento_mode }}"
   become: yes
   become_user: "{{ magento_user }}"
-  command: "php {{ magento_release_dir }}/bin/magento deploy:mode:set production -s"
+  command: "php {{ magento_release_dir }}/bin/magento deploy:mode:set {{ magento_mode | default('production') }} -s"
 
 - name: Compile DI
   become: yes

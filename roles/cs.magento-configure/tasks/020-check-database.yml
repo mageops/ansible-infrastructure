@@ -1,5 +1,12 @@
 - name: Check if database is initialized
-  command: mysql -u {{ mageops_app_mysql_user }} -p{{ mageops_app_mysql_pass }} -h {{ mageops_mysql_host }} -e "SELECT 1 FROM {{ mageops_app_mysql_db }}.admin_user LIMIT 1;"
+  command:
+    argv:
+      - mysql
+      -   "-u{{ mageops_app_mysql_user }}"
+      -   "-p{{ mageops_app_mysql_pass }}"
+      -   "-h{{ mageops_mysql_host }}"
+      -   "-e"
+      -     "SELECT 1 FROM `{{ mageops_app_mysql_db }}`.admin_user LIMIT 1;"
   failed_when: false
   changed_when: false
   register: admins

@@ -67,7 +67,7 @@ deploy_ssh_key_path: "{{ playbook_dir }}/.tmp.ansible.ssh-deploy-key.{{ deploy_r
 deploy_ssh_key_path_pub: "{{ deploy_ssh_key_path }}.pub"
 
 # Options to use for SSH during artifact rsync
-deploy_rsync_ssh_opts: 
+deploy_rsync_ssh_opts:
   - "-o StrictHostKeyChecking=no"
   - "-o UserKnownHostsFile=/dev/null"
   - "-o ServerAliveInterval=60"
@@ -80,6 +80,9 @@ deploy_rsync_perf_opts:
   - "--inplace"
 
 deploy_rsync_excludes: []
+
+# Whether to deploy new code
+deploy_install_new_release: yes
 
 # Hooks
 
@@ -97,7 +100,7 @@ deploy_cleanup_actions: []
 # made to try to restore the system to working order here.
 deploy_abort_install_actions: []
 
-# Executed after the newly prepared release dir has been relinked as the 
+# Executed after the newly prepared release dir has been relinked as the
 # current one and default post deploy actions executed.
 deploy_release_actions: []
 
@@ -111,15 +114,15 @@ deploy_post_actions: []
 
 deploy_post_install_abort_msg: |
   ====================================================
-  ==  FATAL! The deploy has failed Before Release!  ==  
+  ==  FATAL! The deploy has failed Before Release!  ==
   ====================================================
 
-      The new release has not been linked yey but 
-      still the system probably broken in some way 
+      The new release has not been linked yey but
+      still the system probably broken in some way
       due to interrupted configuration, stale cache,
       partial database migrations,...
 
-      Please make 100% sure that everything is 
+      Please make 100% sure that everything is
       working correctly!
 
   ----------------------------------------------------
@@ -129,11 +132,11 @@ deploy_post_release_abort_msg: |
   ==   FATAL! The deploy has failed Post Release!   ==
   ====================================================
 
-      And attempt was made to restore the system 
+      And attempt was made to restore the system
       to the previous pre-release state, but it is
       probably broken in some way.
 
-      Please make 100% sure that everything is 
+      Please make 100% sure that everything is
       working correctly!
 
   ----------------------------------------------------

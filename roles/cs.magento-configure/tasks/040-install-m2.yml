@@ -1,6 +1,6 @@
 - name: Install Magento (fresh)
   block:
-    - name: Install Magento
+    - name: Install Magento (setup:install)
       shell: >
         php {{ magento_release_dir }}/bin/magento setup:install \
           '--backend-frontname=admin' \
@@ -45,7 +45,7 @@
     group: "{{ magento_group }}"
     mode: 0640
     force: 1
-  when: deploy_install_new_release
+  when: magento_configure_new_release
 
 - name: Import new configuration
   become: true
@@ -53,4 +53,4 @@
   shell: php {{ magento_release_dir }}/bin/magento app:config:import
   args:
     chdir: "{{ magento_deployment_dir }}"
-  when: not deploy_install_new_release
+  when: not magento_configure_new_release

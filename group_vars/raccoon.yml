@@ -6,19 +6,23 @@ mageops_secure_site: no
 
 # Whether the ansible code is being run live on developer's machine
 # or a base, distributable container/vm is being provisioned
-mageops_raccoon_live_mode: yes
-
-# Whether raccoon VM is managed using Vagrant
-mageops_raccoon_use_vagrant: yes
+raccoon_live_mode: yes
 
 # Whether the provisioning is being ran inside the virtualized (or containerized)
 # environment with local connection or executed remotely via SSH/docker exec
-mageops_raccoon_nested_provisioning: no
+raccoon_nested_provisioning: no
 
 # The type of virtualization/containerization solution used to run raccoon
-mageops_raccoon_virt: generic-vm
+raccoon_virt: virtualbox
 
+# Install tools helpful during development
 mageops_install_development_tools: yes
+
+# Override the default release dir
+magento_release_dir: "{{ raccoon_project_dir }}"
+
+# Disable redirect to base
+magento_core_config_enable_redirect_to_base: 0
 
 # Https as an option but not the default, port 80 can be used normally
 mageops_https_enable: no
@@ -47,9 +51,6 @@ php_http_request_max_execution_time: 600
 elasticsearch_create: yes
 elasticsearch_heap_size: 512m
 
-varnish_host: 127.0.0.1
-varnish_port: 8080
-varnish_backend_port: 80
 varnish_standalone: false
 varnish_memory: 128M
 
@@ -62,14 +63,14 @@ mysql_mariadb_flavor: yes
 
 nginx_app_port: 80
 
-mageops_rabbitmq_host: 127.0.0.1
-mageops_mysql_host: 127.0.0.1
-mageops_redis_host: 127.0.0.1
-mageops_redis_sessions_host: 127.0.0.1
-mageops_elasticsearch_host: 127.0.0.1
 mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: 8080
 mageops_varnish_backend_port: "{{ nginx_app_port }}"
+mageops_mysql_host: 127.0.0.1
+mageops_elasticsearch_host: 127.0.0.1
+mageops_redis_host: 127.0.0.1
+mageops_redis_sessions_host: 127.0.0.1
+mageops_rabbitmq_host: 127.0.0.1
 
 varnish_standalone: false
 
@@ -85,12 +86,20 @@ sshd_permit_root_login: yes
 sshd_lockdown_untrusted_networks: no
 sshd_trusted_networks: "{{ ['127.0.0.0/8'] + mageops_trusted_cidr_blocks }}"
 
-mageops_authorize_local_keys: "{{ not mageops_raccoon_nested_provisioning }}"
+mageops_authorize_local_keys: "{{ not raccoon_nested_provisioning }}"
 mageops_cli_user_groups: [wheel]
 mageops_cli_user_authorize_local_key: "{{ mageops_authorize_local_keys }}"
 
 mageops_packages_mirrorlist_countrycode: de
-mageops_packages_raccoon_node: []
+mageops_packages_raccoon_node:
+  # Basic build tools are needed for nodejs packages installation, e.g.
+  # the `gifsicle` package cannot be installed without them and theme
+  # build will fail.
+  - gcc
+  - gcc-c++
+  - make
+  - autoconf
+  - automake
+  # Needed for patching Magento and all else
+  - patch
 
-# Allow sudoing without password for developer covenience
-sudo_wheel_nopasswd: yes

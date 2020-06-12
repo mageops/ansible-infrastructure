@@ -7,7 +7,7 @@
   become: yes
   become_user: "{{ magento_user }}"
   command: "php {{ magento_release_dir }}/bin/magento module:enable --all"
-  
+
 - name: Disable defined disabled modules
   become: yes
   become_user: "{{ magento_user }}"

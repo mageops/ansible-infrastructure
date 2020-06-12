@@ -2,17 +2,20 @@
 all:
   hosts:
     raccoon_docker_container:
-      ansible_host: raccoon
+      ansible_host: mageops-raccoon-build
       ansible_connection: docker
       ansible_become: no
+      raccoon_virt: docker
 
     raccoon_virtualbox_vm:
       ansible_port: 22
       ansible_host: 192.168.100.100
+      raccoon_virt: virtualbox
 
     raccoon_local_system:
       ansible_host: 127.0.0.1
       ansible_connection: local
+      raccoon_nested_provisioning: yes
 
   children:
     raccoon_local:
@@ -49,6 +52,10 @@ all:
       children:
         raccoon: ~
 
+    varnish:
+      children:
+        raccoon: ~
+
     redis:
       children:
         raccoon: ~
@@ -63,4 +70,3 @@ all:
         elasticsearch: ~
         rabbitmq: ~
         database: ~
-

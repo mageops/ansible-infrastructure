@@ -72,9 +72,6 @@
         - Reload systemctl daemon
         - Reload varnishncsa
 
-    - name: Ensure services are reloaded at once
-      meta: flush_handlers
-
     - name: Start and enable varnishncsa service
       service:
         name: varnishncsa

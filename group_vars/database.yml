@@ -1,0 +1,2 @@
+mysql_root_user: "{{ mageops_mysql_root_user }}"
+mysql_root_pass: "{{ mageops_mysql_root_pass }}"

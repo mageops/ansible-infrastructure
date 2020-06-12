@@ -11,25 +11,26 @@
   roles:
     - role: geerlingguy.composer
     - role: cs.packages
-    - role: cs.raccoon-sudo
     - role: cs.sshd
     - role: cs.nodejs
     - role: cs.unison-server
-    - role: cs.authorize-local-keys
-      authorize_local_keys_for_users:
-        - root
-        - "{{ magento_user }}"
-      when: mageops_authorize_local_keys | default(false) and ansible_connection != 'local'
+    - role: cs.raccoon-sudo
     - role: cs.mageops-cli-user
-      mageops_cli_user: root
+      mageops_cli_user_name: root
       mageops_cli_user_bashrc_fragments:
         - magento-root
         - elasticsearch
         - nginx
         - redis
         - varnish
+    - role: cs.authorize-local-keys
+      authorize_local_keys_for_users:
+        - root
+        - "{{ magento_user }}"
+      when: mageops_authorize_local_keys | default(false) and ansible_connection != 'local'
+
   tasks:
-    - name: Install composer parallel download plugin globally for magento user
+    - name: Install composer parallel download plugin
       composer:
         command: require
         global_command: yes
@@ -40,6 +41,7 @@
     - include_tasks: "{{ mageops_project_vars_dir }}/{{ item }}"
       when: raccoon_tasks_project is defined
       loop: "{{ raccoon_tasks_project }}"
+
   vars:
     packages_install: "{{ mageops_packages_common + mageops_packages_raccoon_node }}"
     mageops_node_role: raccoon

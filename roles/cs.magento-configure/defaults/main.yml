@@ -7,6 +7,9 @@ mageops_varnish_port: 80
 # Root directory where releases, shared files are kept
 magento_deployment_dir:    "{{ mageops_app_web_dir }}"
 
+# Whether to install new release
+magento_configure_new_release: "{{ deploy_install_new_release | default(true) }}"
+
 # Current realease directory
 magento_release_dir:       "{{ magento_deployment_dir }}/releases/{{ magento_release_id }}"
 magento_media_dir:         "{{ magento_deployment_dir }}/shared/pub/media/"
@@ -29,7 +32,7 @@ magento_app_etc_config_template: magento_app_etc_config.php.j2
 magento_app_etc_env_template: magento_app_etc_env.php.j2
 
 magento_consumer_workers_enable: yes
-magento_consumer_workers: 
+magento_consumer_workers:
    - consumer: codegeneratorProcessor
      batch_size: 100
      process_count: 1

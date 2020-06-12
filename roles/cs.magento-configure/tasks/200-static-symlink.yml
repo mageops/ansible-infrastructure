@@ -2,7 +2,7 @@
 # You need to include it after any pub/static/ S3FS/EFS/NFS/whatever mounts..
 - name: Get static files release version
   slurp:
-    src: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static/deployed_version.txt"
+    src: "{{ magento_release_dir }}/pub/static/deployed_version.txt"
   register: _deployed_version_slurp
 
 - name: Set static files version fact
@@ -13,8 +13,8 @@
 
 - name: Create static files version symlink
   file:
-      src: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static"
-      dest: "{{ deploy_releases_dir }}/{{ deploy_release_id }}/pub/static/version{{ magento_static_files_version }}"
+      src: "{{ magento_release_dir }}/pub/static"
+      dest: "{{ magento_release_dir }}/pub/static/version{{ magento_static_files_version }}"
       follow: yes
       state: link
       force: yes

@@ -1,0 +1,44 @@
+mageops_ssh_authorize_app: yes
+
+mageops_app_node_nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
+mageops_app_node_https_termination_enable: "{{ mageops_https_termination_enable and not varnish_standalone }}"
+
+magento_static_cache_dir: "{{ magento_release_dir }}/pub/static/_cache"
+magento_media_dir: "{{ mageops_app_web_dir }}/shared/pub/media"
+magento_core_config_settings: "{{ magento_core_config_settings_default + magento_core_config_settings_extra }}"
+magento_core_config_settings_to_remove: "{{ magento_core_config_settings_to_remove_default + magento_core_config_settings_to_remove_extra }}"
+magento_varnish_host: "{{ mageops_varnish_host }}"
+magento_varnish_port: "{{ mageops_varnish_port }}"
+
+packages_install: "{{ mageops_packages_common + mageops_packages_app_node + mageops_packages_app_node_extra }}"
+
+nginx_app_root_dir: "{{ magento_live_release_dir }}"
+nginx_blacklist_urls: "{{ mageops_app_node_https_termination_enable | ternary([], mageops_app_node_nginx_blacklist_urls) }}"
+
+nginx_fcgi_backend_socket: "{{ php_fpm_pool_fcgi_socket_path }}"
+nginx_fcgi_backend_debug_socket: "{{ php_fpm_debug_pool_fcgi_socket_path }}"
+
+nginx_secure_cron_user: "{{ magento_cron_user }}"
+nginx_secure_cron_password: "{{ magento_cron_password }}"
+nginx_secure_site: "{{ mageops_secure_site and not varnish_standalone }}"
+nginx_secure_site_user: "{{ mageops_secure_site_user }}"
+nginx_secure_site_password: "{{ mageops_secure_site_password }}"
+
+nginx_debug_request_token: "{{ mageops_debug_token }}"
+nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
+nginx_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
+nginx_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
+
+postfix_relay_host: "{{ mageops_app_email_smtp_relay_host }}"
+postfix_relay_username: "{{ mageops_app_email_smtp_relay_user }}"
+postfix_relay_password: "{{ mageops_app_email_smtp_relay_pass }}"
+postfix_relay_port: "{{ mageops_app_email_smtp_relay_port }}"
+
+php_fpm_pool_user: "{{ magento_user }}"
+php_fpm_pool_group: "{{ magento_group }}"
+php_fpm_terminate_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
+
+supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"
+
+aws_logs_stream_name: app
+aws_logs_loggers: "{{ aws_logs_loggers_app_default | combine(aws_logs_loggers_app_extra | default({}), recursive=True) }}"

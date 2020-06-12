@@ -10,5 +10,6 @@
     - include_tasks: 070-setup-modules.yml
     - include_tasks: 080-configure-integrations.yml
     - include_tasks: 090-setup-upgrade.yml
+    - include_tasks: 100-set-deploy-mode.yml
   become: yes
   become_user: "{{ magento_user }}"

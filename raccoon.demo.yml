@@ -1,21 +1,8 @@
-- name: Provision system
-  import_playbook: raccoon.yml
+- hosts: raccoon
+  roles:
+    - role: cs.raccoon-cmd
   vars:
-    mageops_project: magesuite
-
-- name: Configure project
-  import_playbook: raccoon.configure-project.yml
-  vars:
-    mageops_project: magesuite
-
-- name: Switch project
-  import_playbook: raccoon.switch-project.yml
-  vars:
-    mageops_project: magesuite
-
-- name: Build theme
-  import_playbook: raccoon.build-frontend.yml
-  vars:
-    mageops_project: magesuite
-    theme: theme-demo
+    # raccoon_project_production_mode: yes
+    raccoon_execute_commands:
+      - project:install:demo
 
