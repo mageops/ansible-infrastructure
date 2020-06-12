@@ -56,7 +56,7 @@
     value: 1
     reload: yes
     state: present
-  when: redis_persistence_enable
+  when: redis_persistence_enable and mageops_virtualization_full | default(true)
 
 - name: Increase somaxconn kernel param
   sysctl:
@@ -64,6 +64,7 @@
     value: "{{ redis_somaxconn }}"
     reload: yes
     state: present
+  when: mageops_virtualization_full | default(true)
 
 - name: Ensure Redis service is enabled
   service:
@@ -86,13 +87,15 @@
     - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
   register: _redis_enabled_thd
   notify: Restart {{ redis_daemon }}
+  when: mageops_virtualization_full | default(true)
 
 - name: Disable THP now if just added
   shell: "{{ item }}"
   with_items:
     - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
     - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
-  when: _redis_enabled_thd.changed
+  when: _redis_enabled_thd.changed and mageops_virtualization_full | default(true)
+
 
 - name: Ensure Redis service is started
   service:

@@ -8,6 +8,7 @@
       when: aws_use
     - role: cs.switch-to-dnf
     - role: pinkeen.selinux-disable
+      when: mageops_virtualization_full | default(true)
     - role: cs.swap
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
