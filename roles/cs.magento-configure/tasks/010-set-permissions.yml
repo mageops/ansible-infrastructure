@@ -7,3 +7,11 @@
     recurse: yes
     mode: 0770
 
+- name: Add Magento to redis group for socket access
+  when: magento_redis_use_local_unix_socket | default(false)
+  user:
+    name: "{{ magento_user }}"
+    groups: "{{ magento_redis_group | default('redis') }}"
+    append: yes
+
+
