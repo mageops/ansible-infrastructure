@@ -2,7 +2,7 @@
 all:
   hosts:
     raccoon_docker_container:
-      ansible_host: raccoon
+      ansible_host: musing_lamarr
       ansible_connection: docker
       ansible_become: no
       raccoon_virt: docker

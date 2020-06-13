@@ -1,4 +1,4 @@
-# {{ ansible_managed | comment }}
+{{ ansible_managed | comment }}
 
 #######################################################################################
 # Please consult the documentation for further information on configuration options:  #
