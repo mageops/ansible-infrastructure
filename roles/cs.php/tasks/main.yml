@@ -76,12 +76,17 @@
     state: latest
   when: php_install_mode == 'upgrade'
 
+# Unforunately the following task causes ansible to *hang* so we use a command
+# - name: Downgrade PHP packages
+#     yum:
+#     name: 'php*'
+#     update_cache: yes
+#     allow_downgrade: yes
+#     state: present
 - name: Downgrade PHP packages
-  yum:
-    name: 'php*'
-    update_cache: yes
-    allow_downgrade: yes
-    state: present
+  command:
+    argv: [yum, -y, downgrade, php]
+    warn: no
   when: php_install_mode == 'downgrade'
 
 - name: Ensure requested PHP packages are installed

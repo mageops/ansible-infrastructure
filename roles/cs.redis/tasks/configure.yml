@@ -15,9 +15,9 @@
   loop:
     - path: "{{ redis_dbdir }}"
     - path: "{{ redis_run_dir }}"
-    - path: "{{ redis_logdir }}/redis*.log"
+    - path: "{{ redis_logfile }}"
       mode: '0644'
-      type: z
+      type: f
   loop_control:
     loop_var: entry
     label: "{{ entry.path }}"
