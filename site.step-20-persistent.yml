@@ -26,7 +26,7 @@
     - role: cs.packages
     - role: cs.mageops-cli-profile
     - role: cs.mageops-cli-user
-      mageops_cli_user: root
+      mageops_cli_user_name: root
       mageops_cli_user_bashrc_fragments:
         - elasticsearch
         - redis

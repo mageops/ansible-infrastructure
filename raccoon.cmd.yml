@@ -1,0 +1,32 @@
+- hosts: raccoon
+  pre_tasks:
+    - name: Set list of raccoon commands to execute
+      when: >-
+        raccoon_execute_commands is not defined
+          or raccoon_execute_commands | length == 0
+          and raccoon_cmd is string
+          and raccoon_cmd | trim | length > 0
+      set_fact:
+        raccoon_execute_commands: "{{ ( raccoon_cmd | trim | regex_replace('[^-_:a-z0-9,]+', '_') | lower ).split(',') }}"
+
+    - name: Fail if no command specified
+      when: raccoon_execute_commands | default([], true) | length == 0
+      fail:
+        msg: |
+          *** ERROR: No commands specified! ***
+
+          Please specify the command to execute using `raccoon_cmd` var.
+
+          You can do that by calling the playbook with extra vars:
+
+            ansible-playbook raccoon.cmd.yml \
+              --inventory inventory/raccoon.yml \
+              --extra-vars raccoon_cmd=project:configure
+
+          Specify multiple commands by separating then with commas.
+
+  roles:
+    - role: cs.raccoon-cmd
+
+
+
