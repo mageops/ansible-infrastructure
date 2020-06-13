@@ -44,6 +44,7 @@
       mageops_cli_user_bashrc_fragments:
         - magento
     - role: cs.mageops-authorize-keys
+    - role: cs.magento-tools
     - role: cs.aws-cli
       when: aws_use
     - role: cs.cron

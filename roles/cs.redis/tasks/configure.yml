@@ -14,9 +14,8 @@
       {{ entry.argument | default('-') }}
   loop:
     - path: "{{ redis_dbdir }}"
-    - path: "{{ redis_piddir }}"
-    - path: "{{ redis_logdir }}"
-    - path: "{{ redis_logdir }}/*.log"
+    - path: "{{ redis_run_dir }}"
+    - path: "{{ redis_logdir }}/redis*.log"
       mode: '0644'
       type: z
   loop_control:
@@ -95,7 +94,6 @@
     - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
     - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
   when: _redis_enabled_thd.changed and mageops_virtualization_full | default(true)
-
 
 - name: Ensure Redis service is started
   service:

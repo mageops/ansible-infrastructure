@@ -117,9 +117,13 @@ return [
                             'backend' => 'Cm_Cache_Backend_Redis',
                             'backend_options' =>
                                 [
-                                    'server' => '{{ mageops_redis_host }}',
                                     'database' => '0',
+                                    {% if magento_redis_use_local_unix_socket | default(false) %}
+                                    'server' => 'unix://{{ mageops_redis_socket_path }}',
+                                    {% else %}
+                                    'server' => '{{ mageops_redis_host }}',
                                     'port' => {{ mageops_redis_port}},
+                                    {% endif %}
                                 ],
                         ],
                     'page_cache' =>
@@ -127,9 +131,13 @@ return [
                             'backend' => 'Cm_Cache_Backend_Redis',
                             'backend_options' =>
                                 [
-                                    'server' => '{{ mageops_redis_host }}',
                                     'database' => '1',
+                                    {% if magento_redis_use_local_unix_socket | default(false) %}
+                                    'server' => 'unix://{{ mageops_redis_socket_path }}',
+                                    {% else %}
+                                    'server' => '{{ mageops_redis_host }}',
                                     'port' => {{ mageops_redis_port}},
+                                    {% endif %}
                                     'compress_data' => '0',
                                 ],
                         ],
@@ -158,9 +166,9 @@ return [
             'max_messages' => {{ magento_consumer_workers_max_messages | default(500) }},
         ],
     {% else %}
-    {# 
+    {#
      # Disable consumers cron runner explicitly otherwise Magento will run them even if there
-     # is no amqp connection configured consuming resources unnecessarily and spamming logfiles. 
+     # is no amqp connection configured consuming resources unnecessarily and spamming logfiles.
      #}
     'cron_consumers_runner' =>
         [

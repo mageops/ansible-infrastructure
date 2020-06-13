@@ -1,6 +1,5 @@
-###
-# {{ ansible_managed }}
-###
+# {{ ansible_managed | comment }}
+
 
 EARLYOOM_ARGS="\
   -p \

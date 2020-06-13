@@ -460,7 +460,9 @@ aws_logs_loggers_app_default:
   magento-exception: { enabled: yes }
   magento-paywithamazon: { enabled: yes }
   nginx-error: { enabled: yes }
-  php-fpm-error: { enabled: yes }
+  php-fpm-daemon: { enabled: yes }
+  php-fpm-slow: { enabled: yes }
+  php-fpm-debug: { enabled: yes }
   php-cli-error: { enabled: yes }
   postfix-maillog: { enabled: yes }
   magento-report: { enabled: "{{ aws_logs_log_magento_crash_reports }}" }
@@ -581,13 +583,16 @@ mageops_app_mysql_user: "{{ mageops_app_id_short }}"
 mageops_app_mysql_db: "{{ mageops_app_id_short }}"
 
 # Shall redis be installed/created automatically? (or provide host)
+
 mageops_redis_create: yes
 mageops_redis_host:
 mageops_redis_port: 6379
+mageops_redis_socket_path: /var/run/redis/redis.socket
 
 mageops_redis_sessions_create: "{{ mageops_redis_create }}"
 mageops_redis_sessions_host:
 mageops_redis_sessions_port: 6380
+mageops_redis_sessions_socket_path: /var/run/redis/redis-sessions.socket
 
 # Enable to provision Elasticsearch (or provide host)
 mageops_elasticsearch_create: yes
@@ -978,6 +983,22 @@ magento_core_config_settings_to_remove_default:
   - "smile_elasticsuite_core_base_settings/es_client/servers"
 
 
+# ------------------------------------
+# --------  Magento - Caching --------
+# ------------------------------------
+
+# Whether to use redis for Magento caching
+magento_redis_cache: yes
+
+# If redis is on the same node as app unix sockets can be used for perf boost
+magento_redis_use_local_unix_socket: >-
+  {{
+      mageops_redis_create | default(false)
+      and mageops_redis_host | default('') in [ '127.0.0.1', 'localhost' ]
+      and mageops_redis_socket_path | default(false, true)
+      and not aws_use
+  }}
+
 # ----------------------------------------
 # --------  Magento - PHP Limits  --------
 # ----------------------------------------
@@ -1250,7 +1271,7 @@ nginx_version: "1.10.3"
 nginx_user: "nginx"
 nginx_group: "nginx"
 
-nginx_worker_processes: "{{ ansible_processor_vcpus|default(ansible_processor_count + 1) }}"
+nginx_worker_processes: "{{ ansible_processor_vcpus | default(ansible_processor_cores + 1) | default(2) }}"
 nginx_worker_connections: "1024"
 
 nginx_multi_accept: "off"
@@ -1333,6 +1354,8 @@ elasticsearch_plugins:
 # -------------------------
 
 redis_databases: 4
+redis_port: "{{ mageops_redis_port }}"
+redis_socket_path: "{{ mageops_redis_socket_path }}"
 
 # These are default redis settings, used for the base cache instance
 redis_bind_interface: 0.0.0.0
@@ -1616,6 +1639,7 @@ mageops_packages_tools:
   - nano
   - mc
   - vim
+  - time
 
 # Ops tools
 mageops_packages_ops:

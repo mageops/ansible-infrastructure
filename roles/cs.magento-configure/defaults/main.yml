@@ -25,7 +25,6 @@ magento_install_sample_data: no
 # ----------------------------------------
 
 # Whether to use redis for caching
-magento_redis_cache: yes
 magento_session_max_redis_concurrency: 15
 
 magento_app_etc_config_template: magento_app_etc_config.php.j2
@@ -57,7 +56,7 @@ magento_scd_strategy: quick
 
 # We need a t3.small builder or frequently it will run out of memory
 # So setting the default at 1 upon consideration
-magento_scd_parallel_jobs: 1 # "{{ ansible_processor_vcpus }}"
+magento_scd_parallel_jobs: 1
 magento_scd_excluded_themes: []
 
 # Tip: When using custom themes exclude luma

@@ -1,0 +1,8 @@
+- name: Install netz98-magerun2 from phar archive
+  get_url:
+    dest: /usr/local/bin/magerun
+    url: https://files.magerun.net/n98-magerun2-latest.phar
+    checksum: sha256:https://files.magerun.net/sha256.php?file=n98-magerun2-latest.phar
+    mode: 0755
+    owner: root
+    group: root

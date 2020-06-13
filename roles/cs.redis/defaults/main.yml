@@ -7,18 +7,19 @@ redis_package: redis
 redis_daemon: "redis{% if redis_instance_name %}-{{ redis_instance_name }}{% endif %}"
 
 redis_conf_path: "/etc/{{ redis_daemon }}.conf"
-redis_piddir: "/var/run/redis"
-redis_pidfile_path: "{{ redis_piddir }}/{{ redis_daemon }}.pid"
+redis_run_dir: "/var/run/{{ redis_daemon }}"
+redis_pidfile_path: "{{ redis_run_dir }}/{{ redis_daemon }}.pid"
+redis_socket_path: "{{ redis_run_dir }}/{{ redis_daemon }}.socket"
+redis_socket_mode: '0770'
 
 redis_port: 6379
 redis_bind_interface: 127.0.0.1
-redis_unixsocket: no
 redis_timeout: 300
 
 redis_syslog: no
 redis_loglevel: "notice"
-redis_logdir: /var/log/redis
-redis_logfile: "{{ redis_logdir }}/{{ redis_daemon }}-server.log"
+redis_logdir: /var/log
+redis_logfile: "{{ redis_logdir }}/{{ redis_daemon }}.log"
 
 redis_databases: 16
 redis_maxclients: 512

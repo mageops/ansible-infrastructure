@@ -59,9 +59,23 @@ aws_logs_loggers_default:
         retention: 7
         multiline: yes
         enabled: no
-    php-fpm-error:
-        group_name: "/php-fpm/php-fpm-backend-slow.log"
-        filename: "{{ php_fpm_log_dir_path }}/php-fpm-backend-slow.log"
+    php-fpm-daemon:
+        group_name: "/php-fpm/daemon.log"
+        filename: "/var/log/php-fpm.log"
+        date_format: "[%d-%b-%Y %H:%M:%S]"
+        retention: 7
+        multiline: no
+        enabled: no
+    php-fpm-slow:
+        group_name: "/php-fpm/slow.log"
+        filename: "{{ php_fpm_log_dir_path }}/magento.slow.log"
+        date_format: "[%d-%b-%Y %H:%M:%S]"
+        retention: 7
+        multiline: no
+        enabled: no
+    php-fpm-debug:
+        group_name: "/php-fpm/debug.log"
+        filename: "{{ php_fpm_log_dir_path }}/magento-debug.access.log"
         date_format: "[%d-%b-%Y %H:%M:%S]"
         retention: 7
         multiline: no
@@ -89,14 +103,14 @@ aws_logs_loggers_default:
         enabled: no
     redis-server:
         group_name: "/redis/server.log"
-        filename: "/var/log/redis/redis-server.log"
+        filename: "/var/log/redis.log"
         date_format: "%d %b %H:%M:%S"
         retention: 7
         multiline: no
         enabled: no
     redis-sessions-server:
-        group_name: "/redis/sessions-server.log"
-        filename: "/var/log/redis/redis-sessions-server.log"
+        group_name: "/redis/sessions.log"
+        filename: "/var/log/redis-sessions.log"
         date_format: "%d %b %H:%M:%S"
         retention: 7
         multiline: no

@@ -37,6 +37,7 @@ php_opcache_validate_timestamps: 1
 php_opcache_consistency_checks: 1
 php_opcache_file_update_protection: 2
 
+
 php_opcache_revalidate_path: 1
 php_opcache_revalidate_freq: 0
 

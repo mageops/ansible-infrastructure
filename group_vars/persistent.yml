@@ -8,6 +8,8 @@ efs_mounts: "{{ magento_sftp_basic_efs_mounts + magento_sftp_efs_mounts }}"
 
 varnish_pp_listen_port: "{{ varnish_port }}"
 
+
+
 rabbitmq_virtual_hosts: ["{{ magento_rabbitmq_virtual_host }}"]
 rabbitmq_users:
   - vhost: "{{ magento_rabbitmq_virtual_host }}"

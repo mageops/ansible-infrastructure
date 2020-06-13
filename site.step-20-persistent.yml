@@ -43,6 +43,7 @@
     - role: cs.redis
       redis_instance_name: sessions
       redis_databases: 1
+      redis_socket_path: "{{ mageops_redis_sessions_socket_path }}"
       redis_port: "{{ mageops_redis_sessions_port }}"
       redis_maxmemory_policy: "{{ redis_sessions_maxmemory_policy }}"
       redis_maxmemory: "{{ redis_sessions_maxmemory }}"
