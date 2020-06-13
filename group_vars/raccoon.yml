@@ -47,7 +47,13 @@ php_cli_opcache_file_cache_consistency_checks: 1
 php_display_errors: On
 php_http_request_max_execution_time: 600
 
-
+# services to stop during PHP reinstallation
+php_reinstall_dependent_services:
+    - crond
+    - php-fpm
+    - supervisord
+    - varnish
+    - nginx
 
 elasticsearch_create: yes
 elasticsearch_heap_size: 512m
@@ -103,4 +109,3 @@ mageops_packages_raccoon_node:
   - automake
   # Needed for patching Magento and all else
   - patch
-

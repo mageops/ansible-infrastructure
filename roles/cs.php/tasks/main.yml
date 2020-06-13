@@ -1,6 +1,6 @@
-- name: Install PHP and dependency packages
-  yum:
-    name: >-
+- name: Compute PHP package list
+  set_fact:
+    php_packages: >-
       {{
           (
             php_packages + php_extra_packages | default([])
@@ -8,6 +8,85 @@
               + php_debug_ini_enable | ternary([php_xdebug_package], [])
           ) | unique
       }}
+
+- name: Get the installed package list
+  package_facts:
+    manager: auto
+
+- name: Set fact about current PHP version
+  vars:
+    php_installed_version_full: "{{ ansible_facts.packages[php_core_package][0]['version'] | default(false) }}"
+  set_fact:
+    php_version: "{{ php_version | string }}"
+    php_installed_version_full: >-
+      {{
+          php_installed_version_full | ternary(
+            php_installed_version_full | string,
+            false
+          )
+      }}
+    php_installed_version: >-
+      {{
+          php_installed_version_full | ternary(
+            (php_installed_version_full | default('0.0', true)).split('.')[:2] | join('.'),
+            false
+          )
+      }}
+
+- debug: var=php_version
+- debug: var=php_installed_version
+- debug: var=php_installed_version_full
+
+- name: Set fact about PHP installation mode
+  set_fact:
+    php_install_mode: >-
+      {{
+          php_installed_version_full | ternary(
+            php_version is version(php_installed_version | default('0.0', true), operator='lt') | ternary (
+              'downgrade',
+              'upgrade'
+            ),
+            'install'
+          )
+      }}
+
+- name: Print information about PHP installation
+  debug:
+    msg: |
+      ==================================================
+      ==          PHP installation information        ==
+      ==================================================
+
+      {{ ( '-> ' ~ php_install_mode | upper ~ ' <-' ) | center(50) }}
+
+        {% if php_install_mode in ['upgrade', 'downgrade'] -%}
+        Previous version: {{ php_installed_version }} ({{ php_installed_version_full }})
+        {% endif -%}
+        Requested version: {{ php_version }}
+        Requested packages:
+        {{ php_packages | to_nice_yaml | indent(width=2) }}
+
+      ------------------------------------------------
+
+- name: Upgrade PHP packages
+  yum:
+    name: 'php*'
+    update_cache: yes
+    update_only: yes
+    state: latest
+  when: php_install_mode == 'upgrade'
+
+- name: Downgrade PHP packages
+  yum:
+    name: 'php*'
+    update_cache: yes
+    allow_downgrade: yes
+    state: present
+  when: php_install_mode == 'downgrade'
+
+- name: Ensure requested PHP packages are installed
+  yum:
+    name: "{{ php_packages }}"
     state: present
 
 - name: Add root as required PHP user

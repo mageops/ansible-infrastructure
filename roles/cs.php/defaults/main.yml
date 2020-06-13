@@ -9,6 +9,8 @@ php_packages:
   - php-intl
   - php-opcache
 
+php_core_package: php-common
+
 php_install_fpm_package: no
 php_fpm_package: 'php-fpm'
 

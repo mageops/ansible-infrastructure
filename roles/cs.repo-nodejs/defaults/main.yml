@@ -6,5 +6,5 @@ repo_nodejs_variants:
   - '12'
   - '13'
 repo_nodejs_variants_enabled:
-  - '10'
+  - '12'
 

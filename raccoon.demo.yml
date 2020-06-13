@@ -1,8 +1,6 @@
 - hosts: raccoon
   roles:
     - role: cs.raccoon-cmd
-  vars:
-    # raccoon_project_production_mode: yes
-    raccoon_execute_commands:
-      - project:install:demo
-
+      raccoon_project_production_mode: yes
+      raccoon_execute_commands:
+        - project:install:demo
