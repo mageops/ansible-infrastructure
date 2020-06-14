@@ -6,7 +6,8 @@
     # 3 - Magento/luma
     # 4 - Creativestyle/theme-creativeshop
     # 5 - Creativestyle/theme-demo
-    raccoon_demo_magento_theme_id: 4
+    # Or actually not... On raccoon somehow it's ID 2
+    raccoon_demo_magento_theme_id: 2
     raccoon_project_production_mode: yes
     magento_node_warmup_url_paths:
       - /
