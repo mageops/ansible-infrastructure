@@ -1,0 +1,26 @@
+- name: Install magento warm up daemon script
+  template:
+    src: magento-warm-up.sh
+    dest: /usr/local/bin/magento-warm-up
+    mode: 0755
+
+- name: Install magento warm up daemon systemd config
+  template:
+    src: magento-warm-up.service
+    dest: /etc/systemd/system/magento-warm-up.service
+  register: magento_warm_up_service_file
+
+- name: Instantly reload systemctl daemon
+  when: magento_warm_up_service_file is changed
+  systemd:
+    daemon_reload: yes
+    daemon_reexec: yes
+
+- name: Enable magento warm up
+  service:
+    force: yes
+    enabled: yes
+    state: stopped
+    name: magento-warm-up.service
+
+    

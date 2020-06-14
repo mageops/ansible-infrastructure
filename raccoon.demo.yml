@@ -1,6 +1,17 @@
 - hosts: raccoon
+  vars:
+    # This is how themes looks in a default installation
+    # 1 - Magento/blank
+    # 2 - Magento/backend
+    # 3 - Magento/luma
+    # 4 - Creativestyle/theme-creativeshop
+    # 5 - Creativestyle/theme-demo
+    raccoon_demo_magento_theme_id: 4
+    raccoon_project_production_mode: yes
+    magento_node_warmup_url_paths:
+      - https://demo.magesuite.io/women.html
   roles:
+    - role: cs.magento-node-warmup
     - role: cs.raccoon-cmd
-      raccoon_project_production_mode: yes
       raccoon_execute_commands:
         - project:install:demo

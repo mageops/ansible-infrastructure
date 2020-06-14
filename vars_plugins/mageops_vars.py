@@ -39,16 +39,19 @@ DOCUMENTATION = '''
       - vars_plugin_staging
 '''
 
-import os
 import re
+import os
+from os import environ
 from ansible import constants as C
 from ansible.errors import AnsibleParserError
 from ansible.module_utils._text import to_bytes, to_native, to_text
 from ansible.plugins.vars import BaseVarsPlugin
 from ansible.inventory.host import Host
 from ansible.inventory.group import Group
+from ansible.parsing.vault import is_encrypted_file
 from ansible.utils.vars import combine_vars
 
+CONFIG_SKIP_ENCRYPTED = environ.get('ANSIBLE_MAGEOPS_SKIP_ENCRYPTED_VARS') is not None and environ.get('ANSIBLE_MAGEOPS_SKIP_ENCRYPTED_VARS').lower().strip() in ['1', 'true', 'yes']
 CONFIG_GROUPS = ['all']
 CONFIG_SUBDIR = 'vars'
 CONFIG_TYPES = ['global', 'project']
@@ -62,6 +65,13 @@ def get_entity_name(entity):
         return "group: %s" % (entity.get_name())
 
     return "unknown: %s" % (str(entity))
+
+def is_file_encrypted(filename):
+    with open(filename) as file:
+        is_encrypted = is_encrypted_file(file)
+        file.close()
+
+    return is_encrypted
 
 class VarsModule(BaseVarsPlugin):
     REQUIRES_WHITELIST = False
@@ -107,6 +117,9 @@ class VarsModule(BaseVarsPlugin):
                     for found in found_files:
                         if re.search(r'/(tasks|certs|certificates|files|templates|resources|roles)/', found):
                             continue
+
+                        if CONFIG_SKIP_ENCRYPTED and is_file_encrypted(found):
+                            self._display.v("Encrypted file skip is enabled - skipping: %s" % (found,))
 
                         self._display.vv("Loading MageOps configuration file: %s" % (found))
 
