@@ -1,6 +1,8 @@
 - name: Install Magento (fresh)
   block:
     - name: Install Magento (setup:install)
+      async: 3600
+      poll: 5
       shell: >
         php {{ magento_release_dir }}/bin/magento setup:install \
           '--backend-frontname=admin' \
@@ -27,8 +29,7 @@
   become: true
   become_user: "{{ magento_user }}"
   when: not database_exists
-  async: 3600
-  poll: 5
+
 
 - name: Configure Magento environment (env.php)
   template:
