@@ -27,6 +27,8 @@
   become: true
   become_user: "{{ magento_user }}"
   when: not database_exists
+  async: 3600
+  poll: 5
 
 - name: Configure Magento environment (env.php)
   template:
