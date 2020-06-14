@@ -1271,7 +1271,7 @@ nginx_version: "1.10.3"
 nginx_user: "nginx"
 nginx_group: "nginx"
 
-nginx_worker_processes: "{{ ansible_processor_vcpus | default(ansible_processor_cores + 1) | default(2) }}"
+nginx_worker_processes: "{{ ansible_processor_vcpus | default(ansible_processor_cores | default(1) + 1) }}"
 nginx_worker_connections: "1024"
 
 nginx_multi_accept: "off"
