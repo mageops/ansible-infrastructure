@@ -9,7 +9,8 @@
     raccoon_demo_magento_theme_id: 4
     raccoon_project_production_mode: yes
     magento_node_warmup_url_paths:
-      - https://demo.magesuite.io/women.html
+      - /women.html
+      - /erika-running-short.html
   roles:
     - role: cs.magento-node-warmup
     - role: cs.raccoon-cmd

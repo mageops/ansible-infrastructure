@@ -1,8 +1,7 @@
 magento_node_warmup_host_fake: "{{ magento_hostname }}"
-
 magento_node_warmup_local_port: >-
   {{
-      mageops_varnish_host | default('NA') in ['127.0.0.1', 'localhost'] | ternary(
+      ( ( mageops_varnish_host | default('NA') ) in ['127.0.0.1', 'localhost'] ) | ternary(
         mageops_varnish_port,
         nginx_app_port
       )
@@ -11,7 +10,8 @@ magento_node_warmup_local_port: >-
 magento_node_warmup_url_paths_default:
   - /
   - /checkout/cart/
-  - /{{ magento_admin_path }}
+  - /customer/account/login/
+  - /{{ magento_admin_path }}/
 
 # User-defined
 magento_node_warmup_url_paths: []
