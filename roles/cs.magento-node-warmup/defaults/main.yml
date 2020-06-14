@@ -7,13 +7,11 @@ magento_node_warmup_local_port: >-
       )
   }}
 
-magento_node_warmup_url_paths_default:
+magento_node_warmup_url_paths:
   - /
   - /checkout/cart/
   - /customer/account/login/
   - /{{ magento_admin_path }}/
 
-# User-defined
-magento_node_warmup_url_paths: []
 
 

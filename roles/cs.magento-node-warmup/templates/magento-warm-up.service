@@ -1,8 +1,7 @@
 [Unit]
 Description=Warm Magento Up
 
-After=sysinit.target
-Before=php-fpm.service redis.service elasticsearch.service mysql.service varnish.service
+After=php-fpm.service redis.service elasticsearch.service mysql.service varnish.service
 
 [Service]
 Type=oneshot

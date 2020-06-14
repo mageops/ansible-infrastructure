@@ -9,8 +9,18 @@
     raccoon_demo_magento_theme_id: 4
     raccoon_project_production_mode: yes
     magento_node_warmup_url_paths:
+      - /
+      - /checkout/cart/
+      - /customer/account/login/
+      - /{{ magento_admin_path }}/
       - /women.html
       - /erika-running-short.html
+      - /men.html
+      - /gear.html
+      - /training.html
+      - /sale.html
+      - /fitness-equipment.html
+      - /women/tops-women/jackets-women.html
   roles:
     - role: cs.magento-node-warmup
     - role: cs.raccoon-cmd
