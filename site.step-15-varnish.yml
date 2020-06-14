@@ -25,6 +25,7 @@
       mageops_cli_user_group: "{{ magento_group }}"
       mageops_cli_user_uid: "{{ magento_uid }}"
       mageops_cli_user_gid: "{{ magento_gid }}"
+      mageops_cli_user_umask: "{{ magento_umask }}"
       mageops_cli_user_bashrc_fragments:
         - debug-tunnel
       when: mageops_xdebug_proxy_remote_connection_to_loadbalancer

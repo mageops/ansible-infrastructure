@@ -1,5 +1,6 @@
 - include_tasks: 010-set-permissions.yml
 
+
 - name: Execute Magento setup
   block:
     - include_tasks: 020-check-database.yml

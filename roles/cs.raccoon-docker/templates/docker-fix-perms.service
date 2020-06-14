@@ -1,0 +1,13 @@
+[Unit]
+Description=Fix MageOps App Perms of Docker Bind Mount
+
+After=sysinit.target
+Before=supervisord.service php-fpm.service crond.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/docker-fix-perms
+
+[Install]
+WantedBy=multi-user.target

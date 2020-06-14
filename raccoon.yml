@@ -29,6 +29,9 @@
         - "{{ magento_user }}"
       when: mageops_authorize_local_keys | default(false) and ansible_connection != 'local'
 
+    - role: cs.raccoon-docker
+      when: raccoon_virt == 'docker'
+
   tasks:
     - name: Install composer parallel download plugin
       composer:

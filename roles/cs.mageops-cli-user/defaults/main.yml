@@ -1,5 +1,6 @@
 mageops_cli_user_group: "{{ mageops_cli_user_name }}"
 mageops_cli_user_groups: []
+mageops_cli_user_umas: '0022'
 mageops_cli_user_authorize_local_key: no
 mageops_cli_user_authorized_keys: []
 mageops_cli_user_ssh_config: no

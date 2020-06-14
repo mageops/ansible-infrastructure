@@ -1,0 +1,24 @@
+- name: Install docker perm fix daemon script
+  template:
+    src: docker-fix-perms.sh
+    dest: /usr/local/bin/docker-fix-perms
+    mode: 0755
+
+- name: Install docker perm fix daemon systemd config
+  template:
+    src: docker-fix-perms.service
+    dest: /etc/systemd/system/docker-fix-perms.service
+  register: docker_fix_perms_service_file
+
+- name: Instantly reload systemctl daemon
+  when: docker_fix_perms_service_file is changed
+  systemd:
+    daemon_reload: yes
+    daemon_reexec: yes
+
+- name: Enable perm fix daemon
+  service:
+    force: yes
+    enabled: yes
+    state: stopped
+    name: docker-fix-perms.service

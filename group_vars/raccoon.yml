@@ -13,8 +13,13 @@ raccoon_live_mode: yes
 raccoon_nested_provisioning: no
 
 # The type of virtualization/containerization solution used to run raccoon
-raccoon_virt: virtualbox
-
+raccoon_virt: >-
+  {{
+      ansible_connection | default('local') == 'docker' or (
+          ansible_virtualization_role | default('host') == 'guest'
+          and  ansible_virtualization_type | default('NA') in ['docker', 'podman']
+      ) | ternary('docker', 'virtualbox')
+  }}
 # Install tools helpful during development
 mageops_install_development_tools: yes
 
@@ -65,6 +70,8 @@ redis_create: yes
 redis_maxmemory: 150M
 
 mageops_mysql_create: yes
+mageops_app_umask: '0002'
+
 mysql_public_root_access: yes
 mysql_mariadb_flavor: yes
 

@@ -13,5 +13,13 @@
     name: "{{ magento_user }}"
     groups: "{{ magento_redis_group | default('redis') }}"
     append: yes
+  become: yes
+  become_user: root
 
-
+# See: https://devdocs.magento.com/guides/v2.4/install-gde/install/post-install-umask.html
+- name: Create Magento umask configuration file
+  copy:
+    dest: "{{ magento_release_dir }}/magento_umask"
+    content: "{{ '%03d' | format(php_fpm_umask | default('022') | int,) }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"

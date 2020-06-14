@@ -1,3 +1,4 @@
+umask {{ '%04d' | format(mageops_cli_user_mask | default('0022') | int,) }}
 if [ -f ~/.bashrc ] ; then
 	. ~/.bashrc
 fi
