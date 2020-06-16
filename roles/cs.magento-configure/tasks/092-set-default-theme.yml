@@ -1,0 +1,70 @@
+- name: Get list of Magento Themes
+  command:
+    argv:
+      - "mysql"
+      - "{{ mageops_app_mysql_db }}"
+      - "-h{{ mageops_mysql_host }}"
+      - "-u{{ mageops_app_mysql_user }}"
+      - "-p{{ mageops_app_mysql_pass }}"
+      - "-e{{ magento_json_theme_list_sql_query }}"
+      - "--raw"
+      - "--batch"
+      - "--skip-column-names"
+  changed_when: false
+  vars:
+    magento_json_theme_list_sql_query: >-
+      SELECT CONCAT("{", GROUP_CONCAT(theme), "}") FROM
+        (
+          SELECT CONCAT(
+            "\"", LOWER(theme_path), "\"", ":",
+              "{",
+                  "\"id\":", theme_id, ",",
+                  "\"name\":", "\"", theme_title, "\","
+                  "\"path\":", "\"", theme_path, "\""
+              "}") AS theme FROM theme
+        ) AS themes
+  register: magento_theme_list_query
+
+- name: Set the list of Magento Themes
+  set_fact:
+    magento_themes: "{{ magento_theme_list_query.stdout | from_json }}"
+
+- name: Print list of Magento themes found
+  debug:
+    msg: |
+      ================================
+      ==  Installed Magento Themes  ==
+      ================================
+
+      {{ magento_themes | to_nice_yaml }}
+
+- name: Inform about missing default theme
+  when: magento_default_theme_path | default(false, true) and magento_default_theme_path | lower not in magento_themes
+  debug:
+    msg: |
+      =========================================
+      ==       WARNING! Theme not found!     ==
+      =========================================
+
+      Missing theme: {{ magento_default_theme_path }}
+
+      The default theme is not installed!
+
+      Skipping default theme switch. You will
+      have to switch the theme yourself later!
+
+- name: Set the default Magento theme id in Core Config
+  when: magento_default_theme_path | default(false, true) and magento_default_theme_path | lower in magento_themes
+  mysql_query:
+    name: "{{ mageops_app_mysql_db }}"
+    table: core_config_data
+    login_host: "{{ mageops_mysql_host }}"
+    login_user: "{{ mageops_app_mysql_user }}"
+    login_password: "{{ mageops_app_mysql_pass }}"
+    identifiers:
+      path: "design/theme/theme_id"
+    values:
+      value: "{{ magento_themes[magento_default_theme_path | lower]['id'] }}"
+    defaults:
+      scope_id: 0
+      scope: "default"

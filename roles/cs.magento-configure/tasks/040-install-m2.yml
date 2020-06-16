@@ -1,31 +1,53 @@
 - name: Install Magento (fresh)
   block:
-    - name: Install Magento (setup:install)
-      async: 3600
-      poll: 5
-      shell: >
-        php {{ magento_release_dir }}/bin/magento setup:install \
-          '--backend-frontname=admin' \
-          '--session-save=db' \
-          '--db-host={{ mageops_mysql_host }}' \
-          '--db-user={{ mageops_app_mysql_user }}' \
-          '--db-password={{ mageops_app_mysql_pass }}' \
-          '--db-name={{ mageops_app_mysql_db }}' \
-          '--use-rewrites=1' \
-          '--admin-user={{ magento_admin_user_username }}' \
-          '--admin-password={{ magento_admin_user_password }}' \
-          '--admin-email={{ magento_admin_user_email }}' \
-          '--admin-firstname={{ magento_admin_user_firstname }}' \
-          '--admin-lastname={{ magento_admin_user_lastname }}' \
-          '--language={{ magento_language }}' \
-          '--currency={{ magento_currency }}' \
-          '--key={{ magento_crypt_key }}' \
-          {% if elasticsuite_version is defined and elasticsuite_version is version_compare('2.5', '>=') -%}
-            '--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}' \
-          {% endif %}
-          '--base-url={{ magento_base_url }}'
+    - name: "[Async] Install Magento (setup:install)"
+      command: "{{ args_base + args_options_core + args_options_base_url + args_options_elasticsuite }}"
       args:
         chdir: "{{ magento_deployment_dir }}"
+      vars:
+        args_base: ["php", "{{ magento_release_dir }}/bin/magento setup:install"]
+        args_options_core:
+          - "--backend-frontname=admin"
+          - "--session-save=db"
+          - "--db-host={{ mageops_mysql_host }}"
+          - "--db-user={{ mageops_app_mysql_user }}"
+          - "--db-password={{ mageops_app_mysql_pass }}"
+          - "--db-name={{ mageops_app_mysql_db }}"
+          - "--use-rewrites=1"
+          - "--admin-user={{ magento_admin_user_username }}"
+          - "--admin-password={{ magento_admin_user_password }}"
+          - "--admin-email={{ magento_admin_user_email }}"
+          - "--admin-firstname={{ magento_admin_user_firstname }}"
+          - "--admin-lastname={{ magento_admin_user_lastname }}"
+          - "--language={{ magento_language }}"
+          - "--currency={{ magento_currency }}"
+          - "--key={{ magento_crypt_key }}"
+        args_options_base_url: >-
+            {{
+                magento_base_url | default(false, true) | ternary(
+                  ["--base-url={{ magento_base_url }}"],
+                  []
+                )
+            }}  
+        args_options_elasticsuite: >-
+          {{
+              elasticsuite_version is defined and elasticsuite_version is version_compare('2.5', '>=') | ternary(
+                ["--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}"],
+                []
+              )
+          }}
+      async: "{{ magento_install_timeout | int }}"
+      poll: 0
+      register: magento_install
+    
+    - name: "[Async Poll] Wait for Magento Install to finish"
+      async_status:
+        jid: "{{ magento_install.ansible_job_id }}"
+      register: magento_install_async_poll
+      until: magento_install_async_poll.finished
+      delay: 10
+      retries: "{{ ( magento_install_timeout | int / 10 ) | int + 1 }}"
+
   become: true
   become_user: "{{ magento_user }}"
   when: not database_exists

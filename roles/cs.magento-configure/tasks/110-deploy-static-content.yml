@@ -26,7 +26,7 @@
 
       ============================================
 
-- name: Deploy static content for each language separately (Magento 2.1 and 2.2)
+- name: "[Magento 2.1/2.2 - Separate Languages] Static Content Deploy (setup:static-content:deploy)"
   become: yes
   become_user: "{{ magento_user }}"
   command: >
@@ -44,19 +44,32 @@
   register: magento22_scd
   when: magento_version is version('2.3', '<')
 
-- name: Deploy static content (Magento 2.3+)
-  become: yes
-  become_user: "{{ magento_user }}"
-  command: >
-    php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
-      {% for theme in magento_scd_excluded_themes -%}
-        --exclude-theme "{{ theme }}" \
-      {% endfor %}
-      -s "{{ magento_scd_strategy }}" \
-      -j {{ magento_scd_parallel_jobs }} \
-      {{ magento_scd_languages | join(' ') }}
-  register: magento_scd
+- name: "[Async] [Magento 2.3+] SCD"
   when: magento_version is version('2.3', '>=')
+  block:
+    - name: "[Async] [Magento 2.3+] Static Content Deploy (setup:static-content:deploy)"
+      become: yes
+      become_user: "{{ magento_user }}"
+      command: >
+        php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+          {% for theme in magento_scd_excluded_themes -%}
+            --exclude-theme "{{ theme }}" \
+          {% endfor %}
+          -s "{{ magento_scd_strategy }}" \
+          -j {{ magento_scd_parallel_jobs }} \
+          --max-execution-time "{{ magento_scd_timeout }}" \
+          {{ magento_scd_languages | join(' ') }}
+      register: magento_scd
+      async: "{{ magento_scd_timeout | int }}"
+      poll: 0
+
+    - name: "[Async Poll][Magento 2.3+] Wait for Static Content Deploy to finish"
+      async_status:
+        jid: "{{ magento_scd.ansible_job_id }}"
+      register: magento_scd_async_poll
+      until: magento_scd_async_poll.finished
+      delay: 10
+      retries: "{{ ( magento_scd_timeout | int / 10 ) | int + 1 }}"
 
 - name: Set information about Magento SCD (Magento 2.1 and 2.2)
   when: magento_version is version('2.3', '>=')

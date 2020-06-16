@@ -4,6 +4,12 @@ magento_core_config_settings_to_remove: []
 mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: 80
 
+# If defined and not null then `design/theme/theme_id` configuration item
+# will be set to the `theme_id` corresponding to the supolied `theme_path`
+# in `theme` table just after `setup:upgrade`. If the theme is not found
+# then nothing will be adjusted.
+magento_default_theme_path: ~
+
 # Root directory where releases, shared files are kept
 magento_deployment_dir:    "{{ mageops_app_web_dir }}"
 
@@ -19,6 +25,12 @@ magento_static_cache_dir:  "{{ magento_release_dir }}/pub/static/_cache/"
 magento_node_warmup_script_path: /bin/node-warmup.sh
 
 magento_install_sample_data: no
+
+# Max time for setup:install to complete in seconds (2hrs default)
+magento_install_timeout: 7200
+
+# Max time for setup:upgrade to complete in seconds (2hrs default)
+magento_upgrade_timeout: 7200
 
 # ----------------------------------------
 # --------  Magento Redis Caching --------
@@ -66,5 +78,8 @@ magento_scd_excluded_themes: []
 magento_scd_languages:
   - de_DE
   - en_US
+
+# Max time for SCD to complete in seconds (2hrs default)
+magento_scd_timeout: 7200
 
 

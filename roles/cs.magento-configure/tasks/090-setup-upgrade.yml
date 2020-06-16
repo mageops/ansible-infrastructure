@@ -1,4 +1,15 @@
-- name: Run setup:upgrade
+- name: "[Async] Upgrade Magento (setup:upgrade)"
   become: yes
   become_user: "{{ magento_user }}"
   command: "php {{ magento_release_dir }}/bin/magento setup:upgrade"
+  register: magento_upgrade
+  async: "{{ magento_upgrade_timeout | int }}"
+  poll: 0
+
+- name: "[Async Poll] Wait for Magento Upgrade to finish"
+  async_status:
+    jid: "{{ magento_upgrade.ansible_job_id }}"
+  register: magento_upgrade_async_poll
+  until: magento_upgrade_async_poll.finished
+  delay: 10
+  retries: "{{ ( magento_upgrade_timeout | int / 10 ) | int + 1 }}"
