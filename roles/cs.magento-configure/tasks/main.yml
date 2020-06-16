@@ -1,19 +1,20 @@
 
 - import_tasks: 000-prepare-runtime-config.yml
+- import_tasks: 010-set-permissions.yml
 
 - name: Execute Magento setup
   block:
-    - include_tasks: 010-set-permissions.yml
     - include_tasks: 020-check-database.yml
     - include_tasks: 030-setup-elasticsuite.yml
       when: mageops_elasticsearch_host is defined and mageops_elasticsearch_host != ""
     - include_tasks: 035-clean-old-static-content.yml
     - include_tasks: 037-wait-for-services.yml
+      when: magento_configure_for_production
     - include_tasks: 040-install-m2.yml
     - name: Set up new code
       block:
-        # - include_tasks: 050-install-sample-data.yml
-        #   when: magento_install_sample_data
+        - include_tasks: 050-install-sample-data.yml
+          when: magento_install_sample_data
         - include_tasks: 060-flush-cache.yml
         - include_tasks: 070-setup-modules.yml
         - include_tasks: 080-configure-integrations.yml
@@ -21,11 +22,14 @@
         - include_tasks: 092-set-default-theme.yml
           when: magento_default_theme_path | default(false, true)
         - include_tasks: 095-enable-all-caches.yml
+          when: magento_configure_for_production
         - include_tasks: 100-set-deploy-mode.yml
         - include_tasks: 110-deploy-static-content.yml
-          when: not magento_scd_skip
+          when: not magento_scd_skip and magento_configure_for_production
         - include_tasks: 060-flush-cache.yml
+          when: magento_configure_for_production
         - include_tasks: 120-optimize-autoload.yml
+          when: magento_configure_for_production
         - include_tasks: 140-install-extra-scripts.yml
       when: magento_configure_new_release
   become: yes

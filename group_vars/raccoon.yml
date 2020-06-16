@@ -8,6 +8,10 @@ mageops_secure_site: no
 # or a base, distributable container/vm is being provisioned
 raccoon_live_mode: yes
 
+# If true then the full production-mode configuration will be performed
+# with SCD and other production-mode specific tasks and failsafes.
+raccoon_project_production_mode: no
+
 # Whether the provisioning is being ran inside the virtualized (or containerized)
 # environment with local connection or executed remotely via SSH/docker exec
 raccoon_nested_provisioning: no
@@ -86,9 +90,8 @@ mageops_redis_host: 127.0.0.1
 mageops_redis_sessions_host: 127.0.0.1
 mageops_rabbitmq_host: 127.0.0.1
 
-varnish_standalone: false
-
-magento_mode: default
+magento_mode: "{{ raccoon_project_production_mode | ternary('production', 'default') }}"
+magento_configure_for_production: "{{ raccoon_project_production_mode }}"
 magento_redis_cache: yes
 magento_cron_disabled: yes
 magento_nginx_rewrite_static_assets_version: yes

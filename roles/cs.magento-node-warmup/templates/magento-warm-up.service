@@ -3,6 +3,7 @@ Description=Warm Magento Up
 
 After=php-fpm.service redis.service elasticsearch.service mysql.service varnish.service
 
+
 [Service]
 Type=oneshot
 RemainAfterExit=yes

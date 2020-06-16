@@ -1,3 +1,22 @@
+- name: Force production Magento mode override
+  when: magento_configure_for_production and magento_mode != 'production' 
+  block:
+    - name: Inform about Magento production mode override
+      debug:
+        msg: |
+          ===================================================
+          ==  Warning! Incompatible Magento Mode Override  ==
+          ===================================================
+
+          Incompatible `magento_mode` value: {{ magento_mode }}
+
+          Setting `magento_configure_for_production` is enabled
+          which will force override to 'production' mode.
+
+    - name: Force production Magento mode configuration variable
+      set_fact:
+        magento_mode: production
+
 # This step shall gather, normalize and extend any configuration
 # that should be ready for the next ones.
 - name: Configure magepack JS bundling task hook

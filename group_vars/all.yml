@@ -826,6 +826,9 @@ magento_cron_observer_relative_path: vendor/magento/module-cron/Observer/Process
 # --------  Magento Deploy  --------
 # ----------------------------------
 
+# If true then the full production-mode configuration will be performed
+# with SCD and other production-mode specific tasks and failsafes.
+magento_configure_for_production: yes
 
 # Magento commands that should be always executed as the last post-deploy step
 # on one of the *new* web-nodes (created from the AMI being deployed).

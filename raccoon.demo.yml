@@ -1,6 +1,7 @@
 - hosts: raccoon
   vars:
     raccoon_project_production_mode: yes
+    raccoon_demo_magento_catalog_image_resize: no
     magento_default_theme_path: creativestyle/theme-creativeshop
     magento_node_warmup_url_paths:
       - /
