@@ -71,34 +71,32 @@
       delay: 10
       retries: "{{ ( magento_scd_timeout | int / 10 ) | int + 1 }}"
 
-- name: Set information about Magento SCD (Magento 2.1 and 2.2)
-  when: magento_version is version('2.3', '>=')
-  set_fact:
-    magento_scd_duration: "{{ magento_scd.delta }}"
-    magento_scd_command: "{{ magento_scd.cmd | join(' ') }}"
-    magento_scd_output: "{{ magento_scd.stdout }}"
+    - name: Set information about Magento SCD (Magento 2.1 and 2.2)
+      set_fact:
+        magento_scd_duration: "{{ magento_scd_async_poll.delta | default(-1) }}"
+        magento_scd_command: "{{ magento_scd_async_poll.cmd | join(' ') }}"
+        magento_scd_output: "{{ magento_scd_async_poll.stdout }}"
 
-- name: Show static content deployment logs
-  when: magento_version is version('2.3', '>=')
-  debug:
-    msg: |
-      ============================================
-      ==========  Magento SCD Complete   =========
-      ============================================
+    - name: Show static content deployment logs
+      debug:
+        msg: |
+          ============================================
+          ==========  Magento SCD Complete   =========
+          ============================================
 
-      ----------------  Duration  ----------------
+          ----------------  Duration  ----------------
 
-                    {{ magento_scd_duration }}
+                        {{ magento_scd_duration }}
 
-      ----------------  Command  -----------------
+          ----------------  Command  -----------------
 
-      {{ magento_scd_command }}
+          {{ magento_scd_command }}
 
-      ----------------  Output  ------------------
+          ----------------  Output  ------------------
 
-      {{ magento_scd_output }}
+          {{ magento_scd_output }}
 
-      ============================================
+          ============================================
 
 - name: Execute post static-content deploy containerized tasks
   block:

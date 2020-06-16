@@ -4,6 +4,8 @@ magento_core_config_settings_to_remove: []
 mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: 80
 
+magento_configure_for_production: yes
+
 # If defined and not null then `design/theme/theme_id` configuration item
 # will be set to the `theme_id` corresponding to the supolied `theme_path`
 # in `theme` table just after `setup:upgrade`. If the theme is not found
