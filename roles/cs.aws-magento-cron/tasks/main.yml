@@ -27,6 +27,7 @@
         name: magento-cron-aws
         state: stopped
         enabled: no
+      ignore_errors: yes
 
     - name: Remove files
       file:
