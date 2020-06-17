@@ -1,3 +1,10 @@
+# Warning! Never set a password for production servers although they 
+# have SSH password-based login disabled anyway. This is here only
+# for convenience on local development machines which have password
+# login enabled only for local, trusted networks.
+# Note: You have to crypt the value, plaintext password will not work!
+# See: https://docs.ansible.com/ansible/latest/reference_appendices/faq.html#how-do-i-generate-encrypted-passwords-for-the-user-module
+mageops_cli_user_crypted_password: ~
 mageops_cli_user_group: "{{ mageops_cli_user_name }}"
 mageops_cli_user_groups: []
 mageops_cli_user_umas: '0022'

@@ -1,2 +1,6 @@
+- name: Install Bash Tools
+  import_tasks: tools/bash.yml
+
 - name: Configure nano editor
   import_tasks: tools/nano.yml
+

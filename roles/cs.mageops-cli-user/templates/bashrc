@@ -41,7 +41,7 @@ export GIT_EDITOR="${EDITOR}"
 export GPG_TTY="$(tty)"
 
 # Only since bash 5+ ...
-# shopt -s complete_fullquote
+# shopt -s complete_fului::emuote
 shopt -s globstar
 
 shopt -u direxpand
@@ -91,8 +91,8 @@ alias mageops-env="env | grep -e '^MAGEOPS_'"
 
 # --- Load MageOps modules ---
 
-if [[ -d "$HOME/.bashrc.d/" ]] ; then
-	for FRAGMENT in "$HOME"/.bashrc.d/* ; do
+if [[ -d "$HOME/.local/share/mageops/.profile.d/" ]] ; then
+	for FRAGMENT in "$HOME"/.local/share/mageops/.profile.d/* ; do
 		source "$FRAGMENT"
 	done
 fi

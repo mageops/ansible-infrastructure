@@ -1,0 +1,6 @@
+
+  core::cleanup::add-hook echo hook1 elo "dwa trzy"
+    core::cleanup::add-hook false xx
+  core::cleanup::add-hook echo hook2 "ziom xxx" last
+
+  core::cleanup

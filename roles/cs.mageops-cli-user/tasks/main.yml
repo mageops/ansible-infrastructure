@@ -12,6 +12,7 @@
     group: "{{ mageops_cli_user_group | default(omit) }}"
     groups: "{{ mageops_cli_user_groups | default(omit) }}"
     home: "{{ mageops_cli_user_home | default(omit) }}"
+    password: "{{ mageops_cli_user_crypted_password | default(omit, true) }}"
     create_home: yes
     shell: /bin/bash
     ssh_key_bits: 2048
@@ -40,14 +41,21 @@
     owner: "{{ mageops_cli_user_name }}"
     group: "{{ mageops_cli_user_group }}"
   loop:
-    - .bashrc.d
+    - .mageops
+    - .raccoon
     - .local
     - .local/bin
+    - .local/var
+    - .local/var/run
+    - .local/var/run/mageops
+    - .local/share
+    - .local/share/mageops
+    - .local/share/mageops/.profile.d
 
 - name: Install user's bashrc fragments
   template:
-    src: "bashrc.d/{{ item }}.bash"
-    dest: "~{{ mageops_cli_user_name }}/.bashrc.d/{{ item }}.sh"
+    src: "profile.d/{{ item }}.bash"
+    dest: "~{{ mageops_cli_user_name }}/.local/share/mageops/.profile.d/{{ item }}.sh"
     owner: "{{ mageops_cli_user_name }}"
     group: "{{ mageops_cli_user_group }}"
   loop: "{{ mageops_cli_user_bashrc_fragments_default + mageops_cli_user_bashrc_fragments }}"

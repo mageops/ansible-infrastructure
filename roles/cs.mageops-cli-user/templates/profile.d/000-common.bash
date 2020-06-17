@@ -34,7 +34,7 @@ function mageops-sys-status() {
 
     __mageops__echo-header "Memory Top"
 
-    mageops__top-mem | __mageops__prefix-lines
+    mageops-top-mem | __mageops__prefix-lines
 
     __mageops__echo-header "CPU"
 
@@ -46,7 +46,7 @@ function mageops-sys-status() {
 
     __mageops__echo-header "CPU Top"
 
-    mageops__top-cpu | __mageops__prefix-lines
+    mageops-top-cpu | __mageops__prefix-lines
 }
 
 function mageops-top-cpu() {

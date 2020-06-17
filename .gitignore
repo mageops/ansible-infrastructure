@@ -10,6 +10,8 @@
 /vars/project/*
 !/vars/README.md
 
+/bash_tools/
+
 *.pyc
 __pycache__/
 *.retry

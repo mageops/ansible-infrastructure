@@ -1,8 +1,28 @@
-- name: Install shell locale configuration file
+- name: Create MageOps configuration directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /etc/mageops
+    - /etc/mageops/info.d
+    - /usr/local/share/mageops
+    - /var/lib/mageops
+
+- name: Install MageOps custom profile.d fragments
   template:
-    src: "{{ item }}"
+    src: "profile.d/{{ item }}"
     dest: "/etc/profile.d/{{ item }}"
     mode: 0755
   loop:
     - 001-mageops-locale.sh
     - 002-mageops-env.sh
+    - 003-mageops-info.sh
+
+- name: Install MageOps env info.d fragments
+  template:
+    src: "info.d/{{ item }}"
+    dest: "/etc/mageops/info.d/{{ item }}"
+    mode: 0755
+  loop:
+    - 001-basic.sh

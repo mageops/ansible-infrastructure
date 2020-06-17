@@ -3,3 +3,4 @@ aws_lambda_cloudfront_deploy_package_url: "https://github.com/mageops/aws-lambda
 aws_lambda_cloudfront_deploy_package_path: "{{ mageops_ansible_temp_dir }}/cloudfront-lambda-deploy-package-1.2.0.zip"
 
 aws_cloudfront_lambda_region: "us-east-1"
+

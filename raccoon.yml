@@ -16,7 +16,17 @@
     - role: cs.unison-server
     - role: cs.raccoon-sudo
     - role: cs.mageops-cli-user
+      mageops_cli_user_name: "{{ magento_user }}"
+      mageops_cli_user_crypted_password: "{{ raccoon_app_user_crypted_password }}"
+      mageops_cli_user_group: "{{ magento_group }}"
+      mageops_cli_user_uid: "{{ magento_uid }}"
+      mageops_cli_user_gid: "{{ magento_gid }}"
+      mageops_cli_user_umask: "{{ magento_umask }}"
+      mageops_cli_user_bashrc_fragments:
+        - magento
+    - role: cs.mageops-cli-user
       mageops_cli_user_name: root
+      mageops_cli_user_crypted_password: "{{ raccoon_root_user_crypted_password }}"
       mageops_cli_user_bashrc_fragments:
         - magento-root
         - elasticsearch
