@@ -25,5 +25,5 @@ done
 
 echo "[$(date -Iseconds)] [WARMUP] Finished" >> /tmp/magento-warm-up.log
 
-echo -e '[INFO] System Boot Magento Full Page Cache Warmup has been completed\n\n$(cat /tmp/magento-warm-up.log)\n' | wall -n
+echo -e "[INFO] System Boot Magento Full Page Cache Warmup has been completed\n\n$(cat /tmp/magento-warm-up.log)\n" | wall -n
 

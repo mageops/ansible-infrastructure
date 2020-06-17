@@ -22,4 +22,11 @@
     src: "{{ mageops_cli_bash_tools_local_src_dir }}/"
     dest: "{{ mageops_cli_bash_tools_dir }}/"
   
+- name: Install MageOps Bash Tools profile.d fragments
+  template:
+    src: "profile.d/{{ item }}"
+    dest: "/etc/profile.d/{{ item }}"
+    mode: 0755
+  loop:
+    - 000-mageops-bash-tools.sh
 
