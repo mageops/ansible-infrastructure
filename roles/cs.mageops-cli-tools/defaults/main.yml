@@ -1,12 +1,5 @@
-mageops_cli_bash_tools_version: 0.2.0
+mageops_cli_bash_tools_version: 0.2.1
 mageops_cli_bash_tools_release_url: "https://github.com/mageops/bash-tools/archive/{{ mageops_cli_bash_tools_version }}.tar.gz"
 mageops_cli_bash_tools_local_src_dir: "{{ playbook_dir }}/bash_tools"
 mageops_cli_bash_tools_dir: /usr/local/share/mageops/bash
 mageops_cli_bash_lib_entrypoint: "{{ mageops_cli_bash_tools_dir }}/lib/_lib.bash"
-
-- name: Download lambda deploy packages
-  get_url:
-    url: "{{ aws_lambda_cloudfront_deploy_package_url }}"
-    dest: "{{ aws_lambda_cloudfront_deploy_package_path }}"
-
-aws_lambda_cloudfront_deploy_package_path: "{{ mageops_ansible_temp_dir }}/cloudfront-lambda-deploy-package-1.2.0.zip"
