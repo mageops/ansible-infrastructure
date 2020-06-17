@@ -19,16 +19,16 @@ raccoon_nested_provisioning: no
 # Note: SSH login via password is enabled only for local, trusted networks.
 raccoon_app_user_crypted_password: >-
   {{ 
-      mageops_raccoon_app_user_password | default(false, true) | ternary(
-        mageops_raccoon_app_user_password | password_hash('sha512', mageops_raccoon_app_user_password), 
+      raccoon_app_user_password | default(false, true) | ternary(
+        raccoon_app_user_password | password_hash('sha512', raccoon_app_user_password), 
         null
       )
   }}
 
 raccoon_root_user_crypted_password: >-
   {{ 
-      mageops_raccoon_root_user_password | default(false, true) | ternary(
-        mageops_raccoon_root_user_password | password_hash('sha512', mageops_raccoon_root_user_password), 
+      raccoon_root_user_password | default(false, true) | ternary(
+        raccoon_root_user_password | password_hash('sha512', raccoon_root_user_password), 
         null
       )
   }}

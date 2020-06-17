@@ -40,7 +40,7 @@ HTTPS hosts: {{ https_termination_hosts | map(attribute='servername') | join(', 
 
 mageops_public_ip_v4_api_ur
 
-{{ mageops_raccoon_login_info_extra | default('') }}
+{{ raccoon_login_info_extra | default('') }}
 ENDINFO
 
 magento_release_dir
