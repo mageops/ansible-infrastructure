@@ -5,7 +5,7 @@
       args:
         chdir: "{{ magento_deployment_dir }}"
       vars:
-        args_base: ["php", "{{ magento_release_dir }}/bin/magento setup:install"]
+        args_base: ["php", "{{ magento_release_dir }}/bin/magento", "setup:install"]
         args_options_core:
           - "--backend-frontname=admin"
           - "--session-save=db"
