@@ -1,7 +1,8 @@
 - name: Install Magento (fresh)
   block:
     - name: "[Async] Install Magento (setup:install)"
-      command: "{{ args_base + args_options_core + args_options_base_url + args_options_elasticsuite }}"
+      command: 
+        argv: "{{ args_base + args_options_core + args_options_base_url + args_options_elasticsuite }}"
       args:
         chdir: "{{ magento_deployment_dir }}"
       vars:
