@@ -33,7 +33,7 @@
         args_options_elasticsuite: >-
           {{
               elasticsuite_version is defined and elasticsuite_version is version_compare('2.5', '>=') | ternary(
-                ["--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}"],
+                ["--es-hosts=" ~ mageops_elasticsearch_host ~ ":" ~  elasticsearch_http_port],
                 []
               )
           }}
