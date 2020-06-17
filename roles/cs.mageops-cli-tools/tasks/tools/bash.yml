@@ -1,4 +1,13 @@
-- name: "Install MageOps bash tools (from tarball {{ mageops_cli_bash_tools_url }})"
+- name: Create MageOps Bash Tools Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+    recurse: yes
+  loop:
+    - "{{ mageops_cli_bash_tools_dir }}"
+
+- name: "Install MageOps Bash Tools (from tarball {{ mageops_cli_bash_tools_url }})"
   when: mageops_cli_bash_tools_local_src_dir is not exists
   unarchive:
     src: "{{ mageops_cli_bash_tools_release_url }}"
