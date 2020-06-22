@@ -1,0 +1,6 @@
+# Disable compression for css and js files to prevent chunked response encodig
+# We need content-length in response headers to validate that we can safely cache
+# this resource forever
+if (bereq.url ~ "^/(pub/)?static/.*\.(css|js)$") {
+    set bereq.http.Accept-Encoding = "identity";
+}
