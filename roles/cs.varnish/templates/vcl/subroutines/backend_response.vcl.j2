@@ -29,6 +29,7 @@ if (bereq.url ~ "^/(pub/)?static/.*\.(css|js)$"
     set beresp.http.Cache-Control = "no-cache";
     set beresp.ttl = 0s;
     set beresp.uncacheable = true;
+    set beresp.do_gzip = true;
     return (deliver);
 }
 
