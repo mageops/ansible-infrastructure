@@ -12,5 +12,4 @@
       - "{{ nginx_language_redirect_global_conf_path }}"
 
 - name: Configure redirect with the selected style
-  when: nginx_language_redirect_style == 'domain'
   import_tasks: "redirect-style/{{ nginx_language_redirect_style }}.yml"
