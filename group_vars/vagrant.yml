@@ -61,10 +61,8 @@ php_cli_opcache_file_cache_consistency_checks: 1
 php_display_errors: On
 php_http_request_max_execution_time: 600
 
-varnish_host: 127.0.0.1
-varnish_port: 8080
-varnish_backend_port: 80
-varnish_standalone: false
+
+
 
 mysql_public_root_access: yes
 mysql_mariadb_flavor: yes
@@ -76,6 +74,11 @@ mageops_mysql_host: 127.0.0.1
 mageops_redis_host: 127.0.0.1
 mageops_redis_sessions_host: 127.0.0.1
 mageops_elasticsearch_host: 127.0.0.1
+mageops_varnish_host: 127.0.0.1
+mageops_varnish_port: 8080
+mageops_varnish_backend_port: "{{ nginx_app_port }}"
+
+varnish_standalone: false
 
 magento_mode: default
 magento_redis_cache: yes
