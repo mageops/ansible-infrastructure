@@ -1,4 +1,4 @@
-https_termination_varnish_upstream: "127.0.0.1:{{ varnish_port | default(80) }}"
+https_termination_upstream: "127.0.0.1:{{ varnish_port | default(80) }}"
 https_termination_proxy_read_timeout: 90
 https_termination_hide_varnish: yes
 https_termination_nginx_extra_logging_conf_file: "{{ nginx_confd_dir }}/000-logging-extra.conf"
@@ -9,6 +9,9 @@ https_termination_csr_dir: "{{ https_termination_ssl_dir }}/csr"
 https_termination_letsencrypt_privkey_path: "{{ https_termination_private_dir }}/letsencrypt.pem"
 https_termination_letsencrypt_challenge_dir: .well-known
 https_termination_letsencrypt_challenge_root: "{{ nginx_www_dir }}/letsencrypt/challenge"
+
+# The max-age parameter of the Strict-Transport-Security header
+https_termination_sts_max_age: 63072000
 
 # Testing endpoint
 # https_termination_letsencrypt_acme_directory: https://acme-staging.api.letsencrypt.org/directory

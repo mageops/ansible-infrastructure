@@ -15,7 +15,7 @@
     ssl_session_timeout 1d;
     ssl_session_cache shared:mageops:20m;
     ssl_session_tickets off;
-    add_header Strict-Transport-Security "max-age=63072000" always;
+    add_header Strict-Transport-Security "max-age={{ https_termination_sts_max_age }}" always;
 
     ssl_certificate {{ https_termination_certificate_dir }}/{{ vhost.name }}.cer;
     ssl_certificate_key {{ https_termination_private_dir }}/{{ vhost.name }}.pem;
@@ -80,7 +80,7 @@ server {
             }
         {% endfor %}
         
-        proxy_pass http://{{ https_termination_varnish_upstream }};
+        proxy_pass http://{{ https_termination_upstream }};
 
         proxy_redirect off;
         proxy_set_header Host $host;
