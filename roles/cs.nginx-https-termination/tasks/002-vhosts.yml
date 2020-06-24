@@ -78,6 +78,12 @@
     label: "{{ vhost.name }}"
     loop_var: vhost
 
+- name: Install global cookie rewrite maps config
+  template:
+    src: cookie-rewrite-maps.conf.j2
+    dest: "{{ nginx_confd_dir }}/000-cookie-rewrite-maps.conf"
+  notify: Reload nginx configs  
+
 - name: Install vhost config
   template:
     src: vhost.conf.j2
@@ -91,7 +97,12 @@
 
 - name: Register provisioned nginx config files
   set_fact:
-    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + https_termination_cfg_vhosts | map(attribute='nginx_conf_file') | list }}"
+    nginx_config_cleanup_provisioned_files: >-
+      {{ 
+        nginx_config_cleanup_provisioned_files 
+          + https_termination_cfg_vhosts | map(attribute='nginx_conf_file') | list 
+          + [ nginx_confd_dir ~ '/000-cookie-rewrite-maps.conf' ]
+      }}
 
 
 
