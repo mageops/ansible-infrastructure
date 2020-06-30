@@ -1,0 +1,16 @@
+- name: Install geolite2 pakcages
+  yum:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - geoipupdate
+    - geoipupdate-cron
+    state: latest
+
+- name: Install geoupdate configuration
+  template:
+    src: GeoIP.conf.j2
+    dest: /etc/GeoIP.conf
+
+- name: Update geolite2 databases
+  shell: geoipupdate
