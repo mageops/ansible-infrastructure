@@ -1,0 +1,4 @@
+# License key can be obtained from https://dev.maxmind.com/geoip/geoip2/geolite2/
+# geolite2_userid:
+# geolite2_license_key:
+geolite2_product_ids: GeoLite2-ASN GeoLite2-City GeoLite2-Country

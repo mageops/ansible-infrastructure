@@ -3,6 +3,14 @@ geoip_country /usr/share/GeoIP/GeoIP.dat;
 
 {%- set lang_source_var = "$geoip_country_code" %}
 {%- endif %}
+{% if nginx_language_redirect_detection_method == "geolite2" -%}
+geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
+  auto_reload 15m;
+  $geoip2_data_country_code source=$remote_addr country iso_code;
+}
+
+{%- set lang_source_var = "$geoip2_data_country_code" %}
+{%- endif %}
 {%- if nginx_language_redirect_detection_method == "accept_language" -%}
 set $first_language $http_accept_language;
 if ($http_accept_language ~* '^(.+?),') {
