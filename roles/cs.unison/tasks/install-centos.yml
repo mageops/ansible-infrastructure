@@ -7,7 +7,9 @@
 
 - name: <CentOS> Make sure conflicting packages are absent
   yum:
-    name: unison
+    name: 
+      - unison
+      - unison-ocaml406
     state: absent
 
 - name: <CentOS> Install latest unison version from MageOps RPM repo

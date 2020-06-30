@@ -6,7 +6,7 @@
     - name: Wait app nodes to be reachble
       wait_for_connection:
         delay: 10
-        timeout: 90
+        timeout: 300
 
 - hosts: app:&current
   tasks:

@@ -23,6 +23,16 @@ if (beresp.http.X-Magento-Debug) {
     set beresp.http.X-Magento-Cache-Control = beresp.http.Cache-Control;
 }
 
+# Do not cache static css and js files without size or empty
+if (bereq.url ~ "^/(pub/)?static/.*\.(css|js)$"
+    && (! beresp.http.Content-Length || beresp.http.Content-Length == "0")) {
+    set beresp.http.Cache-Control = "no-cache";
+    set beresp.ttl = 0s;
+    set beresp.uncacheable = true;
+    set beresp.do_gzip = true;
+    return (deliver);
+}
+
 # validate if we need to cache it and prevent from setting cookie
 if (beresp.ttl > 0s && (bereq.method == "GET" || bereq.method == "HEAD")) {
     unset beresp.http.set-cookie;

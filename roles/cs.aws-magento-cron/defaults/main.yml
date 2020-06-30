@@ -1,6 +1,8 @@
 # Should this service be enabled
 aws_magento_cron_enabled: no
 
+aws_magento_cron_service_file: /etc/systemd/system/magento-cron-aws.service
+
 aws_magento_cron_files_install:
   - { src: "aws-cron-service.sh", dest: "/usr/local/libexec/aws-cron-service.sh", mode: "0755" }
 

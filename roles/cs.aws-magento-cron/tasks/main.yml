@@ -22,15 +22,23 @@
 
 - name: Remove
   block:
-    - name: Disable cron service
-      service:
-        name: magento-cron-aws
-        state: stopped
-        enabled: no
+    - name: Check if magento-cron-aws service exists
+      stat:
+        path: "{{ aws_magento_cron_service_file }}"
+      register: aws_magento_cron_service_exists
 
-    - name: Remove files
-      file:
-        state: absent
-        path: "{{ item.dest }}"
-      with_items: "{{ aws_magento_cron_files_install + aws_magento_cron_files_install_templated }}"
+    - name: Remove
+      block:
+        - name: Disable cron service
+          service:
+            name: magento-cron-aws
+            state: stopped
+            enabled: no
+
+        - name: Remove files
+          file:
+            state: absent
+            path: "{{ item.dest }}"
+          with_items: "{{ aws_magento_cron_files_install + aws_magento_cron_files_install_templated }}"
+      when: aws_magento_cron_service_exists.stat.exists
   when: "not aws_magento_cron_enabled or magento_cron_disabled"

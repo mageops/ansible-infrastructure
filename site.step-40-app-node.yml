@@ -94,6 +94,15 @@
       php_fpm_terminate_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
 
     - role: cs.varnish
+      varnish_port: "{{ mageops_varnish_port }}"
+      varnish_backend_port: "{{ mageops_varnish_backend_port }}"
+      varnish_secure_site: no # With varnish on app node, nginx shall handle the basic auth
+      varnish_purge_trusted_ips: "{{ (aws_vpc_subnet_prefix is defined) | ternary([aws_vpc_subnet_prefix ~ '.0.0/16'], []) }}"
+      varnish_purge_logging: "{{ mageops_varnish_purge_logging }}"
+      varnish_debug_request_token: "{{ mageops_debug_token }}"
+      varnish_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
+      varnish_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
+      varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
       when: not varnish_standalone
 
     - role: cs.blackfire

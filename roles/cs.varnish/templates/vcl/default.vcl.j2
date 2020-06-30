@@ -26,6 +26,13 @@
 
 {% endblock %}
 
+{% block vcl_backend_fetch %}
+
+    {% filter indent(width=4) -%}
+    {% include "vcl/subroutines/backend_fetch.vcl.j2" %}
+    {% endfilter %}
+
+{% endblock %}
 
 {% block vcl_backend_response %}
 
