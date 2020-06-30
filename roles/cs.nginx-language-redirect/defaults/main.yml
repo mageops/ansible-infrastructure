@@ -17,6 +17,9 @@ nginx_language_redirect_style: dir
 # geoip - use GeoIP location data to determine location
 #   language codes are uppercase 2 letter codes
 #   eg: PL, US
+# geolite2 - use geolite2 location data to determine location
+#   language codes are uppercase 2 letter codes
+#   eg: PL, US
 # accept_language - use accept-language header send by browser
 #   language codes are represented as "locale identifier"
 #   they may be 2-3 letter codes with optional specifier
