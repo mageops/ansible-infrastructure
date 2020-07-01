@@ -7,5 +7,6 @@ mageops_cli_user_default_editor: nano
 mageops_cli_user_bashrc_fragments_default:
   - 000-common
   - 001-mageops
+  - magento
 
 mageops_cli_user_bashrc_fragments: []
