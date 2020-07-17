@@ -8,4 +8,8 @@ until pgrep php-fpm > /dev/null; do sleep 0.5s ; done
 echo 'Waiting for nginx to come up...'
 until curl http://localhost:{{ nginx_app_port }}/static/deployed_version.txt -s -o /dev/null; do sleep 0.5s ; done
 
-su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento -vvv cs:warm-node --local-url=http://localhost:{{ nginx_app_port }}'
+DELAY=1
+until su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento -vvv cs:warm-node --local-url=http://localhost:{{ nginx_app_port }}';do
+    sleep "$DELAY"
+    DELAY=$((DELAY * 2))
+done
