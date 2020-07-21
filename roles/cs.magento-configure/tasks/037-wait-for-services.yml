@@ -1,0 +1,17 @@
+- name: Wait for Elasticsearch
+  shell: curl -sfk 'http://{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}'
+  warn: false
+  retries: 15
+  delay: 5
+  when: elasticsuite_version is defined
+
+- name: Wait for Redis cache host
+  shell: echo -ne "PING\r\n" | nc {{ mageops_redis_host }} {{ mageops_redis_port }}
+  retries: 15
+  delay: 5
+  when: magento_redis_cache
+
+- name: Wait for Redis session host
+  shell: echo -ne "PING\r\n" | nc {{ mageops_redis_sessions_host }} {{ mageops_redis_sessions_port }}
+  retries: 15
+  delay: 5
