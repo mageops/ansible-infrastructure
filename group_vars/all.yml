@@ -290,7 +290,8 @@ aws_ec2_instance_user_launch_script_custom: ''
 
 # --- Security groups ---
 
-aws_security_group_sftp_name: "{{ mageops_app_name }}-sftp-sg"
+aws_security_group_persistant_name: "{{ mageops_app_name }}-persistant-sg"
+aws_security_group_sftp_name: "{{ mageops_app_name }}-sftp-sg" #Depreciated. For migration only
 aws_security_group_ssh_name: "{{ mageops_app_name }}-ssh-sg"
 aws_security_group_lambda_ssh_name: "{{ mageops_app_name }}-lambda-ssh-sg"
 aws_security_group_lb_name: "{{ mageops_app_name }}-lb-sg"
@@ -301,6 +302,14 @@ aws_security_group_redis_name: "{{ mageops_app_name }}-redis-sg"
 aws_security_group_elasticsearch_name: "{{ mageops_app_name }}-elastic-sg"
 aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
 
+# Allows to add extra ports to persistant server
+# e.g. to allow ssh from webnode:
+# aws_security_group_persistant_extra_rules: 
+#   - proto: tcp
+#     ports:
+#       - "22"
+#     group_name: "{{ aws_security_group_app_name }}"
+aws_security_group_persistant_extra_rules: []
 
 # --- EC2 Node Specific Types / Roles ---
 

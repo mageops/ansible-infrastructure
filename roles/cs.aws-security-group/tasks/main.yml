@@ -10,17 +10,39 @@
       Name: "{{ aws_security_group_lambda_ssh_name }}"
   register: aws_security_group_lambda_ssh
 
-- name: Create security group for sftp node
+- name: Create security group for persistant node
   ec2_group:
-    name: "{{ aws_security_group_sftp_name }}"
-    description: "{{ mageops_app_name }} sftp node"
+    name: "{{ aws_security_group_persistant_name }}"
+    description: "{{ mageops_app_name }} persistent node"
     region: "{{ aws_region }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
+    rules: "{{ aws_security_group_persistant_rules + aws_security_group_persistant_extra_rules }}"
   vars:
     ec2_sg_tags:
-      Name: "{{  aws_security_group_sftp_name  }}"
-  register: aws_security_group_sftp
+      Name: "{{  aws_security_group_persistant_name  }}"
+    aws_security_group_persistant_rules:
+      # TODO: We have reached SG limits - that's why rabbitmq
+      # is added to persistant SG. The whole SG approach needs to be
+      # rethinked and refactored - probably we should use subnets
+      # instead.
+      - proto: tcp
+        ports:
+          - "{{ rabbitmq_amqp_port }}"
+          - "{{ rabbitmq_http_port }}"
+        group_name: "{{ aws_security_group_app_name }}"
+
+  register: aws_security_group_persistant
+
+
+
+#Depreciated. Remove in 2021.
+- name: Remove old security group for sftp
+  ec2_group:
+    name: "{{ aws_security_group_sftp_name }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    state: absent
 
 - name: Create SSH group for access from the office
   ec2_group:
@@ -132,15 +154,6 @@
             - "{{ mageops_redis_port }}"
             - "{{ mageops_redis_sessions_port }}"
         group_name: "{{ aws_security_group_app_name }}"
-      # TODO: We have reached SG limits - that's why rabbitmq
-      # is added to redis SG. The whole SG approach needs to be
-      # rethinked and refactored - probably we should use subnets
-      # instead.
-      - proto: tcp
-        ports:
-          - "{{ rabbitmq_amqp_port }}"
-          - "{{ rabbitmq_http_port }}"
-        group_name: "{{ aws_security_group_app_name }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
@@ -181,7 +194,7 @@
         group_name: "{{ aws_security_group_app_name }}"
       - proto: tcp
         ports: [2049]
-        group_name: "{{ aws_security_group_sftp_name }}"
+        group_name: "{{ aws_security_group_persistant_name }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
