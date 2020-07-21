@@ -1,7 +1,6 @@
 
 aws_security_group_rds_create: no
 aws_security_group_redis_create: no
-aws_security_group_rabbitmq_create: no
 aws_security_group_elasticsearch_create: no
 aws_security_group_name_prefix: mageops
-
+aws_security_group_persistant_extra_rules: []
