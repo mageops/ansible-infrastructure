@@ -34,15 +34,13 @@
 
   register: aws_security_group_persistant
 
-
-
-#Depreciated. Remove in 2021.
-- name: Remove old security group for sftp
-  ec2_group:
-    name: "{{ aws_security_group_sftp_name }}"
-    region: "{{ aws_region }}"
-    vpc_id: "{{ aws_vpc_id }}"
-    state: absent
+# #Depreciated. Remove in 2021.
+# - name: Remove old security group for sftp
+#   ec2_group:
+#     name: "{{ aws_security_group_sftp_name }}"
+#     region: "{{ aws_region }}"
+#     vpc_id: "{{ aws_vpc_id }}"
+#     state: absent
 
 - name: Create SSH group for access from the office
   ec2_group:
