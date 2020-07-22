@@ -1,6 +1,7 @@
 - name: Wait for Elasticsearch
   shell: curl -sfk 'http://{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}'
-  warn: false
+  args:
+    warn: no
   retries: 15
   delay: 5
   when: elasticsuite_version is defined
