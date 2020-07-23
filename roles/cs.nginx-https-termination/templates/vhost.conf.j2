@@ -74,10 +74,15 @@ server {
 {% endif %}
 
     location / {
-        {% for cookie_js_name, cookie_server_name in https_termination_nginx_server_cookie_rewrite_map.items() %}
-            add_header "Set-Cookie" "$MAGEOPS_COOKIE_REWRITE_{{ cookie_js_name | lower | regex_replace('[^_a-z0-9]', '_') }}";
-        {% endfor %}
-        
+{% for cookie_js_name, cookie_config in https_termination_nginx_server_cookie_rewrite_config.items() %}
+        {%- set cookie_js_bare_var_name = cookie_js_name | lower | regex_replace('[^_a-z0-9]', '_') %}
+        add_header "Set-Cookie" "${MAGEOPS_COOKIE_REWRITE_{{ cookie_js_bare_var_name }}}
+{%- if cookie_config.rewrite_domain|default([])|length > 0 -%}
+        ${MAGEOPS_COOKIE_REWRITE_DOMAIN_{{ cookie_js_bare_var_name }}}
+{%- endif -%}
+        ";
+{% endfor %}
+
         proxy_pass http://{{ https_termination_upstream }};
 
         proxy_redirect off;
