@@ -1,0 +1,99 @@
+#!/usr/bin/env bash
+set -e
+
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libmageops.bash"
+
+main::main() {
+    local cmd=$1
+
+    case $cmd in
+    is_cron_node)
+        if [ $# != 1 ];then main::help; fi
+        main::is_cron_node || exit 1
+    ;;
+    is_tag_present)
+        if [ $# != 2 ];then main::help; fi
+        local tag=$2
+        main::is_tag_present "$tag" || exit 1
+    ;;
+    get_tag_value)
+        if [ $# != 2 ];then main::help; fi
+        local tag=$2
+        main::get_tag_value "$tag" || exit 1
+    ;;
+    current_instance_id)
+        if [ $# != 1 ];then main::help; fi
+        main::current_instance_id || exit 1
+    ;;
+    current_region)
+        if [ $# != 1 ];then main::help; fi
+        main::current_region || exit 1
+    ;;
+    *) main::help ;;
+    esac
+}
+
+main::eprintln() {
+    echo "$@" >&2
+}
+
+main::panic() {
+    main::eprintln "ERROR: " "$@"
+    exit 1
+}
+
+main::is_cron_node() {
+    mageops::assert_tag_value "Cron" "yes" || return 1
+}
+
+main::is_tag_present() {
+    local tag=$1
+    main::assert_aws_cli
+    mageops::is_tag_exists "$tag" || return 1
+}
+
+main::get_tag_value() {
+    local tag=$1
+    main::assert_aws_cli
+    mageops::get_tag_value "$tag" || return 1
+}
+
+main::assert_aws_cli() {
+    command -v aws &>/dev/null && return 0
+    main::panic "aws cli is not installed"
+}
+
+main::current_instance_id() {
+    main::assert_aws_cli
+    local id
+    id=$(mageops::get_current_instance_id) || return 1
+    echo "$id"
+}
+
+main::current_region() {
+    main::assert_aws_cli
+    local region
+    region=$(mageops::get_current_region) || return 1
+    echo "$region"
+}
+
+main::help() {
+    main::eprintln "  $0 <cmd>"
+    main::eprintln ""
+    main::eprintln "Where cmd is one of:"
+    main::eprintln "  is_cron_node               Checks if there is tag 'Cron' with value 'yes'"
+    main::eprintln "                             status code 0 means tag present, 1 means missing tag or"
+    main::eprintln "                             other error"
+    main::eprintln "  is_tag_present <tag_name>  Checks if specified tag name is set"
+    main::eprintln "                             status code 0 means tag present, 1 means missing tag or"
+    main::eprintln "                             other error"
+    main::eprintln "  get_tag_value <tag_name>   Reads value assigned to tag"
+    main::eprintln "  current_instance_id        Reads current ec2 instance id"
+    main::eprintln "  current_region             Reads current ec2 region name"
+    main::eprintln ""
+    main::eprintln " Mageops cli tools"
+    main::eprintln "  (c) Creativestyle 2020"
+    exit 1
+}
+
+main::main "$@"
