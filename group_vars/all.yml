@@ -1125,6 +1125,7 @@ php_packages:
   - php-opcache
   - php-mbstring
   - php-bcmath
+  - php-sodium
   - php-soap
 
 php_conf_fragment_dir_path: "/etc/php.d"
