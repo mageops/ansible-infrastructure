@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+MAGEOPS_PROJECT="magesuite"
+MAGEOPS_ENVIRONMENT="dev"
+
+function contains() {
+  local n=$#
+  local value=${!n}
+  for ((i=1;i < $#;i++)) {
+    if [ "${!i}" == "${value}" ]; then
+      return 0
+    fi
+  }
+  return 1
+}
+
+TYPES=("app" "varnish" "persistent")
+TYPE=${1:-app}
+if ! contains "${TYPES[@]}" $TYPE; then
+  echo "Usage: bin/ec2-ip app|varnish|persistent"
+  exit 1
+fi
+
+aws ec2 describe-instances  --filters "Name=tag:Role,Values=$MAGEOPS_PROJECT-$MAGEOPS_ENVIRONMENT-$TYPE" | jq '.Reservations[-1].Instances[-1].PublicIpAddress' -r

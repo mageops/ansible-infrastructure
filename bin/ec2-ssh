@@ -1,0 +1,24 @@
+#!/bin/sh
+
+set -e
+
+MAGEOPS_PROJECT="magesuite"
+MAGEOPS_ENVIRONMENT="dev"
+
+NODE_TYPE=$1
+USER=root
+
+if test "$NODE_TYPE" == "" || test "$NODE_TYPE" == "app"; then
+  NODE_TYPE=app
+  USER=magento
+fi
+
+if [[ $NODE_TYPE == *"@"* ]]; then
+  IFS="@" read USER NODE_TYPE <<< "$1"
+fi
+
+echo "SSHing as $USER into $MAGEOPS_PROJECT-$MAGEOPS_ENVIRONMENT-$NODE_TYPE node"
+
+IP=$(bin/ec2-ip $NODE_TYPE)
+
+ssh $USER@$IP "${@:2}"

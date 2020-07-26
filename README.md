@@ -90,6 +90,20 @@ across internal creativestyle services thus any leftovers have been removed
 to avoid confusion. New documentation will start appearing shortly as part 
 of this repository succesively.
 
+# Utilities
+
+## Managing current EC2 nodes
+
+```sh
+bin/ec2-ip # Returns IP of app node
+bin/ec2-ip varnish # as above, of varnish node
+bin/ec2-ip persistent # as above, of persistent node
+
+bin/ec2-ssh # SSHs into app node as magento user
+bin/ec2-ssh app # SSHs into app node as magento user
+bin/ec2-ssh root@app # SSHs into app node as root user
+bin/ec2-ssh varnish # SSH into varnish node as root user
+```
 
 <p align="right">
 <em>Brought to life by</em><br/>
