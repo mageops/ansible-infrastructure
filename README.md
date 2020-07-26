@@ -91,6 +91,14 @@ to avoid confusion. New documentation will start appearing shortly as part
 of this repository succesively.
 
 
+### SSH utils on an ec2 node
+
+```sh
+mageops-env # prints mageops env vars
+
+mageops-sys-status
+```
+
 <p align="right">
 <em>Brought to life by</em><br/>
 <a href="https://creativestyle.pl">
