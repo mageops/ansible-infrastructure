@@ -33,11 +33,27 @@
     force: yes
   notify: PHP Configuration Changed
 
-- name: Configure separate PHP Debug INI
-  template:
-    src: php-xdebug.ini
-    dest: "{{ php_debug_ini_path }}"
-  notify: PHP Configuration Changed
+- name: Configure debug
+  block:
+  - name: Configure separate PHP Debug INI
+    template:
+      src: php-xdebug.ini
+      dest: "{{ php_debug_ini_path }}"
+    notify: PHP Configuration Changed
+
+  - name: Configure separate PHP Cli Debug INI
+    template:
+      src: php-xdebug.ini
+      dest: "{{ php_cli_debug_ini_path }}"
+    vars:
+      php_xdebug_remote_log: ''
+    notify: PHP Configuration Changed
+
+  - name: Add php xdebug cli
+    template:
+      src: php-xdebug
+      dest: "/usr/local/bin/php-xdebug"
+      mode: "0755"
   when: php_debug_ini_enable
 
 # This is needed so specific /etc/php*.ini settings are not

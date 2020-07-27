@@ -1140,6 +1140,9 @@ php_fpm_debug_pool_enable: yes
 php_fpm_debug_pool_xdebug_remote_host: "{{ mageops_xdebug_proxy_remote_connection_to_loadbalancer | ternary(mageops_varnish_host, 'localhost') }}"
 php_fpm_debug_pool_xdebug_remote_port: "{{ php_xdebug_remote_port }}"
 
+# Required for cli xdebug to work
+php_xdebug_remote_host: "{{ php_fpm_debug_pool_xdebug_remote_host }}"
+
 # Configure the status and ping internal PHP-FPM pool endpoints
 php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
 php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"

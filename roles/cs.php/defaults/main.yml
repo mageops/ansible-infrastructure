@@ -125,6 +125,7 @@ php_debug_ini_prepend_debug_helper: yes
 
 # Path to the special ini file that enables xdebug
 php_debug_ini_path: /etc/php-xdebug.ini
+php_cli_debug_ini_path: /etc/php-xdebug-cli.ini
 
 # --- XDebug settings ---
 
