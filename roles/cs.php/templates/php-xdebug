@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+exec php -c "{{ php_cli_debug_ini_path }}" "$@"
