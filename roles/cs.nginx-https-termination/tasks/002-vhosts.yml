@@ -15,10 +15,10 @@
     label: "{{ vhost.name }}"
     loop_var: vhost
 
-- name: Fail if varnish should be hidden but is bound to port 80
+- name: Fail if upstream should be hidden but is bound to port 80
   fail:
-    msg: Varnish should be hidden, but is on port 80, set `varnish_port` to some other value
-  when: https_termination_hide_varnish and varnish_port == 80
+    msg: Upstream should be hidden, but is on port 80, set `https_termination_upstream_port` to some other value
+  when: https_termination_hide_varnish and https_termination_upstream_port == 80
 
 - name: Make sure cert fragment dir is existing
   file:
