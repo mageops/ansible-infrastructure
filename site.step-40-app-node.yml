@@ -86,6 +86,7 @@
     - role: cs.nginx-https-termination
       when: mageops_app_node_https_termination_enable
       nginx_blacklist_urls: "{{ mageops_app_node_https_termination_enable | ternary(mageops_app_node_nginx_blacklist_urls, []) }}"
+      https_termination_upstream_port: "{{ mageops_varnish_port }}"
 
     - role: cs.php-fpm
       tags: php
