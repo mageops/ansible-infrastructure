@@ -20,7 +20,7 @@
     aws_security_group_lb: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_lb_name) | list | default([false], true) | first }}"
     aws_security_group_ssh: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_ssh_name) | list | default([false], true) | first }}"
     aws_security_group_lambda_ssh: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_lambda_ssh_name) | list | default([false], true) | first }}"
-    aws_security_group_persistant: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_persistant_name) | list | default([false], true) | first }}"
+    aws_security_group_persistant: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_persistant_name) | list | default([false], true) | first }}"    
     cacheable: yes
 
 - name: Set id fact for each security group
@@ -36,7 +36,3 @@
     aws_security_group_lambda_ssh_id: "{{ aws_security_group_lambda_ssh.group_id | default(omit) }}"
     aws_security_group_persistant_id: "{{ aws_security_group_persistant.group_id | default(omit) }}"
     cacheable: yes
-
-
-
-
