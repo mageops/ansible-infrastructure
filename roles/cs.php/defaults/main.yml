@@ -17,6 +17,7 @@ php_fpm_package: 'php-fpm'
 php_date_timezone: "Europe/Berlin"
 php_memory_limit: -1
 php_max_execution_time: 60
+php_session_gc_maxlifetime: 10800
 
 php_max_input_time: 600
 php_max_input_vars: 2000
