@@ -259,6 +259,13 @@ location ~ (resize|index|get|static|report|404|503)\.php$ {
         }
     {% endfor %}
 
+    {% if php_http_request_custom_blackfire_limits %}
+    if ($http_x_blackfire_query) {
+        set $PHP_MEMORY_LIMIT {{ php_http_request_custom_blackfire_limits_memory }};
+        set $PHP_MAX_EXECUTION_TIME {{ php_http_request_custom_blackfire_limits_execution_time }};
+    }
+    {% endif %}
+
     fastcgi_index index.php;
     include {{ nginx_magento_fastcgi_pass_include_path}};
 }
