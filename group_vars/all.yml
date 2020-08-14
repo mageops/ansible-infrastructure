@@ -303,7 +303,7 @@ aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
 
 # Allows to add extra ports to persistant server
 # e.g. to allow ssh from webnode:
-# aws_security_group_persistant_extra_rules: 
+# aws_security_group_persistant_extra_rules:
 #   - proto: tcp
 #     ports:
 #       - "22"
@@ -1185,6 +1185,11 @@ php_http_request_max_execution_time: "60"
 #       memory_limit: 512M
 #       max_execution_time: 3600
 php_http_request_limits_custom: []
+
+# Blackfire php limits
+php_http_request_custom_blackfire_limits: "{{ blackfire_install }}"
+php_http_request_custom_blackfire_limits_memory: "2G"
+php_http_request_custom_blackfire_limits_execution_time: "600"
 
 # OpCache settings
 php_opcache_enable: 1
