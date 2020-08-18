@@ -456,6 +456,7 @@ aws_logs_loggers_persistent_default:
 aws_logs_loggers_app_default:
   syslog: { enabled: yes }
   magento-system: { enabled: yes }
+  magento-cron: { enabled: yes }
   magento-debug: { enabled: yes }
   magento-exception: { enabled: yes }
   magento-paywithamazon: { enabled: yes }

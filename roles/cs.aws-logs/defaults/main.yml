@@ -31,6 +31,13 @@ aws_logs_loggers_default:
         retention: 30
         multiline: yes
         enabled: no
+    magento-cron:
+        group_name: "/magento/cron.log"
+        filename: "{{ aws_logs_project_root }}/var/log/cron.log"
+        date_format: "[%Y-%m-%d %H:%M:%S]"
+        retention: 7
+        multiline: yes
+        enabled: no
     magento-debug:
         group_name: "/magento/debug.log"
         filename: "{{ aws_logs_project_root }}/var/log/debug.log"
