@@ -460,6 +460,7 @@ aws_logs_loggers_app_default:
   magento-debug: { enabled: yes }
   magento-exception: { enabled: yes }
   magento-paywithamazon: { enabled: yes }
+  nginx-access: { enabled: yes }
   nginx-error: { enabled: yes }
   php-fpm-error: { enabled: yes }
   php-cli-error: { enabled: yes }

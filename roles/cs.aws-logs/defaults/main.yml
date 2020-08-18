@@ -59,6 +59,13 @@ aws_logs_loggers_default:
         retention: 60
         multiline: yes
         enabled: no
+    nginx-access:
+        group_name: "/nginx/access.log"
+        filename: "{{ nginx_log_dir }}/access.log"
+        date_format: "[%d/%b/%Y:%H:%M:%S %z]"
+        retention: 3
+        multiline: no
+        enabled: no
     nginx-error:
         group_name: "/nginx/error.log"
         filename: "{{ nginx_log_dir }}/error.log"
