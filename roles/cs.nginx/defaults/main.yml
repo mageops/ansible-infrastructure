@@ -34,4 +34,4 @@ nginx_config_cleanup_dirs:
   - "{{ nginx_serverd_dir }}"
   - "{{ nginx_modules_conf_dir }}"
 
-
+nginx_config_cleanup: yes
