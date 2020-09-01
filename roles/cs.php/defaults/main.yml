@@ -56,6 +56,17 @@ php_opcache_huge_code_pages: 0
 php_opcache_file_update_protection: 0
 php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.blacklist"
 
+php_opcache_file_cache_enable: no
+# Warning this cannot be a path just a single dirname or all hell breaks loose
+php_opcache_file_cache_user_dirname: .opcache
+php_opcache_file_cache_consistency_checks: 0
+# List of usernames (besides root) that will be using PHP in any capacity.
+# This is used to set up the user cache dirs and can be ignored if file cache
+# is not enabled. Not existing users will be filtered-out, but note the extra
+# time needed for the checks.
+php_opcache_file_cache_users: []
+
+
 # --- File-based opcache settings for CLI scripts ---
 
 # Warning! This is an experimental feature. Currenly it does
@@ -64,8 +75,7 @@ php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.black
 # recommended to enable this.
 
 php_cli_opcache_file_cache_enable: no
-php_cli_opcache_file_cache_dir: /var/tmp/php-cli-opcache
-php_cli_opcache_file_cache_consistency_checks: 1
+php_cli_opcache_file_cache_consistency_checks: 0
 
 # Even though the source does not change in some cases (e.g. during deploy)
 # there are commands ran which can (re)generate code at runtime. As it's
