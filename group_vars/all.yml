@@ -597,6 +597,7 @@ mageops_app_id_short: "{{ mageops_project | truncate(10, true, '') }}_{{ mageops
 mageops_app_is_magesuite: yes
 
 mageops_app_user: "{{ mageops_app_type }}"
+mageops_app_user_home: "/home/{{ mageops_app_user }}"
 mageops_app_group: "{{ mageops_app_user }}"
 mageops_app_uid: 1500
 mageops_app_gid: "{{ mageops_app_uid }}"
@@ -810,6 +811,7 @@ magento_mode: "{{ mage_mode|default('production') }}"
 magento_live_release_dir: "{{ mageops_app_web_dir }}/current"
 
 magento_user: "{{ mageops_app_user }}"
+magento_user_home: "{{ mageops_app_user_home }}"
 magento_group: "{{ mageops_app_group }}"
 magento_uid: "{{ mageops_app_uid }}"
 magento_gid: "{{ mageops_app_gid }}"

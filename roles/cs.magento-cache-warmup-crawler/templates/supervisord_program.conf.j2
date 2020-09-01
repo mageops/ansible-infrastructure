@@ -1,11 +1,15 @@
 [program:cache_warmup_crawler]
 command=php {{ mageops_app_web_dir }}/current/bin/magento cache:warm:pages-crawl-worker
 directory={{ mageops_app_web_dir }}/current
+
 autostart=true
 autorestart=true
-startsecs=0
+
+startsecs=0                                                                     ; Ensures program is always restarted by never going into FATAL state.
 startretries=100
+
 user={{ magento_user }}
+environment=USER="{{ magento_user }}",HOME="{{ magento_user_home }}"            ; Important! Supervisor does not set any environment variables and we need those.
 
 redirect_stderr=true
 
