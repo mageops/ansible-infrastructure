@@ -105,13 +105,29 @@
     }}
   notify: PHP Configuration Changed
 
-- name: Create cache cleaning service
+- name: Create tmpfiles maintenance service
   template:
-    src: php.clean-tmp.service
-    dest: /etc/systemd/system/php-clean-tmp.service
+    src: php.tmpfiles.service
+    dest: /etc/systemd/system/php-tmpfiles.service
+  register: php_tmpfiles_service_config
   notify: PHP Configuration Changed
 
-- name: Ensure cache cleaning service is enabled
+# On changes disable and stop the service so next task will:
+# - Reenable it causing new install section entries to be symlinked as
+#   neither ansible nor systemd does this automatically.
+# - Restart it causing all tmpfiles.d config changes to be applied
+#   at once before dependent services like php-fpm and supervisord are set up.
+- name: Disable tmpfiles maintenance service to ensure it is reenabled
   systemd:
+    name: php-tmpfiles
+    state: stopped
+    enabled: no
+    daemon_reload: yes
+  when: php_tmpfiles_service_config is changed
+  
+- name: Ensure tmpfiles maintenance service is enabled
+  systemd:
+    name: php-tmpfiles
+    state: started
     enabled: yes
-    name: php-clean-tmp
+    
