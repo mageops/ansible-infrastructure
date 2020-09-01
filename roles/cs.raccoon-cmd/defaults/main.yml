@@ -1,0 +1,32 @@
+# Remote project sources root dir
+raccoon_project_dir: "{{ mageops_app_web_dir }}/{{ mageops_project }}"
+
+# If enabled then full production-like setup is performed, incl.:
+#  - switch magento to production mode
+#  - enable all magento caches
+#  - perform full static content deployment
+raccoon_project_production_mode: no
+
+# Name of composer package (vendor subdir) that provides the MageSuite theme
+raccoon_theme_package: creativestyle/theme-creativeshop
+
+# Commands to execute
+raccoon_execute_commands: []
+
+# --- Demo project configuration ---
+
+raccoon_demo_app_name: magesuite-demo
+raccoon_demo_app_dir: "{{ mageops_app_web_dir }}/{{ raccoon_demo_app_name }}"
+raccoon_demo_magento_version: "2.3.4-p2"
+raccoon_demo_magento_inventory_version: "1.1.5"
+raccoon_demo_magento_sample_data_version: "{{ raccoon_demo_magento_version }}-develop"
+raccoon_demo_magento_sample_data_install: yes
+raccoon_demo_magento_scd_parallel_jobs: "{{ ansible_processor_vcpus | default(ansible_processor_cores | default(0) + 1) }}"
+raccoon_demo_magento_scd_languages: [ en_US ]
+raccoon_demo_magento_scd_excluded_themes: []
+raccoon_demo_magento_composer_packages:
+  - creativestyle/magesuite
+
+raccoon_demo_magento_release_url: "https://github.com/magento/magento2/archive/{{ raccoon_demo_magento_version }}.tar.gz"
+raccoon_demo_magento_inventory_release_url: "https://github.com/magento/inventory/archive/{{ raccoon_demo_magento_inventory_version }}.tar.gz"
+raccoon_demo_magento_sample_data_release_url: "https://github.com/magento/magento2-sample-data/archive/{{ raccoon_demo_magento_sample_data_version }}.tar.gz"

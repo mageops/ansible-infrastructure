@@ -1,0 +1,25 @@
+- name: Print information banner
+  debug:
+    msg: |
+      {{ '=' * 54 }}
+      = {{ ' ' * 50 }} =
+      = {{ ( '-> raccoon - ' ~ raccoon_command ) | center(50) }} =
+      = {{ ' ' * 50 }} =
+      {{ '=' * 54 }}
+
+      {{ 'STARTED' | center(54) }}
+
+- name: Execute command play
+  include_tasks: "cmd/{{ raccoon_command | replace(':', '.') }}.yml"
+
+- name: Print information banner
+  debug:
+    msg: |
+      {{ '=' * 54 }}
+      = {{ ' ' * 50 }} =
+      = {{ ( '<- raccoon - ' ~ raccoon_command ) | center(50) }} =
+      = {{ ' ' * 50 }} =
+      {{ '=' * 54 }}
+
+      {{ 'FINISHED' | center(54) }}
+

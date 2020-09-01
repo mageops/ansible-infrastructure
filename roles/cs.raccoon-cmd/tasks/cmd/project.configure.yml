@@ -1,0 +1,40 @@
+- name: Update project DB configuration
+  import_role:
+    name: cs.mysql-configure-project
+
+# Normally deploy does it, but we don't deploy to raccoon
+- name: Add nginx to magento group
+  user:
+    name: "{{ nginx_user }}"
+    groups: "{{ magento_group }}"
+    append: yes
+
+# In case previous setup:install was somehow broken the next
+# one will not run, but we can fix this situation:
+#  - remove /generated contents
+#  - flush redis
+#  - dump autoload
+
+- name: Remove generated Magento code
+  file:
+    path: "{{ raccoon_project_dir }}/generated"
+    state: absent
+
+- name: Flush redis
+  command:
+    cmd: redis-cli FLUSHALL
+    warn: no
+
+- name: Dump autoload
+  become: yes
+  become_user: "{{ magento_user }}"
+  command:
+    argv: 
+      - /usr/local/bin/composer 
+      - dump-autoload
+    chdir: "{{ raccoon_project_dir }}"
+    warn: no
+
+- name: Set up Magento installation
+  include_role:
+    name: cs.magento-configure

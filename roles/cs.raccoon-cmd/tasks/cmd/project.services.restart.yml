@@ -1,0 +1,10 @@
+- name: Restart project-specific system services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - redis
+    - php-fpm
+    - nginx
+    - varnish
+

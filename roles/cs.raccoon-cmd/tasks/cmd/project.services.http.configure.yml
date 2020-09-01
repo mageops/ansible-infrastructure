@@ -1,0 +1,29 @@
+- name: Reconfigure nginx core
+  import_role:
+    name: cs.nginx
+
+- name: Reconfigure nginx for url blacklisting
+  import_role:
+    name: cs.nginx-url-blacklist
+
+- name: Reconfigure nginx for language redirects
+  import_role:
+    name: cs.nginx-language-redirect
+  when: mageops_language_redirect_enable
+
+- name: Reconfigure nginx for magento
+  import_role:
+    name: cs.nginx-magento
+
+- name: Reconfigure nginx for https termination
+  import_role:
+    name: cs.nginx-https-termination
+  when: mageops_https_termination_enable
+
+- name: Reconfigure varnish
+  import_role:
+    name: cs.varnish
+
+- name: Force handler flush so new configuration is applied
+  meta: flush_handlers
+

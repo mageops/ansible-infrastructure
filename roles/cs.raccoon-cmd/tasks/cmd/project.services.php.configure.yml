@@ -1,0 +1,7 @@
+- name: Reconfigure PHP and PHP-FPM
+  import_role:
+    name: cs.php-fpm
+
+- name: Force handler flush so new configuration is applied
+  meta: flush_handlers
+

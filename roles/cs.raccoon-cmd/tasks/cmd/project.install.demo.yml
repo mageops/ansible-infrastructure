@@ -1,0 +1,145 @@
+- name: Set global provisioning options for demo project
+  set_fact:
+    mageops_project: "{{ raccoon_demo_app_name }}"
+    magento_scd_parallel_jobs: "{{ raccoon_demo_magento_scd_parallel_jobs | default(1) }}"
+    magento_scd_languages: "{{ raccoon_demo_magento_scd_languages }}"
+    magento_scd_excluded_themes: "{{ raccoon_demo_magento_scd_excluded_themes }}"
+    # Not possible yet in docker because it requires docker...
+    magento_scd_advanced_js_bundling: no
+    magento_deploy_auto_reindex: yes
+    magento_configure_for_production: "{{ raccoon_project_production_mode }}"
+
+- name: Set production-optimized PHP opcache configuration
+  set_fact:
+    php_opcache_consistency_checks: 0
+    php_opcache_file_update_protection: 0
+    php_opcache_validate_timestamps: 0
+    php_opcache_revalidate_path: 0
+  when: raccoon_project_production_mode
+
+- name: Install Magento sources
+  become: yes
+  become_user: "{{ magento_user }}"
+  block:
+    - name: "Make sure release directory exists"
+      file:
+        path: "{{ raccoon_demo_app_dir }}"
+        state: directory
+
+    - name: "Install Magento release: {{ raccoon_demo_magento_version }}"
+      unarchive:
+        src: "{{ raccoon_demo_magento_release_url }}"
+        dest: "{{ raccoon_demo_app_dir }}"
+        creates: "{{ raccoon_demo_app_dir }}/composer.json"
+        extra_opts: [ "--strip-components=1" ]
+        remote_src: yes
+
+    - name: "Install Magento Inventory release: {{ raccoon_demo_magento_inventory_version }}"
+      unarchive:
+        src: "{{ raccoon_demo_magento_inventory_release_url }}"
+        dest: "{{ raccoon_demo_app_dir }}/app/code/Magento"
+        creates: "{{ raccoon_demo_app_dir }}/app/code/Magento/_metapackage/composer.json"
+        extra_opts: [ "--strip-components=1" ]
+        remote_src: yes
+
+    - name: "Install Magento Sample Data release: {{ raccoon_demo_magento_sample_data_version }}"
+      unarchive:
+        src: "{{ raccoon_demo_magento_sample_data_release_url }}"
+        dest: "{{ raccoon_demo_app_dir }}"
+        creates: "{{ raccoon_demo_app_dir }}/pub/media/composer.json"
+        extra_opts: [ "--strip-components=1" ]
+        remote_src: yes
+      when: raccoon_demo_magento_sample_data_install
+
+    - name: "Prepare composer.json files for merging"
+      copy:
+        src: "{{ raccoon_demo_app_dir }}/{{ item[0] }}"
+        dest: "{{ raccoon_demo_app_dir }}/{{ item[1] }}"
+        remote_src: yes
+      loop:
+        - [ composer.json, composer.magento.json ]
+        - [ app/code/Magento/_metapackage/composer.json, composer.msi.json ]
+
+    - name: "Compute composer.json with MSI packages replaced"
+      command:
+        argv:
+          - jq
+          - -sSM
+          - >
+              ( .[0].require[] | select( . == "*" ) ) = .[0].version
+                | .[1].replace += .[0].require
+                | .[1]
+          - composer.msi.json
+          - composer.magento.json
+        chdir: "{{ raccoon_demo_app_dir }}"
+      changed_when: false
+      register: composer_json_msi_update
+
+    - name: "Install merged composer.json"
+      copy:
+        content: "{{ composer_json_msi_update.stdout | from_json | to_nice_json(indent=4) }}"
+        dest: "{{ raccoon_demo_app_dir }}/composer.json"
+        validate: /usr/local/bin/composer validate %s
+
+    # Temporary use --ignore-platform-reqs as one of the MageSuite
+    # translation center package still does not allow PHP 7.3
+    - name: "Install Magento composer deps"
+      composer:
+        command: install
+        arguments: "--ignore-platform-reqs"
+        working_dir: "{{ raccoon_demo_app_dir }}"
+        prefer_dist: yes
+
+    - name: "Require demo composer packages"
+      composer:
+        command: require
+        arguments: "--ignore-platform-reqs {{ raccoon_demo_magento_composer_packages | join(' ') }}"
+        working_dir: "{{ raccoon_demo_app_dir }}"
+        prefer_dist: yes
+
+- name: Build composer-packaged theme
+  include_tasks: cmd.yml
+  vars: { raccoon_command: 'project:theme:build' }
+  when: raccoon_theme_package | default(false, true)
+
+- name: Configure project
+  include_tasks: cmd.yml
+  vars: { raccoon_command: 'project:configure' }
+
+- name: Reconfigure HTTP services for production mode
+  include_tasks: cmd.yml
+  vars: { raccoon_command: 'project:services:http:configure' }
+  when: raccoon_project_production_mode
+
+- name: Reconfigure PHP for production mode
+  include_tasks: cmd.yml
+  vars: { raccoon_command: 'project:services:php:configure' }
+  when: raccoon_project_production_mode
+
+- name: Switch to the demo project
+  include_tasks: cmd.yml
+  vars: { raccoon_command: 'project:switch' }
+
+- name: Run catalog:images:resize
+  when: "{{ raccoon_demo_magento_catalog_image_resize | default(false) }}"
+  become: yes
+  become_user: "{{ magento_user }}"
+  block:
+    - name: "[Async] Magento Image Resize (speed up browsing later - this will take a very long time)"
+      command:
+        cmd: bin/magento catalog:images:resize
+        chdir: "{{ raccoon_project_dir }}"
+      async: 3600
+      poll: 0
+      register: magento_image_resize
+
+    - name: "[Async Poll] Wait for Magento Image Resize to finish"
+      async_status:
+        jid: "{{ magento_image_resize.ansible_job_id }}"
+      register: magento_image_resize_async_poll
+      until: magento_image_resize_async_poll.finished
+      delay: 10
+      retries: 37
+
+
+

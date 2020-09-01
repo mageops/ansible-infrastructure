@@ -1,0 +1,5 @@
+- name: Execute raccoon commands
+  include_tasks: "cmd.yml"
+  loop: "{{ raccoon_execute_commands }}"
+  loop_control:
+    loop_var: raccoon_command

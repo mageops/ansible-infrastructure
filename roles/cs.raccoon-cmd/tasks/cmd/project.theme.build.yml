@@ -1,0 +1,14 @@
+- name: Build composer-packaged Magento theme
+  become: yes
+  become_user: "{{ magento_user }}"
+  command:
+    cmd: "{{ command }}"
+    chdir: "{{ raccoon_project_dir }}/vendor/{{ raccoon_theme_package }}"
+    warn: no
+  loop:
+    - yarn install --frozen-lockfile
+    - yarn build
+  loop_control:
+    loop_var: command
+
+

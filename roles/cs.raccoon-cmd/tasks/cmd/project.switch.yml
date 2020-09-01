@@ -1,0 +1,49 @@
+- name: Create workspace directory
+  file:
+    state: directory
+    name: "{{ mageops_app_web_dir }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+
+- name: Symlink project to live release
+  file:
+    force: yes
+    state: link
+    src: "{{ mageops_app_web_dir }}/{{ mageops_project }}"
+    dest: "{{ magento_live_release_dir }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+
+- name: Save project metadata file
+  copy:
+    dest: "{{ mageops_app_web_dir }}/current_project.json"
+    content: "{{ mageops_current_project_info | to_nice_json }}"
+    owner: "{{ mageops_app_user }}"
+    group: "{{ mageops_app_group }}"
+  vars:
+    mageops_current_project_info:
+      name: "{{ mageops_project }}"
+      switched_on: "{{ ansible_date_time.iso8601_basic_short }}"
+
+- name: Update project DB configuration
+  import_role:
+    name: cs.mysql-configure-project
+
+- name: Update project CLI profile
+  import_role:
+    name: cs.mageops-cli-profile
+
+- name: Restart project services
+  include_tasks: cmd.yml
+  vars: { raccoon_command: 'project:services:restart' }
+
+- name: Ensure that Magento maintenance mode is disabled
+  become: yes
+  become_user: "{{ magento_user }}"
+  command: 
+    argv:
+      - "php"
+      - "{{ magento_release_dir }}/bin/magento" 
+      - "maintenance:disable"
+  changed_when: false
+
