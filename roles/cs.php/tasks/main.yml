@@ -10,6 +10,32 @@
       }}
     state: present
 
+- name: Add root as required PHP user
+  set_fact:
+    php_opcache_file_cache_users: "{{ (  [ 'root' ] + php_opcache_file_cache_users ) | unique }}"
+
+- name: Get PHP users homes
+  getent:
+    database: passwd
+    key: "{{ item }}"
+    fail_key: no
+  register: php_users_getent_passwd
+  loop: "{{ php_opcache_file_cache_users }}"
+
+- name: Compute PHP users home list
+  set_fact:
+    php_opcache_file_cache_users_homes: >-
+      {{
+          php_opcache_file_cache_users | zip (
+            php_users_getent_passwd.results
+              | map(attribute='ansible_facts.getent_passwd')
+              | map('dict2items')
+              | map('first')
+              | map(attribute='value')
+              | map(attribute=4)
+          ) | selectattr(1, 'defined') | list
+      }}
+
 - name: Configure PHP tmpfiles
   template:
     src: php.tmpfiles.conf

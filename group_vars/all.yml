@@ -600,6 +600,7 @@ mageops_app_user: "{{ mageops_app_type }}"
 mageops_app_group: "{{ mageops_app_user }}"
 mageops_app_uid: 1500
 mageops_app_gid: "{{ mageops_app_uid }}"
+mageops_app_umask: '0022'
 
 # MySQL instance shall be provisioned? (or provide host)
 mageops_mysql_create: yes
@@ -812,6 +813,7 @@ magento_user: "{{ mageops_app_user }}"
 magento_group: "{{ mageops_app_group }}"
 magento_uid: "{{ mageops_app_uid }}"
 magento_gid: "{{ mageops_app_gid }}"
+magento_umask: "{{ mageops_app_umask }}"
 
 magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
 
@@ -1193,6 +1195,8 @@ php_conf_fragment_dir_path: "/etc/php.d"
 
 php_fpm_pool_name: "{{ mageops_app_type }}"
 
+php_fpm_umask: "{{ mageops_app_umask }}"
+
 php_fpm_run_dir_path: "/var/run/php-fpm"
 php_fpm_log_dir_path: "/var/log/php-fpm"
 
@@ -1267,7 +1271,8 @@ php_opcache_validate_timestamps: "0"
 php_opcache_revalidate_path: "0"
 php_opcache_revalidate_freq: "2"
 php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.blacklist"
-
+php_opcache_file_cache_users:
+  - "{{ mageops_app_user }}"
 
 # Whether to enable file-based opcache for CLI commands
 php_cli_opcache_file_cache_enable: no
