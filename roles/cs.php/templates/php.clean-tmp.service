@@ -1,13 +1,19 @@
 [Unit]
 Description=Clean PHP Temps and Caches
-Before=sysinit.target shutdown.target php-fpm.service supervisord.service
-PartOf=php-fpm.service supervisord.service
+
+Before=shutdown.target
+PartOf=supervisord.service php-fpm.service
+After=sysinit.target
+
 ConditionPathExists=/etc/tmpfiles.d/php.conf
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/systemd-tmpfiles --remove /etc/tmpfiles.d/php.conf
+
+ExecStartPre=/usr/bin/systemd-tmpfiles --remove /etc/tmpfiles.d/php.conf
+ExecStart=/usr/bin/systemd-tmpfiles    --create /etc/tmpfiles.d/php.conf
+ExecStop=/usr/bin/systemd-tmpfiles     --clean  /etc/tmpfiles.d/php.conf
 
 [Install]
 WantedBy=multi-user.target
