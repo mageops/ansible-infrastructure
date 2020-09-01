@@ -105,13 +105,24 @@
     }}
   notify: PHP Configuration Changed
 
-- name: Create cache cleaning service
+- name: Create tmpfiles maintenance service
   template:
-    src: php.clean-tmp.service
-    dest: /etc/systemd/system/php-clean-tmp.service
+    src: php.tmpfiles.service
+    dest: /etc/systemd/system/php-tmpfiles.service
+  register: php_tmpfiles_service_config
   notify: PHP Configuration Changed
 
-- name: Ensure cache cleaning service is enabled
+# We need to ensure the new [Install] section gets processed so we need reenabling
+# also we get a restart so any new directories get created
+- name: Disable tmpfiles maintenance service to ensure it is reenabled
+  systemd:
+    enabled: no
+    started: no
+    daemon_reload: yes
+    name: php-tmpfiles
+  when: php_tmpfiles_service_config is changed
+  
+- name: Ensure tmpfiles maintenance service is enabled
   systemd:
     enabled: yes
-    name: php-clean-tmp
+    name: php-tmpfiles
