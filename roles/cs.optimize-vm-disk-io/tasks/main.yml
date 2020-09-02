@@ -1,0 +1,20 @@
+- name: Configure system virtual memory settings
+  sysctl:
+    name: "{{ param.name }}"
+    value: "{{ param.value }}"
+    state: present
+    reload: yes
+  loop_control:
+    loop_var: param
+    label: "Set sysctl: {{ param.name }} = {{ param.value }}"
+  loop:
+    - name: vm.vfs_cache_pressure
+      value: "{{ mageops_kernel_vm_vfs_cache_pressure }}"
+    - name: vm.dirty_expire_centisecs
+      value: "{{ mageops_kernel_vm_dirty_expire_centisecs }}"
+    - name: vm.dirty_background_ratio
+      value: "{{ mageops_kernel_vm_dirty_background_ratio }}"
+    - name: vm.dirty_ratio
+      value: "{{ mageops_kernel_vm_dirty_ratio }}"
+    - name: vm.dirty_writeback_centisecs
+      value: "{{ mageops_kernel_vm_dirty_writeback_centisecs }}"

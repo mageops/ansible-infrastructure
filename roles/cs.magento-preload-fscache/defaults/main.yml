@@ -30,6 +30,8 @@ magento_fscache_preload_nproc: 49152
 #   - directories - list of subdirectories to search (relative to base)
 #   - file_name_patterns - only matching files will be preloaded
 #   - max_file_size - only smaller files will be preloaded
+#   - retry_interval - how long to wait before restarting if preload fails (usually due to not enough memory)
+#   - update_interval - the minimum time between restarts triggered by file modification (via watcher)
 magento_fscache_preload_configs:
   php_opcache:
     base_path: "{{ magento_php_opcache_file_cache_dir }}"
@@ -38,6 +40,8 @@ magento_fscache_preload_configs:
     file_name_patterns: 
       - '*.php.bin'
     max_file_size: 256K
+    retry_delay: 15min
+    update_interval: 1min
 
   php_sources:
     base_path: "{{ magento_live_release_dir }}"
@@ -48,6 +52,8 @@ magento_fscache_preload_configs:
     file_name_patterns:
       - '*.php'
     max_file_size: 16k
+    retry_delay: 30min
+    update_interval: 5min
 
 
 magento_fscache_preload_config: >-
