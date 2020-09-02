@@ -7,3 +7,10 @@
     recurse: yes
     mode: 0770
 
+# See: https://devdocs.magento.com/guides/v2.4/install-gde/install/post-install-umask.html
+- name: Create Magento umask configuration file
+  copy:
+    dest: "{{ magento_release_dir }}/magento_umask"
+    content: "{{ '%03d' | format(magento_umask | default('022') | int,) }}"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
