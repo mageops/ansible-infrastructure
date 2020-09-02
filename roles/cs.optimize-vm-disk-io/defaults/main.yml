@@ -1,0 +1,16 @@
+# Reference & explanation:
+# - https://www.kernel.org/doc/Documentation/sysctl/vm.txt 
+# - https://lonesysadmin.net/2013/12/22/better-linux-disk-caching-performance-vm-dirty_ratio/
+
+# Note: Removed the _bytes settings as they have no effect when _ratio is used... /FS
+
+# Prefer to keep vfs cache in memory more (<100) than to reclaim them (>100)
+mageops_kernel_vm_vfs_cache_pressure: '50'
+# Allow dirty pages to be kept for 30s in memory before being flushed
+mageops_kernel_vm_dirty_expire_centisecs: '30000'
+# Allow dirty pages to take 5% of memory before background disk flush
+mageops_kernel_vm_dirty_background_ratio: '5'
+# Allow 10% of memory for dirty pages before everything must get flushed to disk
+mageops_kernel_vm_dirty_ratio: '10'
+# Perform dirty page disk flush checks every 5 seconds
+mageops_kernel_vm_dirty_writeback_centisecs: '500'
