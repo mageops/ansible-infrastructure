@@ -1025,9 +1025,9 @@ magento_core_config_settings_to_remove_default:
   - "smile_elasticsuite_core_base_settings/es_client/servers"
 
 
-# ----------------------------------------
-# --------  Magento - PHP Limits  --------
-# ----------------------------------------
+# --------------------------------
+# --------  Magento - PHP --------
+# --------------------------------
 
 # - For even more options see `php_http_request_memory_limit` and `php_http_request_limits_custom` vars.
 
@@ -1047,6 +1047,8 @@ magento_admin_request_php_max_execution_time: 300
 magento_cron_request_php_memory_limit: "{{ php_http_request_memory_limit }}"
 magento_cron_request_php_max_execution_time: "{{ php_http_request_max_execution_time }}"
 
+# Directory where Magento CLI file opcache is stored
+magento_php_opcache_file_cache_dir: "{{ magento_user_home }}/{{ php_opcache_file_cache_user_dirname }}"
 
 # ---------------------------------------------
 # --------  Magento Page Cache Warmer  --------
@@ -1273,6 +1275,7 @@ php_opcache_validate_timestamps: "0"
 php_opcache_revalidate_path: "0"
 php_opcache_revalidate_freq: "2"
 php_opcache_blacklist_filename: "{{ php_conf_fragment_dir_path }}/opcache*.blacklist"
+php_opcache_file_cache_user_dirname: .opcache
 php_opcache_file_cache_users:
   - "{{ mageops_app_user }}"
 
