@@ -1,9 +1,9 @@
 
 - import_tasks: 000-prepare-runtime-config.yml
-
+- import_tasks: 010-set-permissions.yml
 - name: Execute Magento setup
   block:
-    - include_tasks: 010-set-permissions.yml
+    
     - include_tasks: 020-check-database.yml
     - include_tasks: 030-setup-elasticsuite.yml
       when: mageops_elasticsearch_host is defined and mageops_elasticsearch_host != ""
