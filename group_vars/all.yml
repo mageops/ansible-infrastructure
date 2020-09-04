@@ -885,6 +885,7 @@ magento_core_config_settings_default:
     path: "web/url/redirect_to_base"
     # Magento config values: 0 - disabled, 1 - 302 redirect, 301 - 301 redirect
     value: "{{ '1' if magento_core_config_enable_redirect_to_base | int == 302 else magento_core_config_enable_redirect_to_base | int | string }}"
+    default: yes
 
   - name: Separate process for default cronjob group
     path: "system/cron/default/use_separate_process"
