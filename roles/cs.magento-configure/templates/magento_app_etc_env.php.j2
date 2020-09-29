@@ -103,8 +103,8 @@ return [
         ],
     'http_cache_hosts' => [
         [
-            'host' => '{{ mageops_varnish_host }}',
-            'port' => {{ mageops_varnish_port }}
+            'host' => '{{ magento_varnish_host }}',
+            'port' => {{ magento_varnish_port }}
         ],
     ],
     {% if magento_redis_cache %}
@@ -158,9 +158,9 @@ return [
             'max_messages' => {{ magento_consumer_workers_max_messages | default(500) }},
         ],
     {% else %}
-    {# 
+    {#
      # Disable consumers cron runner explicitly otherwise Magento will run them even if there
-     # is no amqp connection configured consuming resources unnecessarily and spamming logfiles. 
+     # is no amqp connection configured consuming resources unnecessarily and spamming logfiles.
      #}
     'cron_consumers_runner' =>
         [

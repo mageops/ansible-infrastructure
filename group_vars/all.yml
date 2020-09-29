@@ -579,6 +579,7 @@ mageops_elasticsearch_create: yes
 # mageops_elasticsearch_host:
 
 mageops_varnish_purge_logging: yes
+mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: "{% if mageops_https_termination_enable %}8000{% else %}80{% endif %}"
 mageops_varnish_backend_port: "{% if varnish_is_in_autoscaling_group %}8080{% else %}80{% endif %}"
 
@@ -882,6 +883,7 @@ magento_core_config_settings_default:
     path: "web/url/redirect_to_base"
     # Magento config values: 0 - disabled, 1 - 302 redirect, 301 - 301 redirect
     value: "{{ '1' if magento_core_config_enable_redirect_to_base | int == 302 else magento_core_config_enable_redirect_to_base | int | string }}"
+    default: yes
 
   - name: Separate process for default cronjob group
     path: "system/cron/default/use_separate_process"

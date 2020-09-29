@@ -1,8 +1,8 @@
 magento_core_config_settings: []
 magento_core_config_settings_to_remove: []
 
-mageops_varnish_host: 127.0.0.1
-mageops_varnish_port: 80
+magento_varnish_host: 127.0.0.1
+magento_varnish_port: 80
 
 # Root directory where releases, shared files are kept
 magento_deployment_dir:    "{{ mageops_app_web_dir }}"
@@ -29,7 +29,7 @@ magento_app_etc_config_template: magento_app_etc_config.php.j2
 magento_app_etc_env_template: magento_app_etc_env.php.j2
 
 magento_consumer_workers_enable: yes
-magento_consumer_workers: 
+magento_consumer_workers:
    - consumer: codegeneratorProcessor
      batch_size: 100
      process_count: 1
@@ -64,5 +64,3 @@ magento_scd_excluded_themes: []
 magento_scd_languages:
   - de_DE
   - en_US
-
-
