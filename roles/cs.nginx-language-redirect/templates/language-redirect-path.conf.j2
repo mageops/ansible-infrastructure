@@ -1,3 +1,10 @@
+{%- if nginx_language_redirect_detection_method == "accept_language" -%}
+set $first_language $http_accept_language;
+if ($http_accept_language ~* '^(.+?),') {
+    set $first_language $1;
+}
+{%- endif %}
+
 {%- for lang, path in nginx_language_redirect_directory_mapping.items() %}
 if ( $target = "{{ path }}" ) {
     {%- if nginx_language_redirect_mode == 'geofence' %}

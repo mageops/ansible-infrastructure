@@ -12,10 +12,6 @@ geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
 {%- set lang_source_var = "$geoip2_data_country_code" %}
 {%- endif %}
 {%- if nginx_language_redirect_detection_method == "accept_language" -%}
-set $first_language $http_accept_language;
-if ($http_accept_language ~* '^(.+?),') {
-    set $first_language $1;
-}
 {%- set lang_source_var = "$first_language" %}
 {%- endif %}
 {% if nginx_language_redirect_style == "dir" %}
