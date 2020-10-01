@@ -1323,7 +1323,7 @@ redis_maxmemory: 200M
 redis_persistence_enable: no # We don't need to persist magento cache
 
 # Sessions redis instance settings, rest inherited from base
-redis_sessions_maxmemory_policy: noeviction
+redis_sessions_maxmemory_policy: allkeys-lru
 redis_sessions_maxmemory: 100M
 redis_sessions_persistence_enable: yes
 
