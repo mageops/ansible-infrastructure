@@ -759,6 +759,8 @@ magento_gid: "{{ mageops_app_gid }}"
 
 magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
 
+mageops_install_magerun: yes
+
 # ----------------------------------------------------------
 # --------  Magento Project Specific Configuration  --------
 # ----------------------------------------------------------
