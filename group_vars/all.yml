@@ -131,9 +131,6 @@ aws_tags_role_rabbitmq_message_queue:
 aws_tags_role_loadbalancer:
   Role: "loadbalancer"
 
-aws_tags_role_nginx_loadbalancer:
-  RoleLoadBalancer: "nginx"
-
 aws_tags_role_elb_loadbalancer:
   RoleLoadBalancer: "elasticloadbalancer"
 
@@ -761,6 +758,8 @@ magento_uid: "{{ mageops_app_uid }}"
 magento_gid: "{{ mageops_app_gid }}"
 
 magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
+
+mageops_install_magerun: yes
 
 # ----------------------------------------------------------
 # --------  Magento Project Specific Configuration  --------

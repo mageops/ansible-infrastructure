@@ -4,7 +4,7 @@
     region: "{{ aws_region }}"
     name: "{{ aws_elb_name }}"
     subnets: "{{ aws_vpc_subnet_ids }}"
-    aws_security_group_names:
+    security_group_names:
       - "{{ aws_security_group_lb_name }}"
     cross_az_load_balancing: "{{ lb_cross_az }}"
     idle_timeout: "{{ lb_timeout }}"
@@ -18,7 +18,7 @@
       unhealthy_threshold: 3
       healthy_threshold: 2
     access_logs: "{{ lb_s3_logs | ternary(elb_access_logs, omit) }}"
-    tags: "{{ aws_tags_default | combine(aws_tags_role_loadbalancer, aws_tags_elb) }}"
+    tags: "{{ aws_tags_default | combine(aws_tags_role_loadbalancer, aws_tags_role_elb_loadbalancer) }}"
   vars:
     elb_listener_http:
       protocol: http
