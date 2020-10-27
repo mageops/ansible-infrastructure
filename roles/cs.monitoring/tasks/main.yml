@@ -1,0 +1,5 @@
+- include_tasks: pushprox.yml
+  when: monitoring_pushprox_enabled
+
+- include_tasks: node-exporter.yml
+  when: monitoring_node_exporter_enabled

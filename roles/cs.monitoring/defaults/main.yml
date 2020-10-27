@@ -1,0 +1,6 @@
+# Enable pushprox proxy
+monitoring_pushprox_enabled: no
+monitoring_node_exporter_enabled: no
+
+# Url for pushprox endpoint
+# monitoring_pushprox_proxy_url:

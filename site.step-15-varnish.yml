@@ -21,7 +21,7 @@
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:
         - varnish
-        - nginx    
+        - nginx
     - role: cs.mageops-cli-user
       mageops_cli_user: "{{ magento_user }}"
       mageops_cli_user_group: "{{ magento_group }}"
@@ -67,6 +67,9 @@
       aws_logs_stream_name: "{{ mageops_node_role }}"
       aws_logs_loggers: "{{ aws_logs_loggers_varnish_default | combine(aws_logs_loggers_varnish_extra | default({}), recursive=True) }}"
       when: aws_use
+    - role: cs.monitoring
+      monitoring_node_exporter_enabled: yes
+      when: mageops_monitoring_enabled
 
   vars:
     mageops_node_role: varnish
