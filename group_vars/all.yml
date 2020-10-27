@@ -1677,3 +1677,9 @@ mageops_public_ip_v4_api_url: "{{ aws_use | ternary('http://169.254.169.254/late
 
 
 mageops_unison_server_port: 5566
+
+# ---------------------------
+# -------  Monitoring  ------
+# ---------------------------
+
+mageops_monitoring_enabled: no

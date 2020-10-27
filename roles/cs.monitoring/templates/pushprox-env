@@ -1,0 +1,1 @@
+PUSHPROX_CLIENT_OPTS="--proxy-url={{ monitoring_pushprox_proxy_url }}"

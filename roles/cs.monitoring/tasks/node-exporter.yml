@@ -1,0 +1,10 @@
+- name: Install node-exporter
+  yum:
+    name: node-exporter
+    state: latest
+
+- name: Enable node-exporter service
+  service:
+    name: node-exporter
+    enabled: yes
+    state: started
