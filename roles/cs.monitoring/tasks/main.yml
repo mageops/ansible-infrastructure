@@ -3,3 +3,6 @@
 
 - include_tasks: node-exporter.yml
   when: monitoring_node_exporter_enabled
+
+- include_tasks: varnish-exporter.yml
+  when: monitoring_varnish_exporter_enabled
