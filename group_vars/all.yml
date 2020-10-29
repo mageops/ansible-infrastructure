@@ -1157,6 +1157,10 @@ php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
 php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"
 php_fpm_pool_ping_response: "HEALTHY"
 
+# Permissions for fpm socket
+php_fpm_pool_listen_user: "{{ nginx_user }}"
+php_fpm_pool_listen_group: "{{ nginx_group }}"
+
 php_date_timezone: "{{ mageops_timezone }}"
 php_memory_limit: "-1"
 
