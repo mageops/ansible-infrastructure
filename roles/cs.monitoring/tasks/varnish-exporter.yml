@@ -1,0 +1,10 @@
+- name: Install varnish-exporter
+  yum:
+    name: varnish-exporter
+    state: latest
+
+- name: Enable varnish-exporter service
+  service:
+    name: varnish-exporter
+    enabled: yes
+    state: started
