@@ -17,3 +17,19 @@
 - name: Check if throttling shall be enabled
   set_fact:
     varnish_throttling_enabled: "{{ (varnish_standalone and varnish_throttling and varnish_throttling_rules | length > 0)|bool }}"
+
+- name: Collect all app hosts for allowed origins
+  block:
+    - name: Collect main Magento installation host
+      set_fact:
+        varnish_media_cors_allowed_origins: "{{ [magento_hostname] }}"
+    - name: Collect hosts from HTTPS termination configuration
+      set_fact:
+        varnish_media_cors_allowed_origins: |
+          {{
+              varnish_media_cors_allowed_origins +
+              https_termination_hosts | default([])|selectattr('server_name', 'defined')|map(attribute='server_name')|list +
+              https_termination_hosts | default([])|selectattr('aliases', 'defined')|map(attribute='aliases')|list | flatten
+          }}
+      when: mageops_https_termination_enable | default(false)
+  when: varnish_media_cors_allowed_origins is not defined

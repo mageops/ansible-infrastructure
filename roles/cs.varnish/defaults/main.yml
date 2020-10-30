@@ -102,3 +102,5 @@ varnish_debug_request_query_param_name: ___varnish_debug_token___
 varnish_debug_request_cookie_name: ___varnish_debug_token___
 varnish_debug_request_header_name: X-Varnish-Debug-Token
 varnish_debug_request_info_header_name: X-Varnish-Debug-Request-Info
+varnish_media_cors_enabled: yes
+varnish_media_cors_max_age: 2678400
