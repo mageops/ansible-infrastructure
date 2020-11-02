@@ -1,0 +1,10 @@
+- name: Install elasticsearch-exporter
+  yum:
+    name: elasticsearch-exporter
+    state: latest
+
+- name: Enable elasticsearch-exporter service
+  service:
+    name: elasticsearch-exporter
+    enabled: yes
+    state: started

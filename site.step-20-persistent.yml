@@ -77,6 +77,7 @@
       when: mageops_app_is_magesuite
     - role: cs.monitoring
       monitoring_node_exporter_enabled: yes
+      monitoring_elasticsearch_exporter_enabled: yes
       when: mageops_monitoring_enabled
 
   tasks:
