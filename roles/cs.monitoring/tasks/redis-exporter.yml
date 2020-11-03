@@ -1,0 +1,10 @@
+- name: Install redis-exporter
+  yum:
+    name: redis-exporter
+    state: latest
+
+- name: Enable redis-exporter service
+  service:
+    name: redis-exporter
+    enabled: yes
+    state: started
