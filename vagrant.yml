@@ -13,7 +13,7 @@
     - role: cs.sshd
     - role: cs.vagrant-sudo
     - role: geerlingguy.composer
-      composer_version: "1.10.16"
+      composer_version_branch: "--1"
     - role: cs.nodejs
     - role: cs.unison-server
     - role: cs.authorize-local-keys
