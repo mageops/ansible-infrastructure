@@ -196,6 +196,11 @@ aws_tags_node_app_with_varnish:
 aws_tags_node_persistent:
   NodePersistent: "{{ mageops_app_name }}"
 
+# --- Encryption Keys ---
+
+aws_tags_kms_database:
+  EncryptionPurpose: database
+
 # -----------------------
 # --------  AMI  --------
 # -----------------------
@@ -399,6 +404,7 @@ aws_rds_instance_type: db.t3.micro
 
 # Name of this instance
 aws_rds_instance_name: "{{ mageops_app_name }}-db"
+aws_rds_encryption_key_name: "{{ mageops_app_name }}-db"
 
 # Default configuration tunes for MySQL
 aws_rds_param_group_params_default:
@@ -408,6 +414,9 @@ aws_rds_param_group_params_default:
 
 # Parameters to tune MySQL configuration
 aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws_rds_param_group_params_extra | default({}), recursive=True) }}"
+
+# Storage encryption
+aws_rds_storage_encrypt: "{{ mageops_encryption }}"
 
 # --------------------------
 # --------  AWS S3  --------
@@ -637,6 +646,9 @@ mageops_query_param_prefix: "__mgo"
 
 # Name prefix of custom MageOps cookies
 mageops_cookie_prefix: "MageOps"
+
+# Enable data encryption
+mageops_encryption: no
 
 # ---------------------------------------------
 # --------  MageOps General Debugging  --------

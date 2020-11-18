@@ -19,7 +19,7 @@ DOCUMENTATION = '''
           - name: ANSIBLE_MAGEOPS_VARS_INVENTORY_GROUPS
       config_types:
         description: Which config types (subdirs/files) to load from the configuration dir
-        default: ['global', 'project]
+        default: ['global', 'project']
         type: list
         ini:
           - key: vars_config_types

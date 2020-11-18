@@ -1,0 +1,7 @@
+- name: Create KMS access policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_kms_access }}"
+    policy_description: Allow access to KMS resourcess
+    policy: "{{ lookup('template', 'kms_access.policy.json') }}"
+    state: present
+  register: iam_kms_access
