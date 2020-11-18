@@ -34,7 +34,7 @@
     region: "{{ aws_region }}"
     state: "{% if magento_aws_ondemand_import_instance_enable %}present{% else %}absent{% endif %}"
     schedule_expression: "{{ aws_import_scaling_lambda_schedule }}"
-    targets: "{% if magento_aws_ondemand_import_instance_enable %}{{ handle_import_scaling_lambda_eventrule_targets }}{% else %}omit{% endif %}"
+    targets: "{% if magento_aws_ondemand_import_instance_enable %}{{ handle_import_scaling_lambda_eventrule_targets }}{% else %}[]{% endif %}"
   register: import_scaling_schedule_event
 
 - name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
@@ -46,4 +46,3 @@
     principal: "events.amazonaws.com"
     statement_id: "AWSEvents-importScalingHandler-{{ mageops_app_name }}"
     source_arn: "{% if magento_aws_ondemand_import_instance_enable %}{{ import_scaling_schedule_event.rule.arn }}{% else %}omit{% endif %}"
-
