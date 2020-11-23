@@ -23,6 +23,6 @@
     ami_facts_tag_filters: "{{ ami_tags | prefix_keys('tag:') }}"
   register: ami_facts
   until: "ami_facts.images is defined and ami_facts.images|length > 0"
-  retries: 60
+  retries: 360
   delay: 5
   when: ami_output is changed
