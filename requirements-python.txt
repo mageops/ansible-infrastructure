@@ -27,3 +27,6 @@ PyYAML<5.3
 
 # required for `cs.ansible-plugins` role
 jq
+
+# required if host running ansible have selinux installed
+selinux
