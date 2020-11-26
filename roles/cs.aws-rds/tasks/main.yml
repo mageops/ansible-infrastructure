@@ -6,6 +6,12 @@
     description: "{{ aws_rds_subnet_group_name }}"
     subnets: "{{ aws_rds_subnet_group_subnets }}"
 
+- name: Enable collecting slow log
+  set_fact:
+    aws_rds_param_group_params: "{{ aws_rds_param_group_params | combine({'slow_query_log': 1, 'long_query_time': aws_rds_slowlog_time}, recursive=True) }}"
+    aws_rds_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports + [ 'slowquery' ] }}"
+  when: aws_rds_slowlog_enabled
+
 - name: Create RDS parameter group
   rds_param_group:
     state: present
@@ -23,10 +29,53 @@
     tags: "{{ aws_tags_default | combine(aws_tags_kms_database) }}"
   when: aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key
 
+- name: Wait for active rds modifications to finish
+  rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_instance_name }}"
+  register: aws_rds_current
+  retries: 600
+  delay: 5
+  until: (aws_rds_current.instances|length) == 0 or aws_rds_current.instances[0].db_instance_status != "modifying"
+
+- name: Check current RDS configuration
+  rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_instance_name }}"
+  register: aws_rds_current
+
+- name: Update RDS instance class before applying full configuration (workaround)
+  block:
+    - name: Update RDS instance class before applying full configuration (workaround)
+      shell: |
+            aws \
+                --region '{{ aws_region }}' \
+            rds modify-db-instance \
+              --db-instance-identifier='{{ aws_rds_instance_name }}' \
+              --db-instance-class='{{ aws_rds_instance_type }}' \
+              --apply-immediately
+    - name: Wait for modification to start
+      rds_instance_info:
+        region: "{{ aws_region }}"
+        db_instance_identifier: "{{ aws_rds_instance_name }}"
+      register: aws_rds_current
+      retries: 20
+      delay: 3
+      until: aws_rds_current.instances[0].db_instance_status == "modifying" or aws_rds_current.instances[0].pending_modified_values.db_instance_class is not defined
+    - name: Wait for modification to finish
+      rds_instance_info:
+        region: "{{ aws_region }}"
+        db_instance_identifier: "{{ aws_rds_instance_name }}"
+      register: aws_rds_current
+      retries: 600
+      delay: 5
+      until: aws_rds_current.instances[0].db_instance_status == "available"
+  when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].db_instance_class != aws_rds_instance_type
+
 - name: Create MySQL/MariaDB RDS
   rds_instance:
     region: "{{ aws_region }}"
-    publicly_accessible: true
+    publicly_accessible: "{{ aws_rds_publicly_accessible }}"
     db_instance_identifier: "{{ aws_rds_instance_name }}"
     engine: "{{ aws_rds_db_engine }}"
     db_parameter_group_name: "{{ aws_rds_param_group_name }}"
@@ -36,8 +85,7 @@
     master_username: "{{ mageops_mysql_root_user }}"
     master_user_password: "{{ mageops_mysql_root_pass }}"
     db_subnet_group_name: "{{ aws_rds_subnet_group_name }}"
-    vpc_security_group_ids:
-     - "{{ aws_rds_security_groups }}"
+    vpc_security_group_ids: "{{ aws_rds_security_groups }}"
     backup_retention_period: "{{ aws_rds_backup_retention }}"
     preferred_backup_window: "{{ aws_rds_backup_window }}"
     preferred_maintenance_window: "{{ aws_rds_maintenance_window }}"
@@ -47,5 +95,8 @@
     availability_zone: "{{ aws_rds_availability_zone }}"
     storage_encrypted: "{{ aws_rds_storage_encrypt }}"
     kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
+    enable_performance_insights: "{{ aws_rds_performance_insights }}"
+    performance_insights_retention_period: "{{ aws_rds_performance_insights_retention_period if aws_rds_performance_insights else omit }}"
     performance_insights_kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
+    enable_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports }}"
     wait: yes
