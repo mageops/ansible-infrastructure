@@ -10,8 +10,15 @@ aws_rds_db_engine: MySQL
 aws_rds_availability_zone: "{{ aws_preferred_availability_zone }}"
 aws_rds_subnet_group_name: "{{ mageops_app_name }}"
 aws_rds_subnet_group_subnets: "{{ aws_vpc_subnet_ids }}"
-aws_rds_security_groups: "{{ aws_security_group_rds_id }}"
+aws_rds_security_groups:
+  - "{{ aws_security_group_rds_id }}"
 aws_rds_param_group_name: "{{ mageops_app_name }}"
 aws_rds_param_group_desc: "MageOps parameter group"
-aws_rds_db_engine_version: 5.7
+aws_rds_db_engine_version: "5.7"
 aws_rds_param_group_engine: "mysql{{ aws_rds_db_engine_version }}"
+aws_rds_performance_insights: "{{ False if aws_rds_instance_type.startswith('db.t') else True }}"
+aws_rds_performance_insights_retention_period: 7
+aws_rds_slowlog_enabled: yes
+aws_rds_slowlog_time: 10
+aws_rds_cloudwatch_logs_exports: []
+aws_rds_publicly_accessible: yes
