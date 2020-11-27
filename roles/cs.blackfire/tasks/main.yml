@@ -20,4 +20,7 @@
 
     - name: Create agent.json config files
       template: src=agent.json.j2 dest=/etc/blackfire/agent.json
+
+    - name: Create blackfire PHP config
+      template: src=blackfire.ini.j2 dest=/etc/php.d/zz-blackfire.ini
   when: blackfire_install and blackfire_server_id and blackfire_server_token
