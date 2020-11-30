@@ -3,6 +3,11 @@
     path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"
   register: _repo_mageops_config_file_check
 
+- name: Install Mageops GPG key
+  rpm_key:
+    state: present
+    key: "{{ repo_mageops_gpg_key }}"
+
 - name: Bootstrap MageOps repo by installing remote package
   yum:
     name: "{{ repo_mageops_release_package_url }}"
@@ -37,5 +42,3 @@
     state: latest
   when: not _repo_mageops_config_file_check.stat.exists
   notify: Regenerate yum cache for MageOps repo
-
-
