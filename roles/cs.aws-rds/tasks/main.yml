@@ -58,18 +58,18 @@
       rds_instance_info:
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance_name }}"
-      register: aws_rds_current
+      register: aws_rds_wait_start_result
       retries: 20
       delay: 3
-      until: aws_rds_current.instances[0].db_instance_status == "modifying" or aws_rds_current.instances[0].pending_modified_values.db_instance_class is not defined
+      until: aws_rds_wait_start_result.instances[0].db_instance_status == "modifying" or aws_rds_wait_start_result.instances[0].pending_modified_values.db_instance_class is not defined
     - name: Wait for modification to finish
       rds_instance_info:
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance_name }}"
-      register: aws_rds_current
+      register: aws_rds_wait_finish_result
       retries: 600
       delay: 5
-      until: aws_rds_current.instances[0].db_instance_status == "available"
+      until: aws_rds_wait_finish_result.instances[0].db_instance_status == "available"
   when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].db_instance_class != aws_rds_instance_type
 
 - name: Create MySQL/MariaDB RDS
