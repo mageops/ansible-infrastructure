@@ -421,6 +421,9 @@ aws_rds_storage_encrypt: "{{ mageops_encryption }}"
 # EBS encryption
 mageops_ebs_encrypt: "{{ mageops_encryption }}"
 
+# EFS encryption
+mageops_efs_encrypt: "{{ mageops_encryption }}"
+
 # --------------------------
 # --------  AWS S3  --------
 # --------------------------
