@@ -17,10 +17,11 @@
         performance_mode: "{{ efs_performance_mode }}"
         region: "{{ aws_region }}"
         targets: "{{ efs_aws_subnet_ids | jq(efs_targets_jq) }}"
+        encrypt: "{{ mageops_efs_encrypt }}"
       vars:
         efs_targets_jq: >-
           map({
-            subnet_id: ., 
+            subnet_id: .,
             security_groups: [
               "{{ efs_aws_security_group_id }}"
             ]
@@ -32,7 +33,7 @@
     - name: Set EFS LifeCycle Policies
       when: efs_lifecycle_policies and efs_lifecycle_policies | length > 0
       command: >-
-        aws efs put-lifecycle-configuration 
+        aws efs put-lifecycle-configuration
           --region '{{ aws_region }}'
           --file-system-id '{{ _aws_efs.efs.file_system_id }}'
           --lifecycle-policies '{{ efs_lifecycle_policies | to_json }}'
