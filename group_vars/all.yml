@@ -418,6 +418,9 @@ aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws
 # Storage encryption
 aws_rds_storage_encrypt: "{{ mageops_encryption }}"
 
+# EBS encryption
+mageops_ebs_encrypt: "{{ mageops_encryption }}"
+
 # --------------------------
 # --------  AWS S3  --------
 # --------------------------
