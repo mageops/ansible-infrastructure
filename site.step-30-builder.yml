@@ -26,7 +26,7 @@
       builder_instance_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
       builder_instance_inventory_group: app
       builder_instance_name: "{{ mageops_app_name }}-builder-app"
-      builder_instance_type: "{{ aws_app_builder_node_instance_type }}"
+      builder_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_builder_node_instance_type, true) }}"
       builder_instance_volume_size: "{{ aws_app_node_ebs_volume_size }}"
       builder_instance_ssh_key_name: "{{ aws_ec2_ssh_key_name }}"
       builder_instance_iam_role: "{{ aws_iam_role_app_node }}"
@@ -46,4 +46,3 @@
   tasks:
     - name: Refresh inventory to get info about current builder nodes
       meta: refresh_inventory
-

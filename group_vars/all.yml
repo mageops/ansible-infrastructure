@@ -653,6 +653,9 @@ mageops_query_param_prefix: "__mgo"
 # Name prefix of custom MageOps cookies
 mageops_cookie_prefix: "MageOps"
 
+# Amount of memory that is reserved for other processes than php-fpm
+mageops_app_node_reserved_memory: "256M"
+
 # Enable data encryption
 mageops_encryption: no
 
@@ -1236,7 +1239,7 @@ php_cli_opcache_file_cache_enable: no
 # ---------------------------
 
 php_fpm_pm_type: static
-php_fpm_pm_max_children: 4
+php_fpm_pm_max_children: ""
 php_fpm_pm_max_requests: 100
 
 # -----------------------------
