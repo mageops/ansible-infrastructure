@@ -26,18 +26,65 @@
     launch_config_name: "{{ launch_configuration.name }}"
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
-    max_size: "{{ autoscaling_asg_max_size }}"
-    desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
+    max_size: >-
+      {{ autoscaling_asg_replace_with_check | ternary(
+          autoscaling_asg_max_size + autoscaling_asg_desired_capacity, 
+          autoscaling_asg_max_size
+        ) }}
+    desired_capacity: >-
+      {{ autoscaling_asg_replace_with_check | ternary( 
+          autoscaling_asg_desired_capacity * 2, 
+          autoscaling_asg_desired_capacity
+        ) }}"
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
+    wait_for_instances: "{{ autoscaling_asg_wait_for_instances }}"
     wait_timeout: "{{ autoscaling_asg_wait_timeout }}"
-    replace_all_instances: yes
-    replace_batch_size: "{{ autoscaling_asg_replace_batch_size }}"
-    termination_policies: NewestInstance
+    replace_all_instances: "{{ autoscaling_asg_replace_all }}"
+    replace_batch_size: "{{ autoscaling_asg_replace_batch_size | default(omit) }}"
+    termination_policies: "{{ autoscaling_asg_termination_policies }}"
     tags: "{{ aws_tags_default | combine(asg_name_tags, aws_tags_trait_immutable, autoscaling_instance_tags) | dict_to_tag_list }}"
   vars:
     asg_name_tags:
       - Name: "{{ autoscaling_asg_name }}"
+  register: _aws_asg
+
+- name: Handle bulk update of instances with health check
+  block:
+  # - set_fact:
+  #     _asg_instaqnces: "{{ _aws_asg | json_query('instance_facts | keys(@)') }}"
+  # - debug:
+  #     var: _asg_instaqnces
+  - name: Make a list od instances for health check
+    ec2_instance_info:
+      instance_ids: "{{ _aws_asg.instances }}"
+    register: _aws_asg_instances
+  
+  - name: Wait until the health check file exists on all nodes
+    wait_for:
+      path: "{{ autoscaling_asg_replace_check_file }}"
+      timeout: "{{ autoscaling_asg_wait_timeout }}"
+    delegate_to: "{{ item }}"
+    with_items: "{{ _aws_asg_instances | json_query('instances[].public_ip_address') }}"
+
+  - name: Reduce AutoScaling Group - remove old instances
+    ec2_asg:
+      state: present
+      name: "{{ autoscaling_asg_name }}"
+      region: "{{ aws_region }}"
+      min_size: "{{ autoscaling_asg_min_size }}"
+      max_size: "{{ autoscaling_asg_max_size }}"
+      desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
+      termination_policies: >-
+        {{ [ 'OldestLaunchConfiguration' ] 
+        + (autoscaling_asg_termination_policies is string | ternary(
+            [ autoscaling_asg_termination_policies ], autoscaling_asg_termination_policies)
+          ) }}
+      wait_for_instances: yes
+      replace_all_instances: yes
+    register: _aws_asg
+
+  when: autoscaling_asg_replace_with_check
 
 - name: Create ASG Termination Lifecycle Hook
   ec2_asg_lifecycle_hook:
