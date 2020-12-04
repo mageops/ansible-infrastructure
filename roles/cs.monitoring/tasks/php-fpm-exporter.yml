@@ -1,0 +1,28 @@
+- name: Create service override dir
+  file:
+    path: /etc/systemd/system/php-fpm-exporter.service.d
+    state: directory
+    recurse: yes
+
+- name: Set php-fpm-exporter override
+  template:
+    src: php-fpm-exporter-override
+    dest: /etc/systemd/system/php-fpm-exporter.service.d/override.conf
+    force: yes
+
+- name: Install php-fpm-exporter
+  yum:
+    name: php-fpm-exporter
+    state: latest
+
+- name: Configure php-fpm-exporter
+  template:
+    src: php-fpm-exporter-env
+    dest: /etc/default/php-fpm-exporter
+    force: yes
+
+- name: Enable php-fpm-exporter service
+  service:
+    name: php-fpm-exporter
+    enabled: yes
+    state: started

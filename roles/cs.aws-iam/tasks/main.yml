@@ -1,4 +1,5 @@
 - import_tasks: pass-role-to-ec2.yml
 - import_tasks: ec2-instance-roles.yml
 - import_tasks: lambda-roles.yml
+- import_tasks: kms-roles.yml
 - import_tasks: provisioning-groups.yml

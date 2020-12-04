@@ -1,0 +1,34 @@
+- name: Install redis-exporter
+  yum:
+    name: redis-exporter
+    state: latest
+
+- name: Set redis-exporter sessions configuration
+  template:
+    src: redis-exporter-env
+    dest: /etc/default/redis-exporter.sessions
+    force: yes
+  vars:
+    redis_port: 6380
+    metrics_port: 9122
+
+- name: Set redis-exporter sentinel configuration
+  template:
+    src: redis-exporter-env
+    dest: /etc/default/redis-exporter.sentinel
+    force: yes
+  vars:
+    redis_port: 6379
+    metrics_port: 9121
+
+- name: Enable redis-exporter sessions service
+  service:
+    name: redis-exporter@sessions
+    enabled: yes
+    state: started
+
+- name: Enable redis-exporter sentinel service
+  service:
+    name: redis-exporter@sentinel
+    enabled: yes
+    state: started

@@ -131,9 +131,6 @@ aws_tags_role_rabbitmq_message_queue:
 aws_tags_role_loadbalancer:
   Role: "loadbalancer"
 
-aws_tags_role_nginx_loadbalancer:
-  RoleLoadBalancer: "nginx"
-
 aws_tags_role_elb_loadbalancer:
   RoleLoadBalancer: "elasticloadbalancer"
 
@@ -198,6 +195,11 @@ aws_tags_node_app_with_varnish:
 
 aws_tags_node_persistent:
   NodePersistent: "{{ mageops_app_name }}"
+
+# --- Encryption Keys ---
+
+aws_tags_kms_database:
+  EncryptionPurpose: database
 
 # -----------------------
 # --------  AMI  --------
@@ -402,6 +404,7 @@ aws_rds_instance_type: db.t3.micro
 
 # Name of this instance
 aws_rds_instance_name: "{{ mageops_app_name }}-db"
+aws_rds_encryption_key_name: "{{ mageops_app_name }}-db"
 
 # Default configuration tunes for MySQL
 aws_rds_param_group_params_default:
@@ -411,6 +414,15 @@ aws_rds_param_group_params_default:
 
 # Parameters to tune MySQL configuration
 aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws_rds_param_group_params_extra | default({}), recursive=True) }}"
+
+# Storage encryption
+aws_rds_storage_encrypt: "{{ mageops_encryption }}"
+
+# EBS encryption
+mageops_ebs_encrypt: "{{ mageops_encryption }}"
+
+# EFS encryption
+mageops_efs_encrypt: "{{ mageops_encryption }}"
 
 # --------------------------
 # --------  AWS S3  --------
@@ -643,6 +655,10 @@ mageops_cookie_prefix: "MageOps"
 
 # Amount of memory that is reserved for other processes than php-fpm
 mageops_app_node_reserved_memory: "256M"
+
+# Enable data encryption
+mageops_encryption: no
+
 # ---------------------------------------------
 # --------  MageOps General Debugging  --------
 # ---------------------------------------------
@@ -763,6 +779,8 @@ magento_uid: "{{ mageops_app_uid }}"
 magento_gid: "{{ mageops_app_gid }}"
 
 magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
+
+mageops_install_magerun: yes
 
 # ----------------------------------------------------------
 # --------  Magento Project Specific Configuration  --------
@@ -1129,6 +1147,7 @@ php_packages:
   - php-opcache
   - php-mbstring
   - php-bcmath
+  - php-sodium
   - php-soap
 
 php_conf_fragment_dir_path: "/etc/php.d"
@@ -1159,6 +1178,10 @@ php_xdebug_remote_host: "{{ php_fpm_debug_pool_xdebug_remote_host }}"
 php_fpm_pm_status_path: "{{ mageops_internal_api_http_path }}/php-fpm/status"
 php_fpm_pool_ping_path: "{{ mageops_internal_api_http_path }}/php-fpm/healthcheck"
 php_fpm_pool_ping_response: "HEALTHY"
+
+# Permissions for fpm socket
+php_fpm_pool_listen_user: "{{ nginx_user }}"
+php_fpm_pool_listen_group: "{{ nginx_group }}"
 
 php_date_timezone: "{{ mageops_timezone }}"
 php_memory_limit: "-1"
@@ -1680,3 +1703,9 @@ mageops_public_ip_v4_api_url: "{{ aws_use | ternary('http://169.254.169.254/late
 
 
 mageops_unison_server_port: 5566
+
+# ---------------------------
+# -------  Monitoring  ------
+# ---------------------------
+
+mageops_monitoring_enabled: no

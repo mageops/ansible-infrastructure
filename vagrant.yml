@@ -13,6 +13,7 @@
     - role: cs.sshd
     - role: cs.vagrant-sudo
     - role: geerlingguy.composer
+      composer_version_branch: "--1"
     - role: cs.nodejs
     - role: cs.unison-server
     - role: cs.authorize-local-keys
@@ -28,12 +29,6 @@
         - redis
         - varnish
   tasks:
-    - name: Install composer parallel download plugin globally
-      composer:
-        command: require
-        global_command: yes
-        arguments: hirak/prestissimo
-
     - include_tasks: "{{ mageops_project_vars_dir }}/{{ item }}"
       when: vagrant_tasks_project is defined
       loop: "{{ vagrant_tasks_project }}"

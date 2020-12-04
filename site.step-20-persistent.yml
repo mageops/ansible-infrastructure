@@ -21,6 +21,10 @@
     - role: cs.swap
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
+    - role: cs.packages
+      packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
+      packages_install: "{{ mageops_packages_common + mageops_packages_persistent + mageops_packages_persistent_extra }}"
+      packages_remove: "{{ mageops_packages_banned }}"
     - role: cs.provisioning-migrations
     - role: cs.packages
       packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
@@ -75,6 +79,11 @@
       when: mageops_rabbitmq_create
     - role: cs.magento-cron-http-trigger
       when: mageops_app_is_magesuite
+    - role: cs.monitoring
+      monitoring_node_exporter_enabled: yes
+      monitoring_elasticsearch_exporter_enabled: yes
+      monitoring_redis_exporter_enabled: yes
+      when: mageops_monitoring_enabled
 
   tasks:
     - include_tasks: "{{ mageops_extra_tasks_persistent_node }}"

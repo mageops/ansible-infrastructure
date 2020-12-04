@@ -35,6 +35,9 @@
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
 
+    - role: cs.packages
+      packages_install: "{{ mageops_packages_common + mageops_packages_app_node + mageops_packages_app_node_extra }}"
+
     - role: cs.provisioning-migrations
 
     - role: cs.packages
@@ -131,6 +134,12 @@
       when: aws_use
 
     - role: cs.mageops-cli-profile
+    - role: cs.magerun
+      when: mageops_install_magerun
+    - role: cs.monitoring
+      monitoring_node_exporter_enabled: yes
+      monitoring_php_fpm_exporter_enabled: yes
+      when: mageops_monitoring_enabled
 
   tasks:
     - include_tasks: "{{ mageops_extra_tasks_app_node }}"
@@ -145,5 +154,3 @@
     nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
     nginx_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
     nginx_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
-
-

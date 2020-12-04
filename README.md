@@ -90,6 +90,21 @@ across internal creativestyle services thus any leftovers have been removed
 to avoid confusion. New documentation will start appearing shortly as part 
 of this repository succesively.
 
+## Utilities
+
+### Available CLI commands on EC2 nodes
+
+```sh
+mageops-env # prints mageops env vars
+
+mageops-sys-status # prints general info about cpu, io, memory, running processes
+
+mageops-consumers # prints ongoing magento queue consumer processes
+
+magcd # `cd` into magento directory
+mag # `cd` into magento directory and runs `bin/magento`
+magcf # runs `bin/magento cache:flush`
+```
 
 <p align="right">
 <em>Brought to life by</em><br/>

@@ -38,6 +38,15 @@ if (req.http.X-Warmup) {
     {% include "vcl/subroutines/deliver_throttling.vcl.j2" %}
 {% endif %}
 
+{% if varnish_media_cors_enabled %}
+if (req.url ~ "^/media/" && req.http.Origin ~ "^https?:\/\/({{ varnish_media_cors_allowed_origins | join("|") | replace(".", "\.") | replace("-", "\-") }})$") {
+    set resp.http.Access-Control-Max-Age = "{{ varnish_media_cors_max_age }}";
+    set resp.http.Access-Control-Allow-Methods = "HEAD, GET, OPTIONS";
+    set resp.http.Access-Control-Allow-Origin = req.http.Origin;
+    set resp.http.Access-Control-Allow-Headers = "*";
+}
+{% endif %}
+
 unset resp.http.Age;
 unset resp.http.X-Magento-Debug;
 unset resp.http.X-Magento-Tags;

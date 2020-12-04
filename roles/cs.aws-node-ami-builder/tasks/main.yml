@@ -28,6 +28,7 @@
         volume_size: "{{ builder_instance_volume_size }}"
         volume_type: gp2
         delete_on_termination: yes
+        encrypted: "{{ mageops_ebs_encrypt }}"
     exact_count: 1
     count_tag: "{{ builder_instance_name_tags }}"
     wait: yes
@@ -57,5 +58,3 @@
   loop: '{{ builder_ec2.tagged_instances }}'
   loop_control:
     label: "{{ item.public_dns_name }}"
-
-

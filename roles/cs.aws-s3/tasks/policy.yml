@@ -1,10 +1,10 @@
 - name: Gather policies to process
   set_fact:
     aws_s3_bucket_policies: >-
-      {{ 
+      {{
         [ aws_s3_bucket_secret_policy ]
           + aws_s3_media_bucket_create | ternary([ aws_s3_bucket_media_policy ], [])
-          + aws_s3_bucket_policies 
+          + aws_s3_bucket_policies
       }}
 
 - name: Gather bucket names to process

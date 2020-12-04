@@ -1,12 +1,12 @@
 - name: Set up Cloudfront Distribution
-  # This ansible module is so FUBAR (ans so is the AWS CF API) that I'd 
+  # This ansible module is so FUBAR (ans so is the AWS CF API) that I'd
   # recommend to not touch this unless you're in for an all-nighter. /FS
   cloudfront_distribution:
     state: present
     enabled: true
 
     # The ID is mandatory if the distro already exists (ansible_bug)
-    # Vide: https://github.com/ansible/ansible/issues/45043 
+    # Vide: https://github.com/ansible/ansible/issues/45043
     distribution_id: "{{ aws_cloudfront_distribution_id | default(omit, true) }}"
     # Caller_reference has to be ommited if distro exists (related to the above bug)
     caller_reference: "{{ aws_cloudfront_distribution_id | default(false, true) | ternary(omit, aws_cloudfront_distribution_caller_id) }}"
@@ -70,9 +70,9 @@
           - header_name: X-MageOps-Cloudfront-Origin
             header_value: WebsiteMedia
 
-    
+
     # To maintain backwards compatibility with the previous setup
-    # all CDN requests go by default to "/media" website path. 
+    # all CDN requests go by default to "/media" website path.
     default_cache_behavior: >-
         {{
           cloudfront_distribution_cache_behaviour_defaults | combine({
@@ -83,7 +83,7 @@
     cache_behaviors:
       # Requests to Magento Static Cache should go to website root
       # to maintain the original URL
-      - >- 
+      - >-
           {{
             cloudfront_distribution_cache_behaviour_defaults | combine({
               "target_origin_id": "WebsiteRoot",
@@ -114,13 +114,14 @@
         query_string: false
         cookies:
           forward: "none"
-        headers: []
+        headers:
+          - Origin
 
       smooth_streaming: false
       compress: false
 
       lambda_function_associations: >-
-        {{ 
+        {{
           aws_cloudfront_use_lambda | ternary(
             [
               {
@@ -131,5 +132,3 @@
             []
           )
         }}
-
-        

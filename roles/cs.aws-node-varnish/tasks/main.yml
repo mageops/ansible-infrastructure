@@ -31,6 +31,7 @@
         volume_type: gp2
         volume_size: "{{ aws_varnish_node_ebs_volume_size }}"
         delete_on_termination: yes
+        encrypted: "{{ mageops_ebs_encrypt }}"
     wait: yes
     wait_timeout: 1500
     # This has zero costs on current-gen instances
@@ -67,6 +68,3 @@
     device_id: "{{ aws_varnish_ec2.instances[0].id }}"
     ip: "{{ aws_varnish_node_elastic_ip }}"
   when: aws_varnish_node_elastic_ip | default(false, true)
-
-
-

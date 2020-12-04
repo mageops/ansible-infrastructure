@@ -1,5 +1,5 @@
 aws_lambda_cloudfront_name: "handleCloudfrontOriginRequest-{{ mageops_app_name }}"
-aws_lambda_cloudfront_deploy_package_url: "https://github.com/mageops/aws-lambda-cloudfront-edge/releases/download/1.5.0/edge-lambda-deploy-package.nodejs10.x.zip"
-aws_lambda_cloudfront_deploy_package_path: "{{ mageops_ansible_temp_dir }}/cloudfront-lambda-deploy-package-1.2.0.zip"
+aws_lambda_cloudfront_deploy_package_url: "https://github.com/mageops/aws-lambda-cloudfront-edge/releases/download/1.6.0/edge-lambda-deploy-package.nodejs10.x.zip"
+aws_lambda_cloudfront_deploy_package_path: "{{ mageops_ansible_temp_dir }}/cloudfront-lambda-deploy-package-1.6.0.zip"
 
 aws_cloudfront_lambda_region: "us-east-1"

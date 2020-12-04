@@ -62,7 +62,7 @@ server {
 {% if vhost.extra_vhost_config | default('') %}
     # ---  [BEGIN] Custom Project Server Config [BEGIN]  ---
     {% filter indent(width=4) -%}
-    {{ extra_vhost_config }}
+    {{ vhost.extra_vhost_config }}
     {% endfilter %}
     # ---  [END] Custom Project Server Config [END]  ---
 {% endif %}
