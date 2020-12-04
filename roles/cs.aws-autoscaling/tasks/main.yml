@@ -32,7 +32,6 @@
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
     wait_timeout: "{{ autoscaling_asg_wait_timeout }}"
     replace_all_instances: yes
-    replace_batch_wait: "{{ autoscaling_asg_replace_batch_wait | default(omit) }}"
     replace_batch_size: "{{ autoscaling_asg_replace_batch_size }}"
     termination_policies: NewestInstance
     tags: "{{ aws_tags_default | combine(asg_name_tags, aws_tags_trait_immutable, autoscaling_instance_tags) | dict_to_tag_list }}"

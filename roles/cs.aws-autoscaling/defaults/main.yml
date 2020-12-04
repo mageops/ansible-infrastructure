@@ -10,6 +10,3 @@ autoscaling_asg_desired_capacity: 1
 autoscaling_asg_wait_timeout: 1200
 autoscaling_asg_tags: {}
 
-
-# This didn't work with previous ansible versions
-# autoscaling_asg_replace_batch_wait:
