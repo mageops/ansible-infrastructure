@@ -206,11 +206,13 @@ if (req.http.Accept-Encoding) {
 }
 
 {% for param in varnish_strip_params %}
-# remove all forms of param: {{ param }}
-set req.url = regsuball(req.url,"\?{{ param }}=[^&]+$","");  # strips when QS = "?param=AAA"
-set req.url = regsuball(req.url,"\?{{ param }}=[^&]+&","?"); # strips when QS = "?param=AAA&foo=bar"
+# remove all forms of param: {{ param }} - The order is important!
 set req.url = regsuball(req.url,"&{{ param }}=[^&]+","");    # strips when QS = "?foo=bar&param=AAA" or QS = "?foo=bar&param=AAA&bar=baz"
-
+set req.url = regsuball(req.url,"\?{{ param }}=[^&]+&","?"); # strips when QS = "?param=AAA&foo=bar"
+set req.url = regsuball(req.url,"\?{{ param }}=[^&]+$","");  # strips when QS = "?param=AAA"
 {% endfor %}
 
 return (hash);
+
+    
+    
