@@ -34,6 +34,8 @@ magento_efs_app_mounts_basic:
     group: "{{ magento_group }}"
   - local_mountpoint: "{{ magento_static_cache_dir }}"
     remote_path: "{{ magento_efs_static_cache_release_remote_path }}"
+  - local_mountpoint: "{{ magento_efs_global_data_app_path }}"
+    remote_path: "{{ magento_efs_global_data_remote_path }}"
     owner: "{{ magento_user }}"
     group: "{{ magento_group }}"
 
