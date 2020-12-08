@@ -1066,10 +1066,12 @@ magento_efs_static_cache_releases_remote_path: "/pub/static/_cache-releases"
 magento_efs_import_data_remote_path: "/import"
 magento_efs_export_data_remote_path: "/export"
 magento_efs_publicly_shared_remote_path: "/pub/shared"
+magento_efs_global_data_remote_path: "/var/global"
 
 magento_efs_import_data_app_path: "{{ mageops_app_web_dir }}/shared/var/import"
 magento_efs_export_data_app_path: "{{ mageops_app_web_dir }}/shared/var/export"
 magento_efs_publicly_shared_app_path: "{{ mageops_app_web_dir }}/shared/pub/shared"
+magento_efs_global_data_app_path: "{{ mageops_app_web_dir }}/shared/var/global"
 
 # EFS resource name
 magento_efs_app_node_name: "{{ mageops_app_name }}-app-shared"
