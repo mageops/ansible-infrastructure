@@ -6,6 +6,9 @@
 #######################################################################################
 
 cluster.name: {{ elasticsearch_cluster_name }}
+{% if (elasticsearch_major_version | int) >= 7 %}
+cluster.initial_master_nodes: ["{{ elasticsearch_node_name }}"]
+{% endif %}
 
 path.data: /var/lib/elasticsearch
 path.logs: /var/log/elasticsearch
