@@ -34,8 +34,14 @@
   command: systemd-tmpfiles --create
   when: tmpfiles_config is changed
 
+# Note: The detection is based on jar filename instead of `elasticsearch -V` command
+# on purpose. This is a chicken-or-egg problem: when elasticsearch is upgraded from
+# older version the old config files may be invalid and this will prevent the version
+# check from completing but we need to know the version in order to install new configs.
+# Thus a *passive* check that does not involve running es is used.
 - name: Detect current elasticsearch major version
-  command: "sh -c \"/usr/share/elasticsearch/bin/elasticsearch -V | sed 's/^Version: \\([0-9]*\\)\\..*/\\1/'\""
+  shell: |
+    find /usr/share/elasticsearch/lib/ -type f -regex '.*/elasticsearch-[0-9]+\..*\.jar' -printf '%P' | sed -E 's/elasticsearch-([0-9]+).*/\1/'
   register: elasticsearch_major_version_command
   changed_when: false
 
@@ -45,6 +51,10 @@
 
 # Note: (elasticsearch_major_version | int) is needed hack for issue in older ansible versions (before 2.8)
 # without that set_fact templates integers to strings and makes comparison impossible
+- name: Print info about installed elasticsearch version
+  debug: 
+    msg: | 
+      Identified installed ElasticSearch version {{ elasticsearch_major_version }}.X
 
 - name: Configure elasticsearch 5
   template:
@@ -55,10 +65,11 @@
   with_dict:
     es5-jvm.options: jvm.options
     elasticsearch.yml: elasticsearch.yml
+    log4j2.properties: log4j2.properties
   notify: Restart elasticsearch
   when: (elasticsearch_major_version | int) == 5
 
-- name: Configure elasticsearch 6 or higher
+- name: Configure elasticsearch 6
   template:
     src: "{{ item.key }}"
     dest: /etc/elasticsearch/{{ item.value }}
@@ -67,8 +78,22 @@
   with_dict:
     es6-jvm.options: jvm.options
     elasticsearch.yml: elasticsearch.yml
+    log4j2.properties: log4j2.properties
   notify: Restart elasticsearch
   when: (elasticsearch_major_version | int) >= 6
+
+- name: Configure elasticsearch 7 or higher
+  template:
+    src: "{{ item.key }}"
+    dest: /etc/elasticsearch/{{ item.value }}
+    owner: root
+    group: elasticsearch
+  with_dict:
+    es7-jvm.options: jvm.options
+    elasticsearch.yml: elasticsearch.yml
+    es7-log4j2.properties: log4j2.properties
+  notify: Restart elasticsearch
+  when: (elasticsearch_major_version | int) >= 7
 
 - name: Ensure elasticsearch systemd config override directory exists
   file:
@@ -108,12 +133,6 @@
         removes:  "/usr/share/elasticsearch/plugins/{{ item }}"
       loop: "{{ elasticsearch_plugin_list_command.stdout_lines }}"
   when: elasticsearch_version_save is changed
-
-- name: Configure log4j2 configuration
-  template:
-    src: log4j2.properties
-    dest: /etc/elasticsearch/log4j2.properties
-  notify: Restart elasticsearch
 
 - name: Install elasticsearch plugins
   command: "/usr/share/elasticsearch/bin/elasticsearch-plugin install {{ item }}"
