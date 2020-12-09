@@ -1,7 +1,7 @@
 - name: Install elasticsearch packages
   package:
     name: elasticsearch
-    state: present
+    state: latest
   register: elasticsearch_packages_install
 
 # In case `/var` or `/var/run` is a tmpfs (common thing nowadays)
