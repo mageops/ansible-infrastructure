@@ -1,0 +1,96 @@
+###
+# *** This playbook deploys `shlink` URL shortener ***
+#
+# You must provide values for at least these vars in your project config:
+#   shlink_short_domain:
+#   shlink_geolite_license_key:
+#
+# Refer to `cs.shlink` role defaults for further configuration options.
+###
+
+- hosts: all
+  connection: local
+  gather_facts: no
+  tags: always
+  tasks:
+    - name: Create group targeting our specific host
+      group_by:
+        key: shlink_service_node
+      when: >-
+        inventory_hostname
+          in (
+            groups['shlink'] | default([])
+            | intersect(groups[mageops_project] | default([]))
+            | intersect(groups[mageops_environment] | default([]))
+          )
+
+- hosts: shlink_service_node
+  gather_facts: yes
+  vars:
+    ### Base shlink MageSuite config
+
+    shlink_user: shlink
+    shlink_group: shlink
+    shlink_home: /home/{{ shlink_user }}
+    shlink_http_bind_port: 8080
+    shlink_http_bind_host: 127.0.0.1
+
+    ### Base MageOps params
+
+    mageops_app_type: "shlink"
+    mageops_app_user: "{{ shlink_user }}"
+    mageops_app_group: "{{ shlink_group }}"
+    mageops_ssh_authorize_app: yes
+    mageops_node_role: "{{ mageops_app_type }}"
+
+    ### Base system config
+
+    packages_install: "{{ mageops_packages_common }}"
+
+    firewall_public_services:
+      - http
+      - https
+
+    nginx_blacklist_vhost_check_include_file: ~
+
+    https_termination_hosts:
+      - name: "{{ shlink_short_domain }}"
+        server_name: "{{ shlink_short_domain }}"
+        letsencrypt: yes
+    https_termination_proxy_http_port: yes
+
+    https_termination_upstream_host: 127.0.0.1
+    https_termination_upstream_port: "{{ shlink_http_bind_port }}"
+    https_termination_upstream: "{{ https_termination_upstream_host }}:{{ https_termination_upstream_port }}"
+
+    https_termination_crt_acme_email: filip.sobalski@creativestyle.pl
+
+    ### Testing config
+    # https_termination_crt_acme_staging: yes
+
+  roles:
+    # - role: pinkeen.selinux-disable
+    # - role: geerlingguy.ntp
+    # - role: cs.switch-to-dnf
+    # - role: cs.cron
+    # - role: cs.swap
+    # - role: cs.earlyoom
+    # - role: cs.packages
+    # - role: cs.provisioning-migrations
+    # - role: cs.firewalld
+    #   when: firewall_enable | default(false)
+    # - role: cs.mageops-cli-user
+    #   mageops_cli_user: root
+    # - role: cs.mageops-cli-user
+    #   mageops_cli_user: "{{ mageops_app_user }}"
+    #   mageops_cli_user_group: "{{ mageops_app_group }}"
+    #   mageops_cli_user_uid: "{{ mageops_app_uid }}"
+    #   mageops_cli_user_gid: "{{ mageops_app_gid }}"
+    # - role: cs.mageops-cli-profile
+    # - role: cs.mageops-authorize-keys
+    - role: cs.shlink
+    # - role: cs.nginx-https-termination
+
+
+
+

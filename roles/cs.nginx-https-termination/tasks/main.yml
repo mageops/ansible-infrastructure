@@ -1,4 +1,14 @@
-- import_tasks: 001-filesystem.yml
-- import_tasks: 002-vhosts.yml
-- import_tasks: 003-letsencrypt.yml
-- import_tasks: 004-logging.yml
+- name: Prepare effective configuration
+  import_tasks: 000-facts.yml
+
+- name: Setup filesystem structure
+  import_tasks: 010-filesystem.yml
+
+- name: Create filesystem structure
+  import_tasks: 020-nginx.yml
+
+- name: Create filesystem structure
+  import_tasks: 030-certificates.yml
+
+- name: Ensure changes take effect
+  meta: flush_handlers

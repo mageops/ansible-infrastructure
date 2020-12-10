@@ -23,6 +23,14 @@ keyed_groups:
     prefix: "app"
     separator: "_"
 
+  - key: tags.Environment
+    prefix: ""
+    separator: ""
+
+  - key: tags.Project
+    prefix: ""
+    separator: ""
+
   - key: tags.Role
     prefix: ""
     separator: ""
@@ -66,3 +74,13 @@ keyed_groups:
   - key: tags.TraitImmutable
     prefix: ""
     separator: ""
+
+  - key: tags.RoleService
+    prefix: ""
+    separator: ""
+    parent_group: "service"
+
+  - key: tags.ServiceInstance
+    prefix: ""
+    separator: ""
+    parent_group: "service"
