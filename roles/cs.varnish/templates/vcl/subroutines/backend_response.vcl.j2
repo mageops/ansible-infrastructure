@@ -54,4 +54,6 @@ if (beresp.http.Cache-Control ~ "public" && beresp.http.Content-Type ~ "text/htm
    set beresp.http.X-Rewrite-HTML-Maxage = 1;
 }
 
+set beresp.http.X-Cached-At = now;
+
 return (deliver);
