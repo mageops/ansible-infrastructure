@@ -14,5 +14,9 @@ if ( $target = "{{ path }}" ) {
     {%- if nginx_language_redirect_mode == 'home-redirect' %}
     rewrite ^/$ /$target/ redirect;
     {% endif %}
+    {%- if nginx_language_redirect_mode == 'deep-redirect' %}
+    rewrite ^/({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }})/(.*)$ /$target/$2 redirect;
+    rewrite ^/$ /$target/ redirect;
+    {% endif %}
 }
 {% endfor -%}
