@@ -27,15 +27,19 @@
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
     max_size: >-
-      {{ autoscaling_asg_replace_with_check | ternary(
+      {{
+        autoscaling_asg_replace_with_check | ternary(
           autoscaling_asg_max_size + autoscaling_asg_desired_capacity, 
           autoscaling_asg_max_size
-        ) }}
+        ) 
+      }}
     desired_capacity: >-
-      {{ autoscaling_asg_replace_with_check | ternary( 
+      {{
+        autoscaling_asg_replace_with_check | ternary( 
           autoscaling_asg_desired_capacity * 2, 
           autoscaling_asg_desired_capacity
-        ) }}"
+        ) 
+      }}
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
     wait_for_instances: "{{ autoscaling_asg_wait_for_instances }}"
@@ -76,10 +80,14 @@
       max_size: "{{ autoscaling_asg_max_size }}"
       desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
       termination_policies: >-
-        {{ [ 'OldestLaunchConfiguration' ] 
-        + (autoscaling_asg_termination_policies is string | ternary(
-            [ autoscaling_asg_termination_policies ], autoscaling_asg_termination_policies)
-          ) }}
+        {{ 
+          [ 'OldestLaunchConfiguration' ] 
+          + (autoscaling_asg_termination_policies is string | ternary(
+                [ autoscaling_asg_termination_policies ], 
+                autoscaling_asg_termination_policies
+              )
+            ) 
+        }}
       wait_for_instances: yes
       replace_all_instances: yes
     register: _aws_asg
