@@ -61,6 +61,7 @@
   #     var: _asg_instaqnces
   - name: Make a list od instances for health check
     ec2_instance_info:
+      region: "{{ aws_region }}"
       instance_ids: "{{ _aws_asg.instances }}"
     register: _aws_asg_instances
   
