@@ -29,16 +29,16 @@
     max_size: >-
       {{
         autoscaling_asg_replace_with_check | ternary(
-          autoscaling_asg_max_size + autoscaling_asg_desired_capacity, 
+          autoscaling_asg_max_size + autoscaling_asg_desired_capacity,
           autoscaling_asg_max_size
-        ) 
+        )
       }}
     desired_capacity: >-
       {{
-        autoscaling_asg_replace_with_check | ternary( 
-          autoscaling_asg_desired_capacity * 2, 
+        autoscaling_asg_replace_with_check | ternary(
+          autoscaling_asg_desired_capacity * 2,
           autoscaling_asg_desired_capacity
-        ) 
+        )
       }}
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
@@ -64,13 +64,23 @@
       region: "{{ aws_region }}"
       instance_ids: "{{ _aws_asg.instances }}"
     register: _aws_asg_instances
-  
-  - name: Wait until the health check file exists on all nodes
+
+  - name: Add hosts to inventory
+    add_host:
+      hostname: "{{ item }}"
+      groups:
+        - "aws_autoscaling_asg"
+    loop: "{{ _aws_asg_instances | json_query('instances[].public_ip_address') }}"
+
+  - name: Wait for connection
+    wait_for_connection: ~
+    hosts: aws_autoscaling_asg
+
+  - name: Wait for warmup file
+    hosts: aws_autoscaling_asg
     wait_for:
       path: "{{ autoscaling_asg_replace_check_file }}"
       timeout: "{{ autoscaling_asg_wait_timeout }}"
-    delegate_to: "{{ item }}"
-    with_items: "{{ _aws_asg_instances | json_query('instances[].public_ip_address') }}"
 
   - name: Reduce AutoScaling Group - remove old instances
     ec2_asg:
@@ -81,13 +91,13 @@
       max_size: "{{ autoscaling_asg_max_size }}"
       desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
       termination_policies: >-
-        {{ 
-          [ 'OldestLaunchConfiguration' ] 
+        {{
+          [ 'OldestLaunchConfiguration' ]
           + (autoscaling_asg_termination_policies is string | ternary(
-                [ autoscaling_asg_termination_policies ], 
+                [ autoscaling_asg_termination_policies ],
                 autoscaling_asg_termination_policies
               )
-            ) 
+            )
         }}
       wait_for_instances: yes
       replace_all_instances: yes
