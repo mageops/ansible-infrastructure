@@ -30,7 +30,7 @@
       autoscaling_asg_cooldown: "{{ aws_app_asg_cooldown }}"
 
       autoscaling_asg_replace_all: no
-      autoscaling_asg_replace_with_check: yes
+      autoscaling_asg_replace_with_check: no
       autoscaling_asg_replace_check_file: /var/www/magento/current/pub/WARMUP
 
       autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
