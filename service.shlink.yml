@@ -65,13 +65,26 @@
 
     https_termination_crt_acme_email: filip.sobalski@creativestyle.pl
 
-  roles:
-    - role: cs.aws-rds-facts
+  pre_tasks:
+    - name: Automatically configure MySQL host as RDS instance
+      when: >-
+          aws_use
+          and shlink_mysql_db_name | default(false, true)
+          and shlink_mysql_db_pass | default(false, true)
+          and not shlink_mysql_db_host | default(false, true)
       delegate_to: localhost
       delegate_facts: no
       become: no
-      when: aws_use
+      block:
+        - name: Compute AWS rds facts
+          include_role:
+            name: cs.aws-rds-facts
 
+        - name: Set shlink MySQL host
+          set_fact:
+            shlink_mysql_db_host: "{{ aws_rds_instance_host }}"
+
+  roles:
     - role: pinkeen.selinux-disable
     - role: geerlingguy.ntp
     - role: cs.switch-to-dnf

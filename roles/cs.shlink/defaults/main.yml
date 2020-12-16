@@ -56,10 +56,10 @@ shlink_geolite_license_key: ~
 
 # If defined then an external MySQL DB will be used
 shlink_mysql_db_host: ~
-shlink_mysql_db_name: ~
-shlink_mysql_db_user: ~
+shlink_mysql_db_name: shlink
+shlink_mysql_db_user: shlink
 shlink_mysql_db_pass: ~
-shlink_mysql_db_port: ~
+shlink_mysql_db_port: 3306
 
 # Use local SQLite DB if MySQL DB hostname is not set
 shlink_sqlite_db: "{{ not (shlink_mysql_db_host | default(false, true)) }}"
