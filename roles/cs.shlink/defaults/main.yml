@@ -21,7 +21,7 @@ shlink_missing_url_redirect_to: ~
 shlink_404_redirect_to: ~
 
 # Redirect code - 301 or 302
-shlink_redirect_status_code: 301
+shlink_redirect_status_code: 302
 
 # How long to keep redirs in cache
 shlink_redirect_cache_lifetime: 30
