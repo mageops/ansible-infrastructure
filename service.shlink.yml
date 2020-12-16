@@ -31,7 +31,7 @@
 
     shlink_user: shlink
     shlink_group: shlink
-    shlink_home: /home/{{ shlink_user }}
+    shlink_home: "/home/{{ shlink_user }}"
     shlink_http_bind_port: 8080
     shlink_http_bind_host: 127.0.0.1
 
@@ -40,13 +40,13 @@
     mageops_app_type: "shlink"
     mageops_app_user: "{{ shlink_user }}"
     mageops_app_group: "{{ shlink_group }}"
-    mageops_ssh_authorize_app: yes
     mageops_node_role: "{{ mageops_app_type }}"
 
     ### Base system config
 
     packages_install: "{{ mageops_packages_common }}"
 
+    firewall_enable: not (aws_use | default(false))
     firewall_public_services:
       - http
       - https
@@ -65,31 +65,43 @@
 
     https_termination_crt_acme_email: filip.sobalski@creativestyle.pl
 
-    ### Testing config
-    # https_termination_crt_acme_staging: yes
-
   roles:
-    # - role: pinkeen.selinux-disable
-    # - role: geerlingguy.ntp
-    # - role: cs.switch-to-dnf
-    # - role: cs.cron
-    # - role: cs.swap
-    # - role: cs.earlyoom
-    # - role: cs.packages
-    # - role: cs.provisioning-migrations
-    # - role: cs.firewalld
-    #   when: firewall_enable | default(false)
-    # - role: cs.mageops-cli-user
-    #   mageops_cli_user: root
-    # - role: cs.mageops-cli-user
-    #   mageops_cli_user: "{{ mageops_app_user }}"
-    #   mageops_cli_user_group: "{{ mageops_app_group }}"
-    #   mageops_cli_user_uid: "{{ mageops_app_uid }}"
-    #   mageops_cli_user_gid: "{{ mageops_app_gid }}"
-    # - role: cs.mageops-cli-profile
-    # - role: cs.mageops-authorize-keys
+    - role: cs.aws-rds-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+
+    - role: pinkeen.selinux-disable
+    - role: geerlingguy.ntp
+    - role: cs.switch-to-dnf
+    - role: cs.cron
+    - role: cs.swap
+    - role: cs.earlyoom
+    - role: cs.packages
+    - role: cs.provisioning-migrations
+
+    - role: cs.firewalld
+      when: firewall_enable
+
+    - role: cs.mageops-cli-user
+      mageops_cli_user: root
+
+    - role: cs.mageops-cli-user
+      mageops_cli_user: "{{ mageops_app_user }}"
+      mageops_cli_user_group: "{{ mageops_app_group }}"
+      mageops_cli_user_uid: "{{ mageops_app_uid }}"
+      mageops_cli_user_gid: "{{ mageops_app_gid }}"
+
+    - role: cs.mageops-cli-profile
+    - role: cs.mageops-authorize-keys
+      mageops_ssh_authorize_app: yes
+
+    - role: cs.monitoring
+      monitoring_node_exporter_enabled: yes
+
     - role: cs.shlink
-    # - role: cs.nginx-https-termination
+    - role: cs.nginx-https-termination
 
 
 

@@ -38,6 +38,12 @@ shlink_validate_url: no
 # Disable tracking when this query parameter is present
 shlink_disable_track_param: _shlnt
 
+# Whether to anonymize remote IPs
+# Warning! If disabled then you must ensure GDPR compliance somehow which
+# might not be possible legally without displaying some opt-in, so better
+# to keep anonymization enabled at all times.
+shlink_anonymize_remote_addr: yes
+
 # Number of workers
 shlink_web_worker_num: 16
 shlink_task_worker_num: 16
@@ -77,8 +83,7 @@ shlink_http_container_port: 8888
 #   - Env vars described: https://shlink.io/documentation/install-docker-image/#supported-env-vars
 #   - Available JSON params: https://shlink.io/documentation/install-docker-image/#provide-config-via-volumes
 shlink_config_default:
-  # This must be true for GDPR compliance (always)!
-  anonymize_remote_addr: true
+  anonymize_remote_addr: "{{ shlink_anonymize_remote_addr }}"
 
   disable_track_param: "{{ shlink_disable_track_param }}"
 
