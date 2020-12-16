@@ -1,4 +1,4 @@
-ansible>=2.9.3,<2.10
+ansible>=2.9.16,<2.10
 
 # needed for inventory and aws modules
 boto3
