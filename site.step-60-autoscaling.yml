@@ -29,9 +29,8 @@
       autoscaling_asg_max_size: "{{ aws_app_asg_max_size }}"
       autoscaling_asg_cooldown: "{{ aws_app_asg_cooldown }}"
 
-      autoscaling_asg_replace_all: yes
-      autoscaling_asg_replace_with_check: no
-      autoscaling_asg_replace_check_file: /var/www/magento/current/pub/WARMUP
+      autoscaling_asg_replace_all: no
+      autoscaling_asg_replace_with_check: yes
 
       autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
       autoscaling_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
@@ -63,6 +62,58 @@
         {{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}
         {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
 
+- hosts: mageops_aws_autoscaling_asg
+  vars:
+    autoscaling_asg_replace_check_file: /var/www/magento/current/pub/WARMUP
+    autoscaling_asg_name: "{{ mageops_app_name }}-app"
+    autoscaling_asg_desired_capacity: "{{ aws_app_asg_desired_capacity }}"
+    autoscaling_asg_min_size: "{{ aws_app_asg_min_size }}"
+    autoscaling_asg_max_size: "{{ aws_app_asg_max_size }}"
+  tasks:
+  - name: Wait for warmup file
+    wait_for:
+      path: "{{ autoscaling_asg_replace_check_file }}"
+      timeout: "{{ aws_extra_app_asg_cooldown }}"
+
+  - name: Reduce AutoScaling Group - remove old instances
+    ec2_asg:
+      state: present
+      name: "{{ autoscaling_asg_name }}"
+      region: "{{ aws_region }}"
+      min_size: "{{ autoscaling_asg_min_size }}"
+      max_size: "{{ autoscaling_asg_max_size }}"
+      desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
+      termination_policies: >-
+        {{
+          [ 'OldestLaunchConfiguration' ]
+          + (autoscaling_asg_termination_policies is string | ternary(
+                [ autoscaling_asg_termination_policies ],
+                autoscaling_asg_termination_policies
+              )
+            )
+        }}
+      wait_for_instances: yes
+      replace_all_instances: yes
+    register: _aws_asg
+
+- hosts: localhost
+  connection: local
+  vars:
+    aws_app_node_security_group_ids: >-
+        {{
+            [
+              aws_security_group_app_id,
+              aws_security_group_ssh_id
+            ] + (
+              varnish_is_in_autoscaling_group | ternary(
+                [
+                  aws_security_group_varnish_id
+                ],
+                []
+              )
+            )
+        }}
+  roles:
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
       autoscaling_assign_public_ip: yes

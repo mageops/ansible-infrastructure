@@ -69,39 +69,9 @@
     add_host:
       hostname: "{{ item }}"
       groups:
-        - "aws_autoscaling_asg"
+        - "mageops_aws_autoscaling_asg"
     loop: "{{ _aws_asg_instances | json_query('instances[].public_ip_address') }}"
-
-  - name: Wait for connection
-    wait_for_connection: ~
-    hosts: aws_autoscaling_asg
-
-  - name: Wait for warmup file
-    hosts: aws_autoscaling_asg
-    wait_for:
-      path: "{{ autoscaling_asg_replace_check_file }}"
-      timeout: "{{ autoscaling_asg_wait_timeout }}"
-
-  - name: Reduce AutoScaling Group - remove old instances
-    ec2_asg:
-      state: present
-      name: "{{ autoscaling_asg_name }}"
-      region: "{{ aws_region }}"
-      min_size: "{{ autoscaling_asg_min_size }}"
-      max_size: "{{ autoscaling_asg_max_size }}"
-      desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
-      termination_policies: >-
-        {{
-          [ 'OldestLaunchConfiguration' ]
-          + (autoscaling_asg_termination_policies is string | ternary(
-                [ autoscaling_asg_termination_policies ],
-                autoscaling_asg_termination_policies
-              )
-            )
-        }}
-      wait_for_instances: yes
-      replace_all_instances: yes
-    register: _aws_asg
+    when: _aws_asg_instances is defined
 
   when: autoscaling_asg_replace_with_check
 
