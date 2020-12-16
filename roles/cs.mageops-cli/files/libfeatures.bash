@@ -30,6 +30,20 @@ features::read_feature_flag() {
     echo "${value}"
 }
 
+features::is_flag_set() {
+    local name=$1
+
+    local value
+
+    features::load_config
+    value="$(echo "${features__config}" | jq -r ".${name}")"
+
+    if [ "$value" = "null" ];then
+        return 1
+    fi
+
+    return 0
+}
 
 features::update_feature_flag() {
     local name=$1

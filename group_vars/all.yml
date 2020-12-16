@@ -1578,6 +1578,7 @@ mageops_earlyoom_enable: yes
 
 earlyoom_ram_min_percent: 7
 earlyoom_swap_min_percent: 40
+mageops_cli_features_dir: /usr/local/lib/mageops/features
 
 # ----------------------------
 # --------  Packages  --------

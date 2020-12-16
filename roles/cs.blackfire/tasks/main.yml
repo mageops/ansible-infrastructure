@@ -16,11 +16,26 @@
         state: present
 
     - name: Create agent config
-      template: src=agent.j2 dest=/etc/blackfire/agent
+      template:
+        src: agent.j2
+        dest: /etc/blackfire/agent
 
     - name: Create agent.json config files
-      template: src=agent.json.j2 dest=/etc/blackfire/agent.json
+      template:
+        src: agent.json.j2
+        dest: /etc/blackfire/agent.json
 
     - name: Create blackfire PHP config
-      template: src=blackfire.ini.j2 dest=/etc/php.d/zz-blackfire.ini
+      template:
+        src: blackfire.ini.j2
+        dest: /etc/php.d/zz-blackfire.ini
+
+    - name: Install feature flag module
+      copy:
+        src: blackfile_feature.bash
+        dest: "{{ mageops_cli_features_dir }}/blackfire_feature.bash"
+
+    - name: Set feature flag
+      shell: "mageopscli set_feature_flag blackfire_apm {{ blackfire_enable_apm | ternary('yes', 'no') }}"
+
   when: blackfire_install and blackfire_server_id and blackfire_server_token

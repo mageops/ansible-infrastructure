@@ -42,6 +42,11 @@ main::main() {
         local feature=$2
         main::read_feature_flag "$feature"
     ;;
+    is_feature_flag_set)
+        if [ $# != 2 ];then main::help; fi
+        local feature=$2
+        main::is_feature_flag_set "$feature" || exit 1
+    ;;
     apply_features)
     if [ $# != 1 ];then main::help; fi
         main::apply_features
@@ -103,10 +108,16 @@ main::set_feature_flag() {
     main::eprintln "OK"
 }
 
+main::is_feature_flag_set() {
+    local feature=$1
+
+    features::is_flag_set "$feature" || return 1
+}
+
 main::read_feature_flag() {
     local feature=$1
 
-    features::read_feature_flag "$feature"
+    features::read_feature_flag "$feature" ""
 }
 
 main::apply_features() {
@@ -127,7 +138,9 @@ main::help() {
     main::eprintln "  current_instance_id                  Reads current ec2 instance id"
     main::eprintln "  current_region                       Reads current ec2 region name"
     main::eprintln "  set_feature_flag <feature> <value>   Update feature flag value"
-    main::eprintln "  read_feature_flag <feature> <value>  Reads current feature flag value"
+    main::eprintln "  read_feature_flag <feature>          Reads current feature flag value"
+    main::eprintln "  is_feature_flag_set <feature>        Checks if there is any value set for feature flag"
+    main::eprintln "                                       status code 0 means flag is set, 1 otherwise"
     main::eprintln "  apply_features                       Apply feature updates to this host"
     main::eprintln ""
     main::eprintln " Mageops cli tools"
