@@ -57,3 +57,24 @@ nginx_debug_request_header_name: X-NGINX-Debug-Token
 nginx_debug_request_info_header_name: X-NGINX-Debug-Info
 
 
+# Note: For performance reasons the buffer sizes must be aligned to (be a multiple
+# of) the system page size which can be safely assumed to be 8k.
+#
+# Following two settings are assigned to `fastcgi_buffers` param effectively
+# controlling the maximum total size of fcgi upstream response read buffers.
+# The total size is roughly equal to the product of both values `chunk_count * chunk_size`.
+# See: http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_buffers
+nginx_magento_fastcgi_buffers_chunk_count: 16
+nginx_magento_fastcgi_buffers_chunk_size: 256k
+
+# This setting is assigned to `fastcgi_buffer_size` parameter which confusingly
+# controls the size of the buffer that is allocated *initially* when FCGI response
+# is processed. This buffer - among others - holds the response HTTP headers, so
+# it might need to be increased in case of 'too big header' errors.
+#
+# Caution: This value does not allocate a separate buffer, this buffer is allocated
+# from the pool configured above. This value must be smaller than the max buffer size.
+# See: http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_buffer_size
+nginx_magento_fastcgi_buffers_head_size: 256k
+
+
