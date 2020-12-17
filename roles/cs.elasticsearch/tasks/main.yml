@@ -44,7 +44,7 @@
     find /usr/share/elasticsearch/lib/ -type f -regex '.*/elasticsearch-[0-9]+\..*\.jar' -printf '%P' | sed -E 's/elasticsearch-(([0-9]+\.)+[0-9]+).*.jar/\1/'
   register: elasticsearch_get_installed_version
   failed_when: >-
-    elasticsearch_get_installed_version.rc | default(0, true) | int == 0
+    elasticsearch_get_installed_version.rc | default(0, true) | int != 0
       or elasticsearch_get_installed_version.stdout_lines | default([], true) | length == 0
   changed_when: false
 
