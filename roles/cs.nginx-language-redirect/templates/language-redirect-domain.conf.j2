@@ -8,7 +8,7 @@ if ($http_accept_language ~* '^(.+?),') {
 {% for lang, domain in nginx_language_redirect_domain_mapping.items() %}
   if ( $target_domain != "{{ domain }}" ) {
     {% if nginx_language_redirect_mode == 'geofence' %}
-    rewrite / $scheme://$target_domain/ redirect;
+    rewrite ^/(?!static|media) $scheme://$target_domain/ redirect;
     {% endif %}
     {% if nginx_language_redirect_mode == 'home-redirect' %}
     rewrite ^/$ $scheme://$target_domain/ redirect;
