@@ -14,8 +14,10 @@ fastcgi_param MAGE_RUN_TYPE $MAGE_RUN_TYPE;
 fastcgi_read_timeout {{ nginx_fcgi_read_timeout }};
 fastcgi_connect_timeout {{ nginx_fcgi_connect_timeout }};
 
-fastcgi_buffers 256 16k;
-fastcgi_buffer_size 32k;
+
+
+fastcgi_buffers {{ nginx_magento_fastcgi_buffers_chunk_count }} {{ nginx_magento_fastcgi_buffers_chunk_size }};
+fastcgi_buffer_size {{ nginx_magento_fastcgi_buffers_head_size }};
 
 {% if nginx_magento_fastci_params_extra | default(false, true) %}
 # --- START CUSTOM APPLICATION {{ mageops_app_name }} PARAMS ---
