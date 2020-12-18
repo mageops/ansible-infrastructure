@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-mageops::get_current_instance_id() {
-    curl -Lsf http://instance-data/latest/meta-data/instance-id || return 1
-}
-
-mageops::get_current_region() {
-    curl -Lsf http://instance-data/latest/meta-data/placement/availability-zone | sed 's/[a-z]$//' || return 1
-}
-
 mageops::get_ec2_tag_value() {
     local region=$1
     local instance_id=$2
@@ -25,8 +17,8 @@ mageops::get_tag_value() {
     local instance_id
     local found_value
     local region
-    region="$(mageops::get_current_region)"
-    instance_id="$(mageops::get_current_instance_id)"
+    region="$(aws::get_current_region)"
+    instance_id="$(aws::current_instance_id)"
     found_value="$(mageops::get_ec2_tag_value "$region" \
         "$instance_id" "$tag_name")"
 
@@ -39,8 +31,8 @@ mageops::is_tag_exists() {
     local instance_id
     local found_value
     local region
-    region="$(mageops::get_current_region)"
-    instance_id="$(mageops::get_current_instance_id)"
+    region="$(aws::get_current_region)"
+    instance_id="$(aws::current_instance_id)"
     found_value="$(mageops::get_ec2_tag_value "$region" \
         "$instance_id" "$tag_name")"
 
@@ -57,8 +49,8 @@ mageops::assert_tag_value() {
     local instance_id
     local found_value
     local region
-    region="$(mageops::get_current_region)"
-    instance_id="$(mageops::get_current_instance_id)"
+    region="$(aws::get_current_region)"
+    instance_id="$(aws::current_instance_id)"
     found_value="$(mageops::get_ec2_tag_value "$region" \
         "$instance_id" "$tag_name")"
 

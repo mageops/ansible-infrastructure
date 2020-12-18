@@ -12,5 +12,6 @@
     dest: "{{ item.dest }}"
     mode: "{{ item.mode }}"
   with_items:
+    - { src: "libaws.bash", dest: "/usr/local/lib/mageops/libaws.bash", mode: "0644" }
     - { src: "libmageops.bash", dest: "/usr/local/lib/mageops/libmageops.bash", mode: "0644" }
     - { src: "mageopscli", dest: "/usr/local/bin/mageopscli", mode: "0755" }
