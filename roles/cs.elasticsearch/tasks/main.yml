@@ -39,22 +39,50 @@
 # older version the old config files may be invalid and this will prevent the version
 # check from completing but we need to know the version in order to install new configs.
 # Thus a *passive* check that does not involve running es is used.
-- name: Detect current elasticsearch major version
+- name: Detect installed elasticsearch major version
   shell: |
-    find /usr/share/elasticsearch/lib/ -type f -regex '.*/elasticsearch-[0-9]+\..*\.jar' -printf '%P' | sed -E 's/elasticsearch-([0-9]+).*/\1/'
-  register: elasticsearch_major_version_command
+    find /usr/share/elasticsearch/lib/ -type f -regex '.*/elasticsearch-[0-9]+\..*\.jar' -printf '%P' | sed -E 's/elasticsearch-(([0-9]+\.)+[0-9]+).*.jar/\1/'
+  register: elasticsearch_get_installed_version
+  failed_when: >-
+    elasticsearch_get_installed_version.rc | default(0, true) | int != 0
+      or elasticsearch_get_installed_version.stdout_lines | default([], true) | length == 0
   changed_when: false
 
-- name: Store elasticsearch major version
-  set_fact:
-    elasticsearch_major_version: "{{ elasticsearch_major_version_command.stdout | trim | int }}"
+- name: Detect running elasticsearch version
+  uri:
+    url: "http://{{ elasticsearch_network_host }}:{{ elasticsearch_http_port }}"
+    return_content: yes
+  register: elasticsearch_get_running_version
+  failed_when: false
+  changed_when: false
 
-# Note: (elasticsearch_major_version | int) is needed hack for issue in older ansible versions (before 2.8)
-# without that set_fact templates integers to strings and makes comparison impossible
+- name: Store elasticsearch version
+  set_fact:
+    elasticsearch_version_number: "{{ elasticsearch_get_installed_version.stdout | default('0.0.0', true) | trim }}"
+    elasticsearch_running_version_number: >-
+      {{
+          (
+            { 'version': { 'number': '0.0.0' } }
+              | combine(elasticsearch_get_running_version.content | default('{}', true) | from_json)
+          ).version.number | trim
+      }}
+
 - name: Print info about installed elasticsearch version
-  debug: 
-    msg: | 
-      Identified installed ElasticSearch version {{ elasticsearch_major_version }}.X
+  when:
+  debug:
+    msg: |
+      ========================================================
+      =     Installed elasticsearch version identified      ==
+      ========================================================
+
+      Installed version number: {{ elasticsearch_version_number }}
+      Running version number: {{ elasticsearch_running_version_number }}
+
+- name: Fail for unsupported ansible version
+  when: elasticsearch_version_number is version('5.0.0', '<')
+  fail:
+    msg: |
+      ERROR! Invalid, undetected or unsupported elasticsearch version!
 
 - name: Configure elasticsearch 5
   template:
@@ -67,7 +95,9 @@
     elasticsearch.yml: elasticsearch.yml
     log4j2.properties: log4j2.properties
   notify: Restart elasticsearch
-  when: (elasticsearch_major_version | int) == 5
+  when: >-
+    elasticsearch_version_number is version('5.0.0', '>=')
+      and elasticsearch_version_number is version('6.0.0', '<')
 
 - name: Configure elasticsearch 6
   template:
@@ -80,7 +110,9 @@
     elasticsearch.yml: elasticsearch.yml
     log4j2.properties: log4j2.properties
   notify: Restart elasticsearch
-  when: (elasticsearch_major_version | int) >= 6
+  when: >-
+    elasticsearch_version_number is version('6.0.0', '>=')
+      and elasticsearch_version_number is version('7.0.0', '<')
 
 - name: Configure elasticsearch 7 or higher
   template:
@@ -93,7 +125,7 @@
     elasticsearch.yml: elasticsearch.yml
     es7-log4j2.properties: log4j2.properties
   notify: Restart elasticsearch
-  when: (elasticsearch_major_version | int) >= 7
+  when: elasticsearch_version_number is version('7.0.0', '>=')
 
 - name: Ensure elasticsearch systemd config override directory exists
   file:
@@ -109,19 +141,7 @@
     - Reload systemctl daemon
     - Restart elasticsearch
 
-- name: Get current elasticsearch version
-  command: /usr/share/elasticsearch/bin/elasticsearch --version
-  register: elasticsearch_version_command
-  changed_when: false
-
-- name: Store current elasticsearch version
-  copy:
-    dest: "{{ elasticsearch_version_file_path }}"
-    content: "{{ elasticsearch_version_command.stdout | trim | lower }}"
-    force: yes
-  register: elasticsearch_version_save
-
-- name: Force update of elasticsearch plugins if necessary
+- name: Force update of elasticsearch plugins on version change
   block:
     - name: Get list of installed elasticsearch plugins
       command: /usr/share/elasticsearch/bin/elasticsearch-plugin list --silent
@@ -132,7 +152,8 @@
       args:
         removes:  "/usr/share/elasticsearch/plugins/{{ item }}"
       loop: "{{ elasticsearch_plugin_list_command.stdout_lines }}"
-  when: elasticsearch_version_save is changed
+  when: >-
+    elasticsearch_version_number != elasticsearch_running_version_number
 
 - name: Install elasticsearch plugins
   command: "/usr/share/elasticsearch/bin/elasticsearch-plugin install {{ item }}"
