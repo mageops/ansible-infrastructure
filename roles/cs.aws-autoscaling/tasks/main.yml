@@ -64,13 +64,14 @@
       region: "{{ aws_region }}"
       instance_ids: "{{ _aws_asg.instances }}"
     register: _aws_asg_instances
-  
-  - name: Wait until the health check file exists on all nodes
+
+  - name: Wait for nodes to get up (ssh availability)
     wait_for:
-      path: "{{ autoscaling_asg_replace_check_file }}"
-      timeout: "{{ autoscaling_asg_wait_timeout }}"
-    delegate_to: "{{ item }}"
-    with_items: "{{ _aws_asg_instances | json_query('instances[].public_ip_address') }}"
+      port: 22
+      host: "{{ item.public_ip_address }}"
+    loop: "{{ _aws_asg_instances.instances }}"
+    loop_control:
+      label: "{{ item.public_dns_name }}"
 
   - name: Reduce AutoScaling Group - remove old instances
     ec2_asg:
