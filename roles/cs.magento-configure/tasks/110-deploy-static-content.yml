@@ -27,35 +27,69 @@
       ============================================
 
 - name: Deploy static content for each language separately (Magento 2.1 and 2.2)
-  become: yes
-  become_user: "{{ magento_user }}"
-  command: >
-    php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
-      {% for theme in magento_scd_excluded_themes -%}
-        --exclude-theme "{{ theme }}" \
-      {% endfor %}
-      -s "{{ magento_scd_strategy }}" \
-      -j {{ magento_scd_parallel_jobs }} \
-      '{{ magento_theme_language }}'
-  loop: "{{ magento_scd_languages }}"
-  loop_control:
-    loop_var: magento_theme_language
-    label: "Language: {{ magento_theme_language }}"
-  register: magento22_scd
+  block:
+  - name: Deploy static content for each language separately (Magento 2.1 and 2.2)
+    become: yes
+    become_user: "{{ magento_user }}"
+    command: >
+      php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+        {% for theme in magento_scd_excluded_themes -%}
+          --exclude-theme "{{ theme }}" \
+        {% endfor %}
+        -s "{{ magento_scd_strategy }}" \
+        -j {{ magento_scd_parallel_jobs }} \
+        '{{ magento_theme_language }}'
+    loop: "{{ magento_scd_languages }}"
+    loop_control:
+      loop_var: magento_theme_language
+      label: "Language: {{ magento_theme_language }}"
+    register: magento22_scd
+  rescue:
+  - name: Retry with single job - deploy static content for each language separately (Magento 2.1 and 2.2)
+    become: yes
+    become_user: "{{ magento_user }}"
+    command: >
+      php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+        {% for theme in magento_scd_excluded_themes -%}
+          --exclude-theme "{{ theme }}" \
+        {% endfor %}
+        -s "{{ magento_scd_strategy }}" \
+        -j 1 \
+        '{{ magento_theme_language }}'
+    loop: "{{ magento_scd_languages }}"
+    loop_control:
+      loop_var: magento_theme_language
+      label: "Language: {{ magento_theme_language }}"
+    register: magento22_scd
   when: magento_version is version('2.3', '<')
 
 - name: Deploy static content (Magento 2.3+)
-  become: yes
-  become_user: "{{ magento_user }}"
-  command: >
-    php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
-      {% for theme in magento_scd_excluded_themes -%}
-        --exclude-theme "{{ theme }}" \
-      {% endfor %}
-      -s "{{ magento_scd_strategy }}" \
-      -j {{ magento_scd_parallel_jobs }} \
-      {{ magento_scd_languages | join(' ') }}
-  register: magento_scd
+  block:
+  - name: Deploy static content (Magento 2.3+)
+    become: yes
+    become_user: "{{ magento_user }}"
+    command: >
+      php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+        {% for theme in magento_scd_excluded_themes -%}
+          --exclude-theme "{{ theme }}" \
+        {% endfor %}
+        -s "{{ magento_scd_strategy }}" \
+        -j {{ magento_scd_parallel_jobs }} \
+        {{ magento_scd_languages | join(' ') }}
+    register: magento_scd
+  rescue:
+  - name: Deploy static content (Magento 2.3+)
+    become: yes
+    become_user: "{{ magento_user }}"
+    command: >
+      php {{ magento_release_dir }}/bin/magento setup:static-content:deploy \
+        {% for theme in magento_scd_excluded_themes -%}
+          --exclude-theme "{{ theme }}" \
+        {% endfor %}
+        -s "{{ magento_scd_strategy }}" \
+        -j 1 \
+        {{ magento_scd_languages | join(' ') }}
+    register: magento_scd
   when: magento_version is version('2.3', '>=')
 
 - name: Set information about Magento SCD (Magento 2.1 and 2.2)
