@@ -29,16 +29,16 @@
     max_size: >-
       {{
         autoscaling_asg_replace_with_check | ternary(
-          autoscaling_asg_max_size + autoscaling_asg_desired_capacity, 
+          autoscaling_asg_max_size + autoscaling_asg_desired_capacity,
           autoscaling_asg_max_size
-        ) 
+        )
       }}
     desired_capacity: >-
       {{
-        autoscaling_asg_replace_with_check | ternary( 
-          autoscaling_asg_desired_capacity * 2, 
+        autoscaling_asg_replace_with_check | ternary(
+          autoscaling_asg_desired_capacity * 2,
           autoscaling_asg_desired_capacity
-        ) 
+        )
       }}
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
@@ -82,13 +82,13 @@
       max_size: "{{ autoscaling_asg_max_size }}"
       desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
       termination_policies: >-
-        {{ 
-          [ 'OldestLaunchConfiguration' ] 
+        {{
+          [ 'OldestLaunchConfiguration' ]
           + (autoscaling_asg_termination_policies is string | ternary(
-                [ autoscaling_asg_termination_policies ], 
+                [ autoscaling_asg_termination_policies ],
                 autoscaling_asg_termination_policies
               )
-            ) 
+            )
         }}
       wait_for_instances: yes
       replace_all_instances: yes
@@ -106,3 +106,12 @@
     heartbeat_timeout: 120
     default_result: CONTINUE
   when: autoscaling_webnodedown_hook_create
+
+- name: Wait for desired capacity
+  ec2_asg_info:
+    name: "{{ autoscaling_asg_name }}"
+    region: "{{ aws_region }}"
+  register: _asg_info
+  until: "_asg_info.results and (_asg_info.results[0].instances | length > 0) and (_asg_info.results[0].instances | length) == _asg_info.results[0].desired_capacity"
+  retries: 300
+  delay: 5
