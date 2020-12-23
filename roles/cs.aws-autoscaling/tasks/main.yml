@@ -55,10 +55,6 @@
 
 - name: Handle bulk update of instances with health check
   block:
-  # - set_fact:
-  #     _asg_instaqnces: "{{ _aws_asg | json_query('instance_facts | keys(@)') }}"
-  # - debug:
-  #     var: _asg_instaqnces
   - name: Make a list od instances for health check
     ec2_instance_info:
       region: "{{ aws_region }}"
@@ -72,28 +68,44 @@
     loop: "{{ _aws_asg_instances.instances }}"
     loop_control:
       label: "{{ item.public_dns_name }}"
-
-  - name: Reduce AutoScaling Group - remove old instances
-    ec2_asg:
-      state: present
-      name: "{{ autoscaling_asg_name }}"
+  rescue:
+  # Retry because of race condition when it will return instance that is shutting down
+  # The same thing as in block, because ansible doesn't allow to retry on block
+  - name: Make a list od instances for health check
+    ec2_instance_info:
       region: "{{ aws_region }}"
-      min_size: "{{ autoscaling_asg_min_size }}"
-      max_size: "{{ autoscaling_asg_max_size }}"
-      desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
-      termination_policies: >-
-        {{
-          [ 'OldestLaunchConfiguration' ]
-          + (autoscaling_asg_termination_policies is string | ternary(
-                [ autoscaling_asg_termination_policies ],
-                autoscaling_asg_termination_policies
-              )
-            )
-        }}
-      wait_for_instances: yes
-      replace_all_instances: yes
-    register: _aws_asg
+      instance_ids: "{{ _aws_asg.instances }}"
+    register: _aws_asg_instances
 
+  - name: Wait for nodes to get up (ssh availability)
+    wait_for:
+      port: 22
+      host: "{{ item.public_ip_address }}"
+    loop: "{{ _aws_asg_instances.instances }}"
+    loop_control:
+      label: "{{ item.public_dns_name }}"
+  when: autoscaling_asg_replace_with_check
+
+- name: Reduce AutoScaling Group - remove old instances
+  ec2_asg:
+    state: present
+    name: "{{ autoscaling_asg_name }}"
+    region: "{{ aws_region }}"
+    min_size: "{{ autoscaling_asg_min_size }}"
+    max_size: "{{ autoscaling_asg_max_size }}"
+    desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
+    termination_policies: >-
+      {{
+        [ 'OldestLaunchConfiguration' ]
+        + (autoscaling_asg_termination_policies is string | ternary(
+              [ autoscaling_asg_termination_policies ],
+              autoscaling_asg_termination_policies
+            )
+          )
+      }}
+    wait_for_instances: yes
+    replace_all_instances: yes
+  register: _aws_asg
   when: autoscaling_asg_replace_with_check
 
 - name: Create ASG Termination Lifecycle Hook
