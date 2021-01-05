@@ -1,0 +1,161 @@
+# Base app/etc/env.php config
+magento_app_etc_config:
+  backend:
+    frontName: "{{ magento_admin_path }}"
+
+  system: {}
+  cache: {}
+  queue: {}
+
+  crypt:
+    key: "{{ magento_crypt_key }}"
+
+  session:
+    save: redis
+    redis:
+      host: "{{ mageops_redis_sessions_host }}"
+      port: "{{ mageops_redis_sessions_port }}"
+      password: ""
+      timeout: "2.5"
+      persistent_identifier: ""
+      database: "0"
+      compression_threshold: "2048"
+      compression_library: gzip
+      log_level: "1"
+      max_concurrency: "{{ magento_session_max_redis_concurrency }}"
+      break_after_frontend: "5"
+      break_after_adminhtml: "30"
+      first_lifetime: "600"
+      bot_first_lifetime: "60"
+      bot_lifetime: "7200"
+      disable_locking: "0"
+      min_lifetime: "60"
+      max_lifetime: "2592000"
+
+  db:
+    table_prefix: ""
+    connection:
+      default:
+        host: "{{ mageops_mysql_host }}"
+        dbname: "{{ mageops_app_mysql_db }}"
+        username: "{{ mageops_app_mysql_user }}"
+        password: "{{ mageops_app_mysql_pass }}"
+        model: mysql4
+        engine: innodb
+        initStatements: "SET NAMES utf8;"
+        active: "1"
+
+  resource:
+    default_setup:
+      connection: default
+
+  x-frame-options: SAMEORIGIN
+
+  MAGE_MODE: "{{ magento_mode }}"
+
+  cache_types:
+    config: 1
+    layout: 1
+    block_html: 1
+    collections: 1
+    reflection: 1
+    db_ddl: 1
+    eav: 1
+    customer_notification: 1
+    full_page: 1
+    config_integration: 1
+    config_integration_api: 1
+    translate: 1
+    config_webservice: 1
+    compiled_config: 1
+    media_listing: 1
+    navigation: 1
+    vertex: 1
+
+  install:
+    date: "Tue, 11 Nov 2016 11:11:00 +0000"
+
+  http_cache_hosts:
+    - host: "{{ magento_varnish_host }}"
+      port: "{{ magento_varnish_port }}"
+
+# Optional elasticsuite config
+magento_app_etc_config_elasticsuite:
+  system:
+    default:
+      smile_elasticsuite_core_base_settings:
+        es_client:
+          servers: "{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}"
+          enable_https_mode: false
+          http_auth_user: ""
+          http_auth_pwd: ""
+          enable_http_auth: false
+        indices_settings:
+          alias: "{{ magento_elasticsearch_index_alias }}"
+
+# Optional redis cache config
+magento_app_etc_config_cache_redis_default:
+  cache:
+    frontend:
+      default:
+        backend: Cm_Cache_Backend_Redis
+        backend_options:
+          server: "{{ mageops_redis_host }}"
+          database: "0"
+          port: "{{ mageops_redis_port }}"
+
+
+magento_app_etc_config_cache_redis_default_2l:
+  cache:
+      frontend:
+          default:
+              backend: \Magento\Framework\Cache\Backend\RemoteSynchronizedCache
+              backend_options:
+                  remote_backend: \Magento\Framework\Cache\Backend\Redis
+                  remote_backend_options:
+                      persistent: 0
+                      server: "{{ mageops_redis_host }}"
+                      database: "0"
+                      port: "{{ mageops_redis_port }}"
+                      password: ""
+                      preload_keys:
+                        - EAV_ENTITY_TYPES:hash
+                        - GLOBAL_PLUGIN_LIST:hash
+                        - DB_IS_UP_TO_DATE:hash
+                        - SYSTEM_DEFAULT:hash
+                  local_backend: Cm_Cache_Backend_File
+                  local_backend_options:
+                      cache_dir: /dev/shm/
+              frontend_options:
+                  write_control: false
+      type:
+          default:
+              frontend: default
+
+magento_app_etc_config_cache_redis_page_cache:
+  cache:
+    frontend:
+      page_cache:
+        backend: Cm_Cache_Backend_Redis
+        backend_options:
+          server: "{{ mageops_redis_host }}"
+          database: "1"
+          port: "{{ mageops_redis_port }}"
+          compress_data: "0"
+
+# Optional RabbitMQ queue config
+magento_app_etc_config_queue_rabbitmq:
+  queue:
+    amqp:
+      host: "{{ mageops_rabbitmq_host }}"
+      port: "{{ rabbitmq_amqp_port }}"
+      user: "{{ magento_rabbitmq_username }}"
+      password: "{{ magento_rabbitmq_password }}"
+      virtualhost: "{{ magento_rabbitmq_virtual_host }}"
+      ssl: false
+
+# Optional config for when consumer workers are enabled
+magento_app_etc_config_consumer_workers:
+  cron_consumers_runner:
+    cron_run: false
+    max_messages: "{{ magento_consumer_workers_max_messages | default(500) }}"
