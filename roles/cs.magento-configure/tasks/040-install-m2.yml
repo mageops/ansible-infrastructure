@@ -41,24 +41,24 @@
       when: magento_redis_cache
       block:
         - name: Enable default Redis cache
-          when: not magento_redis_cache_2l
+          when: not magento_redis_cache_l2
           set_fact:
             magento_app_etc_config: >-
               {{ magento_app_etc_config
-                  | combine(magento_app_etc_config_cache_redis_default, recursive=true) }}
+                  | combine(magento_app_etc_config_cache_default_redis, recursive=true) }}
 
         - name: Enable 2-level default Redis cache
-          when: magento_redis_cache_2l
+          when: magento_redis_cache_l2
           set_fact:
             magento_app_etc_config: >-
               {{ magento_app_etc_config
-                  | combine(magento_app_etc_config_cache_redis_default_2l, recursive=true) }}
+                  | combine(magento_app_etc_config_cache_default_redis_l2, recursive=true) }}
 
         - name: Configure Redis page cache
           set_fact:
             magento_app_etc_config: >-
               {{ magento_app_etc_config
-                  | combine(magento_app_etc_config_cache_redis_page_cache, recursive=true) }}
+                  | combine(magento_app_etc_config_cache_page_redis, recursive=true) }}
 
     - name: Enable RabbitMQ queue configuration
       when: magento_rabbitmq_queue
