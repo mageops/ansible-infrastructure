@@ -94,7 +94,7 @@ magento_app_etc_config_elasticsuite:
           alias: "{{ magento_elasticsearch_index_alias }}"
 
 # Optional redis cache config
-magento_app_etc_config_cache_redis_default:
+magento_app_etc_config_cache_default_redis:
   cache:
     frontend:
       default:
@@ -105,7 +105,7 @@ magento_app_etc_config_cache_redis_default:
           port: "{{ mageops_redis_port }}"
 
 
-magento_app_etc_config_cache_redis_default_2l:
+magento_app_etc_config_cache_default_redis_l2:
   cache:
       frontend:
           default:
@@ -125,14 +125,14 @@ magento_app_etc_config_cache_redis_default_2l:
                         - SYSTEM_DEFAULT:hash
                   local_backend: Cm_Cache_Backend_File
                   local_backend_options:
-                      cache_dir: /dev/shm/
+                      cache_dir: "{{ magento_redis_cache_l2_dir }}"
               frontend_options:
                   write_control: false
       type:
           default:
               frontend: default
 
-magento_app_etc_config_cache_redis_page_cache:
+magento_app_etc_config_cache_page_redis:
   cache:
     frontend:
       page_cache:
