@@ -120,6 +120,7 @@
   when: autoscaling_webnodedown_hook_create
 
 - name: Wait for desired capacity
+  when: autoscaling_asg_desired_capacity | int > 0
   ec2_asg_info:
     name: "{{ autoscaling_asg_name }}"
     region: "{{ aws_region }}"
