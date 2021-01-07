@@ -1,5 +1,5 @@
 - name: Stop builder for AMI creation
-  when: ami_instance_stop
+  when: aws_ami_build_stop_builder
   ec2:
     region: "{{ aws_region }}"
     state: stopped
