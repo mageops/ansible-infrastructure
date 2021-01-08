@@ -24,7 +24,7 @@ magento_install_sample_data: no
 # Whether to use redis for caching
 magento_redis_cache: yes
 # Whether to use a local Level 2 cache
-magento_redis_cache_l2: no
+magento_redis_cache_l2: yes
 magento_redis_cache_l2_dir: /dev/shm
 magento_session_max_redis_concurrency: 15
 
