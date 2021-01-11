@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/config.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libaws.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libmageops.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libfeatures.bash"
 
 main::main() {
-    local cmd=$1
+    local cmd=${1:-}
 
     case $cmd in
     is_cron_node)
@@ -29,6 +31,26 @@ main::main() {
     current_region)
         if [ $# != 1 ];then main::help; fi
         main::current_region || exit 1
+    ;;
+    set_feature_flag)
+        if [ $# != 3 ];then main::help; fi
+        local feature=$2
+        local value=$3
+        main::set_feature_flag "$feature" "$value"
+    ;;
+    read_feature_flag)
+        if [ $# != 2 ];then main::help; fi
+        local feature=$2
+        main::read_feature_flag "$feature"
+    ;;
+    is_feature_flag_set)
+        if [ $# != 2 ];then main::help; fi
+        local feature=$2
+        main::is_feature_flag_set "$feature" || exit 1
+    ;;
+    apply_features)
+    if [ $# != 1 ];then main::help; fi
+        main::apply_features
     ;;
     *) main::help ;;
     esac
@@ -78,19 +100,49 @@ main::current_region() {
     echo "$region"
 }
 
+main::set_feature_flag() {
+    local feature=$1
+    local value=$2
+
+    main::eprintln "Updating feature flag $feature to $value..."
+    features::update_feature_flag "$feature" "$value"
+    main::eprintln "OK"
+}
+
+main::is_feature_flag_set() {
+    local feature=$1
+
+    features::is_flag_set "$feature" || return 1
+}
+
+main::read_feature_flag() {
+    local feature=$1
+
+    features::read_feature_flag "$feature" ""
+}
+
+main::apply_features() {
+    features::update_host_state
+}
+
 main::help() {
     main::eprintln "  $0 <cmd>"
     main::eprintln ""
     main::eprintln "Where cmd is one of:"
-    main::eprintln "  is_cron_node               Checks if there is tag 'Cron' with value 'yes'"
-    main::eprintln "                             status code 0 means tag present, 1 means missing tag or"
-    main::eprintln "                             other error"
-    main::eprintln "  is_tag_present <tag_name>  Checks if specified tag name is set"
-    main::eprintln "                             status code 0 means tag present, 1 means missing tag or"
-    main::eprintln "                             other error"
-    main::eprintln "  get_tag_value <tag_name>   Reads value assigned to tag"
-    main::eprintln "  current_instance_id        Reads current ec2 instance id"
-    main::eprintln "  current_region             Reads current ec2 region name"
+    main::eprintln "  is_cron_node                         Checks if there is tag 'Cron' with value 'yes'"
+    main::eprintln "                                       status code 0 means tag present, 1 means missing tag or"
+    main::eprintln "                                       other error"
+    main::eprintln "  is_tag_present <tag_name>            Checks if specified tag name is set"
+    main::eprintln "                                       status code 0 means tag present, 1 means missing tag or"
+    main::eprintln "                                       other error"
+    main::eprintln "  get_tag_value <tag_name>             Reads value assigned to tag"
+    main::eprintln "  current_instance_id                  Reads current ec2 instance id"
+    main::eprintln "  current_region                       Reads current ec2 region name"
+    main::eprintln "  set_feature_flag <feature> <value>   Update feature flag value"
+    main::eprintln "  read_feature_flag <feature>          Reads current feature flag value"
+    main::eprintln "  is_feature_flag_set <feature>        Checks if there is any value set for feature flag"
+    main::eprintln "                                       status code 0 means flag is set, 1 otherwise"
+    main::eprintln "  apply_features                       Apply feature updates to this host"
     main::eprintln ""
     main::eprintln " Mageops cli tools"
     main::eprintln "  (c) Creativestyle 2020"

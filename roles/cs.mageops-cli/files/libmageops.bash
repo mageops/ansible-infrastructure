@@ -59,3 +59,16 @@ mageops::assert_tag_value() {
     fi
     return 1
 }
+
+mageops::read_s3_file() {
+    local url=$1
+
+    aws s3 cp "$url" -
+}
+
+mageops::update_s3_file() {
+    local url=$1
+    local content=$2
+
+    echo "$content" | aws s3 cp - "$url"
+}
