@@ -29,16 +29,16 @@
     max_size: >-
       {{
         autoscaling_asg_replace_with_check | ternary(
-          autoscaling_asg_max_size + autoscaling_asg_desired_capacity, 
+          autoscaling_asg_max_size + autoscaling_asg_desired_capacity,
           autoscaling_asg_max_size
-        ) 
+        )
       }}
     desired_capacity: >-
       {{
-        autoscaling_asg_replace_with_check | ternary( 
-          autoscaling_asg_desired_capacity * 2, 
+        autoscaling_asg_replace_with_check | ternary(
+          autoscaling_asg_desired_capacity * 2,
           autoscaling_asg_desired_capacity
-        ) 
+        )
       }}
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
@@ -55,44 +55,57 @@
 
 - name: Handle bulk update of instances with health check
   block:
-  # - set_fact:
-  #     _asg_instaqnces: "{{ _aws_asg | json_query('instance_facts | keys(@)') }}"
-  # - debug:
-  #     var: _asg_instaqnces
   - name: Make a list od instances for health check
     ec2_instance_info:
       region: "{{ aws_region }}"
       instance_ids: "{{ _aws_asg.instances }}"
     register: _aws_asg_instances
-  
-  - name: Wait until the health check file exists on all nodes
+
+  - name: Wait for nodes to get up (ssh availability)
     wait_for:
-      path: "{{ autoscaling_asg_replace_check_file }}"
-      timeout: "{{ autoscaling_asg_wait_timeout }}"
-    delegate_to: "{{ item }}"
-    with_items: "{{ _aws_asg_instances | json_query('instances[].public_ip_address') }}"
-
-  - name: Reduce AutoScaling Group - remove old instances
-    ec2_asg:
-      state: present
-      name: "{{ autoscaling_asg_name }}"
+      port: 22
+      host: "{{ item.public_ip_address }}"
+    loop: "{{ _aws_asg_instances.instances }}"
+    loop_control:
+      label: "{{ item.public_dns_name }}"
+  rescue:
+  # Retry because of race condition when it will return instance that is shutting down
+  # The same thing as in block, because ansible doesn't allow to retry on block
+  - name: Make a list od instances for health check
+    ec2_instance_info:
       region: "{{ aws_region }}"
-      min_size: "{{ autoscaling_asg_min_size }}"
-      max_size: "{{ autoscaling_asg_max_size }}"
-      desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
-      termination_policies: >-
-        {{ 
-          [ 'OldestLaunchConfiguration' ] 
-          + (autoscaling_asg_termination_policies is string | ternary(
-                [ autoscaling_asg_termination_policies ], 
-                autoscaling_asg_termination_policies
-              )
-            ) 
-        }}
-      wait_for_instances: yes
-      replace_all_instances: yes
-    register: _aws_asg
+      instance_ids: "{{ _aws_asg.instances }}"
+    register: _aws_asg_instances
 
+  - name: Wait for nodes to get up (ssh availability)
+    wait_for:
+      port: 22
+      host: "{{ item.public_ip_address }}"
+    loop: "{{ _aws_asg_instances.instances }}"
+    loop_control:
+      label: "{{ item.public_dns_name }}"
+  when: autoscaling_asg_replace_with_check
+
+- name: Reduce AutoScaling Group - remove old instances
+  ec2_asg:
+    state: present
+    name: "{{ autoscaling_asg_name }}"
+    region: "{{ aws_region }}"
+    min_size: "{{ autoscaling_asg_min_size }}"
+    max_size: "{{ autoscaling_asg_max_size }}"
+    desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
+    termination_policies: >-
+      {{
+        [ 'OldestLaunchConfiguration' ]
+        + (autoscaling_asg_termination_policies is string | ternary(
+              [ autoscaling_asg_termination_policies ],
+              autoscaling_asg_termination_policies
+            )
+          )
+      }}
+    wait_for_instances: yes
+    replace_all_instances: yes
+  register: _aws_asg
   when: autoscaling_asg_replace_with_check
 
 - name: Create ASG Termination Lifecycle Hook
@@ -105,3 +118,13 @@
     heartbeat_timeout: 120
     default_result: CONTINUE
   when: autoscaling_webnodedown_hook_create
+
+- name: Wait for desired capacity
+  when: autoscaling_asg_desired_capacity | int > 0
+  ec2_asg_info:
+    name: "{{ autoscaling_asg_name }}"
+    region: "{{ aws_region }}"
+  register: _asg_info
+  until: "_asg_info.results and (_asg_info.results[0].instances | length > 0) and (_asg_info.results[0].instances | length) == _asg_info.results[0].desired_capacity"
+  retries: 300
+  delay: 5

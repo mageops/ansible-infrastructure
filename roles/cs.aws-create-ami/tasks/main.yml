@@ -1,3 +1,11 @@
+- name: Stop builder for AMI creation
+  when: aws_ami_build_stop_builder
+  ec2:
+    region: "{{ aws_region }}"
+    state: stopped
+    instance_ids: "{{ [ ami_instance_id ] }}"
+    wait: yes
+
 - name: Create AMI
   ec2_ami:
     region: "{{ aws_region }}"
@@ -6,7 +14,7 @@
     instance_id: "{{ ami_instance_id }}"
     name: "{{ ami_name }}"
     wait: yes
-    wait_timeout: 600
+    wait_timeout: 1800
     tags: "{{ aws_tags_default | combine(ami_tags, ami_name_tags) }}"
     delete_snapshot: "{{ ami_delete_snapshot | default('yes') }}"
   vars:

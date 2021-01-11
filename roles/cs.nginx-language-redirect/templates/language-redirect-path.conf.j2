@@ -8,10 +8,14 @@ if ($http_accept_language ~* '^(.+?),') {
 {%- for lang, path in nginx_language_redirect_directory_mapping.items() %}
 if ( $target = "{{ path }}" ) {
     {%- if nginx_language_redirect_mode == 'geofence' %}
-    rewrite /({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }}) /$target/ redirect;
+    rewrite ^/({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }}) /$target/ redirect;
     rewrite ^/$ /$target/ redirect;
     {% endif %}
     {%- if nginx_language_redirect_mode == 'home-redirect' %}
+    rewrite ^/$ /$target/ redirect;
+    {% endif %}
+    {%- if nginx_language_redirect_mode == 'deep-redirect' %}
+    rewrite ^/({{ nginx_language_redirect_directory_mapping.values() | list | difference([path]) | join('|') }})/(.*)$ /$target/$2 redirect;
     rewrite ^/$ /$target/ redirect;
     {% endif %}
 }

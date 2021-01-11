@@ -36,3 +36,4 @@
   vars:
     packages_install: "{{ mageops_packages_common + mageops_packages_vagrant_node }}"
     mageops_node_role: vagrant
+    magento_redis_cache_l2: no

@@ -2,6 +2,7 @@
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/config.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libaws.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libmageops.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libfeatures.bash"
 

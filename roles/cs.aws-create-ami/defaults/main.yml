@@ -1,0 +1,2 @@
+# Whether to stop the "builder" instance before creating AMI
+aws_ami_build_stop_builder: true

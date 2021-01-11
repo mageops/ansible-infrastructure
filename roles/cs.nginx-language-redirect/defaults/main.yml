@@ -4,6 +4,7 @@ nginx_language_redirect_site: default
 # kind of redirect we want to have
 # geofence - blocks access completly
 # home-redirect - redirect is performed only for single url
+# deep-redirect - redirect to different language while keeping urls unchanged
 nginx_language_redirect_mode: geofence
 
 # Site style used for redirection
