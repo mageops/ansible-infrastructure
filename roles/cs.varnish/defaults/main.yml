@@ -85,7 +85,7 @@ varnish_ncsa_logging: no
 varnish_ncsa_logfile: "{{ varnish_log_dir }}/varnishncsa.log"
 varnish_ncsa_log_format: '%h %l %u %t "%r" %s %b "%{Referer}i" "%{User-agent}i"'
 
-varnish_purge_logging: yes
+varnish_purge_logging: no
 varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
 
 # Extra VCL code to add to subroutines
