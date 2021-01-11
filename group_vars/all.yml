@@ -1430,7 +1430,7 @@ varnish_log_dir: /var/log/varnish
 varnish_ncsa_logging: no
 
 # If enabled then Magento PURGE requests to varnish will be logged
-varnish_purge_logging: yes
+varnish_purge_logging: no
 varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
 
 # Error page customization
