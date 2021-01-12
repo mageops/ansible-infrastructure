@@ -38,7 +38,7 @@ magento_efs_app_mounts_basic:
     remote_path: "{{ magento_efs_global_data_remote_path }}"
     owner: "{{ magento_user }}"
     group: "{{ magento_group }}"
-  - local_mountpoint: "{{ mmagento_efs_locks_data_app_path }}"
+  - local_mountpoint: "{{ magento_efs_locks_data_app_path }}"
     remote_path: "{{ magento_efs_locks_data_remote_path }}"
     owner: "{{ magento_user }}"
     group: "{{ magento_group }}"
