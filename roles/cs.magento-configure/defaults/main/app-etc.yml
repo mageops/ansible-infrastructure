@@ -159,3 +159,10 @@ magento_app_etc_config_consumer_workers:
   cron_consumers_runner:
     cron_run: false
     max_messages: "{{ magento_consumer_workers_max_messages | default(500) }}"
+
+
+magento_app_etc_config_file_locking:
+  lock:
+    provider: file
+    config:
+      path: "{{ magento_lock_files_dir }}"

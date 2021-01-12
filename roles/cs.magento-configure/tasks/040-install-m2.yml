@@ -74,6 +74,13 @@
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_consumer_workers, recursive=true) }}
 
+    - name: Enable file lock provider
+      when: magento_lock_files_enabled
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_file_locking, recursive=true) }}
+
     - name: Export configuration as PHP code
       command:
         stdin: "{{ magento_app_etc_config | to_json }}"
