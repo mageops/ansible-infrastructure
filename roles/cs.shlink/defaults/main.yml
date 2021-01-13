@@ -1,0 +1,115 @@
+# The suffix used for naming all instance resources
+# Set it if deploying multiple instances on the same host
+shlink_instance: ~
+
+# Use https
+shlink_short_domain_https: yes
+
+# The domain name that the app is hosted at
+shlink_short_domain: ~
+
+# Base URL path of the app
+shlink_base_path: ''
+
+# Redirect to this URL on access to the base path
+shlink_base_url_redirect_to: ~
+
+# Redirect to this URL when shortcode is not in the DB
+shlink_missing_url_redirect_to: ~
+
+# Redirect to this URL when target URL is invalid
+shlink_404_redirect_to: ~
+
+# Redirect code - 301 or 302
+shlink_redirect_status_code: 302
+
+# How long to keep redirs in cache
+shlink_redirect_cache_lifetime: 30
+
+# Minimum amount of visits needed to keep the shortened entry
+shlink_delete_short_url_threshold: 3
+
+# Initial length of short codes
+shlink_shortcode_length: 4
+
+# Whether to validate target URLs
+shlink_validate_url: no
+
+# Disable tracking when this query parameter is present
+shlink_disable_track_param: _shlnt
+
+# Whether to anonymize remote IPs
+# Warning! If disabled then you must ensure GDPR compliance somehow which
+# might not be possible legally without displaying some opt-in, so better
+# to keep anonymization enabled at all times.
+shlink_anonymize_remote_addr: yes
+
+# Number of workers
+shlink_web_worker_num: 16
+shlink_task_worker_num: 16
+
+# Target docker container tag
+shlink_version: 2.4.2
+
+# GeoLite DB license key
+shlink_geolite_license_key: ~
+
+# If defined then an external MySQL DB will be used
+shlink_mysql_db_host: ~
+shlink_mysql_db_name: shlink
+shlink_mysql_db_user: shlink
+shlink_mysql_db_pass: ~
+shlink_mysql_db_port: 3306
+
+# Use local SQLite DB if MySQL DB hostname is not set
+shlink_sqlite_db: "{{ not (shlink_mysql_db_host | default(false, true)) }}"
+
+shlink_user: "shlink{{ shlink_instance_suffix }}"
+shlink_group: "{{ shlink_user }}"
+shlink_home: "/home/{{ shlink_user }}"
+
+# Port bound to the host - not that container is ran rootless
+# you cannot bind to ports < 1024! This is a backend only so
+# you need a reverse-proxy in front anyway.
+shlink_http_bind_port: 8080
+
+# The IP to publish the http port to
+shlink_http_bind_host: 0.0.0.0
+
+# The internal port exposed by the container
+shlink_http_container_port: 8888
+
+# The shlink backend configuration build. See reference:
+#   - Env vars described: https://shlink.io/documentation/install-docker-image/#supported-env-vars
+#   - Available JSON params: https://shlink.io/documentation/install-docker-image/#provide-config-via-volumes
+shlink_config_default:
+  anonymize_remote_addr: "{{ shlink_anonymize_remote_addr }}"
+
+  disable_track_param: "{{ shlink_disable_track_param }}"
+
+  short_domain_host: "{{ shlink_short_domain }}"
+  short_domain_schema: "{{ shlink_short_domain_https | ternary('https', 'http') }}"
+
+  validate_url: "{{ shlink_validate_url }}"
+
+  base_path: "{{ shlink_base_path }}"
+  base_url_redirect_to: "{{ shlink_base_url_redirect_to }}"
+  invalid_short_url_redirect_to: "{{ shlink_missing_url_redirect_to }}"
+  regular_404_redirect_to: "{{ shlink_404_redirect_to }}"
+
+  web_worker_num: "{{ shlink_web_worker_num }}"
+  task_worker_num: "{{ shlink_task_worker_num }}"
+  default_short_codes_length: "{{ shlink_shortcode_length }}"
+  geolite_license_key: "{{ shlink_geolite_license_key }}"
+
+  redirect_status_code: "{{ shlink_redirect_status_code }}"
+  redirect_cache_lifetime: "{{ shlink_redirect_cache_lifetime }}"
+
+  delete_short_url_threshold: "{{ shlink_delete_short_url_threshold }}"
+
+  port: "{{ shlink_http_container_port }}"
+
+  db_config: "{{ shlink_sqlite_db | ternary(shlink_db_config_sqlite, shlink_db_config_mysql) | dict2items | rejectattr('value', 'none') | list | items2dict }}"
+
+# Extra parameters to override / add to the default JSON config
+shlink_config_custom: {}
