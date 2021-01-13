@@ -1,8 +1,8 @@
 - name: Create user's group
   group:
     name: "{{ mageops_cli_user_group }}"
-    gid: "{{ mageops_cli_user_gid }}"
-  when: mageops_cli_user_gid is defined
+    gid: "{{ mageops_cli_user_gid | default(omit) }}"
+  when: mageops_cli_user_group is defined
 
 - name: Create user
   user:

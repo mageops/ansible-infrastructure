@@ -1,24 +1,40 @@
+# Basic configuration
+https_termination_upstream_scheme: http
 https_termination_upstream_port: 80
 https_termination_upstream_host: 127.0.0.1
-https_termination_upstream: "{{ https_termination_upstream_host }}:{{ https_termination_upstream_port }}"
 https_termination_proxy_read_timeout: 90
-https_termination_hide_varnish: yes
-https_termination_nginx_extra_logging_conf_file: "{{ nginx_confd_dir }}/000-logging-extra.conf"
-https_termination_ssl_dir: /etc/ssl
-https_termination_certificate_dir: "{{ https_termination_ssl_dir }}/certs"
-https_termination_private_dir: "{{ https_termination_ssl_dir }}/private"
-https_termination_csr_dir: "{{ https_termination_ssl_dir }}/csr"
-https_termination_letsencrypt_privkey_path: "{{ https_termination_private_dir }}/letsencrypt.pem"
-https_termination_letsencrypt_challenge_dir: .well-known
-https_termination_letsencrypt_challenge_root: "{{ nginx_www_dir }}/letsencrypt/challenge"
+https_termination_conf_cookie_rewrite_path: "{{ nginx_confd_dir }}/000-global-cookie-rewrite.conf"
+https_termination_conf_cache_miss_log_path: "{{ nginx_confd_dir }}/000-global-cache-miss-log.conf"
+
+# Also proxy port 80 to the upstream
+https_termination_proxy_http_port: false
 
 # The max-age parameter of the Strict-Transport-Security header
 https_termination_sts_max_age: 63072000
 
-# Testing endpoint
-# https_termination_letsencrypt_acme_directory: https://acme-staging.api.letsencrypt.org/directory
-https_termination_letsencrypt_acme_directory: https://acme-v02.api.letsencrypt.org/directory
-https_termination_letsencrypt_remaining_days: 10
+# SSL Configuration
+https_termination_crt_install_search_paths:
+  - "{{ mageops_project_certs_dir | default('') }}"
+  - "certs/"
+  - "{{ playbook_dir }}/"
+  - "{{ playbook_dir }}/certs/"
+
+https_termination_crt_dir:              "{{ nginx_etc_dir }}/certs"
+https_termination_crt_archive_dir:      "{{ https_termination_crt_dir }}/archive"
+https_termination_crt_live_dir:         "{{ https_termination_crt_dir }}/live"
+
+https_termination_crt_acme_dir:         "/etc/letsencrypt"
+https_termination_crt_acme_archive_dir: "{{ https_termination_crt_acme_dir }}/archive"
+https_termination_crt_acme_live_dir:    "{{ https_termination_crt_acme_dir }}/live"
+https_termination_crt_acme_renewal_dir: "{{ https_termination_crt_acme_dir }}/renewal"
+https_termination_crt_acme_webroot_dir: "{{ https_termination_crt_acme_dir }}/webroot"
+
+# Used for LE notifications, must be set when letsencrypt is used
+https_termination_crt_acme_email: ~
+# Override ACME directory URL
+https_termination_crt_acme_directory: ~
+# Use staging ACME directory for local testing
+https_termination_crt_acme_staging: no
 
 # Additional logging configuration
 
@@ -79,9 +95,6 @@ https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-ca
 https_termination_hosts:
     - name: "default-https-termination"
       server_name: "*"
-
-# Internal helper var for storing runtime computed configuration
-https_termination_cfg_vhosts: []
 
 # Rewrite JS cookies into server-created (first party) cookies to work around
 # short expiration time forced on JS cookies by some browsers (Safari, ...).

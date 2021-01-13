@@ -1,0 +1,149 @@
+- name: Compute basic global config
+  set_fact:
+    https_termination_default_upstream_uri: "{{ https_termination_upstream_scheme }}://{{ https_termination_upstream_host }}:{{ https_termination_upstream_port }}"
+    https_termination_nginx_install_global_configs:
+      - label: Specialized JSON log for debugging cache misses
+        src: nginx.cache-miss-log.global.conf
+        dst: "{{ https_termination_conf_cache_miss_log_path }}"
+
+      - label: Global configuration maps for server cookie rewrites
+        src: nginx.cookie-rewrite.global.conf
+        dst: "{{ https_termination_conf_cookie_rewrite_path }}"
+
+
+- name: Compute primary runtime vhost configuration
+  set_fact:
+    https_termination_vhosts: "{{ https_termination_vhosts | default({}) | combine({ vhost_derived.name: vhost_derived }) }}"
+  vars:
+    vhost_derived:
+      params:       "{{ host }}"
+      label:        "{{ host.name }}"
+      name:         "{{ host.name | trim | lower | regex_replace('[^a-z0-9.-]+', '_') }}"
+
+      conf_path:          "{{ nginx_confd_dir }}/050-vhost-{{ host.name }}.conf"
+      conf_custom_block:  "{{ host.extra_config | default(false, true) }}"
+
+      upstream_uri:         "{{ host.upstream | default(https_termination_default_upstream_uri, true) }}"
+      upstream_proxy_http:  "{{ host.proxy_http | default(https_termination_proxy_http_port) }}"
+
+      server_name:                "{{ host.server_name | default('*') }}"
+      server_aliases:             "{{ host.aliases | default([]) }}"
+      server_aliases_redirect:    "{{ host.redirect_aliases | default(false) }}"
+      server_custom_block:        "{{ host.extra_vhost_config | default(false, true) }}"
+      server_redirect_path_mapping:   "{{ host.permanent_path_redirect_map | default({}) }}"
+      server_redirect_path_code:  "301"
+
+      crt_install_cert_src:   "{{ lookup('first_found', { 'files': host.cert_path       | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
+      crt_install_key_src:    "{{ lookup('first_found', { 'files': host.cert_key_path   | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
+      crt_install_chain_src:  "{{ lookup('first_found', { 'files': host.cert_chain_path | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
+
+  loop: "{{ https_termination_hosts }}"
+  loop_control:
+    label: "{{ host.name }}"
+    loop_var: host
+
+- name: Compute secondary runtime vhost configuraqtion
+  set_fact:
+    https_termination_vhosts: "{{ https_termination_vhosts | combine({ vhost.name: https_termination_vhosts[vhost.name] | combine(vhost_derived) }) }}"
+  vars:
+    vhost_derived:
+      safe_name:              "{{ vhost.name | regex_replace('[^a-z0-9]+', '_') }}"
+      upstream:               "{{ vhost.upstream_uri | urlsplit }}"
+      conf_fragment_dir:      "{{ nginx_serverd_dir }}/{{ vhost.name }}"
+
+      crt_do_install:         "{{ vhost.crt_install_cert_src is string and vhost.crt_install_key_src is string }}"
+      crt_do_acme:            "{{ vhost.params.letsencrypt | default(false, true) }}"
+
+      crt_live_dir:           "{{ https_termination_crt_live_dir }}"
+      crt_archive_dir:        "{{ https_termination_crt_archive_dir }}/{{ vhost.name }}"
+
+      crt_acme_live_dir:           "{{ https_termination_crt_acme_live_dir }}/{{ vhost.name }}"
+      crt_acme_archive_dir:        "{{ https_termination_crt_acme_archive_dir }}/{{ vhost.name }}"
+      crt_acme_webroot_dir:        "{{ https_termination_crt_acme_webroot_dir }}/{{ vhost.name }}"
+      crt_acme_renewal_conf_path:  "{{ https_termination_crt_acme_renewal_dir }}/{{ vhost.name }}.conf"
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
+- name: Compute tertiary runtime vhost configuration
+  set_fact:
+    https_termination_vhosts: "{{ https_termination_vhosts | combine({ vhost.name: https_termination_vhosts[vhost.name] | combine(vhost_derived) }) }}"
+  vars:
+    vhost_derived:
+      crt_do_bootstrap:             "{{ not vhost.crt_do_install or vhost.crt_do_acme }}"
+
+      crt_install_cert_path:        "{{ vhost.crt_archive_dir }}/installed.cert.pem"
+      crt_install_key_path:         "{{ vhost.crt_archive_dir }}/installed.privkey.pem"
+      crt_install_chain_path:       "{{ vhost.crt_archive_dir }}/installed.chain.pem"
+      crt_install_fullchain_path:   "{{ vhost.crt_archive_dir }}/installed.fullchain.pem"
+
+      crt_boot_csr_path:            "{{ vhost.crt_archive_dir }}/selfsigned.csr.pem"
+      crt_boot_cert_path:           "{{ vhost.crt_archive_dir }}/selfsigned.cert.pem"
+      crt_boot_key_path:            "{{ vhost.crt_archive_dir }}/selfsigned.privkey.pem"
+      crt_boot_fullchain_path:      "{{ vhost.crt_archive_dir }}/selfsigned.fullchain.pem"
+
+      crt_live_key_path:            "{{ vhost.crt_live_dir }}/{{ vhost.name }}.privkey.pem"
+      crt_live_fullchain_path:      "{{ vhost.crt_live_dir }}/{{ vhost.name }}.fullchain.pem"
+
+      crt_acme_live_key_path:       "{{ vhost.crt_acme_live_dir }}/privkey.pem"
+      crt_acme_live_fullchain_path: "{{ vhost.crt_acme_live_dir }}/fullchain.pem"
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
+- name: Print runtime vhost configuration
+  debug:
+    var: https_termination_vhosts
+
+- name: Check vhost upstream proxy config
+  fail:
+    msg: |
+      ==================================================================
+      =  ERROR: Misconfigured upstream of '{{ vhost.label }}' vhost !  =
+      ==================================================================
+
+      Cannot proxy http traffic to an upstream which is bound to local port 80.
+      Disable http proxying explicitly or change the upstream port.
+  when: >-
+    vhost.upstream_proxy_http
+      and vhost.upstream.port == 80
+      and vhost.upstream.hostname in [
+        '127.0.0.1',
+        '::1',
+        'localhost',
+        ansible_hostname,
+        inventory_hostname
+      ]
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
+# - name: Compute global config aggregated from vhosts
+#   set_fact:
+
+
+- name: Handle missing ACME gracefully
+  when: not (https_termination_crt_acme_email | default(false, true))
+  block:
+    - name: Set ACME e-mail to a dummy fallback value
+      set_fact:
+        https_termination_crt_acme_email: devnull@mageops.sh
+
+    - name: Print warning message
+      debug:
+        msg: |
+          =========================================================
+          =   WARNING! E-mail for ACME registration is not set!   =
+          =========================================================
+
+          It is essential for setting-up ACME/Letsencrypt!
+
+          The value has been set to a dummy fallback, but this is:
+           - unsafe
+           - might break
+           - deprives you of notifications
+
+          Provide it via `https_termination_crt_acme_email` var.

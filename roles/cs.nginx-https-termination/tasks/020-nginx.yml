@@ -1,0 +1,6 @@
+- name: Setup additional global config
+  import_tasks: 022-nginx-global.yml
+
+- name: Configure vhosts
+  import_tasks: 024-nginx-vhosts.yml
+

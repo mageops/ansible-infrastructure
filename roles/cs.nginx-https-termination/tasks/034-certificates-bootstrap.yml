@@ -1,0 +1,98 @@
+- name: Install ansible runtime deps
+  yum:
+    name: python2-cryptography
+    state: present
+
+- name: Generate vhost private key
+  openssl_privatekey:
+    select_crypto_backend: cryptography
+    path: "{{ vhost.crt_boot_key_path }}"
+    type: RSA
+  when: vhost.crt_do_bootstrap
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
+- name: Create vhost cert signing request
+  openssl_csr:
+    select_crypto_backend: cryptography
+    path: "{{ vhost.crt_boot_csr_path }}"
+    privatekey_path: "{{ vhost.crt_boot_key_path }}"
+    common_name: "{{ vhost.server_name }}"
+    subject_alt_name: >-
+      {{
+        vhost.server_aliases
+          | default([])
+          | map('regex_replace', '^', 'DNS:')
+          | list
+      }}
+    subject_alt_name_critical: yes
+  when: vhost.crt_do_bootstrap
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+
+- name: Generate self-signed certs
+  openssl_certificate:
+    select_crypto_backend: cryptography
+    path: "{{ vhost.crt_boot_cert_path }}"
+    privatekey_path: "{{ vhost.crt_boot_key_path }}"
+    csr_path: "{{ vhost.crt_boot_csr_path }}"
+    provider: selfsigned
+  when: vhost.crt_do_bootstrap
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+  notify: Reload nginx
+
+- name: Symlink self-signed cert as fullchain
+  file:
+    state: link
+    force: yes
+    src:  "{{ vhost.crt_boot_cert_path }}"
+    dest: "{{ vhost.crt_boot_fullchain_path }}"
+  when: vhost.crt_do_bootstrap
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+  notify: Reload nginx
+
+- name: Check for existing live cert
+  stat:
+    path: "{{ vhost.crt_live_fullchain_path }}"
+    follow: yes
+  when: vhost.crt_do_bootstrap
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }}"
+    loop_var: vhost
+  register: https_termination_live_check
+
+- name: Symlink self-signed certificates as live ones if none found
+  file:
+    state: link
+    src:  "{{ vhost[key.src] }}"
+    dest: "{{ vhost[key.dst] }}"
+    force: yes
+  when: vhost.crt_do_bootstrap and not (live_check.stat.exists | default(false))
+  vars:
+    vhost: "{{ entry[0][0] }}"
+    live_check: "{{ entry[0][1] }}"
+    key: "{{ entry[1] }}"
+  loop: >-
+    {{
+      https_termination_vhosts.values()
+        | zip(https_termination_live_check.results)
+        | product([
+            { 'src': 'crt_boot_fullchain_path',  'dst': 'crt_live_fullchain_path' },
+            { 'src': 'crt_boot_key_path',        'dst': 'crt_live_key_path' },
+          ])
+        | list
+    }}
+  loop_control:
+    label: "{{ vhost.name }} -> {{ vhost[key.dst] }}"
+    loop_var: entry

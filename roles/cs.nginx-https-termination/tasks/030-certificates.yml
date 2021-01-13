@@ -1,0 +1,8 @@
+- name: Install user-provided certificates
+  import_tasks: 032-certificates-install.yml
+
+- name: Bootstrap self-signed certificates if not provided
+  import_tasks: 034-certificates-bootstrap.yml
+
+- name: Setup automatically renewed ACME certificates
+  import_tasks: 036-certificates-acme.yml

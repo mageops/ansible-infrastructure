@@ -1,0 +1,31 @@
+- name: Create base dirs
+  file:
+    path: "{{ item }}"
+    state: directory
+    follow: yes
+  loop:
+    - "{{ https_termination_crt_dir }}"
+    - "{{ https_termination_crt_archive_dir }}"
+    - "{{ https_termination_crt_live_dir }}"
+    - "{{ https_termination_crt_acme_webroot_dir }}"
+
+- name: Create vhost dirs
+  file:
+    path: "{{ vhost[key] }}"
+    state: directory
+    follow: yes
+  vars:
+    vhost: "{{ entry[0] }}"
+    key: "{{ entry[1] }}"
+  loop: >-
+    {{
+      https_termination_vhosts.values() | product([
+        'conf_fragment_dir',
+        'crt_live_dir',
+        'crt_archive_dir',
+        'crt_acme_webroot_dir',
+      ]) | list
+    }}
+  loop_control:
+    label: "{{ vhost.name }} [{{ key }}] -> {{ vhost[key] }}"
+    loop_var: entry
