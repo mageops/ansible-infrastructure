@@ -1404,6 +1404,8 @@ redis_aws_elasticache_instance_type: t3a.micro
 
 mageops_https_termination_enable: "{{ mageops_https_enable }}"
 
+# Backwards compat fallback
+https_termination_proxy_http_port: "{{ https_termination_hide_varnish | default(true) }}"
 https_termination_proxy_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
 
 # Special logging setup for requests for cacheable HTML pages which were a cache MISS

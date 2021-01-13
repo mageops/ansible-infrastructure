@@ -1,0 +1,74 @@
+- name: Install provided certificates
+  copy:
+    src: "{{ vhost[key.src] }}"
+    dest: "{{ vhost[key.dst] }}"
+    force: yes
+    backup: yes
+    mode: 0600
+  vars:
+    vhost: "{{ entry[0] }}"
+    key: "{{ entry[1] }}"
+  when: vhost.crt_do_install and vhost[key.src]
+  loop: >-
+    {{
+      https_termination_vhosts.values() | product([
+        { 'src': 'crt_install_cert_src',  'dst': 'crt_install_cert_path' },
+        { 'src': 'crt_install_key_src',   'dst': 'crt_install_key_path' },
+        { 'src': 'crt_install_chain_src', 'dst': 'crt_install_chain_path' },
+      ]) | list
+    }}
+  loop_control:
+    label: "{{ vhost.name }} [{{ key.src }}] -> {{ vhost[key.dst] }}"
+    loop_var: entry
+  notify: Reload nginx
+
+- name: Assemble fullchain certificate
+  copy:
+    force: yes
+    backup: yes
+    dest: "{{ vhost.crt_install_fullchain_path }}"
+    content: |
+      {{ lookup('file', vhost.crt_install_cert_src) }}
+      {{ lookup('file', vhost.crt_install_chain_src) }}
+    mode: 0600
+    validate: 'openssl x509 -in %s -text -noout'
+  when: vhost.crt_do_install and vhost.crt_install_chain_src
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }} -> {{ vhost.crt_install_fullchain_path }}"
+    loop_var: vhost
+  notify: Reload nginx
+
+- name: Symlink installed certificate as fullchain
+  file:
+    state: link
+    src:  "{{ vhost.crt_install_cert_path }}"
+    dest: "{{ vhost.crt_install_fullchain_path }}"
+  when: vhost.crt_do_install and not vhost.crt_install_chain_src
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }} -> {{ vhost.crt_install_fullchain_path }}"
+    loop_var: vhost
+  notify: Reload nginx
+
+- name: Symlink installed certificates as live ones
+  file:
+    state: link
+    src:  "{{ vhost[key.src] }}"
+    dest: "{{ vhost[key.dst] }}"
+  when: vhost.crt_do_install
+  vars:
+    vhost: "{{ entry[0] }}"
+    key: "{{ entry[1] }}"
+  loop: >-
+    {{
+      https_termination_vhosts.values()
+        | product([
+            { 'src': 'crt_install_fullchain_path',  'dst': 'crt_live_fullchain_path' },
+            { 'src': 'crt_install_key_path',        'dst': 'crt_live_key_path' },
+          ])
+        | list
+    }}
+  loop_control:
+    label: "{{ vhost.name }} -> {{ vhost[key.dst] }}"
+    loop_var: entry
