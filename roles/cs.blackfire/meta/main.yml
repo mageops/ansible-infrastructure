@@ -1,2 +1,3 @@
 dependencies:
   - role: cs.mageops-cli
+    when: aws_use
