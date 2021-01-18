@@ -389,6 +389,8 @@ aws_extra_app_asg_passthrough_url_pattern:
 aws_extra_app_asg_passthrough_uagent_pattern:
 aws_extra_app_asg_passthrough_ip_pattern:
 
+aws_app_asg_replace_with_check: no
+
 # Example regex to pass bot traffic to the extra instances:
 #aws_extra_app_asg_passthrough_uagent_pattern: "(?i)^alexa|^blitz\\.io|bot|^browsermob|crawl|^curl|^facebookexternalhit|feed|google web preview|^ia_archiver|indexer|^java|jakarta|^libwww-perl|^load impact|^magespeedtest|monitor|^Mozilla$|nagios |^\\.net|^pinterest|postrank|slurp|spider|uptime|^wget|yandex|^elb-healthchecker|binglocalsearch|^Ruby|^python-requests|^Mediapartners-Google|^Sogou"
 
