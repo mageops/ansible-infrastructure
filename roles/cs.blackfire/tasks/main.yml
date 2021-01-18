@@ -34,8 +34,10 @@
       copy:
         src: blackfile_feature.bash
         dest: "{{ mageops_cli_features_dir }}/blackfire_feature.bash"
+      when: aws_use
 
     - name: Set feature flag
       shell: "mageopscli set_feature_flag blackfire_apm {{ blackfire_enable_apm | ternary('yes', 'no') }}"
+      when: aws_use
 
   when: blackfire_install and blackfire_server_id and blackfire_server_token
