@@ -4,7 +4,7 @@
     - name: Install xdebug extension
       yum:
         state: present
-        name: php-pecl-xdebug
+        name: php-pecl-xdebug3
       when: xdebug_enable | bool
     - name: Reconfigure xdebug
       lineinfile:
@@ -22,12 +22,12 @@
     - name: Remove xdebug extension
       yum:
         state: absent
-        name: php-pecl-xdebug
-      when: not xdebug_enable | bool      
+        name: php-pecl-xdebug3
+      when: not xdebug_enable | bool
     - name: Restart php-fpm
       service:
         name: php-fpm
         state: restarted
-  vars: 
+  vars:
     remote_enabled: 1
     xdebug_enable: True
