@@ -24,7 +24,6 @@ varnish_backend_first_byte_timeout: "300s"
 varnish_log_user: "varnishlog"
 varnish_log_group: "varnishlog"
 
-varnish_memory: "128M"
 varnish_vsl_space: 80M
 varnish_vsm_space: 1M
 
@@ -51,7 +50,7 @@ varnish_workspace_thread: 2048
 #   #include <stdio.h>
 #   #include <limits.h>
 #   int main() { printf("sysconf(_SC_THREAD_STACK_MIN) = %lu\n", sysconf(_SC_THREAD_STACK_MIN)); }
-varnish_thread_pool_stack: 2048
+varnish_thread_pool_stack: 16384
 
 # Helper variables for estimating the memory requirements (extra 2048B)
 varnish_thread_mem: >-
@@ -63,23 +62,46 @@ varnish_thread_mem: >-
       + 2048
   }}
 
+# System memory left after allocating VSL and VSM.
+varnish_memory_ceil: >-
+  {{
+      (ansible_memtotal_mb * 1024 * 1024)
+        - varnish_vsl_space | human_to_bytes
+        - varnish_vsm_space | human_to_bytes
+  }}
+
+
+# Relative memory used for object storage
+varnish_object_mem_rel: 0.4
+# Relative system memory used for thread limit calculation
+varnish_thread_mem_rel: 0.6
+
+# Cached object storage size
+varnish_memory: "{{ (varnish_memory_ceil | int * varnish_object_mem_rel / 1024) | int ~ 'k' }}"
+
 # Max memory left for threads after allocating VSL, VSM and object storage.
 # Does not take into account memory needed for system and other services.
 # Also note that each cached object's metadata structure requires ~1k.
-varnish_thread_ceil: >-
+varnish_thread_ceil: "{{ (varnish_memory_ceil | int - varnish_memory | human_to_bytes) * varnish_thread_mem_rel }}"
+
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#thread-pool-max
+varnish_thread_pools: "{{ ansible_processor_vcpus }}"
+
+# Use less than half of the "leftover" memory for threads as system
+# and other resources like per-object structures require it too
+varnish_thread_pool_max: "{{ (varnish_thread_ceil | int / varnish_thread_mem | int / varnish_thread_pools | int) | int }}"
+varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 100] | max, varnish_thread_pool_max | int] | min }}"
+
+# Debugging variable indicating theoretical memory left for rest of the system
+varnish_leftover_sysmem: >-
   {{
       (ansible_memtotal_mb * 1024 * 1024)
         - varnish_vsl_space | human_to_bytes
         - varnish_vsm_space | human_to_bytes
         - varnish_memory | human_to_bytes
+        - varnish_thread_ceil | int
   }}
 
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#thread-pool-max
-varnish_thread_pools: "{{ ansible_processor_vcpus }}"
-# Use less than half of the "leftover" memory for threads as system
-# and other resources like per-object structures require it too
-varnish_thread_pool_max: "{{ (varnish_thread_ceil | int * 0.4 / varnish_thread_mem | int / varnish_thread_pools | int) | int }}"
-varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 100] | max, varnish_thread_pool_max | int] | min }}"
 
 varnish_params:
   vsl_space: "{{ varnish_vsl_space }}"
