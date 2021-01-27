@@ -28,37 +28,32 @@ varnish_vsl_space: 80M
 varnish_vsm_space: 1M
 
 # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-hdr-len
-varnish_http_resp_hdr_len: 42000
+varnish_http_resp_hdr_len: 40k
 
 # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-size
-varnish_http_resp_size: 84000
+varnish_http_resp_size: 80k
 
 # Per-thread workspace memory allocation (the sum is basically thread's heap).
 # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-backend
 # WARNING! Shall be bigger than `http_resp_size` as resp size is allocated from this pool!
-varnish_workspace_backend: 262144
+varnish_workspace_backend: 256k
 
 # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-client
-varnish_workspace_client: 65536
+varnish_workspace_client: 64k
 
 # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-thread
-varnish_workspace_thread: 2048
+varnish_workspace_thread: 2k
 
-# Varnish minimum 2k, POSIX default sysconf(_SC_THREAD_STACK_MIN) = 16384
-# Check system limit in Linux:
-#   #include <unistd.h>
-#   #include <stdio.h>
-#   #include <limits.h>
-#   int main() { printf("sysconf(_SC_THREAD_STACK_MIN) = %lu\n", sysconf(_SC_THREAD_STACK_MIN)); }
-varnish_thread_pool_stack: 16384
+# As of varnish 6.0 the default is 48k and lower values cause segfault with our VCL
+varnish_thread_pool_stack: 48k
 
 # Helper variables for estimating the memory requirements (extra 2048B)
 varnish_thread_mem: >-
   {{
-    varnish_workspace_thread
-      + varnish_workspace_client
-      + varnish_workspace_backend
-      + varnish_thread_pool_stack
+    varnish_workspace_thread | human_to_bytes
+      + varnish_workspace_client | human_to_bytes
+      + varnish_workspace_backend | human_to_bytes
+      + varnish_thread_pool_stack | human_to_bytes
       + 2048
   }}
 
