@@ -24,24 +24,26 @@ varnish_backend_first_byte_timeout: "300s"
 varnish_log_user: "varnishlog"
 varnish_log_group: "varnishlog"
 
-varnish_vsl_space: 80M
+# Since we don't write logs anywhere the default of 80M seems to be an overkill
+# https://varnish-cache.org/docs/6.0/reference/varnishd.html#vsl-space
+varnish_vsl_space: 20M
 varnish_vsm_space: 1M
 
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-hdr-len
+# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#http-resp-hdr-len
 varnish_http_resp_hdr_len: 40k
 
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-size
+# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#http-resp-size
 varnish_http_resp_size: 80k
 
 # Per-thread workspace memory allocation (the sum is basically thread's heap).
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-backend
+# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-backend
 # WARNING! Shall be bigger than `http_resp_size` as resp size is allocated from this pool!
 varnish_workspace_backend: 256k
 
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-client
+# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-client
 varnish_workspace_client: 64k
 
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-thread
+# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-thread
 varnish_workspace_thread: 2k
 
 # As of varnish 6.0 the default is 48k and lower values cause segfault with our VCL
@@ -79,7 +81,7 @@ varnish_memory: "{{ (varnish_memory_ceil | int * varnish_object_mem_rel / 1024) 
 # Also note that each cached object's metadata structure requires ~1k.
 varnish_thread_ceil: "{{ (varnish_memory_ceil | int - varnish_memory | human_to_bytes) * varnish_thread_mem_rel }}"
 
-# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#thread-pool-max
+# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#thread-pool-max
 varnish_thread_pools: "{{ ansible_processor_vcpus }}"
 
 # Use less than half of the "leftover" memory for threads as system
@@ -152,7 +154,7 @@ varnish_throttling: no
 # - `error_message` (optional) - custom error string returned to client when this rule is triggered
 # - `limit` (required) - number of requests until clien tis throttled
 # - `duration` (required) - time window over which the `limit` requests may be performed
-#   (use varnish duration format, see: https://varnish-cache.org/docs/4.1/reference/vcl.html#durations)
+#   (use varnish duration format, see: https://varnish-cache.org/docs/6.0/reference/vcl.html#durations)
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.

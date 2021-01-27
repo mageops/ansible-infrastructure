@@ -1,7 +1,7 @@
 allow_duplicates: no
 dependencies:
   - cs.ansible-plugins
-  # - cs.repo-varnish
+  - cs.repo-varnish
 
 galaxy_info:
   author: creativestyle
