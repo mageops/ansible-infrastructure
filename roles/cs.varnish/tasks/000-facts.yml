@@ -5,6 +5,15 @@
       =        Varnish service parameters         =
       =============================================
 
+      sysmem: {{ ansible_memtotal_mb }}MB
+      memory_ceil: {{ varnish_memory_ceil | int | human_readable }}
+
+      memory: {{ varnish_memory | human_to_bytes | human_readable }}
+      thread_ceil: {{ varnish_thread_ceil | int | human_readable }}
+      tmpfs_size: {{ varnish_tmpfs_size | human_to_bytes | human_readable }}
+      leftover_sysmem: {{ varnish_leftover_sysmem | int | human_readable }}
+
+
       {{ varnish_params | to_nice_yaml }}
 
 - name: Get Varnish backends - running EC2 app instances (AWS)
