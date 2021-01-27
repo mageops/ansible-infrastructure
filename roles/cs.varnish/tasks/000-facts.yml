@@ -1,3 +1,12 @@
+- name: Print configured varnish service params
+  debug:
+    msg: |
+      =============================================
+      =        Varnish service parameters         =
+      =============================================
+
+      {{ varnish_params | to_nice_yaml }}
+
 - name: Get Varnish backends - running EC2 app instances (AWS)
   block:
     - name: Get VPC IP addresses of backend app instances
@@ -33,3 +42,4 @@
           }}
       when: mageops_https_termination_enable | default(false)
   when: varnish_media_cors_allowed_origins is not defined
+

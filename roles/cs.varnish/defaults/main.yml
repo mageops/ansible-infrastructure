@@ -24,16 +24,84 @@ varnish_backend_first_byte_timeout: "300s"
 varnish_log_user: "varnishlog"
 varnish_log_group: "varnishlog"
 
+varnish_memory: "128M"
+varnish_vsl_space: 80M
+varnish_vsm_space: 1M
+
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-hdr-len
+varnish_http_resp_hdr_len: 42000
+
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-size
+varnish_http_resp_size: 84000
+
+# Per-thread workspace memory allocation (the sum is basically thread's heap).
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-backend
+# WARNING! Shall be bigger than `http_resp_size` as resp size is allocated from this pool!
+varnish_workspace_backend: 262144
+
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-client
+varnish_workspace_client: 65536
+
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-thread
+varnish_workspace_thread: 2048
+
+# Varnish minimum 2k, POSIX default sysconf(_SC_THREAD_STACK_MIN) = 16384
+# Check system limit in Linux:
+#   #include <unistd.h>
+#   #include <stdio.h>
+#   #include <limits.h>
+#   int main() { printf("sysconf(_SC_THREAD_STACK_MIN) = %lu\n", sysconf(_SC_THREAD_STACK_MIN)); }
+varnish_thread_pool_stack: 2048
+
+# Helper variables for estimating the memory requirements (extra 2048B)
+varnish_thread_mem: >-
+  {{
+    varnish_workspace_thread
+      + varnish_workspace_client
+      + varnish_workspace_backend
+      + varnish_thread_pool_stack
+      + 2048
+  }}
+
+# Max memory left for threads after allocating VSL, VSM and object storage.
+# Does not take into account memory needed for system and other services.
+# Also note that each cached object's metadata structure requires ~1k.
+varnish_thread_ceil: >-
+  {{
+      (ansible_memtotal_mb * 1024 * 1024)
+        - varnish_vsl_space | human_to_bytes
+        - varnish_vsm_space | human_to_bytes
+        - varnish_memory | human_to_bytes
+  }}
+
+# see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#thread-pool-max
+varnish_thread_pools: "{{ ansible_processor_vcpus }}"
+# Use less than half of the "leftover" memory for threads as system
+# and other resources like per-object structures require it too
+varnish_thread_pool_max: "{{ (varnish_thread_ceil | int * 0.4 / varnish_thread_mem | int / varnish_thread_pools | int) | int }}"
+varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 100] | max, varnish_thread_pool_max | int] | min }}"
+
 varnish_params:
-  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-hdr-len
-  http_resp_hdr_len: 42000
-  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#http-resp-size
-  http_resp_size: 84000
-  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-backend
-  # WARNING! Shall be bigger than `http_resp_size` as resp size is allocated from this pool!
-  workspace_backend: 256000
-  # see: https://varnish-cache.org/docs/4.1/reference/varnishd.html#workspace-client
-  workspace_client: 64000
+  vsl_space: "{{ varnish_vsl_space }}"
+  vsm_space: "{{ varnish_vsm_space }}"
+  http_resp_hdr_len: "{{ varnish_http_resp_hdr_len }}"
+  http_resp_size: "{{ varnish_http_resp_size }}"
+  workspace_thread: "{{ varnish_workspace_thread }}"
+  workspace_backend: "{{ varnish_workspace_backend }}"
+  workspace_client: "{{ varnish_workspace_client }}"
+  thread_pools: "{{ varnish_thread_pools }}"
+  thread_pool_max: "{{ varnish_thread_pool_max }}"
+  thread_pool_min: "{{ varnish_thread_pool_min }}"
+  thread_pool_stack: "{{ varnish_thread_pool_stack }}"
+
+# Size of the tmpfs mount for VSL (shm-log)
+varnish_tmpfs_size: >-
+  {{
+    ((
+      1.1 * (varnish_vsl_space | human_to_bytes
+              + varnish_vsm_space | human_to_bytes)
+    ) / 1024) | int ~ 'k'
+  }}
 
 varnish_vcl_conf: /etc/varnish/default.vcl
 varnish_backends_vcl: /etc/varnish/backends.vcl
@@ -44,7 +112,6 @@ varnish_storage: "malloc"
 # to the main ones if the extra ones are not healthy.
 varnish_extra_instance_failover_enable: yes
 
-varnish_memory: "128M"
 varnish_syscfg_limit_nofile: 131072
 varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
