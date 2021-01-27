@@ -3,7 +3,17 @@
 
 - name: Calculate workers
   set_fact:
-    php_fpm_pm_max_children_by_memory: "{{ (((ansible_memtotal_mb * 1024 * 1024) - ( mageops_app_node_reserved_memory | human_to_bytes )) / ( php_http_request_memory_limit | human_to_bytes)) | int }}"
+    php_fpm_pm_max_children_by_memory: >-
+      {{
+          (
+            (
+              ( ansible_memtotal_mb * 1024 * 1024 )
+              - ( mageops_app_node_reserved_memory | human_to_bytes )
+            )
+            / ( php_http_request_memory_limit | human_to_bytes )
+          ) | int
+      }}
+
     php_fpm_pm_max_children_by_cpu: "{{ ansible_processor_vcpus * 4 | int }}"
 
 - name: Calculate default workers
