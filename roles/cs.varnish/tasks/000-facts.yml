@@ -18,12 +18,12 @@
       Approx. reserved (left) system memory: {{ (varnish_total_sys_mem | int - varnish_full_mem_usage | int) | human_readable }}
 
       VSM/VSL memory: {{ varnish_vs_space_mem | int | human_readable }}
-      Dynamic memory calculation base: {{ varnish_dyn_mem_ceil | int | human_readable }}
+      Dynamic memory calculation base: {{ varnish_dyn_mem_quota | int | human_readable }}
       Object storage memory: {{ varnish_storage_mem | int| human_readable }}
 
       Max. total number of threads: {{ varnish_thread_pool_max | int * varnish_thread_pools | int }}
       Approx. max. single thread memory: {{ varnish_thread_mem_est | int | human_readable }}
-      Approx. max. total thread memory: {{ varnish_thread_mem_ceil | int | human_readable }}
+      Approx. max. total thread memory: {{ varnish_thread_mem_quota | int | human_readable }}
 
       --- Daemon Startup Parameters ---
 
