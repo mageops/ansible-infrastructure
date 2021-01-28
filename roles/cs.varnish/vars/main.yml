@@ -6,3 +6,73 @@ varnish_group: "varnish"
 varnish_secure_site_http_auth_string: "{{ varnish_secure_site_user }}:{{ varnish_secure_site_password }}"
 varnish_backend_instances_filter_base:
   instance-state-name: running
+
+# We support only malloc storage for now
+varnish_storage: "malloc"
+
+# Total system memory in bytes
+varnish_total_sys_mem: "{{ ansible_memtotal_mb * 1024 * 1024 }}"
+
+# Base amount of system memory dedicated to varnish used for calculating derived dynamic param defaults
+varnish_base_mem_ceil: >-
+  {{
+    [
+      varnish_total_sys_mem | int * varnish_sys_mem_rel,
+      varnish_total_sys_mem | int - varnish_sys_mem_reserved | human_to_bytes
+    ] | min
+  }}
+
+# Estimated per-thread maximum memory usage
+# Note: The extra 2048 bytes value is overhead added as extra safety.
+varnish_thread_mem_est: >-
+  {{
+    varnish_workspace_thread | human_to_bytes
+      + varnish_workspace_client | human_to_bytes
+      + varnish_workspace_backend | human_to_bytes
+      + varnish_thread_pool_stack | human_to_bytes
+      + 2048
+  }}
+
+# Total size of VSL + VSM space that is preallocated and stored in tmpfs (/var/lib/varnish)
+varnish_vs_space_mem: "{{ varnish_vsl_space | human_to_bytes + varnish_vsm_space | human_to_bytes }}"
+
+# System memory left after allocating VSL and VSM
+varnish_dyn_mem_ceil: "{{ varnish_base_mem_ceil | int - varnish_vs_space_mem | int }}"
+
+# Cached object storage size
+varnish_storage_mem: >-
+  {{
+      varnish_memory | default(false, true) | ternary(
+          varnish_memory | default(0, true) | human_to_bytes,
+          varnish_storage_mem_rel * varnish_dyn_mem_ceil | int
+      )
+  }}
+
+# Max memory left for threads after allocating VSL, VSM and object storage.
+# Used to calculate thread/pool count limits.
+# Does not take into account memory needed for system and other services.
+# Also note that each cached object's metadata structure requires ~1k.
+varnish_thread_mem_ceil: "{{ varnish_dyn_mem_ceil | int - varnish_storage_mem | int }}"
+
+# Debugging variable indicating theoretical memory usage at full load (max threads, all busy).
+varnish_full_mem_usage: >-
+  {{
+          varnish_vs_space_mem | int
+        + varnish_storage_mem | int
+        + varnish_thread_mem_ceil | int
+  }}
+
+varnish_params_base:
+  vsl_space: "{{ varnish_vsl_space }}"
+  vsm_space: "{{ varnish_vsm_space }}"
+  http_resp_hdr_len: "{{ varnish_http_resp_hdr_len }}"
+  http_resp_size: "{{ varnish_http_resp_size }}"
+  workspace_thread: "{{ varnish_workspace_thread }}"
+  workspace_backend: "{{ varnish_workspace_backend }}"
+  workspace_client: "{{ varnish_workspace_client }}"
+  thread_pools: "{{ varnish_thread_pools }}"
+  thread_pool_max: "{{ varnish_thread_pool_max }}"
+  thread_pool_min: "{{ varnish_thread_pool_min }}"
+  thread_pool_stack: "{{ varnish_thread_pool_stack }}"
+
+varnish_params: "{{ varnish_params_base | combine(varnish_params_extra) }}"

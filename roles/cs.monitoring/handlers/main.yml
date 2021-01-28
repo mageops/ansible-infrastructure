@@ -1,0 +1,4 @@
+- name: Restart varnish-exporter
+  service:
+    name: varnish-exporter
+    state: restarted
