@@ -1,2 +1,11 @@
-{# This is error from web node's nginx indicating that php-fpm response timed out #}
 {% extends "layout50x.html.j2" %}
+{% set status_message = 'Gateway Timeout' %}
+{% block error_details_message %}
+    Backend connection has timed out, usual causes:
+    <ul>
+        <li>Application upstream (php-fpm) on app node took too long to generate page</li>
+        <li>The app node nginx upstream timeout is set too low</li>
+        <li>Varnish backend timeouts are too low</li>
+        <li>Backend servers are overloaded and slow</li>
+    </ul>
+{% endblock %}
