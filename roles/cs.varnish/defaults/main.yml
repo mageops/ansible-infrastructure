@@ -17,124 +17,68 @@ varnish_extra_packages:
   - varnish-module-accept
 
 varnish_port: 80
-varnish_listen_address: ''
+varnish_listen_address: ~
 varnish_default_backend_ip: 127.0.0.1
 varnish_backend_first_byte_timeout: "300s"
 
 varnish_log_user: "varnishlog"
 varnish_log_group: "varnishlog"
 
+# Memory allocated for malloc storage backend, if empty then auto calculated
+# from the `varnish_storage_mem_rel` and `varnish_sys_mem_rel` relative values.
+varnish_memory: ~
+
+# Relative amount of system memory that can be consumed by varnish
+varnish_sys_mem_rel: 0.8
+
+# Relative chunk of `varnish_sys_mem_rel` used for object storage
+varnish_storage_mem_rel: 0.7
+
+# The minimum amount of system memory that has to be reserved for other
+# services. This variable has effect only if the memory left after subtracting
+# the `varnish_sys_mem_rel` calculation is smaller than this value.
+varnish_sys_mem_reserved: 128M
+
 # Since we don't write logs anywhere the default of 80M seems to be an overkill
 # https://varnish-cache.org/docs/6.0/reference/varnishd.html#vsl-space
-varnish_vsl_space: 20M
+varnish_vsl_space: 31M
 varnish_vsm_space: 1M
 
-# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#http-resp-hdr-len
+# See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#http-resp-hdr-len
 varnish_http_resp_hdr_len: 40k
 
-# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#http-resp-size
+# See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#http-resp-size
 varnish_http_resp_size: 80k
 
-# Per-thread workspace memory allocation (the sum is basically thread's heap).
-# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-backend
+# Per-thread workspace memory allocation (the sum is basically thread's heap)
+# See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-backend
 # WARNING! Shall be bigger than `http_resp_size` as resp size is allocated from this pool!
 varnish_workspace_backend: 256k
 
-# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-client
+# See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-client
 varnish_workspace_client: 64k
 
-# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-thread
-varnish_workspace_thread: 2k
+# See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#workspace-thread
+varnish_workspace_thread: 4k
 
 # As of varnish 6.0 the default is 48k and lower values cause segfault with our VCL
-varnish_thread_pool_stack: 48k
+varnish_thread_pool_stack: 64k
 
-# Helper variables for estimating the memory requirements (extra 2048B)
-varnish_thread_mem: >-
-  {{
-    varnish_workspace_thread | human_to_bytes
-      + varnish_workspace_client | human_to_bytes
-      + varnish_workspace_backend | human_to_bytes
-      + varnish_thread_pool_stack | human_to_bytes
-      + 2048
-  }}
-
-# System memory left after allocating VSL and VSM.
-varnish_memory_ceil: >-
-  {{
-      (ansible_memtotal_mb * 1024 * 1024)
-        - varnish_vsl_space | human_to_bytes
-        - varnish_vsm_space | human_to_bytes
-  }}
-
-
-# Relative memory used for object storage
-varnish_object_mem_rel: 0.4
-# Relative system memory used for thread limit calculation
-varnish_thread_mem_rel: 0.6
-
-# Cached object storage size
-varnish_memory: "{{ (varnish_memory_ceil | int * varnish_object_mem_rel / 1024) | int ~ 'k' }}"
-
-# Max memory left for threads after allocating VSL, VSM and object storage.
-# Does not take into account memory needed for system and other services.
-# Also note that each cached object's metadata structure requires ~1k.
-varnish_thread_ceil: "{{ (varnish_memory_ceil | int - varnish_memory | human_to_bytes) * varnish_thread_mem_rel }}"
-
-# see: https://varnish-cache.org/docs/6.0/reference/varnishd.html#thread-pool-max
+# Max. number of thread pools that should be at most the number of vCPUs
+# See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#thread-pool-max
 varnish_thread_pools: "{{ ansible_processor_vcpus }}"
 
-# Use less than half of the "leftover" memory for threads as system
-# and other resources like per-object structures require it too
-varnish_thread_pool_max: "{{ (varnish_thread_ceil | int / varnish_thread_mem | int / varnish_thread_pools | int) | int }}"
-varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 100] | max, varnish_thread_pool_max | int] | min }}"
+# The min/max number of threads per pool
+varnish_thread_pool_max: "{{ (varnish_thread_mem_ceil | int / varnish_thread_mem_est | int / varnish_thread_pools | int) | int }}"
+varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 50] | max, varnish_thread_pool_max | int] | min }}"
 
-# Debugging variable indicating theoretical memory left for rest of the system
-varnish_leftover_sysmem: >-
-  {{
-      (ansible_memtotal_mb * 1024 * 1024)
-        - varnish_vsl_space | human_to_bytes
-        - varnish_vsm_space | human_to_bytes
-        - varnish_memory | human_to_bytes
-        - varnish_thread_ceil | int
-  }}
+# Any extra parameters that deamon is started with (`-p` arguments)
+# Note: Overrides keys defined in the base parameters (`varnish_params_base` in `vars/main.yml`).
+varnish_params_extra: {}
 
-
-varnish_params:
-  vsl_space: "{{ varnish_vsl_space }}"
-  vsm_space: "{{ varnish_vsm_space }}"
-  http_resp_hdr_len: "{{ varnish_http_resp_hdr_len }}"
-  http_resp_size: "{{ varnish_http_resp_size }}"
-  workspace_thread: "{{ varnish_workspace_thread }}"
-  workspace_backend: "{{ varnish_workspace_backend }}"
-  workspace_client: "{{ varnish_workspace_client }}"
-  thread_pools: "{{ varnish_thread_pools }}"
-  thread_pool_max: "{{ varnish_thread_pool_max }}"
-  thread_pool_min: "{{ varnish_thread_pool_min }}"
-  thread_pool_stack: "{{ varnish_thread_pool_stack }}"
-
-# Size of the tmpfs mount for VSL (shm-log)
-varnish_tmpfs_size: >-
-  {{
-    ((
-      1.1 * (varnish_vsl_space | human_to_bytes
-              + varnish_vsm_space | human_to_bytes)
-    ) / 1024) | int ~ 'k'
-  }}
-
-varnish_vcl_conf: /etc/varnish/default.vcl
-varnish_backends_vcl: /etc/varnish/backends.vcl
-varnish_run_dir: /var/run/varnish
-varnish_pid_file: "{{ varnish_run_dir }}/varnish.pid"
-varnish_storage: "malloc"
 # Whether to route requests intendend for extra instances
 # to the main ones if the extra ones are not healthy.
 varnish_extra_instance_failover_enable: yes
-
-varnish_syscfg_limit_nofile: 131072
-varnish_syscfg_limit_memlock: 85983232
-varnish_syscfg_tasks_max: "infinity"
-varnish_syscfg_limit_core: "infinity"
 
 # Error page color theme
 varnish_error_page_color_primary: "#212121"
@@ -154,7 +98,7 @@ varnish_throttling: no
 # - `error_message` (optional) - custom error string returned to client when this rule is triggered
 # - `limit` (required) - number of requests until clien tis throttled
 # - `duration` (required) - time window over which the `limit` requests may be performed
-#   (use varnish duration format, see: https://varnish-cache.org/docs/6.0/reference/vcl.html#durations)
+#   (use varnish duration format, See: https://varnish-cache.org/docs/6.0/reference/vcl.html#durations)
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
@@ -190,3 +134,13 @@ varnish_debug_request_header_name: X-Varnish-Debug-Token
 varnish_debug_request_info_header_name: X-Varnish-Debug-Request-Info
 varnish_media_cors_enabled: yes
 varnish_media_cors_max_age: 2678400
+
+varnish_vcl_conf: /etc/varnish/default.vcl
+varnish_backends_vcl: /etc/varnish/backends.vcl
+varnish_run_dir: /var/run/varnish
+varnish_pid_file: "{{ varnish_run_dir }}/varnish.pid"
+
+varnish_syscfg_limit_nofile: 131072
+varnish_syscfg_limit_memlock: 85983232
+varnish_syscfg_tasks_max: "infinity"
+varnish_syscfg_limit_core: "infinity"

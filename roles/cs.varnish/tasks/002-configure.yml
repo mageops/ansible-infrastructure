@@ -4,9 +4,11 @@
     path: /var/lib/varnish
     src: none
     fstype: tmpfs
-    opts: rw,auto,noatime,size={{ varnish_tmpfs_size }}
+    opts: rw,auto,noatime
     state: mounted
-  notify: Restart varnish
+  notify:
+    - Restart varnish
+    - Restart varnish-exporter
 
 - name: Ensure varnish var directories always exist
   lineinfile:
