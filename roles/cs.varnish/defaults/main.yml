@@ -69,8 +69,8 @@ varnish_thread_pool_stack: 64k
 varnish_thread_pools: "{{ ansible_processor_vcpus }}"
 
 # The min/max number of threads per pool
-varnish_thread_pool_max: "{{ (varnish_thread_mem_ceil | int / varnish_thread_mem_est | int / varnish_thread_pools | int) | int }}"
-varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 50] | max, varnish_thread_pool_max | int] | min }}"
+varnish_thread_pool_max: "{{ [(varnish_thread_mem_ceil | int / varnish_thread_mem_est | int / varnish_thread_pools | int) | int, 20] | max }}"
+varnish_thread_pool_min: "{{ [[(varnish_thread_pool_max | int / 5) | int, 20] | max, varnish_thread_pool_max | int] | min }}"
 
 # Any extra parameters that deamon is started with (`-p` arguments)
 # Note: Overrides keys defined in the base parameters (`varnish_params_base` in `vars/main.yml`).

@@ -10,6 +10,8 @@ Read this if you want to know how and when to set:
 
 And how their values are calculated.
 
+### Calculation steps
+
 1) **Calculate base memory pool assigned to be used by varnishd:**
 
    ```js
@@ -48,7 +50,7 @@ And how their values are calculated.
     ```
 
 5) **Calculate the max number of threads per pool by dividing `varnish_thread_mem_ceil`
-   by _estimated peak memory usage per-thread_ and the number of pools:**
+   by _estimated peak memory usage per-thread_ and the number of pools (but not less than 20):**
 
    ```js
    varnish_thread_pool_max = varnish_thread_mem_ceil / varnish_thread_mem_est / varnish_thread_pools
@@ -61,6 +63,27 @@ And how their values are calculated.
    varnish_thread_pool_min = varnish_thread_pool_max / 5
    ```
 
+### Calculation examples
 
+#### A server with 4GB of RAM and 2vCPUs
+
+Assuming role configuration:
+
+```
+varnish_memory: ~
+varnish_sys_mem_rel: 0.9
+varnish_storage_mem_rel: 0.8
+```
+
+We get as follows (final values rounded slightly for clarity):
+
+```py
+   3.60G == varnish_base_mem_ceil   = 90% * 4G
+   3.56G == varnish_dyn_mem_ceil    = 3.60G - 31M - 1M
+   2.85G == varnish_storage_mem     = 80% * 0.80G
+   0.71G == varnish_thread_mem_ceil = 3.56G - 2.85G
+     910 == varnish_thread_pool_max = 0.71G / 390k / 2
+     182 == varnish_thread_pool_min = 910 / 5
+```
 
 
