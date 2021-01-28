@@ -10,7 +10,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="#c20000">
     <meta charset="utf-8">
     <meta name="robots" content="*"/>
-
     <style type="text/css">
         @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
         html {
@@ -113,6 +112,48 @@
             font-size: 0.8rem;
         }
 
+        .error-page__details-box {
+            background: #1C2431;
+            padding: 1.5rem;
+            margin: 0 auto;
+            border-radius: 0.3em;
+            position: absolute;
+            max-width: 40rem;
+            top: 5vw;
+            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
+        }
+
+        .error-page__details-title {
+            color: #af0087;
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 0 0 1rem 0;
+            padding: 0;
+        }
+
+        .error-page__details-message {
+            color: #0087FF;
+            text-align: left;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .error-page__details-message ul {
+            padding-left: 1em;
+            margin: 1em 0 0 0;
+        }
+
+        .error-page__details-data {
+            font-size: 0.8rem;
+            margin: 1rem 0 0 0;
+            border-radius: 0.3rem;
+            box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
+            background: #fff;
+            padding: 1rem;
+            font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", "Roboto Mono", monospace;
+            overflow-x: scroll;
+        }
+
         {% if varnish_error_page_url %}
             html, body {
                 border: 0;
@@ -158,7 +199,50 @@
                     <p class="error-page__text" id="error-description">{% block error_description %}{% endblock %}</p>
                 {% endblock %}
             </header>
+            <div class="error-page__details-box" id="error-details-box" style="display: none;">
+                <div class="error-page__details-title" id="error-details-title">
+                    Error returned by<em>varnish</em> | <strong>{{ status_code }} <em>{{ status_message | default('Unknown') }}</em></strong>
+                </div>
+                {% if self.error_details_message() | trim != "" %}
+                    <div class="error-page__details-message" id="error-details-message">
+                        {% block error_details_message %}{% endblock %}
+                    </div>
+                {% endif %}
+                <pre class="error-page__details-data" id="error-details-data" style="display: none;"></pre>
+            </div>
+            <script>
+                    window.MGS = window.MGS || {};
+                    window.MGS.error = window.MGS.error || {code: {{ status_code }}};
+
+                    (function show_details() {
+                        var error = window.MGS.error || {};
+
+                        window.addEventListener('DOMContentLoaded', function(event) {
+                            console.log('Error page data', window.MGS.error);
+                        });
+
+                        document.onkeydown = function(evt) {
+                            evt = evt || window.event;
+
+                            if (evt.keyCode == 69) {
+                                if (typeof error.title !== 'undefined') {
+                                    document.getElementById('error-details-title').innerHTML = error.title;
+                                }
+
+                                if (typeof error.data !== 'undefined') {
+                                    document.getElementById('error-details-data').innerHTML = error.data;
+                                    document.getElementById('error-details-data').style.display = 'block';
+                                }
+
+                                document.getElementById('error-details-box').style.display = 'block';
+                            }
+                        }
+                    })();
+            </script>
         </div>
     {% endif %}
 </body>
-</html>
+<!-- Do not close HTML tag on purpose so extra data can be passed from varnish
+     synth by appending dynamically generated JS code. Missing closing html tag
+     is a trivial problem which shouldn't break the page in any modern browser. -->
+<!-- </html> -->
