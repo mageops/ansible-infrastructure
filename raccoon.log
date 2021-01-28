@@ -1,0 +1,1890 @@
+[21-01-28 23:05:28] (DEBUG) Starting command: CS\Raccoon\Commands\AwsSshCommand, Input: 'aws:ssh'  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+{
+    "Reservations": [
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-04cf43aca3e6f3de3",
+                    "InstanceId": "i-0ac3aeed616604fbd",
+                    "InstanceType": "t3.micro",
+                    "KeyName": "cs-magesuite-proto",
+                    "LaunchTime": "2021-01-28T16:26:38.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-40-1-58.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.40.1.58",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-18-195-194-101.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "18.195.194.101",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 23:00:59 GMT)",
+                    "SubnetId": "subnet-e5e3a28e",
+                    "VpcId": "vpc-6a961001",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2019-12-16T20:47:47.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-03b6041dc1d372166"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": false,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "457405505183",
+                                "PublicDnsName": "ec2-18-195-194-101.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "18.195.194.101"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2019-12-16T20:47:46.000Z",
+                                "AttachmentId": "eni-attach-00cfa8f734b9741a2",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-proto-elastic-sg",
+                                    "GroupId": "sg-02561309d716816c6"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-proto-ssh-sg",
+                                    "GroupId": "sg-0257a41402cde5db9"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-proto-persistant-sg",
+                                    "GroupId": "sg-088a4d52b5ccafdc4"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-proto-redis-sg",
+                                    "GroupId": "sg-09ac20891dc915e46"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:c7:7d:78:33:c6",
+                            "NetworkInterfaceId": "eni-0d57cc7f75082d7ec",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-40-1-58.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.40.1.58",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "457405505183",
+                                        "PublicDnsName": "ec2-18-195-194-101.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "18.195.194.101"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-40-1-58.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.40.1.58"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-e5e3a28e",
+                            "VpcId": "vpc-6a961001",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-proto-elastic-sg",
+                            "GroupId": "sg-02561309d716816c6"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-proto-ssh-sg",
+                            "GroupId": "sg-0257a41402cde5db9"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-proto-persistant-sg",
+                            "GroupId": "sg-088a4d52b5ccafdc4"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-proto-redis-sg",
+                            "GroupId": "sg-09ac20891dc915e46"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-proto-persistent"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "RoleCache",
+                            "Value": "redis"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_proto"
+                        },
+                        {
+                            "Key": "NodePersistent",
+                            "Value": "cs-magesuite-proto"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "persistent"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "proto"
+                        },
+                        {
+                            "Key": "RoleSearch"  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+,
+                            "Value": "elasticsearch"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-02695dbf117fba55f"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-04cf43aca3e6f3de3",
+                    "InstanceId": "i-0812790bab19e6d49",
+                    "InstanceType": "t3.micro",
+                    "KeyName": "cs-magesuite-dev",
+                    "LaunchTime": "2021-01-28T06:01:47.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-41-1-90.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.41.1.90",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 17:01:06 GMT)",
+                    "SubnetId": "subnet-083ed73e08ebcb1ee",
+                    "VpcId": "vpc-01f8c1fe505be595c",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2019-12-16T21:34:18.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-074d2dc26748331a5"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": false,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Attachment": {
+                                "AttachTime": "2019-12-16T21:34:18.000Z",
+                                "AttachmentId": "eni-attach-0705bf0908fb3c5a6",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-dev-ssh-sg",
+                                    "GroupId": "sg-08ceb11dd81017894"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev-redis-sg",
+                                    "GroupId": "sg-00ce5360748894879"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev-elastic-sg",
+                                    "GroupId": "sg-09919e10b99e1a36d"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev-persistant-sg",
+                                    "GroupId": "sg-0fcf8035206e59f63"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:26:93:84:28:46",
+                            "NetworkInterfaceId": "eni-0f22092d6aa94be9c",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-41-1-90.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.41.1.90",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-41-1-90.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.41.1.90"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-083ed73e08ebcb1ee",
+                            "VpcId": "vpc-01f8c1fe505be595c",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-dev-ssh-sg",
+                            "GroupId": "sg-08ceb11dd81017894"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev-redis-sg",
+                            "GroupId": "sg-00ce5360748894879"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev-elastic-sg",
+                            "GroupId": "sg-09919e10b99e1a36d"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev-persistant-sg",
+                            "GroupId": "sg-0fcf8035206e59f63"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-dev-persistent"
+                        },
+                        {
+                            "Key": "NodePersistent",
+                            "Value": "cs-magesuite-dev"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "RoleSearch",
+                              
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+"Value": "elasticsearch"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "dev"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_dev"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "persistent"
+                        },
+                        {
+                            "Key": "RoleCache",
+                            "Value": "redis"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-0ec58fd1ca02325f2"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-04cf43aca3e6f3de3",
+                    "InstanceId": "i-091c9e01b12ee18d1",
+                    "InstanceType": "t3.nano",
+                    "KeyName": "cs-magesuite-prod",
+                    "LaunchTime": "2019-12-16T23:34:41.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-30-1-39.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.30.1.39",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-18-194-81-53.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "18.194.81.53",
+                    "State": {
+                        "Code": 16,
+                        "Name": "running"
+                    },
+                    "StateTransitionReason": "",
+                    "SubnetId": "subnet-090695ae8f5b86e2a",
+                    "VpcId": "vpc-0559f399c5db5b4d8",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2019-12-16T23:34:42.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-02daa73258eba5abc"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": false,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "457405505183",
+                                "PublicDnsName": "ec2-18-194-81-53.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "18.194.81.53"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2019-12-16T23:34:41.000Z",
+                                "AttachmentId": "eni-attach-09821581b34721cb4",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-prod-lb-sg",
+                                    "GroupId": "sg-0913c17d31bd626b3"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-prod-ssh-sg",
+                                    "GroupId": "sg-06cde17ffbdebd1a6"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-prod-varnish-sg",
+                                    "GroupId": "sg-0e239439061187a11"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:ea:3b:b8:13:c0",
+                            "NetworkInterfaceId": "eni-0c73ff8d76671e6ce",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-30-1-39.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.30.1.39",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "457405505183",
+                                        "PublicDnsName": "ec2-18-194-81-53.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "18.194.81.53"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-30-1-39.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.30.1.39"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-090695ae8f5b86e2a",
+                            "VpcId": "vpc-0559f399c5db5b4d8",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-prod-lb-sg",
+                            "GroupId": "sg-0913c17d31bd626b3"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-prod-ssh-sg",
+                            "GroupId": "sg-06cde17ffbdebd1a6"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-prod-varnish-sg",
+                            "GroupId": "sg-0e239439061187a11"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Tags": [
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "prod"
+                        },
+                        {
+                            "Key": "NodeVarnish"  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+,
+                            "Value": "cs-magesuite-prod"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "loadbalancer"
+                        },
+                        {
+                            "Key": "RoleHttpCache",
+                            "Value": "varnish"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_prod"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-prod-varnish"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-0883d94bede4b8ce8"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-0e8286b71b81c3cc1",
+                    "InstanceId": "i-0520988a145bff7a7",
+                    "InstanceType": "t3.micro",
+                    "KeyName": "cs-magesuite-prod",
+                    "LaunchTime": "2020-04-10T07:58:28.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-30-1-17.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.30.1.17",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-18-195-210-29.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "18.195.210.29",
+                    "State": {
+                        "Code": 16,
+                        "Name": "running"
+                    },
+                    "StateTransitionReason": "",
+                    "SubnetId": "subnet-090695ae8f5b86e2a",
+                    "VpcId": "vpc-0559f399c5db5b4d8",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2020-04-10T07:58:29.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-011b3f770c863e86e"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "amazon",
+                                "PublicDnsName": "ec2-18-195-210-29.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "18.195.210.29"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2020-04-10T07:58:28.000Z",
+                                "AttachmentId": "eni-attach-04aca21ee183c21ba",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-prod-sftp-sg",
+                                    "GroupId": "sg-000f99c66bdf4e79b"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-prod-redis-sg",
+                                    "GroupId": "sg-063bb0f864afcead8"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-prod-elastic-sg",
+                                    "GroupId": "sg-0e83c00addfe990cd"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-prod-ssh-sg",
+                                    "GroupId": "sg-06cde17ffbdebd1a6"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:02:2f:43:41:e4",
+                            "NetworkInterfaceId": "eni-06b6cdd527804110a",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-30-1-17.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.30.1.17",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "amazon",
+                                        "PublicDnsName": "ec2-18-195-210-29.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "18.195.210.29"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-30-1-17.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.30.1.17"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-090695ae8f5b86e2a",
+                            "VpcId": "vpc-0559f399c5db5b4d8",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-prod-sftp-sg",
+                            "GroupId": "sg-000f99c66bdf4e79b"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-prod-redis-sg",
+                            "GroupId": "sg-063bb0f864afcead8"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-prod-elastic-sg"  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+,
+                            "GroupId": "sg-0e83c00addfe990cd"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-prod-ssh-sg",
+                            "GroupId": "sg-06cde17ffbdebd1a6"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Tags": [
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_prod"
+                        },
+                        {
+                            "Key": "RoleSearch",
+                            "Value": "elasticsearch"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "prod"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "NodePersistent",
+                            "Value": "cs-magesuite-prod"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "persistent"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-prod-persistent"
+                        },
+                        {
+                            "Key": "RoleCache",
+                            "Value": "redis"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-00f85b86bdbd2092b"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-009d5cb9a44a50fd1",
+                    "InstanceId": "i-0436b662a297d1059",
+                    "InstanceType": "t3a.small",
+                    "KeyName": "cs-magesuite-prod",
+                    "LaunchTime": "2020-07-10T14:20:14.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-30-1-98.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.30.1.98",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-3-127-217-210.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "3.127.217.210",
+                    "State": {
+                        "Code": 16,
+                        "Name": "running"
+                    },
+                    "StateTransitionReason": "",
+                    "SubnetId": "subnet-090695ae8f5b86e2a",
+                    "VpcId": "vpc-0559f399c5db5b4d8",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2020-07-10T14:20:15.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-0d02f7a6efd1e8c51"
+                            }
+                        }
+                    ],
+                    "ClientToken": "2985cce4-646f-8dab-2a99-c640dc3da103",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "amazon",
+                                "PublicDnsName": "ec2-3-127-217-210.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "3.127.217.210"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2020-07-10T14:20:14.000Z",
+                                "AttachmentId": "eni-attach-0a22d33778cde257a",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-prod-ssh-sg",
+                                    "GroupId": "sg-06cde17ffbdebd1a6"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-prod-app-sg",
+                                    "GroupId": "sg-0018cfd275383ab79"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:40:ed:5e:2d:dc",
+                            "NetworkInterfaceId": "eni-01cfc1043961615c5",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-30-1-98.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.30.1.98",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "amazon",
+                                        "PublicDnsName": "ec2-3-127-217-210.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "3.127.217.210"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-30-1-98.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.30.1.98"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-090695ae8f5b86e2a",
+                            "VpcId": "vpc-0559f399c5db5b4d8",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs"  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+,
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-prod-ssh-sg",
+                            "GroupId": "sg-06cde17ffbdebd1a6"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-prod-app-sg",
+                            "GroupId": "sg-0018cfd275383ab79"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "Tags": [
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "aws:autoscaling:groupName",
+                            "Value": "cs-magesuite-prod-app"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Cron",
+                            "Value": "yes"
+                        },
+                        {
+                            "Key": "NodeApp",
+                            "Value": "cs-magesuite-prod"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_prod"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-prod-app"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "app"
+                        },
+                        {
+                            "Key": "TraitImmutable",
+                            "Value": "immutable"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "prod"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "RequesterId": "053592188284",
+            "ReservationId": "r-021106bca91e1d23c"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-0e8286b71b81c3cc1",
+                    "InstanceId": "i-0cab2de59e2837002",
+                    "InstanceType": "t3.nano",
+                    "KeyName": "cs-magesuite-proto",
+                    "LaunchTime": "2021-01-28T16:26:38.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-40-1-27.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.40.1.27",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-3-123-238-198.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "3.123.238.198",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 23:00:59 GMT)",
+                    "SubnetId": "subnet-e5e3a28e",
+                    "VpcId": "vpc-6a961001",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2020-07-20T09:46:05.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-05f420fbb451acc34"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "457405505183",
+                                "PublicDnsName": "ec2-3-123-238-198.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "3.123.238.198"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2020-07-20T09:46:04.000Z",
+                                "AttachmentId": "eni-attach-018c5b78ac152525b",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-proto-lb-sg",
+                                    "GroupId": "sg-07049d45e54946e65"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-proto-ssh-sg",
+                                    "GroupId": "sg-0257a41402cde5db9"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-proto-varnish-sg",
+                                    "GroupId": "sg-04f38b27454a3312b"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:f8:71:c3:9e:46",
+                            "NetworkInterfaceId": "eni-0db3be30ccb9cbc4f",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-40-1-27.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.40.1.27",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "457405505183",
+                                        "PublicDnsName": "ec2-3-123-238-198.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "3.123.238.198"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-40-1-27.eu-central-1.compute.internal",
+                                      
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+"PrivateIpAddress": "10.40.1.27"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-e5e3a28e",
+                            "VpcId": "vpc-6a961001",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-proto-lb-sg",
+                            "GroupId": "sg-07049d45e54946e65"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-proto-ssh-sg",
+                            "GroupId": "sg-0257a41402cde5db9"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-proto-varnish-sg",
+                            "GroupId": "sg-04f38b27454a3312b"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "RoleHttpCache",
+                            "Value": "varnish"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_proto"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "proto"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-proto-varnish"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "loadbalancer"
+                        },
+                        {
+                            "Key": "NodeVarnish",
+                            "Value": "cs-magesuite-proto"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-03325d01cbfb37e63"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-0e8286b71b81c3cc1",
+                    "InstanceId": "i-0c5e81fa004dd127d",
+                    "InstanceType": "t3.micro",
+                    "KeyName": "cs-magesuite-dev23",
+                    "LaunchTime": "2021-01-28T06:01:46.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-25-1-25.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.25.1.25",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 17:01:06 GMT)",
+                    "SubnetId": "subnet-0e763748caf1af3ff",
+                    "VpcId": "vpc-04ea0abf5284fb21f",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2020-09-04T11:31:01.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-0cc600ead59a9c566"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Attachment": {
+                                "AttachTime": "2020-09-04T11:31:00.000Z",
+                                "AttachmentId": "eni-attach-0eab3df2752bfe8e1",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-dev23-redis-sg",
+                                    "GroupId": "sg-02ef642d9d9d20f85"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev23-ssh-sg",
+                                    "GroupId": "sg-00db09e2c41d71ab4"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev23-elastic-sg",
+                                    "GroupId": "sg-0d461045bd5004263"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev23-persistant-sg",
+                                    "GroupId": "sg-0726da16cee32f533"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:49:cc:13:9c:72",
+                            "NetworkInterfaceId": "eni-0fbcddff440b91a88",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-25-1-25.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.25.1.25",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Primary": true,
+                                    "PrivateDnsName"  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+: "ip-10-25-1-25.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.25.1.25"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-0e763748caf1af3ff",
+                            "VpcId": "vpc-04ea0abf5284fb21f",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-dev23-redis-sg",
+                            "GroupId": "sg-02ef642d9d9d20f85"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev23-ssh-sg",
+                            "GroupId": "sg-00db09e2c41d71ab4"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev23-elastic-sg",
+                            "GroupId": "sg-0d461045bd5004263"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev23-persistant-sg",
+                            "GroupId": "sg-0726da16cee32f533"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "RoleCache",
+                            "Value": "redis"
+                        },
+                        {
+                            "Key": "RoleSearch",
+                            "Value": "elasticsearch"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "dev23"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-dev23-persistent"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_dev23"
+                        },
+                        {
+                            "Key": "NodePersistent",
+                            "Value": "cs-magesuite-dev23"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "persistent"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-0a8ca824954b02250"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-0e8286b71b81c3cc1",
+                    "InstanceId": "i-0bd42fbb470c8199f",
+                    "InstanceType": "t3.nano",
+                    "KeyName": "cs-magesuite-dev23",
+                    "LaunchTime": "2021-01-28T06:01:46.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-25-1-30.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.25.1.30",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-18-192-7-205.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "18.192.7.205",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 17:01:07 GMT)",
+                    "SubnetId": "subnet-0e763748caf1af3ff",
+                    "VpcId": "vpc-04ea0abf5284fb21f",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2020-09-04T11:29:39.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-0f98acdc201a3d38c"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "457405505183",
+                                "PublicDnsName": "ec2-18-192-7-205.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "18.192.7.205"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2020-09-04T11:29:38.000Z",
+                                "AttachmentId": "eni-attach-0af06b12fb8a66bc7",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                {
+                                    "GroupName": "cs-magesuite-dev23-lb-sg",
+                                    "GroupId": "sg-02d51a369cf30aa80"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev23-varnish-sg",
+                                    "GroupId": "sg-0cb307e64ecbd5d68"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev23-ssh-sg",
+                                    "GroupId": "sg-00db09e2c41d71ab4"
+                                  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+}
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:1b:ed:1f:51:34",
+                            "NetworkInterfaceId": "eni-03bc9c5902c19c4db",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-25-1-30.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.25.1.30",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "457405505183",
+                                        "PublicDnsName": "ec2-18-192-7-205.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "18.192.7.205"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-25-1-30.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.25.1.30"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-0e763748caf1af3ff",
+                            "VpcId": "vpc-04ea0abf5284fb21f",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-dev23-lb-sg",
+                            "GroupId": "sg-02d51a369cf30aa80"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev23-varnish-sg",
+                            "GroupId": "sg-0cb307e64ecbd5d68"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev23-ssh-sg",
+                            "GroupId": "sg-00db09e2c41d71ab4"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "RoleHttpCache",
+                            "Value": "varnish"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "NodeVarnish",
+                            "Value": "cs-magesuite-dev23"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "loadbalancer"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-dev23-varnish"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "dev23"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_dev23"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-0384e4b2c46c62ee1"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-0e8286b71b81c3cc1",
+                    "InstanceId": "i-069c53e48cf044d90",
+                    "InstanceType": "t3.nano",
+                    "KeyName": "cs-magesuite-dev",
+                    "LaunchTime": "2021-01-28T06:01:48.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "ip-10-41-1-24.eu-central-1.compute.internal",
+                    "PrivateIpAddress": "10.41.1.24",
+                    "ProductCodes": [
+                        {
+                            "ProductCodeId": "aw0evgkw8e5c1q413zgy5pjce",
+                            "ProductCodeType": "marketplace"
+                        }
+                    ],
+                    "PublicDnsName": "ec2-3-120-216-226.eu-central-1.compute.amazonaws.com",
+                    "PublicIpAddress": "3.120.216.226",
+                    "State": {
+                        "Code": 80,
+                        "Name": "stopped"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 17:01:07 GMT)",
+                    "SubnetId": "subnet-083ed73e08ebcb1ee",
+                    "VpcId": "vpc-01f8c1fe505be595c",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "AttachTime": "2020-11-18T16:52:22.000Z",
+                                "DeleteOnTermination": true,
+                                "Status": "attached",
+                                "VolumeId": "vol-03b7c31ea91a392bb"
+                            }
+                        }
+                    ],
+                    "ClientToken": "",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "IamInstanceProfile": {
+                        "Arn": "arn:aws:iam::457405505183:instance-profile/MageOpsAppNode",
+                        "Id": "AIPAWU736D2PTR73VNN3E"
+                    },
+                    "NetworkInterfaces": [
+                        {
+                            "Association": {
+                                "IpOwnerId": "457405505183",
+                                "PublicDnsName": "ec2-3-120-216-226.eu-central-1.compute.amazonaws.com",
+                                "PublicIp": "3.120.216.226"
+                            },
+                            "Attachment": {
+                                "AttachTime": "2020-11-18T16:52:21.000Z",
+                                "AttachmentId": "eni-attach-054d56b37476c766b",
+                                "DeleteOnTermination": true,
+                                "DeviceIndex": 0,
+                                "Status": "attached"
+                            },
+                            "Description": "",
+                            "Groups": [
+                                  
+[21-01-28 23:05:30] (DEBUG) Executing: aws ec2 describe-instances --region eu-central-1
+{
+                                    "GroupName": "cs-magesuite-dev-ssh-sg",
+                                    "GroupId": "sg-08ceb11dd81017894"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev-varnish-sg",
+                                    "GroupId": "sg-0ec4c4927e7a7461a"
+                                },
+                                {
+                                    "GroupName": "cs-magesuite-dev-lb-sg",
+                                    "GroupId": "sg-09d18aa3ceecbdbed"
+                                }
+                            ],
+                            "Ipv6Addresses": [],
+                            "MacAddress": "02:20:d6:68:0c:fa",
+                            "NetworkInterfaceId": "eni-0aef8f356dd77235f",
+                            "OwnerId": "457405505183",
+                            "PrivateDnsName": "ip-10-41-1-24.eu-central-1.compute.internal",
+                            "PrivateIpAddress": "10.41.1.24",
+                            "PrivateIpAddresses": [
+                                {
+                                    "Association": {
+                                        "IpOwnerId": "457405505183",
+                                        "PublicDnsName": "ec2-3-120-216-226.eu-central-1.compute.amazonaws.com",
+                                        "PublicIp": "3.120.216.226"
+                                    },
+                                    "Primary": true,
+                                    "PrivateDnsName": "ip-10-41-1-24.eu-central-1.compute.internal",
+                                    "PrivateIpAddress": "10.41.1.24"
+                                }
+                            ],
+                            "SourceDestCheck": true,
+                            "Status": "in-use",
+                            "SubnetId": "subnet-083ed73e08ebcb1ee",
+                            "VpcId": "vpc-01f8c1fe505be595c",
+                            "InterfaceType": "interface"
+                        }
+                    ],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "cs-magesuite-dev-ssh-sg",
+                            "GroupId": "sg-08ceb11dd81017894"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev-varnish-sg",
+                            "GroupId": "sg-0ec4c4927e7a7461a"
+                        },
+                        {
+                            "GroupName": "cs-magesuite-dev-lb-sg",
+                            "GroupId": "sg-09d18aa3ceecbdbed"
+                        }
+                    ],
+                    "SourceDestCheck": true,
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "NodeVarnish",
+                            "Value": "cs-magesuite-dev"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "loadbalancer"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-dev-varnish"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_dev"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        },
+                        {
+                            "Key": "RoleHttpCache",
+                            "Value": "varnish"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "dev"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "applied",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "ReservationId": "r-0ede438b2fc4e021a"
+        },
+        {
+            "Groups": [],
+            "Instances": [
+                {
+                    "AmiLaunchIndex": 0,
+                    "ImageId": "ami-0045d3732eddf7f2c",
+                    "InstanceId": "i-07eaffb5c0820ffca",
+                    "InstanceType": "t3.micro",
+                    "KeyName": "cs-magesuite-proto",
+                    "LaunchTime": "2021-01-28T21:14:09.000Z",
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "Placement": {
+                        "AvailabilityZone": "eu-central-1a",
+                        "GroupName": "",
+                        "Tenancy": "default"
+                    },
+                    "PrivateDnsName": "",
+                    "ProductCodes": [],
+                    "PublicDnsName": "",
+                    "State": {
+                        "Code": 48,
+                        "Name": "terminated"
+                    },
+                    "StateTransitionReason": "User initiated (2021-01-28 23:01:00 GMT)",
+                    "Architecture": "x86_64",
+                    "BlockDeviceMappings": [],
+                    "ClientToken": "2405dd2b-6291-5003-e10d-fe17f830915b",
+                    "EbsOptimized": true,
+                    "EnaSupport": true,
+                    "Hypervisor": "xen",
+                    "NetworkInterfaces": [],
+                    "RootDeviceName": "/dev/sda1",
+                    "RootDeviceType": "ebs",
+                    "SecurityGroups": [],
+                    "StateReason": {
+                        "Code": "Client.UserInitiatedShutdown",
+                        "Message": "Client.UserInitiatedShutdown: User initiated shutdown"
+                    },
+                    "Tags": [
+                        {
+                            "Key": "TraitImmutable",
+                            "Value": "immutable"
+                        },
+                        {
+                            "Key": "Role",
+                            "Value": "app"
+                        },
+                        {
+                            "Key": "aws:autoscaling:groupName",
+                            "Value": "cs-magesuite-proto-app"
+                        },
+                        {
+                            "Key": "Infrastructure",
+                            "Value": "mageops"
+                        },
+                        {
+                            "Key": "AppId",
+                            "Value": "magesuite_proto"
+                        },
+                        {
+                            "Key": "Environment",
+                            "Value": "proto"
+                        },
+                        {
+                            "Key": "NodeApp",
+                            "Value": "cs-magesuite-proto"
+                        },
+                        {
+                            "Key": "Tool",
+                            "Value": "ansible"
+                        },
+                        {
+                            "Key": "Cron",
+                            "Value": "yes"
+                        },
+                        {
+                            "Key": "Name",
+                            "Value": "cs-magesuite-proto-app"
+                        },
+                        {
+                            "Key": "Project",
+                            "Value": "magesuite"
+                        }
+                    ],
+                    "VirtualizationType": "hvm",
+                    "CpuOptions": {
+                        "CoreCount": 1,
+                        "ThreadsPerCore": 2
+                    },
+                    "CapacityReservationSpecification": {
+                        "CapacityReservationPreference": "open"
+                    },
+                    "HibernationOptions": {
+                        "Configured": false
+                    },
+                    "MetadataOptions": {
+                        "State": "pending",
+                        "HttpTokens": "optional",
+                        "HttpPutResponseHopLimit": 1,
+                        "HttpEndpoint": "enabled"
+                    },
+                    "EnclaveOptions": {
+                        "Enabled": false
+                    }
+                }
+            ],
+            "OwnerId": "457405505183",
+            "RequesterId": "053592188284",
+            "ReservationId": "r-0b5e6245c501cb23f"
+        }
+    ]
+}
+  
+[21-01-28 23:05:30] (DEBUG) Executed: aws ec2 describe-instances --region eu-central-1, Return code: 0  

@@ -14,7 +14,7 @@ varnish_storage: "malloc"
 varnish_total_sys_mem: "{{ ansible_memtotal_mb * 1024 * 1024 }}"
 
 # Base amount of system memory dedicated to varnish used for calculating derived dynamic param defaults
-varnish_base_mem_ceil: >-
+varnish_base_mem_quota: >-
   {{
     [
       varnish_total_sys_mem | int * varnish_sys_mem_rel,
@@ -37,14 +37,14 @@ varnish_thread_mem_est: >-
 varnish_vs_space_mem: "{{ varnish_vsl_space | human_to_bytes + varnish_vsm_space | human_to_bytes }}"
 
 # System memory left after allocating VSL and VSM
-varnish_dyn_mem_ceil: "{{ varnish_base_mem_ceil | int - varnish_vs_space_mem | int }}"
+varnish_dyn_mem_quota: "{{ varnish_base_mem_quota | int - varnish_vs_space_mem | int }}"
 
 # Cached object storage size
 varnish_storage_mem: >-
   {{
       varnish_memory | default(false, true) | ternary(
           varnish_memory | default(0, true) | human_to_bytes,
-          varnish_storage_mem_rel * varnish_dyn_mem_ceil | int
+          varnish_storage_mem_rel * varnish_dyn_mem_quota | int
       )
   }}
 
@@ -52,14 +52,14 @@ varnish_storage_mem: >-
 # Used to calculate thread/pool count limits.
 # Does not take into account memory needed for system and other services.
 # Also note that each cached object's metadata structure requires ~1k.
-varnish_thread_mem_ceil: "{{ varnish_dyn_mem_ceil | int - varnish_storage_mem | int }}"
+varnish_thread_mem_quota: "{{ varnish_dyn_mem_quota | int - varnish_storage_mem | int }}"
 
 # Debugging variable indicating theoretical memory usage at full load (max threads, all busy).
 varnish_full_mem_usage: >-
   {{
           varnish_vs_space_mem | int
         + varnish_storage_mem | int
-        + varnish_thread_mem_ceil | int
+        + varnish_thread_mem_quota | int
   }}
 
 varnish_params_base:
