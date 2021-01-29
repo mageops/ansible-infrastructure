@@ -389,6 +389,8 @@ aws_extra_app_asg_passthrough_url_pattern:
 aws_extra_app_asg_passthrough_uagent_pattern:
 aws_extra_app_asg_passthrough_ip_pattern:
 
+aws_app_asg_replace_with_check: no
+
 # Example regex to pass bot traffic to the extra instances:
 #aws_extra_app_asg_passthrough_uagent_pattern: "(?i)^alexa|^blitz\\.io|bot|^browsermob|crawl|^curl|^facebookexternalhit|feed|google web preview|^ia_archiver|indexer|^java|jakarta|^libwww-perl|^load impact|^magespeedtest|monitor|^Mozilla$|nagios |^\\.net|^pinterest|postrank|slurp|spider|uptime|^wget|yandex|^elb-healthchecker|binglocalsearch|^Ruby|^python-requests|^Mediapartners-Google|^Sogou"
 
@@ -1067,11 +1069,13 @@ magento_efs_import_data_remote_path: "/import"
 magento_efs_export_data_remote_path: "/export"
 magento_efs_publicly_shared_remote_path: "/pub/shared"
 magento_efs_global_data_remote_path: "/var/global"
+magento_efs_locks_data_remote_path: "/var/lock"
 
 magento_efs_import_data_app_path: "{{ mageops_app_web_dir }}/shared/var/import"
 magento_efs_export_data_app_path: "{{ mageops_app_web_dir }}/shared/var/export"
 magento_efs_publicly_shared_app_path: "{{ mageops_app_web_dir }}/shared/pub/shared"
 magento_efs_global_data_app_path: "{{ mageops_app_web_dir }}/shared/var/global"
+magento_efs_locks_data_app_path: "{{ mageops_app_web_dir }}/shared/var/lock"
 
 # EFS resource name
 magento_efs_app_node_name: "{{ mageops_app_name }}-app-shared"
@@ -1430,7 +1434,7 @@ varnish_log_dir: /var/log/varnish
 varnish_ncsa_logging: no
 
 # If enabled then Magento PURGE requests to varnish will be logged
-varnish_purge_logging: yes
+varnish_purge_logging: no
 varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
 
 # Error page customization
@@ -1578,6 +1582,7 @@ mageops_earlyoom_enable: yes
 
 earlyoom_ram_min_percent: 7
 earlyoom_swap_min_percent: 40
+mageops_cli_features_dir: /usr/local/lib/mageops/features
 
 # ----------------------------
 # --------  Packages  --------

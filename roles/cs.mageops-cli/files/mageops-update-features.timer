@@ -1,0 +1,9 @@
+[Unit]
+Description=Trigger update of dynamic features
+
+[Timer]
+OnActiveSec=10sec
+OnUnitActiveSec=1min
+
+[Install]
+WantedBy=timers.target

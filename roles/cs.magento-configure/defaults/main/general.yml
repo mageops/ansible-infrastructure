@@ -17,12 +17,24 @@ magento_node_warmup_script_path: /bin/node-warmup.sh
 
 magento_install_sample_data: no
 
+# Note: When file locks are used they must be shared across app instances
+# so enable this feature only if the lock file dir is an EFS/NFSv4 share or
+# this is a single-instance non-AWS deployment!
+#
+# Whether to enable file lock provider (db is the default)
+magento_lock_files_enabled: no
+# Path to the directory to place locks in
+magento_lock_files_dir: var/lock
+
 # ----------------------------------------
 # --------  Magento Redis Caching --------
 # ----------------------------------------
 
 # Whether to use redis for caching
 magento_redis_cache: yes
+# Whether to use a local Level 2 cache
+magento_redis_cache_l2: no
+magento_redis_cache_l2_dir: /dev/shm
 magento_session_max_redis_concurrency: 15
 
 magento_app_etc_config_template: magento_app_etc_config.php.j2

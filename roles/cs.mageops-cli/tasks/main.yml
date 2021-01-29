@@ -4,6 +4,7 @@
     state: directory
   with_items:
     - "/usr/local/lib/mageops"
+    - "/usr/local/lib/mageops/features"
     - "/usr/local/bin"
 
 - name: Install mageops cli
@@ -14,4 +15,19 @@
   with_items:
     - { src: "libaws.bash", dest: "/usr/local/lib/mageops/libaws.bash", mode: "0644" }
     - { src: "libmageops.bash", dest: "/usr/local/lib/mageops/libmageops.bash", mode: "0644" }
+    - { src: "libfeatures.bash", dest: "/usr/local/lib/mageops/libfeatures.bash", mode: "0644" }
     - { src: "mageopscli", dest: "/usr/local/bin/mageopscli", mode: "0755" }
+    - { src: "features/example_feature.bash", dest: "/usr/local/lib/mageops/features/example_feature.bash", mode: "0644" }
+    - { src: "mageops-update-features.service", dest: "/etc/systemd/system/mageops-update-features.service", mode: "0644" }
+    - { src: "mageops-update-features.timer", dest: "/etc/systemd/system/mageops-update-features.timer", mode: "0644" }
+
+- name: Render configuration
+  template:
+    src: config.bash
+    dest: "/usr/local/lib/mageops/config.bash"
+
+- name: Enable feature update timer
+  service:
+    name: mageops-update-features.timer
+    enabled: yes
+    state: started
