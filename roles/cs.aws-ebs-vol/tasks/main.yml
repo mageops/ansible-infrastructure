@@ -1,0 +1,70 @@
+### Modifies an EBS volume type and parameters ###
+# This role is needed since there is no community.aws module for modifying EBS
+# volumes.
+#
+# Note: Right now I don't see any EBS volume-related modules in communit.aws
+# repo so AWS CLI is used for everything. / FS
+###
+
+# Note: We need to normalize dict values which are ints because ansible (jinja)
+# always converts them to strings and this will produce a false diff.
+- name: Normalize parameters
+  set_fact:
+    aws_ebs_volume_describe_params: >-
+      {{ aws_ebs_volume_describe_params
+          | default({}, true )
+          | pick_nonempty_keys }}
+    aws_ebs_volume_modify_params: >-
+      {{ aws_ebs_volume_modify_params
+          | default({}, true)
+          | pick_nonempty_keys
+          | dict_normalize_numbers }}
+
+- name: Print information about operations to be done
+  debug:
+    msg: |
+      =======================================================
+      =              Modifying AWS EBS Volumes              =
+      =======================================================
+
+      ------------------ Select Matching  -------------------
+
+      {{ aws_ebs_volume_describe_params | to_nice_yaml }}
+      ---------------- Target Parameters  -------------------
+
+      {{ aws_ebs_volume_modify_params | to_nice_yaml }}
+      -------------------------------------------------------
+
+
+- name: Perform volume operations
+  delegate_to: localhost
+  connection: local
+  become: no
+  block:
+    - name: Select and get info about volumes to modify
+      command:
+        argv: >-
+          {{ [ 'aws', 'ec2', 'describe-volumes' ]
+              + aws_ebs_volume_cli_args_base
+              + [ '--cli-input-json', aws_ebs_volume_describe_params | to_json ] }}
+      register: aws_ebs_volume_describe
+      changed_when: false
+
+    - name: Modify parameters of selected EBS volumes if change is requested
+      command:
+        argv: >-
+          {{ [ 'aws', 'ec2', 'modify-volume' ]
+              + aws_ebs_volume_cli_args_base
+              + [ '--cli-input-json',
+                    aws_ebs_volume_modify_changed_params | combine(aws_ebs_volume_modify_item_params) | to_json ] }}
+      when: aws_ebs_volume_modify_changed_params | length > 0
+      vars:
+        aws_ebs_volume_modify_changed_params: >-
+          {{ aws_ebs_volume_modify_params
+              | dict_diff(volume | pick_keys(aws_ebs_volume_modify_params.keys())) }}
+        aws_ebs_volume_modify_item_params:
+          VolumeId: "{{ volume.VolumeId }}"
+      loop_control:
+        loop_var: volume
+        label: "{{ volume.VolumeId }} / {{ volume | pick_keys(aws_ebs_volume_modify_params.keys()) | to_yaml | trim }} -> {{ aws_ebs_volume_modify_params | to_yaml| trim }}"
+      loop: "{{ ( aws_ebs_volume_describe.stdout | from_json ).Volumes }}"

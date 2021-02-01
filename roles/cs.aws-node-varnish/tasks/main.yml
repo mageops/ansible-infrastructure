@@ -28,7 +28,7 @@
       }}
     volumes:
       - device_name: "{{ aws_varnish_node_root_device }}"
-        volume_type: "{{ aws_ec2_ebs_gp3_enable | ternary('gp3', 'gp2') }}"
+        volume_type: "{{ aws_ec2_ebs_volume_type }}"
         volume_size: "{{ aws_varnish_node_ebs_volume_size }}"
         delete_on_termination: yes
         encrypted: "{{ mageops_ebs_encrypt }}"
@@ -41,6 +41,27 @@
     aws_varnish_node_name_tags:
       Name: "{{ aws_varnish_node_instance_name }}"
   register: aws_varnish_ec2
+
+- name: Ensure varnish root disk is a gp3 volume
+  when: aws_varnish_node_ebs_volume_type == 'gp3' and aws_varnish_node_ebs_gp3_convert
+  command:
+    argv: [
+      'aws', 'ec2', 'modify-volume',
+          '--volume-type', 'gp3',
+          '--volume-id',   "{{ volume_id }}",
+          '--iops',        "{{ aws_varnish_node_ebs_gp3_iops }}",
+          '--throughput',  "{{ aws_varnish_node_ebs_gp3_throughput }}",
+    ]
+  loop: '{{ aws_varnish_ec2.instances }}'
+  loop_control:
+    loop_var: instance
+    label: "{{ instance.id }} / {{ volume_id }}"
+  vars:
+    volume_id: "{{ ( instance.block_device_mapping | list | first ).volume_id }}"
+  delegate_to: localhost
+  connection: local
+  become: no
+
 
 - name: Wait for varnish node instance to get up
   wait_for:
