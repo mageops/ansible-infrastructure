@@ -26,7 +26,7 @@
     volumes:
       - device_name: "{{ builder_instance_root_device }}"
         volume_size: "{{ builder_instance_volume_size }}"
-        volume_type: gp2
+        volume_type: "{{ aws_ec2_ebs_gp3_enable | ternary('gp3', 'gp2') }}"
         delete_on_termination: yes
         encrypted: "{{ mageops_ebs_encrypt }}"
     exact_count: 1
