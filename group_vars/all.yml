@@ -242,6 +242,15 @@ aws_vpc_routes_extra: []
 # --------  AWS EC2  --------
 # ---------------------------
 
+# Use gp3 instead of the default gp2 EBS volumes
+aws_ec2_ebs_gp3_enable: no
+
+# Provision 3k IOPS for gp3 volumes - (baseline - no extra fees)
+aws_ec2_ebs_gp3_iops_default: 3000
+
+# Provision 125MB/s throughput for gp3 volumes (baseline - no extra fees)
+aws_ec2_ebs_gp3_througput_default: 125
+
 # The key has to be manually generated in the console and the name
 # has to agree with this setting.
 aws_ec2_ssh_key_name: "{{ mageops_app_name }}"

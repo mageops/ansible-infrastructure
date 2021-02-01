@@ -28,7 +28,7 @@
       }}
     volumes:
       - device_name: "{{ aws_varnish_node_root_device }}"
-        volume_type: gp2
+        volume_type: "{{ aws_ec2_ebs_gp3_enable | ternary('gp3', 'gp2') }}"
         volume_size: "{{ aws_varnish_node_ebs_volume_size }}"
         delete_on_termination: yes
         encrypted: "{{ mageops_ebs_encrypt }}"
