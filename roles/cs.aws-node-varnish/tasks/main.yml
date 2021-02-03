@@ -42,26 +42,23 @@
       Name: "{{ aws_varnish_node_instance_name }}"
   register: aws_varnish_ec2
 
-- name: Ensure varnish root disk is a gp3 volume
+- name: Ensure varnish disks are gp3 volumes
   when: aws_varnish_node_ebs_volume_type == 'gp3' and aws_varnish_node_ebs_gp3_convert
-  command:
-    argv: [
-      'aws', 'ec2', 'modify-volume',
-          '--volume-type', 'gp3',
-          '--volume-id',   "{{ volume_id }}",
-          '--iops',        "{{ aws_varnish_node_ebs_gp3_iops }}",
-          '--throughput',  "{{ aws_varnish_node_ebs_gp3_throughput }}",
-    ]
-  loop: '{{ aws_varnish_ec2.instances }}'
-  loop_control:
-    loop_var: instance
-    label: "{{ instance.id }} / {{ volume_id }}"
+  include_role:
+    name: cs.aws-ebs-vol
   vars:
-    volume_id: "{{ ( instance.block_device_mapping | list | first ).volume_id }}"
-  delegate_to: localhost
-  connection: local
-  become: no
-
+    aws_ebs_volume_modify_ids: >-
+      {{ ( aws_varnish_ec2.instances + aws_varnish_ec2.tagged_instances )
+          | map(attribute='block_device_mapping') 
+          | map('dict2items') 
+          | flatten 
+          | map(attribute='value')
+          | map(attribute='volume_id')
+          | list
+          | to_nice_json }}
+    aws_ebs_volume_modify_type: "{{ aws_varnish_node_ebs_volume_type }}"
+    aws_ebs_volume_modify_iops: "{{ aws_varnish_node_ebs_gp3_iops }}"
+    aws_ebs_volume_modify_throughput: "{{ aws_varnish_node_ebs_gp3_throughput }}"
 
 - name: Wait for varnish node instance to get up
   wait_for:
