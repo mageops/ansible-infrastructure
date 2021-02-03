@@ -1,2 +1,6 @@
 # Whether to stop the "builder" instance before creating AMI
 aws_ami_build_stop_builder: true
+
+aws_ami_build_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', true) }}"
+aws_ami_build_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
+aws_ami_build_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"

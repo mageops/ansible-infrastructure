@@ -18,3 +18,4 @@ __pycache__/
 .tmp.*
 
 /test.*
+/callback_plugins/clean.py
