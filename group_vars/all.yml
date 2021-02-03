@@ -255,11 +255,9 @@ aws_ec2_ebs_gp3_iops: 3000
 # Provision 125MB/s throughput for gp3 volumes (baseline - no extra fees)
 aws_ec2_ebs_gp3_throughput: 125
 
-
 # The key has to be manually generated in the console and the name
 # has to agree with this setting.
 aws_ec2_ssh_key_name: "{{ mageops_app_name }}"
-
 
 # User data to add to every EC2 instance / Launch configuration
 # As a default configuration for compatibility reasons it changes

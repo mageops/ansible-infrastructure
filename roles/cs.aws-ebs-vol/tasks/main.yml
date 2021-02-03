@@ -50,7 +50,7 @@
       register: aws_ebs_volume_describe
       changed_when: false
 
-    - name: Modify parameters of selected EBS volumes if change is requested
+    - name: Modify parameters of selected EBS volumes (if changed)
       command:
         argv: >-
           {{ [ 'aws', 'ec2', 'modify-volume' ]
