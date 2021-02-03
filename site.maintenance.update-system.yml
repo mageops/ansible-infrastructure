@@ -1,0 +1,11 @@
+- import_playbook: site.common.group-current-hosts.yml
+- hosts: current:!immutable
+  roles:
+  - role: cs.aws-node-facts
+    delegate_to: localhost
+    become: no
+    when: aws_use
+  - role: cs.switch-to-dnf
+  - role: cs.packages
+    packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
+    packages_full_update: yes
