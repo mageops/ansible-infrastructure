@@ -10,7 +10,8 @@ aws_varnish_node_security_groups:
 aws_varnish_instance_id: false
 
 # See `aws_ec2_ebs_gp3_*` vars in `group_vars/all.yml`
-aws_varnish_node_ebs_volume_type:   "{{ aws_ec2_ebs_volume_type | default('gp3') }}"
-aws_varnish_node_ebs_gp3_convert:   "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
-aws_varnish_node_ebs_gp3_iops:      "{{ aws_ec2_ebs_gp3_iops | default(3000) }}"
-aws_varnish_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125) }}"
+aws_varnish_node_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', true) }}"
+aws_varnish_node_ebs_gp3_convert: "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
+aws_varnish_node_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
+aws_varnish_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"
+

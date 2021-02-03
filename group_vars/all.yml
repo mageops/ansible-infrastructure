@@ -243,7 +243,7 @@ aws_vpc_routes_extra: []
 # ---------------------------
 
 
-# The default volume type to use
+# The (global) default volume type to use
 aws_ec2_ebs_volume_type: gp3
 
 # Whether to convert existing volumes of non-autoscaled instances
@@ -254,6 +254,27 @@ aws_ec2_ebs_gp3_iops: 3000
 
 # Provision 125MB/s throughput for gp3 volumes (baseline - no extra fees)
 aws_ec2_ebs_gp3_throughput: 125
+
+# You may also override the above defaults for specific node types
+
+#   aws_varnish_node_ebs_volume_type: ~
+#   aws_varnish_node_ebs_gp3_convert: ~
+#   aws_varnish_node_ebs_gp3_iops: ~
+#   aws_varnish_node_ebs_gp3_throughput: ~
+
+#   aws_persistent_node_ebs_volume_type: ~
+#   aws_persistent_node_ebs_gp3_convert: ~
+#   aws_persistent_node_ebs_gp3_iops: ~
+#   aws_persistent_node_ebs_gp3_throughput: ~
+
+#   aws_builder_node_ebs_volume_type: ~
+#   aws_builder_node_ebs_gp3_convert: ~
+#   aws_builder_node_ebs_gp3_iops: ~
+#   aws_builder_node_ebs_gp3_throughput: ~
+
+#   aws_ami_build_ebs_volume_type: ~
+#   aws_ami_build_ebs_gp3_iops: ~
+#   aws_ami_build_ebs_gp3_throughput: ~
 
 # The key has to be manually generated in the console and the name
 # has to agree with this setting.
