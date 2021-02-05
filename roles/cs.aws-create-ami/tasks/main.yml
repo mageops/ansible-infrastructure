@@ -36,8 +36,6 @@
       # iops: "{{ aws_ami_build_ebs_gp3_iops | int }}"
   register: ami_output
 
-- debug: var=ami_output
-
 - name: Wait until AMI is accessible
   ec2_ami_info:
     region: "{{ aws_region }}"
