@@ -1,4 +1,11 @@
+- name: Check if varnish-exporter is active
+  shell: systemctl is-active varnish-exporter
+  failed_when: false
+  changed_when: false
+  register: varnish_exporter_check
+
 - name: Restart varnish-exporter
   service:
     name: varnish-exporter
     state: restarted
+  when: varnish_exporter_check.rc is defined and varnish_exporter_check.rc == 0
