@@ -2,6 +2,14 @@
 
 set -e -x
 
+systemctl stop supervisord 
+
+su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento maintenance:enable'
+su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento setup:upgrade --keep-generated'
+su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento maintenance:disable'
+
+systemctl start supervisord
+
 echo 'Waiting for php-fpm to come up...'
 until pgrep php-fpm > /dev/null; do sleep 0.5s ; done
 

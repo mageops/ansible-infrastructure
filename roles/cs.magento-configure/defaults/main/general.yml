@@ -1,3 +1,5 @@
+magento_build_mode: no
+
 magento_core_config_settings: []
 magento_core_config_settings_to_remove: []
 
@@ -26,6 +28,9 @@ magento_lock_files_enabled: no
 # Path to the directory to place locks in
 magento_lock_files_dir: var/lock
 
+# Whether to enable http cache config in app/etc/env.php
+magento_http_cache_enable: "{{ magento_varnish_host | default(false, true) }}"
+
 # ----------------------------------------
 # --------  Magento Redis Caching --------
 # ----------------------------------------
@@ -49,7 +54,6 @@ magento_redis_cache_backend_fqcn: >-
           'Cm_Cache_Backend_Redis', 
           '\Magento\Framework\Cache\Backend\Redis'
         ) }}
-
 
 magento_consumer_workers_enable: yes
 magento_consumer_workers:
@@ -87,3 +91,5 @@ magento_scd_excluded_themes: []
 magento_scd_languages:
   - de_DE
   - en_US
+
+

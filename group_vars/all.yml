@@ -1031,7 +1031,7 @@ magento_core_config_settings_default:
 
 
 # Extra core config settings to be set at deploy,
-# see roles/cs.magento-configure/tasks/080-configure-integrations.yml
+# see roles/cs.magento-configure/tasks/080-core-config.yml
 magento_core_config_settings_extra: []
 
 # Settings to remove by default

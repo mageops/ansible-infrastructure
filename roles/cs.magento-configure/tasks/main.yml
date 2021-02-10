@@ -3,26 +3,27 @@
 - import_tasks: 010-set-permissions.yml
 - name: Execute Magento setup
   block:
-    
-    - include_tasks: 020-check-database.yml
+    - include_tasks: 010-set-permissions.yml
     - include_tasks: 030-setup-elasticsuite.yml
-      when: mageops_elasticsearch_host is defined and mageops_elasticsearch_host != ""
+      
     - include_tasks: 035-clean-old-static-content.yml
     - include_tasks: 037-wait-for-services.yml
-    - include_tasks: 040-install-m2.yml
+    - include_tasks: 040-install-magento.yml
     - name: Set up new code
       block:
         # - include_tasks: 050-install-sample-data.yml
         #   when: magento_install_sample_data
-        - include_tasks: 060-flush-cache.yml
+        # Checking if it works without
+        # - include_tasks: action/flush-cache.yml
         - include_tasks: 070-setup-modules.yml
-        - include_tasks: 080-configure-integrations.yml
-        - include_tasks: 090-setup-upgrade.yml
-        - include_tasks: 095-enable-all-caches.yml
-        - include_tasks: 100-set-production-mode.yml
+        - include_tasks: 075-compile-di.yml
+        - include_tasks: 075-optimize-autoload.yml
+        - include_tasks: 080-core-config.yml
+        # - include_tasks: 090-setup-upgrade.yml
+        #   when: not magento_build_mode
         - include_tasks: 110-deploy-static-content.yml
           when: not magento_scd_skip
-        - include_tasks: 060-flush-cache.yml
+        - include_tasks: action/flush-cache.yml
         - include_tasks: 120-optimize-autoload.yml
         - include_tasks: 140-install-extra-scripts.yml
       when: deploy_install_new_release
@@ -32,11 +33,12 @@
 - name: Post setup tasks (that need root)
   block:
     - include_tasks: 150-configure-logrotate.yml
-    - include_tasks: 160-limit-cache-size.yml
   when: deploy_install_new_release
+
+- name: Install final Magento configuration
+  include_tasks: 205-config-finalize.yml
 
 - include_tasks: 210-setup-workers.yml
   when: magento_consumer_workers_enable and magento_version is version('2.3', '>=')
 
-- include_tasks: 300-reindex.yml
-  when: magento_deploy_auto_reindex
+
