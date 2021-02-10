@@ -87,21 +87,15 @@
       deploy_install_actions:
         - name: Configure Magento
           role: cs.magento-configure
-      deploy_install_abort:
-        - name: Failed deploy install stage - get rid of possible corrupted cache
-          role: cs.magento-configure
-          tasks_from: 060-flush-cache.yml
+      deploy_install_abort: []
       deploy_release_actions:
         - name: Setup shared storage mounts
           role: cs.magento-shared-storage
-      deploy_release_abort:
-        - name: Failed deploy release stage - get rid of possible corrupted cache
-          role: cs.magento-configure
-          tasks_from: 060-flush-cache.yml
+      deploy_release_abort: []
       deploy_post_actions:
         - name: Link static files version dir
           role: cs.magento-configure
-          tasks_from: 200-static-symlink.yml
+          tasks_from: 205-static-symlink.yml
 
     - role: cs.aws-magento-cron
 

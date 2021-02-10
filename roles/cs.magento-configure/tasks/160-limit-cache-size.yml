@@ -1,6 +1,0 @@
-- name: Run Directory Size Protector every hour
-  cron:
-    name: "Remove files when cache is over 2 GB"
-    minute: 0
-    hour: 2
-    job: "if [ `du -s {{ magento_live_release_dir }}/var/cache/ | cut -f1` -ge 2000000 ]; then rm -Rf {{ magento_live_release_dir }}/var/cache/* ; fi"

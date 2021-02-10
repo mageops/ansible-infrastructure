@@ -1,4 +1,4 @@
-- name: Run composer du
+- name: Dump *non-optimized* composer autoload
   become: yes
   become_user: "{{ magento_user }}"
   command: "php {{ magento_release_dir }}/vendor/bin/composer du -d {{ magento_release_dir }}"
@@ -13,3 +13,4 @@
   become_user: "{{ magento_user }}"
   command: "php {{ magento_release_dir }}/bin/magento module:disable -f {{ item }}"
   with_items: "{{ magento_disabled_modules | default([]) }}"
+
