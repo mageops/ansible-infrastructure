@@ -6,6 +6,29 @@
 # repo so AWS CLI is used for everything. / FS
 ###
 
+- name: Set params
+  set_fact:
+    # Common AWS CLI arguemnts
+    aws_ebs_volume_cli_args_base: [
+      --region,       "{{ aws_region }}",
+      --output,       "json",
+      --color,        "off",
+      --no-paginate,
+    ]
+
+    # Parameters for `aws ec2 describe-volumes` call
+    aws_ebs_volume_describe_params:
+      VolumeIds: "{{ aws_ebs_volume_modify_ids | default([], true) }}"
+      Filters: "{{ aws_ebs_volume_modify_filters | default({}, true) | dict2items(key_name='Name', value_name='Values') }}"
+
+    # Parameters for `aws ec2 modify volume` call
+    aws_ebs_volume_modify_params:
+
+      VolumeType: "{{ aws_ebs_volume_modify_type }}"
+      Size:       "{{ aws_ebs_volume_modify_size }}"
+      Iops:       "{{ aws_ebs_volume_modify_iops }}"
+      Throughput: "{{ aws_ebs_volume_modify_throughput }}"
+
 # Note: We need to normalize dict values which are ints because ansible (jinja)
 # always converts them to strings and this will produce a false diff.
 - name: Normalize parameters
