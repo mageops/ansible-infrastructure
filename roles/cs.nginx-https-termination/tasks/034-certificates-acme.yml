@@ -31,6 +31,11 @@
       --email, "{{ https_termination_crt_acme_email }}"
     ]
 
+- name: Ensure nginx is running so it can serve the ACME challenges
+  service:
+    name: nginx
+    state: started
+
 - name: Run certbot for vhost
   command:
     argv: "{{ certbot_args_default + certbot_args_vhost }}"
