@@ -29,7 +29,7 @@ magento_lock_files_enabled: no
 magento_lock_files_dir: var/lock
 
 # Whether to enable http cache config in app/etc/env.php
-magento_http_cache_enable: "{{ magento_varnish_host | default(false, true) }}"
+magento_http_cache_enable: yes #TODO: "{{ magento_varnish_host | default(false, true) }}"
 
 # ----------------------------------------
 # --------  Magento Redis Caching --------
