@@ -5,10 +5,6 @@ magento_app_etc_config:
   backend:
     frontName: "{{ magento_admin_path }}"
 
-  system: {}
-  cache: {}
-  queue: {}
-
   crypt:
     key: "{{ magento_crypt_key }}"
 

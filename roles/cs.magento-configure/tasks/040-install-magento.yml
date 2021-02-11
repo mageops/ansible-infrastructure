@@ -31,16 +31,15 @@
 
 - name: Configure *TEMPORARY* env.php for build
   include_tasks: action/configure-env.yml
-  args:
-    vars:
-      magento_redis_cache: no
-      magento_http_cache_enable: no
+  vars:
+    magento_redis_cache: no
+    magento_http_cache_enable: no
 
 # TODO [deploy-next] These needs to be done on app node ideally, not on builder
-- name: Import new configuration
-  become: true
-  become_user: "{{ magento_user }}"
-  shell: php {{ magento_release_dir }}/bin/magento app:config:import
-  args:
-    chdir: "{{ magento_deployment_dir }}"
-  when: not deploy_install_new_release
+# - name: Import new configuration
+#   become: true
+#   become_user: "{{ magento_user }}"
+#   shell: php {{ magento_release_dir }}/bin/magento app:config:import
+#   args:
+#     chdir: "{{ magento_deployment_dir }}"
+#   when: not deploy_install_new_release
