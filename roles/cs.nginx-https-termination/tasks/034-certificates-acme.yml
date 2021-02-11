@@ -3,9 +3,6 @@
     state: present
     name: certbot
 
-- name: Ensure nginx is up and running with the latest configuration
-  meta: flush_handlers
-
 - name: Compute certbot runtime facts
   set_fact:
     certbot_args_default: >-

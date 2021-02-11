@@ -43,11 +43,11 @@
     - role: cs.nginx-url-blacklist
       nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
     - role: cs.nginx
+    - role: cs.nginx-language-redirect
+      when: mageops_language_redirect_enable
     - role: cs.nginx-https-termination
       https_termination_upstream_port: "{{ mageops_varnish_port }}"
       when: mageops_https_termination_enable
-    - role: cs.nginx-language-redirect
-      when: mageops_language_redirect_enable
     - role: cs.varnish
       varnish_port: "{{ mageops_varnish_port }}"
       varnish_backend_port: "{{ mageops_varnish_backend_port }}"

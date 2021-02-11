@@ -7,8 +7,17 @@
 - name: Create filesystem structure
   import_tasks: 020-nginx.yml
 
-- name: Create filesystem structure
-  import_tasks: 030-certificates.yml
+- name: Install user-provided certificates
+  import_tasks: 030-certificates-install.yml
+
+- name: Bootstrap self-signed certificates if not provided
+  import_tasks: 032-certificates-bootstrap.yml
+
+- name: Ensure nginx is up and running with the latest configuration
+  meta: flush_handlers
+
+- name: Setup automatically renewed ACME certificates
+  import_tasks: 034-certificates-acme.yml
 
 - name: Ensure changes take effect
   meta: flush_handlers
