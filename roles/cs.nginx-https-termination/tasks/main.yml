@@ -1,3 +1,12 @@
+# TODO: Remove once all hosts were migrated
+- name: Remove leftover config fragments
+  file:
+    path: "{{ nginx_confd_dir }}/{{ item }}"
+    state: absent
+  loop:
+    # Renamed to '000-global-cache-miss-log.conf' in 259201d732db79a43acd3
+    - "000-logging-extra.conf"
+
 - name: Prepare effective configuration
   import_tasks: 000-facts.yml
 
@@ -12,9 +21,6 @@
 
 - name: Bootstrap self-signed certificates if not provided
   import_tasks: 032-certificates-bootstrap.yml
-
-- name: Ensure nginx configuration is up to date
-  meta: flush_handlers
 
 - name: Setup automatically renewed ACME certificates
   import_tasks: 034-certificates-acme.yml

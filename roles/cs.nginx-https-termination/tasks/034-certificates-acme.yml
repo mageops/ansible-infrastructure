@@ -31,10 +31,15 @@
       --email, "{{ https_termination_crt_acme_email }}"
     ]
 
+- name: Ensure up-to-date nginx config
+  include_role:
+    name: cs.nginx
+    tasks_from: 099-cleanup.yml
+
 - name: Ensure nginx is running so it can serve the ACME challenges
   service:
     name: nginx
-    state: started
+    state: reloaded
 
 - name: Run certbot for vhost
   command:
