@@ -20,7 +20,7 @@
   loop_control:
     loop_var: config
     label: "{{ config.template }} -> {{ config.filepath }}"
-  notify: Reload nginx configs
+  notify: Apply final nginx config
 
 - name: Register provisioned nginx config files
   set_fact:

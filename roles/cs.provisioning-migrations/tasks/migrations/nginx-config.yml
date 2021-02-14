@@ -8,7 +8,7 @@
     - "/etc/nginx/magento_server_body"
     - "/etc/nginx/magento_url_blacklist_check"
 
-    # This is not needed anymore due to cleanup in `roles/cs.nginx/tasks/099-cleanup.yml`
+    # This is not needed anymore due to cleanup in `roles/cs.nginx/tasks/099-config-cleanup.yml`
     # # Now all conf.d files must have a numeric prefix to guarantee order, new name is `090-magento.conf`
     # - "{{ nginx_confd_dir }}/magento.conf"
     # # Very old name, Magento is always 2.x now, so no version suffix

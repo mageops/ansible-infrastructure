@@ -31,10 +31,19 @@
       --email, "{{ https_termination_crt_acme_email }}"
     ]
 
-- name: Ensure nginx is running so it can serve the ACME challenges
-  service:
-    name: nginx
-    state: started
+- name: Ensure nginx is running with the latest config so it can serve the ACME challenges
+  block:
+    - name: Clean up nginx config structure
+      when: nginx_config_cleanup_pending | default(false, true)
+      include_role: 
+        name: cs.nginx
+        tasks_from: 099-config-cleanup.yml
+
+    # - name: Reload nginx immediately if config has changed on disk
+    #   include_role: 
+    #     name: cs.nginx
+    #     tasks_from: 100-config-conditional-reload.yml
+  
 
 - name: Run certbot for vhost
   command:

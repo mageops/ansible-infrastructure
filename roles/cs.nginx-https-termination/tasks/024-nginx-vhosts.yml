@@ -6,7 +6,8 @@
   loop_control:
     label: "{{ vhost.name }} -> {{ vhost.conf_path }}"
     loop_var: vhost
-  notify: Reload nginx configs
+  notify: Apply final nginx config
+  register: https_termination_vhost_config_install
 
 - name: Register provisioned nginx config files
   set_fact:

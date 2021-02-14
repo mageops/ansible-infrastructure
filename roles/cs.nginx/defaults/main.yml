@@ -21,7 +21,7 @@ nginx_serverd_defaults_dir: "{{ nginx_etc_dir }}/server.d/defaults"
 nginx_modules_conf_dir: "{{ nginx_etc_dir }}/modules"
 
 # --- Automatic auto-loaded config file cleanup ---
-# See comment in `tasks/099-cleanup.yml` for details.
+# See comment in `tasks/099-config-cleanup.yml` for details.
 
 # Directories to look for config files to be cleaned up if
 # they were not provisioned with this run. These should be
@@ -35,3 +35,4 @@ nginx_config_cleanup_dirs:
   - "{{ nginx_modules_conf_dir }}"
 
 nginx_config_cleanup: yes
+nginx_config_cleanup_pending: no

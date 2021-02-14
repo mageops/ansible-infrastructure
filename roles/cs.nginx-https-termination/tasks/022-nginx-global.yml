@@ -5,7 +5,8 @@
   loop: "{{ https_termination_nginx_install_global_configs }}"
   loop_control:
     label: "{{ item.label | default(item.src, true) }} -> {{ item.dst }}"
-  notify: Reload nginx configs
+  notify: Apply final nginx config
+  register: https_termination_global_config_install
 
 - name: Register provisioned nginx global config files
   set_fact:

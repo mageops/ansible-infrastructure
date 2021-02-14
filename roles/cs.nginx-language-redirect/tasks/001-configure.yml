@@ -2,7 +2,7 @@
   template:
     src: language-redirect.conf.j2
     dest: "{{ nginx_language_redirect_global_conf_path }}"
-  notify: Reload nginx configs
+  notify: Apply final nginx config
 
 - name: Register provisioned nginx config files
   set_fact:

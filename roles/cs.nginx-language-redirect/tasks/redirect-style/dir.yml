@@ -3,7 +3,7 @@
     src: language-redirect-path.conf.j2
     dest: "{{ nginx_language_redirect_server_default_conf_path }}"
   notify:
-    - Reload nginx configs
+    - Apply final nginx config
 
 - name: Register provisioned nginx config files
   set_fact:

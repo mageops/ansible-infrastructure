@@ -22,7 +22,7 @@
   template:
     src: magento_url_blacklist_map.j2
     dest: "{{ nginx_blacklist_map_config_file }}"
-  notify: Reload nginx configs
+  notify: Apply final nginx config
 
 - name: Create URL blacklist vhost nginx config include
   template:

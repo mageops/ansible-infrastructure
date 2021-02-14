@@ -30,7 +30,7 @@ nginx_magento_server_body_include_path: "{{ nginx_included_dir }}/magento_server
 nginx_magento_fastcgi_params_conf_path: "{{ nginx_magento_fastcgi_params_include_path }}"
 nginx_magento_server_body_conf_path: "{{ nginx_magento_server_body_include_path }}"
 
-# These are nginx configs that are *automatically* included.
+# These are nginx config that are *automatically* included.
 # NOTE: Order is often important thus numeric file name prefixes
 # are used to ensure it as nginx loads includes in alphabetical order.
 nginx_magento_vhost_conf_path: "{{ nginx_confd_dir }}/050-vhost-magento.conf"

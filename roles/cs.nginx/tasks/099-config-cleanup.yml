@@ -1,6 +1,6 @@
 # IMPORTANT! Read on how to use this process!
 #
-# This task list removes any nginx configs which were not
+# This task list removes any nginx config which were not
 # provisioned during this run - which are not listed in the
 # fact `nginx_config_cleanup_provisioned_files`.
 #
@@ -12,7 +12,7 @@
 #
 # EXAMPLE usage:
 #
-#    - name: Register provisioned nginx configs
+#    - name: Register provisioned nginx config
 #      set_fact:
 #        nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + nginx_role_provisioned_nginx_confd_files }}"
 #      vars:
@@ -20,10 +20,10 @@
 #          - /etc/nginx/conf.d/005-map-something.conf
 #          - /etc/nginx/conf.d/094-some-vhost.conf
 #
-#    - name: Remove deprecated nginx configs not added in this run
+#    - name: Remove deprecated nginx config not added in this run
 #      include_role:
 #        name: cs.nginx
-#        tasks_from: 099-cleanup.yml
+#        tasks_from: 099-config-cleanup.yml
 #
 # ALTERNATIVELY you may notify the cleanup handler after your file updates:
 #
@@ -31,15 +31,22 @@
 #      template:
 #         src: vhost.conf.j2
 #         dest: /etc/nginx/conf.d/090-main-vhost.conf
-#      notify: Reload nginx configs
+#      notify: Apply final nginx config
 #
-#    - name: Register provisioned nginx configs
+#    - name: Register provisioned nginx config
 #      set_fact:
 #        nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + ['/etc/nginx/conf.d/090-main-vhost.conf'] }}"
 #
 #    - name: Perform nginx config cleanup and reload at once
 #      meta: flush_handlers
-
+#
+#
+# *** Opptionally force immediate reload if any part of the config has changed ***
+#
+# Setting `nginx_config_apply_immediately: yes forces the current fs config to 
+# be applied if it's different than the one that was applied last time the service 
+# was started / reloaded.
+###
 
 - name: Find existing nginx conf.d files
   find:
@@ -76,7 +83,7 @@
   debug:
     msg: |
       =============================================
-      ==     Deprecated nginx configs cleanup    ==
+      ==     Deprecated nginx config cleanup    ==
       =============================================
 
       --- Config dirs SCANNED for files ---
@@ -100,3 +107,7 @@
     label: "{{ confpath | regex_replace('^' ~ nginx_etc_dir | regex_escape ~ '/', '') }}"
     loop_var: confpath
   notify: Reload nginx
+
+- name: Get 
+  set_fact:
+    mf1sha1: "{{ myfirstfile.stat.checksum }}"

@@ -13,11 +13,10 @@
 - name: Bootstrap self-signed certificates if not provided
   import_tasks: 032-certificates-bootstrap.yml
 
-- name: Ensure nginx configuration is up to date
-  meta: flush_handlers
-
 - name: Setup automatically renewed ACME certificates
   import_tasks: 034-certificates-acme.yml
 
-- name: Ensure changes take effect
-  meta: flush_handlers
+- name: Reload nginx immediately if config has changed on disk
+  include_role: 
+    name: cs.nginx
+    tasks_from: 100-config-conditional-reload.yml

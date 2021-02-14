@@ -1,0 +1,33 @@
+
+
+- name: Assemble new config dump
+  shell: 
+    cmd: >-
+      /usr/sbin/nginx 
+        -c {{ nginx_etc_dir }}/nginx.conf 
+        -Tq 
+          > {{ nginx_etc_dir }}/nginx.conf.dump.next
+
+- name: Compute hash of loaded and new config
+  stat:
+    checksum_algorithm: sha1
+    get_checksum: yes
+    path: "{{ nginx_etc_dir }}/nginx.conf.dump.{{ item }}"
+  register: nginx_config_dump_stat
+  loop:
+    - loaded
+    - next
+    
+- debug: var=nginx_config_dump_stat
+
+- name: Reload nginx immediately if config has changed
+  when: >-
+    nginx_config_dump_stat.results.0.stat.checksum | default('missing', true) 
+      != nginx_config_dump_stat.results.1.stat.checksum | default('missing', true)
+  service:
+    name: nginx
+    state: reloaded
+
+
+
+

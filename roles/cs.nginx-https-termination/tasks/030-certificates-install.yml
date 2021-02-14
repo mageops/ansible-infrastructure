@@ -72,3 +72,4 @@
   loop_control:
     label: "{{ vhost.name }} -> {{ vhost[key.dst] }}"
     loop_var: entry
+  register: https_termination_cert_install_symlink

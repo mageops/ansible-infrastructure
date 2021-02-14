@@ -12,7 +12,7 @@
     dest: "{{ nginx_serverd_dir }}/{{ item.value }}/{{ nginx_language_redirect_conf_filename }}"
   with_dict: "{{ nginx_language_redirect_domain_mapping }}"
   notify:
-    - Reload nginx configs
+    - Apply final nginx config
 
 - name: Register provisioned nginx config files
   set_fact:

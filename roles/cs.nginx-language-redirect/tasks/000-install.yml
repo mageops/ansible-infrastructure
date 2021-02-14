@@ -24,14 +24,14 @@
     src: geoip_module.conf.j2
     dest: "{{ nginx_language_redirect_geoip_module_conf_path }}"
   when: nginx_language_redirect_detection_method == 'geoip'
-  notify: Reload nginx configs
+  notify: Apply final nginx config
 
 - name: Configure geolite2 nginx module
   template:
     src: geolite2_module.conf.j2
     dest: "{{ nginx_language_redirect_geoip_module_conf_path }}"
   when: nginx_language_redirect_detection_method == 'geolite2'
-  notify: Reload nginx configs
+  notify: Apply final nginx config
 
 - name: Register provisioned nginx config files
   set_fact:

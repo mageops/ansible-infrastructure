@@ -10,6 +10,7 @@
     - "{{ nginx_serverd_dir }}"
     - "{{ nginx_serverd_defaults_dir }}"
     - "{{ nginx_modules_conf_dir }}"
+    - /etc/systemd/system/nginx.service.d
 
 - name: Ensure var directories always exist
   lineinfile:
@@ -43,7 +44,21 @@
   template:
     src: nginx.conf
     dest: "{{ nginx_etc_dir }}/nginx.conf"
-  notify: Reload nginx configs
+  notify: Apply final nginx config
+
+- name: Configure nginx systemd service overrides
+  template:
+    src: nginx.service.overrides.conf
+    dest: /etc/systemd/system/nginx.service.d/mageops.conf
+    trim_blocks: no
+  register: nginx_systemd_service_unit
+  notify:
+    - Reload nginx
+
+- name: Reload systemctl daemon immediately
+  systemd:
+    daemon_reload: yes
+  when: nginx_systemd_service_unit is changed
 
 - name: Enable nginx service
   service:

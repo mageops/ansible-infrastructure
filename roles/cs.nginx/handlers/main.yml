@@ -1,9 +1,32 @@
-- name: Reload nginx configs
-  include_tasks: 099-cleanup.yml
-  when: nginx_config_cleanup
+- name: Reload systemctl daemon
+  systemd:
+    daemon_reload: yes
 
-- name: Restart nginx
-  service: name=nginx state=restarted
+- name: Apply final nginx config
+  set_fact: 
+    nginx_config_cleanup_pending: >-
+      {{ nginx_config_cleanup_pending == 'done' | ternary('pending-duplicate', 'pending') }}
+  changed_when: true
+  notify: 
+    - Cleanup nginx config
+
+- name: Cleanup nginx config
+  when: nginx_config_cleanup and nginx_config_cleanup_pending | default(false, true)
+  block:
+    - debug:
+        when: nginx_config_cleanup_pending == 'pending-duplicate'
+        msg: |
+          WARNING! Nginx config cleanup is being triggered
+          more than once. 
+          
+          Ensure this handler is executed only once during the 
+          whole playbook run.
+    - include_tasks: 099-config-cleanup.yml
+    - set_fact: 
+        nginx_config_cleanup_pending: done
 
 - name: Reload nginx
   service: name=nginx state=reloaded
+
+- name: Restart nginx
+  service: name=nginx state=restarted
