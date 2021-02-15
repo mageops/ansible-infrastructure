@@ -166,3 +166,5 @@ magento_app_etc_config_file_locking:
     provider: file
     config:
       path: "{{ magento_lock_files_dir }}"
+
+magento_app_etc_config_extra: {}
