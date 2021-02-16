@@ -8,6 +8,41 @@
         delay: 10
         timeout: 300
 
+# Non-zero status means setup:upgrade is required
+# bin/magento setup:db:status 
+# systemctl stop supervisord 
+
+# su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento maintenance:enable'
+# su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento setup:upgrade --keep-generated'
+# su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento maintenance:disable'
+
+# systemctl start supervisord
+- hosts: app:&current
+  tasks:
+    - name: Run Magento setup upgrade
+      command: "{{ item.cmd | default(item) }}"
+      args:
+        chdir: "{{ item.dir | default(magento_live_release_dir) }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+      loop: 
+        - "bin/magento setup:upgrade --keep-generated"
+        - "bin/magento maintenance:disable"
+        # - "bin/magento cache:flush full_page"
+        - "{{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}"
+      loop_control:
+        label: "{{ item.cmd | default(item) }}"
+      register: out
+
+    - name: Show Magento post-deploy command output
+      debug:
+        msg: "{{ result.stdout | default('--- N/A ---') }}"
+      loop: "{{ out.results }}"
+      loop_control:
+        loop_var: result
+        label: "{{ result.cmd | default([]) | join(' ') }}"
+
 - hosts: app:&current
   tasks:
     - name: Run Magento post-deploy commands
@@ -29,3 +64,5 @@
       loop_control:
         loop_var: result
         label: "{{ result.cmd | default([]) | join(' ') }}"
+
+
