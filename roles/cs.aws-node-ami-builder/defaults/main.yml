@@ -1,1 +1,7 @@
 builder_create_instance_timeout: 400
+
+aws_builder_node_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', true) }}"
+aws_builder_node_ebs_gp3_convert: "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
+aws_builder_node_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
+aws_builder_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"
+

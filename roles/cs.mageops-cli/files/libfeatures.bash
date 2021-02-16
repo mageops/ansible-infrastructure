@@ -24,7 +24,7 @@ features::read_feature_flag() {
     value="$(echo "${features__config}" | jq -r ".${name}")"
 
     if [ "$value" = "null" ];then
-        $value="$default_value"
+        value="$default_value"
     fi
 
     echo "${value}"

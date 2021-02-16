@@ -39,7 +39,7 @@ feature::current_value() {
 
     current="$(grep blackfire.apm_enabled /etc/php.d/zz-blackfire.ini | sed 's/.*=\s*\(.*\)\s*$/\1/')"
 
-    if [ -n "$current" ];then
+    if [ -z "$current" ];then
         current="0"
     fi
 

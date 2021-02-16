@@ -2,15 +2,15 @@
   systemd:
     daemon_reload: yes
 
-- name: Reload varnish
-  service: 
-    name: varnish
-    state: reloaded
-
 - name: Restart varnish
   service:
     name: varnish
     state: restarted
+
+- name: Reload varnish
+  service: 
+    name: varnish
+    state: reloaded
 
 - name: Restart varnish purge logger
   service: 

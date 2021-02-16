@@ -81,6 +81,12 @@
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_file_locking, recursive=true) }}
 
+    - name: Set extra options
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_extra, recursive=true) }}
+
     - name: Export configuration as PHP code
       command:
         stdin: "{{ magento_app_etc_config | to_json }}"

@@ -2,7 +2,9 @@
 
 {% block content %}
     <script>
-        window.cs_translations = {
+        window.MGS = window.MGS || {};
+
+        window.MGS.translations = {
             en: {
                 headline: 'Sorry, there has been a problem with our server and <strong>it\'s not your fault</strong>',
                 description: 'We have been informed and are already working on a solution.'
@@ -25,41 +27,31 @@
     <p class="error-page__text" id="error-description">We have been informed and are already working on a solution.</p>
 
     <script>
-        (function cs_trans() {
-            var cs_translations = window.cs_translations || {},
-                cs_lang = 'en',
-                cs_nav_lang = typeof window.navigator.language !== 'undefined' ? window.navigator.language.substring(0, 2) : null;
+        (function translate() {
+            var translations = window.MGS.translations || {},
+                lang = 'en',
+                nav_lang = typeof window.navigator.language !== 'undefined' ? window.navigator.language.substring(0, 2) : null;
 
-            if (cs_nav_lang && typeof cs_translations[cs_nav_lang] !== 'undefined') {
-                cs_lang = cs_nav_lang;
+            if (nav_lang && typeof translations[nav_lang] !== 'undefined') {
+                lang = nav_lang;
             }
 
-            var cs_translated = cs_translations[cs_lang];
+            var translated = translations[lang];
 
-            document.getElementById('error-headline').innerHTML = cs_translated.headline;
-            document.getElementById('error-description').innerHTML = cs_translated.description;
+            document.getElementById('error-headline').innerHTML = translated.headline;
+            document.getElementById('error-description').innerHTML = translated.description;
         })();
 
         (function auto_reload() {
-            var phase = parseInt(sessionStorage.getItem('cs_backoff_reload_phase')) || 0,
+            var phase = parseInt(sessionStorage.getItem('mgs_backoff_reload_phase')) || 0,
                 wait = Math.pow(2, phase) * 5;
 
             setTimeout(function() {
                 console.log('Reloading page, backoff phase ' + phase + ', wait ' + wait + 's');
                 if (phase > 6) { phase = 0; }
-                sessionStorage.setItem('cs_backoff_reload_phase', ++phase);
+                sessionStorage.setItem('mgs_backoff_reload_phase', ++phase);
                 location.reload();
             }, wait * 1000);
-        })();
-
-        (function show_error() {
-            document.onkeydown = function(evt) {
-                evt = evt || window.event;
-
-                if (evt.keyCode == 69) {
-                    alert('This error is generated or intercepted by varnish');
-                }
-            }
         })();
     </script>
 {% endblock %}

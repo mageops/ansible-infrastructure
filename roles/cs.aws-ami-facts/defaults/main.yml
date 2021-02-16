@@ -1,7 +1,6 @@
 ami_facts_common_filters:
   state: "available"
   architecture: "x86_64"
-  block-device-mapping.volume-type: "gp2"
 
 # Deprecated - CentOS no longer updates the Marketplace AMIs
 # ami_facts_clean_base_filters:

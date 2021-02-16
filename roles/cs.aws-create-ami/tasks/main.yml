@@ -5,6 +5,8 @@
     state: stopped
     instance_ids: "{{ [ ami_instance_id ] }}"
     wait: yes
+  register: ami_builder_instance
+
 
 - name: Create AMI
   ec2_ami:
@@ -17,9 +19,21 @@
     wait_timeout: 1800
     tags: "{{ aws_tags_default | combine(ami_tags, ami_name_tags) }}"
     delete_snapshot: "{{ ami_delete_snapshot | default('yes') }}"
+    device_mapping: >-
+      {{ ( aws_ami_build_ebs_volume_type == 'gp3' ) 
+          | ternary(
+              [aws_ami_build_root_volume_mapping_gp3 ], 
+              omit) }}
   vars:
     ami_name_tags:
       Name: "{{ ami_description }}"
+    aws_ami_build_root_volume_mapping_gp3: 
+      device_name: "{{ (ami_builder_instance.instances | first).root_device_name }}"
+      volume_type: "{{ aws_ami_build_ebs_volume_type }}"
+      # Warning: We use AWS defaults since the ansible module does not support gp3
+      # parameters yet and even fails for `iops` because it sends it as string...
+      # throughput: "{{ aws_ami_build_ebs_gp3_throughput | int }}"
+      # iops: "{{ aws_ami_build_ebs_gp3_iops | int }}"
   register: ami_output
 
 - name: Wait until AMI is accessible

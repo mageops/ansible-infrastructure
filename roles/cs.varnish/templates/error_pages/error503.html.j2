@@ -1,2 +1,12 @@
 {# This is the varnish's guru mediation error when backend is not available #}
 {% extends "layout50x.html.j2" %}
+{% set status_message = 'Service Unavailable' %}
+{% block error_details_message %}
+    Cannot connect to backend - possible causes:
+    <ul>
+        <li>Invalid varnish backend address</li>
+        <li>App node is down or its network address is not accessible from varnish</li>
+        <li>App node is rejecting connections on http port (firewall?)</li>
+        <li>The nginx webserver on app node is down</li>
+    </ul>
+{% endblock %}

@@ -242,10 +242,43 @@ aws_vpc_routes_extra: []
 # --------  AWS EC2  --------
 # ---------------------------
 
+
+# The (global) default volume type to use
+aws_ec2_ebs_volume_type: gp3
+
+# Whether to convert existing volumes of non-autoscaled instances
+aws_ec2_ebs_gp3_convert: yes
+
+# Provision 3k IOPS for gp3 volumes - (baseline - no extra fees)
+aws_ec2_ebs_gp3_iops: 3000
+
+# Provision 125MB/s throughput for gp3 volumes (baseline - no extra fees)
+aws_ec2_ebs_gp3_throughput: 125
+
+# You may also override the above defaults for specific node types
+
+#   aws_varnish_node_ebs_volume_type: ~
+#   aws_varnish_node_ebs_gp3_convert: ~
+#   aws_varnish_node_ebs_gp3_iops: ~
+#   aws_varnish_node_ebs_gp3_throughput: ~
+
+#   aws_persistent_node_ebs_volume_type: ~
+#   aws_persistent_node_ebs_gp3_convert: ~
+#   aws_persistent_node_ebs_gp3_iops: ~
+#   aws_persistent_node_ebs_gp3_throughput: ~
+
+#   aws_builder_node_ebs_volume_type: ~
+#   aws_builder_node_ebs_gp3_convert: ~
+#   aws_builder_node_ebs_gp3_iops: ~
+#   aws_builder_node_ebs_gp3_throughput: ~
+
+#   aws_ami_build_ebs_volume_type: ~
+#   aws_ami_build_ebs_gp3_iops: ~
+#   aws_ami_build_ebs_gp3_throughput: ~
+
 # The key has to be manually generated in the console and the name
 # has to agree with this setting.
 aws_ec2_ssh_key_name: "{{ mageops_app_name }}"
-
 
 # User data to add to every EC2 instance / Launch configuration
 # As a default configuration for compatibility reasons it changes
@@ -622,7 +655,7 @@ mageops_install_development_tools: yes
 # setup language redirect
 mageops_language_redirect_enable: no
 
-# Preload files into memory and tune sysctl to reduce iops
+# Tune sysctl to reduce iops
 mageops_reduce_iops: "{{ aws_use }}"
 
 # App node swap config
@@ -1371,6 +1404,8 @@ redis_aws_elasticache_instance_type: t3a.micro
 
 mageops_https_termination_enable: "{{ mageops_https_enable }}"
 
+# Backwards compat fallback
+https_termination_proxy_http_port: "{{ https_termination_hide_varnish | default(true) }}"
 https_termination_proxy_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
 
 # Special logging setup for requests for cacheable HTML pages which were a cache MISS
@@ -1632,6 +1667,7 @@ mageops_packages_ops:
   - bind-utils
   - goaccess
   - atop
+  - lsof
 
 # Handy packages installed on all nodes by default
 mageops_packages_common: "{{ mageops_packages_base + mageops_packages_tools + mageops_packages_ops }}"

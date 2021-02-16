@@ -4,10 +4,15 @@
     - role: cs.aws-node-facts
 
     - role: cs.aws-create-ami
+
       ami_description: "{{ mageops_project | capitalize }} {{ mageops_environment | capitalize }} App Node ({{ ansible_date_time.iso8601 }})"
       ami_instance_id: "{{ aws_app_builder_node_instance.instance_id }}"
       ami_name: "{{ mageops_app_name }}-app-{{ ansible_date_time.epoch }}"
       ami_tags: "{{ aws_tags_role_app }}"
+
+      aws_ami_build_ebs_volume_type: "{{ aws_app_node_ebs_volume_type | default(aws_ec2_ebs_volume_type, true) }}"
+      aws_ami_build_ebs_gp3_iops: "{{ aws_app_node_ebs_gp3_iops | default(aws_ec2_ebs_gp3_iops, true) }}"
+      aws_ami_build_ebs_gp3_throughput: "{{ aws_app_node_ebs_gp3_throughput | default(aws_ec2_ebs_gp3_throughput, true) }}"
 
     - role: cs.aws-node-state
       node_state_target: absent

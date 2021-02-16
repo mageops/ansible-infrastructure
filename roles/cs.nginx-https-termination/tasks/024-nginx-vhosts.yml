@@ -1,0 +1,26 @@
+- name: Install vhost config
+  template:
+    src: nginx.vhost.conf
+    dest: "{{ vhost.conf_path }}"
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }} -> {{ vhost.conf_path }}"
+    loop_var: vhost
+  notify: Reload nginx configs
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: >-
+      {{
+        nginx_config_cleanup_provisioned_files
+          + https_termination_vhosts.values() | map(attribute='conf_path') | list
+      }}
+
+
+
+
+
+
+
+
+

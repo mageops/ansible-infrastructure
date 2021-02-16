@@ -1,4 +1,29 @@
-- import_tasks: 001-filesystem.yml
-- import_tasks: 002-vhosts.yml
-- import_tasks: 003-letsencrypt.yml
-- import_tasks: 004-logging.yml
+# TODO: Remove once all hosts were migrated
+- name: Remove leftover config fragments
+  file:
+    path: "{{ nginx_confd_dir }}/{{ item }}"
+    state: absent
+  loop:
+    # Renamed to '000-global-cache-miss-log.conf' in 259201d732db79a43acd3
+    - "000-logging-extra.conf"
+
+- name: Prepare effective configuration
+  import_tasks: 000-facts.yml
+
+- name: Setup filesystem structure
+  import_tasks: 010-filesystem.yml
+
+- name: Create filesystem structure
+  import_tasks: 020-nginx.yml
+
+- name: Install user-provided certificates
+  import_tasks: 030-certificates-install.yml
+
+- name: Bootstrap self-signed certificates if not provided
+  import_tasks: 032-certificates-bootstrap.yml
+
+- name: Setup automatically renewed ACME certificates
+  import_tasks: 034-certificates-acme.yml
+
+- name: Ensure changes take effect
+  meta: flush_handlers

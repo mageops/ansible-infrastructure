@@ -1,3 +1,15 @@
+# Prevents unneeded shmlog disk I/O
+- name: Mount VSL under tmpfs
+  mount:
+    path: /var/lib/varnish
+    src: none
+    fstype: tmpfs
+    opts: rw,auto,noatime
+    state: mounted
+  notify:
+    - Restart varnish
+    - Restart varnish-exporter
+
 - name: Ensure varnish var directories always exist
   lineinfile:
     path: /etc/tmpfiles.d/varnish.conf
@@ -9,7 +21,7 @@
 - name: Ensure var directory changes are applied at once
   command: systemd-tmpfiles --create
   when: tmpfiles_config is changed
-  
+
 - name: Generate Varnish error page HTML files
   template:
     src: "error_pages/error{{ item }}.html.j2"
@@ -19,6 +31,7 @@
   with_items:
     - 401
     - 429
+    - 500
     - 502
     - 503
     - 504

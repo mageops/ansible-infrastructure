@@ -1,0 +1,12 @@
+
+# Select volumes for operation by id
+aws_ebs_volume_modify_ids: []
+
+# Define filters as dict mapping parameter name to a list of possible values
+aws_ebs_volume_modify_filters: {}
+
+# Modify selected volumes to have this parameters
+aws_ebs_volume_modify_type: ~
+aws_ebs_volume_modify_size: ~
+aws_ebs_volume_modify_iops: ~
+aws_ebs_volume_modify_throughput: ~

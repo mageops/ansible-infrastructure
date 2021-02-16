@@ -26,7 +26,7 @@
     volumes:
       - device_name: "{{ builder_instance_root_device }}"
         volume_size: "{{ builder_instance_volume_size }}"
-        volume_type: gp2
+        volume_type: "{{ aws_builder_node_ebs_volume_type }}"
         delete_on_termination: yes
         encrypted: "{{ mageops_ebs_encrypt }}"
     exact_count: 1
@@ -39,6 +39,24 @@
     builder_instance_name_tags:
       Name: "{{ builder_instance_name }}"
   register: builder_ec2
+
+- name: Ensure builder disks are gp3 volumes
+  when: aws_builder_node_ebs_volume_type == 'gp3' and aws_builder_node_ebs_gp3_convert
+  include_role:
+    name: cs.aws-ebs-vol
+  vars:
+    aws_ebs_volume_modify_ids: >-
+      {{ ( builder_ec2.instances + builder_ec2.tagged_instances )
+          | map(attribute='block_device_mapping') 
+          | map('dict2items') 
+          | flatten 
+          | map(attribute='value')
+          | map(attribute='volume_id')
+          | list
+          | to_nice_json }}
+    aws_ebs_volume_modify_type: "{{ aws_builder_node_ebs_volume_type }}"
+    aws_ebs_volume_modify_iops: "{{ aws_builder_node_ebs_gp3_iops }}"
+    aws_ebs_volume_modify_throughput: "{{ aws_builder_node_ebs_gp3_throughput }}"
 
 - name: Add builder host to inventory
   add_host:
