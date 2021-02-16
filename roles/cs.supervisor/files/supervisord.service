@@ -1,7 +1,8 @@
 [Unit]
 Description=Supervisor process control system for UNIX
 Documentation=http://supervisord.org
-After=network.target
+After=network.target var-www-magento-shared-var-global.mount
+ConditionPathExists=!{{ magento_live_release_dir }}/var/global/.maintenance.flag
 
 [Service]
 ExecStart=/usr/bin/supervisord -n -c /etc/supervisord.conf

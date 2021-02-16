@@ -53,5 +53,5 @@
 - name: Enable and start supervisord
   service:
     name: supervisord
-    enabled: yes
-    state: started
+    enabled: "{{ supervisor_service_autostart }}"
+    state: "{{ supervisor_service_initial_state }}"
