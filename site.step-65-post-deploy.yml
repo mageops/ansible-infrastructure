@@ -27,6 +27,7 @@
       become: yes
       become_user: "{{ magento_user }}"
       loop: 
+        - "bin/magento app:config:import --no-interaction"
         - "bin/magento setup:upgrade --keep-generated"
         - "bin/magento maintenance:disable"
         # - "bin/magento cache:flush full_page"
@@ -66,3 +67,7 @@
         label: "{{ result.cmd | default([]) | join(' ') }}"
 
 
+- hosts: app:&current
+  tasks:
+    - name: Start supervisord Magento workers
+      command: /usr/bin/systemctl start supervisord

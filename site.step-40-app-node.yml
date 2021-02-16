@@ -75,6 +75,8 @@
 
     - role: cs.supervisor
       supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"
+      supervisor_service_autostart: no
+      supervisor_service_initial_state: stopped
 
     - role: cs.nginx-url-blacklist
 

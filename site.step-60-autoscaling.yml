@@ -70,12 +70,8 @@
         {{ aws_app_node_launch_script_extra }}
         {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
 
-        # TODO-DEPLOY-NEXT: Add this check to supervisord unit file - auto stop/start
-        # when this file is created / removed. Make sure the service starts after
-        # NFS mount is ready. Also add this to extra-instances.
-        if [ ! -f "{{ magento_live_release_dir }}/var/global/.maintenance.flag" ] ; then 
-          /usr/bin/systemctl start supervisord
-        fi
+        /usr/bin/systemctl enable supervisord
+        /usr/bin/systemctl start supervisord
 
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
@@ -120,3 +116,6 @@
       autoscaling_instance_start_script: |
         {{ aws_app_node_launch_script_extra }}
         {% if magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
+
+        /usr/bin/systemctl enable supervisord
+        /usr/bin/systemctl start supervisord
