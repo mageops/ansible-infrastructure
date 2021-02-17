@@ -1,6 +1,9 @@
 # swap size in MB
 swap_size: 1024
 
+# How likely system is to use this swap device over others (e.g. zram)
+swap_file_priority: -100
+
 # usually don't change unless you want to put it on different, faster drive
 swap_file_location: /swapfile
 

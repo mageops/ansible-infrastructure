@@ -1,0 +1,5 @@
+magento_preload_fscache_systemd_units:
+  - magento-preload-sources.service
+  - magento-preload-sources-watcher.service
+  - magento-preload-sources-watcher.timer
+  - magento-preload-sources-watcher.path
