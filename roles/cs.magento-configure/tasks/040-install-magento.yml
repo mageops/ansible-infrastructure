@@ -28,7 +28,6 @@
   become_user: "{{ magento_user }}"
   when: not database_exists
 
-
 - name: Configure *TEMPORARY* env.php for build
   include_tasks: action/configure-env.yml
   vars:
