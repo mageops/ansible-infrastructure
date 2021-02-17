@@ -30,8 +30,7 @@
 - name: Post setup tasks (that need root)
   block:
     - include_tasks: 150-configure-logrotate.yml
-  when: deploy_install_new_release
-
+    
 - name: Install final Magento configuration
   include_tasks: 200-config-finalize.yml
 

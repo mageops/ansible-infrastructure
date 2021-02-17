@@ -1,5 +1,10 @@
 # Base app/etc/env.php config
 
+###
+# Use local Read-Only Redis REPLICA (slave) as a L2 cache via unix socket.
+# This can be only achieved by splitting writes to master and reads locally.
+# See: https://github.com/colinmollenhour/Cm_Cache_Backend_Redis#load-balancer-or-service-discovery
+###
 
 magento_app_etc_config:
   backend:
