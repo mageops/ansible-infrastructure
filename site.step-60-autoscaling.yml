@@ -1,14 +1,16 @@
 - import_playbook: site.common.group-current-hosts.yml
 
-- hosts: app:&current
-  tasks:
-    - name: Enable Magento maintenance mode
-      command: "bin/magento maintenance:enable"
-      args:
-        chdir: "{{ item.dir | default(magento_live_release_dir) }}"
-      run_once: true
-      become: yes
-      become_user: "{{ magento_user }}"
+# Removed because it is not working. Connection error 100%. Most likely because it tries to connect to builder that already died.
+# - hosts: app:&current:&immutable
+#   gather_facts: no
+#   tasks:
+#     - name: Enable Magento maintenance mode
+#       command: "bin/magento maintenance:enable"
+#       args:
+#         chdir: "{{ item.dir | default(magento_live_release_dir) }}"
+#       run_once: true
+#       become: yes
+#       become_user: "{{ magento_user }}"
 
 - hosts: localhost
   connection: local

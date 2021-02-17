@@ -18,6 +18,7 @@
 
 # systemctl start supervisord
 - hosts: app:&current
+  gather_facts: no
   tasks:
     - name: Run Magento setup upgrade
       command: "{{ item.cmd | default(item) }}"
@@ -45,6 +46,7 @@
         label: "{{ result.cmd | default([]) | join(' ') }}"
 
 - hosts: app:&current
+  gather_facts: no
   tasks:
     - name: Run Magento post-deploy commands
       command: "{{ item.cmd | default(item) }}"
@@ -68,6 +70,7 @@
 
 
 - hosts: app:&current
+  gather_facts: no
   tasks:
     - name: Start supervisord Magento workers
       command: /usr/bin/systemctl start supervisord
