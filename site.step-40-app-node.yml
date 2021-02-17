@@ -26,11 +26,16 @@
 
     - role: pinkeen.selinux-disable
 
-    - role: cs.swap
-      when: mageops_swap_app_node_enable
-
     - role: cs.zram
-      when: mageops_zram_app_node_enable
+      zram_size_relative: "{{ mageops_app_node_zram_size_relative }}"
+      when: mageops_app_node_zram_enable
+
+    - role: cs.optimize-vm-disk-io
+      when: mageops_app_node_optimize_kernel_vm_io
+
+    - role: cs.swap
+      swap_swappiness: "{{ mageops_app_node_swappiness }}"
+      when: mageops_app_node_swap_enable
 
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
@@ -134,8 +139,10 @@
       when: aws_use
 
     - role: cs.mageops-cli-profile
+
     - role: cs.magerun
       when: mageops_install_magerun
+
     - role: cs.monitoring
       monitoring_node_exporter_enabled: yes
       monitoring_php_fpm_exporter_enabled: yes

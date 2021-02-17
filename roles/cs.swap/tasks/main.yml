@@ -15,14 +15,14 @@
       lineinfile:
         dest: /etc/fstab
         regexp: "{{ swap_file_location }}"
-        line: "{{ swap_file_location }} none swap sw 0 0"
+        line: "{{ swap_file_location }} none swap sw,pri={{ swap_file_priority }} 0 0"
 
     - name: Drop all vm caches # Prevent memory error when enabling swapfile
       shell: echo 3 > /proc/sys/vm/drop_caches 
       changed_when: false
 
     - name: Enable swap file
-      command: "swapon -a"
+      command: "swapon -p {{ swap_file_priority }} {{ swap_file_location }}"
       retries: 3
       delay: 30
       register: _enabled_swap_cmd_result
