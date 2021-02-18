@@ -11,6 +11,10 @@
       run_once: true
       become: yes
       become_user: "{{ magento_user }}"
+      register: enable_maintenance_mode
+      until: enable_maintenance_mode is not failed
+      retries: 10 
+      delay: 6
 
 - hosts: localhost
   connection: local
