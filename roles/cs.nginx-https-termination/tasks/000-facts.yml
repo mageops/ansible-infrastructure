@@ -30,6 +30,7 @@
       server_aliases:             "{{ host.aliases | default([]) }}"
       server_aliases_redirect:    "{{ host.redirect_aliases | default(false) }}"
       server_custom_block:        "{{ host.extra_vhost_config | default(false, true) }}"
+      server_location_config:        "{{ host.extra_location_config | default(false, true) }}"
       server_redirect_path_mapping:   "{{ host.permanent_path_redirect_map | default({}) }}"
       server_redirect_path_code:  "301"
 

@@ -66,6 +66,7 @@ https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-ca
 #   the auto-generated main `server` block
 # - extra_vhost_config - custom config block to add inside the
 #   the auto-generated main `server` directive
+# - extra_location_config - custom config block to add inside default location
 # - redirect_aliases - (default: no) - whether the aliases should be redirected
 #   with 301 to the main `server_name`
 # - permanent_path_redirect_map - a map of request patterns to redirect using 301
