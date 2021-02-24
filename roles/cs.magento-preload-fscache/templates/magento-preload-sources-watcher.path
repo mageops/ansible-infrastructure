@@ -1,0 +1,9 @@
+[Unit]
+Description=Trigger restart of Magento Source Preload on file modification
+
+[Path]
+Unit=magento-preload-sources-watcher.timer
+PathModified={{ magento_fscache_preload_config.base_path }}
+
+[Install]
+WantedBy=multi-user.target

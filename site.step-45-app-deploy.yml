@@ -105,7 +105,10 @@
 
     - role: cs.aws-magento-cron
 
-    - role: cs.magento-optimize-iops
+    - role: cs.optimize-vm-disk-io
+      when: mageops_reduce_iops
+
+    - role: cs.magento-preload-fscache
       when: mageops_reduce_iops
 
     - role: cs.magento-import-dispatcher

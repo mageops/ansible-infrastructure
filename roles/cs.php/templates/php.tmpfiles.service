@@ -1,0 +1,18 @@
+[Unit]
+Description=PHP Temp and Cache Maintenance
+
+Before=shutdown.target
+PartOf=supervisord.service php-fpm.service
+After=sysinit.target
+ConditionPathExists=/etc/tmpfiles.d/php.conf
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+ExecStartPre=/usr/bin/systemd-tmpfiles --remove /etc/tmpfiles.d/php.conf
+ExecStart=/usr/bin/systemd-tmpfiles    --create /etc/tmpfiles.d/php.conf
+ExecStop=/usr/bin/systemd-tmpfiles     --clean  /etc/tmpfiles.d/php.conf
+
+[Install]
+WantedBy=multi-user.target php-fpm.service supervisord.service

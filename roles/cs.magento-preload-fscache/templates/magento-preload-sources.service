@@ -1,0 +1,20 @@
+{% set cfg = magento_fscache_preload_config %}
+
+[Unit]
+Description=Preload Magento PHP code into FS cache
+After=local-fs.target supervisord.service php-fpm.service nginx.service
+ConditionPathExists={{ cfg.base_path }}
+
+[Service]
+Type=simple
+LimitNOFILE={{ magento_fscache_preload_nproc }}
+
+WorkingDirectory={{ cfg.base_path }}
+ExecStart=/usr/bin/vmtouch -f -l -m {{ cfg.max_file_size }} {% for pattern in cfg.file_name_patterns %}-I '{{ pattern }}'{% endfor %} {{ cfg.directories | join(' ') }}
+ExecStartPost=/bin/free -hwt
+
+Restart=on-abort
+RestartSec={{ cfg.retry_delay }}
+
+[Install]
+WantedBy=multi-user.target
