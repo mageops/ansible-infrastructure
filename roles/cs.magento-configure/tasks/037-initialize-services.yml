@@ -1,0 +1,40 @@
+# TODO: This needs to be done on the final app node before setup:upgrade / cache:flush
+
+- name: Ensure initial service state
+  systemd:
+    name: "{{ service.unit }}"
+    state: "{{ service.state | default(omit) }}"
+    masked: no
+    force: yes
+    daemon_reload: yes
+  loop: "{{ magento_configure_services_init }}"
+  loop_control:
+    loop_var: result
+    label: >-
+      {{ service.unit }} -> 
+      {{ service.state | mandatory }}
+
+- name: Wait for Elasticsearch
+  shell: curl -sfk 'http://{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}'
+  args:
+    warn: no
+  retries: 15
+  delay: 5
+  register: result
+  until: result.rc == 0
+  when: mageops_elasticsearch_host | default(false, true)
+
+- name: Wait for Redis cache host
+  shell: echo -ne "PING\r\n" | nc {{ mageops_redis_host }} {{ mageops_redis_port }}
+  retries: 15
+  delay: 5
+  register: result
+  until: result.rc == 0
+  when: magento_redis_cache
+
+- name: Wait for Redis session host
+  shell: echo -ne "PING\r\n" | nc {{ mageops_redis_sessions_host }} {{ mageops_redis_sessions_port }}
+  retries: 15
+  delay: 5
+  register: result
+  until: result.rc == 0
