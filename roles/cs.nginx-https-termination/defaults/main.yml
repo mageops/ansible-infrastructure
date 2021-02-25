@@ -72,6 +72,15 @@ https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-ca
 # - redirect_aliases_include_domain - (default: no) - should add original hostname
 #   to url as `_mageops_redirect_source` query parameter
 # - permanent_path_redirect_map - a map of request patterns to redirect using 301
+# - redirect_to - (optional) use this domain as redirect to different target
+# - redirect_to_kind - (default: permanent) kind of redirect to use:
+#   permanent - use 301
+#   temporary - use 302
+# - redirect_to_style - (default: deep) style of redirect to use
+#   deep - append requested url to new target
+#   absolute - use target destination as absolute url
+# - redirect_to_include_domain - (default: no) should add original hostname
+#   to url as `_mageops_redirect_source` query parameter
 #
 # Example config:
 #
