@@ -33,7 +33,7 @@
     # Grace period for Healthcheck  tatus when new nodes are going up. 
     # The 300s default we had is waaaay too long for our setup and makes the 
     # deploy much, much longer (at least 300s long).
-    health_check_period: "{{ autoscaling_asg_healthcheck_grace_period }}"
+    health_check_period: "{{ autoscaling_healthcheck_grace_period }}"
     termination_policies: "{{ autoscaling_asg_termination_policies }}"
     tags: "{{ aws_tags_default | combine(asg_name_tags, aws_tags_trait_immutable, autoscaling_instance_tags) | dict_to_tag_list }}"
     # This ansible module does not handle instance replacement properly
@@ -57,18 +57,18 @@
       # Note: A futureproof setting - there is no other strategy as of yet.
       Strategy: Rolling
       Preferences:
-          MinHealthyPercentage: "{{ aws_asg_rolling_instance_refresh_min_healthy_percent }}"
-          InstanceWarmup: "{{ aws_asg_rolling_instance_refresh_extra_warmup_grace_period }}"
+          MinHealthyPercentage: "{{ autoscaling_rolling_instance_refresh_min_healthy_percent }}"
+          InstanceWarmup: "{{ autoscaling_rolling_instance_refresh_extra_warmup_grace_period }}"
   register: aws_asg_instance_refresh_command
 
 - name: Compute instance refresh task info
   set_fact:
     aws_asg_instance_refresh_id: "{{ ( aws_asg_instance_refresh_command.stdout | from_json ).InstanceRefreshId }}"
     aws_asg_instance_refresh_estimated_duration: >-
-      {{ ( ( autoscaling_asg_healthcheck_grace_period | int
-          + aws_asg_rolling_instance_refresh_extra_warmup_grace_period | int )
+      {{ ( ( autoscaling_healthcheck_grace_period | int
+          + autoscaling_rolling_instance_refresh_extra_warmup_grace_period | int )
               * autoscaling_asg_desired_capacity | int 
-              * ( aws_asg_rolling_instance_refresh_min_healthy_percent | int + 100 )
+              * ( autoscaling_rolling_instance_refresh_min_healthy_percent | int + 100 )
               / 100 ) | round(1, 'ceil') }}
 
 - name: Print info about refresh id so it can be tracked
@@ -84,10 +84,10 @@
         Est. duration: {{ aws_asg_instance_refresh_estimated_duration }} sec
         Desired capacity: {{ autoscaling_asg_desired_capacity }} instances
 
-        Healthcheck grace period: {{ autoscaling_asg_healthcheck_grace_period }} sec
-        Extra warmup grace period: {{ aws_asg_rolling_instance_refresh_extra_warmup_grace_period }} sec
+        Healthcheck grace period: {{ autoscaling_healthcheck_grace_period }} sec
+        Extra warmup grace period: {{ autoscaling_rolling_instance_refresh_extra_warmup_grace_period }} sec
 
-        Min. healthy: {{ aws_asg_rolling_instance_refresh_min_healthy_percent }} % of instances
+        Min. healthy: {{ autoscaling_rolling_instance_refresh_min_healthy_percent }} % of instances
 
         ---------------------------------------------------
 
