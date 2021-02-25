@@ -7,6 +7,10 @@ nginx_language_redirect_site: default
 # deep-redirect - redirect to different language while keeping urls unchanged
 nginx_language_redirect_mode: geofence
 
+# When performing domain redirect (nginx_language_redirect_style se to domain)
+# this will app `_mageops_redirect_source` parameter to url with original hostname
+nginx_language_redirect_domain_redirect_include_domain: no
+
 # Site style used for redirection
 # dir - languages are detetmined by top level dir
 #   eg: example.com/en, example.com/de
