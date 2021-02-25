@@ -1196,7 +1196,7 @@ php_packages:
   - php-curl
   - php-mysqlnd
   - php-pecl-apcu-bc
-  - php-pecl-redis
+  - php-pecl-redis5
   - php-gd
   - php-gmp
   - php-mcrypt

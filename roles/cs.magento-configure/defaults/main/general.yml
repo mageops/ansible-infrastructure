@@ -38,7 +38,18 @@ magento_redis_cache_l2_dir: /dev/shm
 magento_session_max_redis_concurrency: 15
 
 magento_app_etc_config_template: magento_app_etc_config.php.j2
-magento_app_etc_env_template: magento_app_etc_env.php.j2
+
+# Use legacy cache backend class 'Cm_Cache_Backend_Redis'
+# which is the only one available for Magento < 2.3.5 !
+# See: https://devdocs.magento.com/guides/v2.4/config-guide/redis/redis-pg-cache.html#new-redis-cache-implementation
+magento_redis_cache_backend_legacy: yes
+magento_redis_cache_backend_fqcn: >-
+  {{ magento_redis_cache_backend_legacy 
+      | ternary(
+          'Cm_Cache_Backend_Redis', 
+          '\Magento\Framework\Cache\Backend\Redis'
+        ) }}
+
 
 magento_consumer_workers_enable: yes
 magento_consumer_workers:

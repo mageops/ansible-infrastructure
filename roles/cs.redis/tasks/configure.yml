@@ -32,6 +32,8 @@
   template:
     src: redis.service
     dest: "/etc/systemd/system/{{ redis_daemon }}.service"
+    trim_blocks: yes
+    lstrip_blocks: yes
   notify:
     - Reload systemctl daemon
     - Restart {{ redis_daemon }}

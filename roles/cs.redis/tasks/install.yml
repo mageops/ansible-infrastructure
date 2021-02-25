@@ -1,5 +1,9 @@
 - name: Install redis packages
   package:
     name: "{{ redis_package }}"
-    state: present
+    state: "{{ redis_enable_v6 | ternary('latest', 'present') }}"
+    enablerepo: "{{ redis_enable_v6 | ternary('remi,remi-safe', omit) }}"
+  notify:
+    - Reload systemctl daemon
+    - Restart {{ redis_daemon }}
 
