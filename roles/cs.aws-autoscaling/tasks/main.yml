@@ -45,9 +45,6 @@
       - Name: "{{ autoscaling_asg_name }}"
   register: _aws_asg
 
-  # wait_for_instances: "{{ autoscaling_asg_wait_for_instances }}"
-  # wait_timeout: "{{ autoscaling_asg_wait_timeout }}"
-
 - name: Refresh AutoScaling Group Instances
   command:
     argv: >-
@@ -64,17 +61,37 @@
           InstanceWarmup: "{{ aws_asg_rolling_instance_refresh_extra_warmup_grace_period }}"
   register: aws_asg_instance_refresh_command
 
-- name: Get the current refresh task identifier
+- name: Compute instance refresh task info
   set_fact:
     aws_asg_instance_refresh_id: "{{ ( aws_asg_instance_refresh_command.stdout | from_json ).InstanceRefreshId }}"
+    aws_asg_instance_refresh_estimated_duration: >-
+      {{ ( ( autoscaling_asg_healthcheck_grace_period | int
+          + aws_asg_rolling_instance_refresh_extra_warmup_grace_period | int )
+              * autoscaling_asg_desired_capacity | int 
+              * ( aws_asg_rolling_instance_refresh_min_healthy_percent | int + 100 )
+              / 100 ) | round(1, 'ceil') }}
 
 - name: Print info about refresh id so it can be tracked
   debug:
-    msg: |
-      Started ASG rolling instance refresh with id:
-      {{ aws_asg_instance_refresh_id }}
+    msg: |-
+      ========================================================
+      =         Started ASG rolling instance refresh!        =
+      ========================================================
 
-- name: Wait for the AutoScaling Group Instance Refresh to complete
+        Group: {{ autoscaling_asg_name }}
+
+        Operation id: {{ aws_asg_instance_refresh_id }}
+        Est. duration: {{ aws_asg_instance_refresh_estimated_duration }} sec
+        Desired capacity: {{ autoscaling_asg_desired_capacity }} instances
+
+        Healthcheck grace period: {{ autoscaling_asg_healthcheck_grace_period }} sec
+        Extra warmup grace period: {{ aws_asg_rolling_instance_refresh_extra_warmup_grace_period }} sec
+
+        Min. healthy: {{ aws_asg_rolling_instance_refresh_min_healthy_percent }} % of instances
+
+      ========================================================
+
+- name: Wait for the rolling Instance Refresh to complete
   command:
     argv: >-
       {{ [ 'aws', 'autoscaling', 'describe-instance-refreshes' ]
@@ -86,16 +103,17 @@
       InstanceRefreshIds: [ "{{ aws_asg_instance_refresh_id }}" ]
     aws_asg_instance_describe_data: >- 
       {{ ( aws_asg_describe_instance_refresh_command.stdout 
-            | default('{"Status": null, "PercentageComplete": -1}') | from_json ).InstanceRefreshes | first }}
+            | default('{"Status": null, "PercentageComplete": -1}') 
+            | from_json ).InstanceRefreshes | first }}
   register: aws_asg_describe_instance_refresh_command
   until: >-
     aws_asg_describe_instance_refresh_command is not failed 
-    and aws_asg_instance_describe_data.PercentageComplete | default(-1, true) | int == 100
+    and aws_asg_instance_describe_data.PercentageComplete | default(0, true) | int == 100
       and aws_asg_instance_describe_data.Status == 'Successful'
-  loop_control:
-    label: "{{ item }}"
-  delay: 15
-  retries: 60
+  delay: "{{ aws_asg_instance_refresh_progress_check_interval }}"
+  retries: >- 
+    {{ ( aws_asg_instance_refresh_progress_check_timeout | int 
+          / aws_asg_instance_refresh_progress_check_interval | int ) | int }}
 
 - name: Create ASG Termination Lifecycle Hook
   ec2_asg_lifecycle_hook:
