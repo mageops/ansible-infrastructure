@@ -29,6 +29,7 @@
       server_name:                "{{ host.server_name | default('*') }}"
       server_aliases:             "{{ host.aliases | default([]) }}"
       server_aliases_redirect:    "{{ host.redirect_aliases | default(false) }}"
+      server_aliases_redirect_include_domain: "{{ redirect_aliases_include_domain | default(false) }}"
       server_custom_block:        "{{ host.extra_vhost_config | default(false, true) }}"
       server_location_config:        "{{ host.extra_location_config | default(false, true) }}"
       server_redirect_path_mapping:   "{{ host.permanent_path_redirect_map | default({}) }}"

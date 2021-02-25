@@ -1525,6 +1525,7 @@ varnish_strip_params:
   - "trk_[^=&]+"
   - "dm_i"
   - "fbclid"
+  - "_mageops_redirect_source"
 
 varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
 
