@@ -89,6 +89,19 @@
 
         Min. healthy: {{ aws_asg_rolling_instance_refresh_min_healthy_percent }} % of instances
 
+        ---------------------------------------------------
+
+        TIP: Use this shell script to check the status live:
+
+        while sleep 3s ; do aws autoscaling describe-instance-refreshes \
+          --auto-scaling-group-name {{ autoscaling_asg_name }} \
+          --instance-refresh-ids {{ aws_asg_instance_refresh_id }} \
+          | jq -r '.InstanceRefreshes | first | ( [ "[\(now | strftime("%X"))]",
+             "\(.Status) |", "Refresh \(.AutoScalingGroupName) ASG",
+            "- \(.PercentageComplete)% complete", "/ \(.InstancesToUpdate) left",
+            ( if .StatusReason then "(\(.StatusReason))" else "" end ) ] | join(" "))'; \
+        done
+        
       ========================================================
 
 - name: Wait for the rolling Instance Refresh to complete
