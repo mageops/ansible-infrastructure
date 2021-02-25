@@ -111,7 +111,7 @@ magento_app_etc_config_cache_default_redis_l2:
           default:
               backend: \Magento\Framework\Cache\Backend\RemoteSynchronizedCache
               backend_options:
-                  remote_backend: \Magento\Framework\Cache\Backend\Redis
+                  remote_backend: "{{ magento_redis_cache_backend_fqcn }}"
                   remote_backend_options:
                       persistent: 0
                       server: "{{ mageops_redis_host }}"
@@ -136,7 +136,7 @@ magento_app_etc_config_cache_page_redis:
   cache:
     frontend:
       page_cache:
-        backend: Cm_Cache_Backend_Redis
+        backend: "{{ magento_redis_cache_backend_fqcn }}"
         backend_options:
           server: "{{ mageops_redis_host }}"
           database: "1"
