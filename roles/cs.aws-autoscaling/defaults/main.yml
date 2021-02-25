@@ -7,9 +7,41 @@ autoscaling_instance_tags: {}
 autoscaling_asg_min_size: 1
 autoscaling_asg_max_size: 1
 autoscaling_asg_desired_capacity: 1
-autoscaling_asg_wait_timeout: 1200
 autoscaling_asg_tags: {}
-autoscaling_asg_replace_all: yes
 autoscaling_asg_termination_policies: NewestInstance
-autoscaling_asg_wait_for_instances: yes
-autoscaling_asg_replace_with_check: no
+
+# The minimum time to wait since the node was started until it's considered
+# healthy, attached to the ASG (and next node can be replaced or refresh finished).
+# Note: In other words - it's the time for the node to warm itself up.
+autoscaling_asg_healthcheck_grace_period: 30
+
+### Built-in AWS rolling ASG instance refresh (update / replacement)
+# The relative minimum amount of instances that must must be up and healthy
+# int the ASG at any point in time druing the refresh. (90% is the AWS default)
+#
+# Note: Max capacity does *not* have to be adjusted. AWS ignores it when fullfilling
+# the parameters defined here for the period of refresh.
+#
+# Couple of example cases:
+# - If we have one instance then the default 90% will ensure that this instance
+#   is not killed before the new one is up, healthy and after the grace period.
+# - If this is set to 0 the all old instances are terminated *at once* and new
+#   replacements started.
+# - Assume there are currenty 3 instances in the group and we set this param to
+#   60%. The 60% out of 3 instances translated to the number 2, which means that
+#   at any point in time there will be *at least* 3 healthy instances in the ASG.
+#   Only one can be terminated / replaced at a time, so the full refresh will be
+#   made in 3 steps one-by-one.
+aws_asg_rolling_instance_refresh_min_healthy_percent: 90
+
+# The extra time to wait for the instance to be warm before replacing the next
+# one - *on top of* the value configured in `autoscaling_asg_healthcheck_grace_period`.
+aws_asg_rolling_instance_refresh_extra_warmup_grace_period: 15
+
+# Just common parameters to avoid copy-paster repetition
+aws_asg_instance_refresh_cli_args_base: [
+    --region,       "{{ aws_region }}",
+    --output,       "json",
+    --color,        "off",
+    --no-paginate,
+]
