@@ -46,7 +46,7 @@
         - redis
 
   roles:
-    - role: cs.mageops-cli-profile
+    - role: cs.mageops-shell-profile
       mageops_node_role: raccoon
 
 - hosts: database

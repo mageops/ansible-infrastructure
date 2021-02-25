@@ -1,1 +1,4 @@
+# Path to mageops parameters dotenv file on each node
+mageops_sysconfig_path: /etc/sysconfig/mageops
+mageops_cli_lib_path: /usr/local/lib/mageops
 mageops_cli_features_dir: /usr/local/lib/mageops/features

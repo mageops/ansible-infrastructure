@@ -10,6 +10,11 @@ filters:
     - running
     - pending
 
+hostnames:
+  - tag:InventoryHostname
+  - dns-name
+  - ip-address
+
 keyed_groups:
   - key: tags.Name
     prefix: "node"
@@ -66,3 +71,6 @@ keyed_groups:
   - key: tags.TraitImmutable
     prefix: ""
     separator: ""
+
+compose:
+  ansible_host: public_ip_address

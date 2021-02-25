@@ -1,3 +1,2 @@
 dependencies:
-  - role: cs.mageops-cli-profile
-  - role: cs.mageops-cli-tools
+  - role: cs.mageops-shell-profile

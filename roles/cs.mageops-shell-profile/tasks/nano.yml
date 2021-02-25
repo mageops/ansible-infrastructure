@@ -1,0 +1,14 @@
+# Unforunately old nano on CentOS 7 does not support include wildcards
+# With newer nano all that is required is: 
+#   include "/usr/share/nano/*.nanorc"
+# Note: We use shell now because the ansible loop was super-slow
+- name: Create nano syntax hilight config
+  shell: 
+    cmd: "find /usr/share/nano/ -type f -name '*.nanorc' -exec echo 'include {}' \\; 2>/dev/null"
+  register: nano_syntax_includes_rc
+
+- name: Enable nano hilights
+  blockinfile:
+    path: /etc/nanorc
+    block: "{{ nano_syntax_includes_rc.stdout }}"
+    create: yes

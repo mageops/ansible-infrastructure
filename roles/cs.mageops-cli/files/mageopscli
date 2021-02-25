@@ -4,9 +4,12 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/config.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libaws.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libmageops.bash"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libnode.bash"
 source "$(dirname "${BASH_SOURCE[0]}")/../lib/mageops/libfeatures.bash"
 
-main::main() {
+outputMode="${MAGEOPS_OUTPUT_FORMAT:-}"
+
+main::_main() {
     local cmd=${1:-}
 
     case $cmd in
@@ -26,7 +29,7 @@ main::main() {
     ;;
     current_instance_id)
         if [ $# != 1 ];then main::help; fi
-        main::current_instance_id || exit 1
+        main::get_current_instance_id || exit 1
     ;;
     current_region)
         if [ $# != 1 ];then main::help; fi
@@ -52,16 +55,22 @@ main::main() {
     if [ $# != 1 ];then main::help; fi
         main::apply_features
     ;;
+    generate_completions)
+        main::generate_completions
+    ;;
+    node*)
+        shift ; main::$cmd "$@"
+    ;;
     *) main::help ;;
     esac
 }
 
-main::eprintln() {
+main::_eprintln() {
     echo "$@" >&2
 }
 
-main::panic() {
-    main::eprintln "ERROR: " "$@"
+main::__eprintln() {
+    main::_eprintln "ERROR: " "$@"
     exit 1
 }
 
@@ -83,20 +92,20 @@ main::get_tag_value() {
 
 main::assert_aws_cli() {
     command -v aws &>/dev/null && return 0
-    main::panic "aws cli is not installed"
+    main::_eprintln "aws cli is not installed"
 }
 
-main::current_instance_id() {
+main::get_current_instance_id() {
     main::assert_aws_cli
     local id
-    id=$(mageops::get_current_instance_id) || return 1
+    id=$(aws::get_current_instance_id) || return 1
     echo "$id"
 }
 
 main::current_region() {
     main::assert_aws_cli
     local region
-    region=$(mageops::get_current_region) || return 1
+    region=$(aws::get_current_region) || return 1
     echo "$region"
 }
 
@@ -104,9 +113,9 @@ main::set_feature_flag() {
     local feature=$1
     local value=$2
 
-    main::eprintln "Updating feature flag $feature to $value..."
+    main::_eprintln "Updating feature flag $feature to $value..."
     features::update_feature_flag "$feature" "$value"
-    main::eprintln "OK"
+    main::_eprintln "OK"
 }
 
 main::is_feature_flag_set() {
@@ -125,28 +134,89 @@ main::apply_features() {
     features::update_host_state
 }
 
+main::generate_completions() {
+    echo "complete -W '$(node::list_functions "main::" | tr -s '\n' ' ')' $(basename "$0")"
+}
+
+main::node_get_sysconfig() {
+    echo "###"
+    echo "# MageOps sysconfig read from: $config__sysconfig_path"
+    echo "#"
+    echo "# Printed by $0 for: $(whoami)@$(hostname)"
+    echo "# State from: $(date)"
+    echo "###"
+    echo
+
+    cat "$config__sysconfig_path"
+}
+
+main::node_get_name()                       { node::get_name ; }
+main::node_get_inventory_hostname()         { node::get_inventory_hostname ; }
+main::node_get_instance_data()              { node::get_instance_data ; }
+main::node_get_lifecycle_state()            { node::get_instance_lifecycle_state ; }
+main::node_get_app_release_info()           { node::get_app_release_info ; }
+main::node_get_group_name()                 { node::get_instance_group_name ; }
+main::node_get_tags()                       { node::get_instance_tags ; }
+main::node_has_app_release()                { node::has_app_release ; }
+main::node_is_within_grace_period()         { node::is_set_unhealthy_permitted ; }
+main::node_is_being_launched()              { node::is_being_launched ; }
+main::node_is_warming_up()                  { node::is_warming_up ; }
+main::node_set_warm_up_started()            { node::mark_instance_as_warming_up ; }
+main::node_set_warm_up_success()            { node::mark_instance_as_warmed_up ; }
+main::node_update_name_tag()                { node::set_node_name_instance_tag ; }
+main::node_update_app_release_tags()        { node::set_app_release_tags ; }
+main::node_update_inventory_hostname_tag()  { node::set_inventory_hostname_instance_tag ; }
+main::node_update_tags()                    { node::set_instance_tags ; }
+
 main::help() {
-    main::eprintln "  $0 <cmd>"
-    main::eprintln ""
-    main::eprintln "Where cmd is one of:"
-    main::eprintln "  is_cron_node                         Checks if there is tag 'Cron' with value 'yes'"
-    main::eprintln "                                       status code 0 means tag present, 1 means missing tag or"
-    main::eprintln "                                       other error"
-    main::eprintln "  is_tag_present <tag_name>            Checks if specified tag name is set"
-    main::eprintln "                                       status code 0 means tag present, 1 means missing tag or"
-    main::eprintln "                                       other error"
-    main::eprintln "  get_tag_value <tag_name>             Reads value assigned to tag"
-    main::eprintln "  current_instance_id                  Reads current ec2 instance id"
-    main::eprintln "  current_region                       Reads current ec2 region name"
-    main::eprintln "  set_feature_flag <feature> <value>   Update feature flag value"
-    main::eprintln "  read_feature_flag <feature>          Reads current feature flag value"
-    main::eprintln "  is_feature_flag_set <feature>        Checks if there is any value set for feature flag"
-    main::eprintln "                                       status code 0 means flag is set, 1 otherwise"
-    main::eprintln "  apply_features                       Apply feature updates to this host"
-    main::eprintln ""
-    main::eprintln " Mageops cli tools"
-    main::eprintln "  (c) Creativestyle 2020"
+    main::_eprintln "  $0 <cmd>"
+    main::_eprintln " "
+    main::_eprintln "Where cmd is one of:"
+    main::_eprintln "  is_cron_node                         Checks if there is tag 'Cron' with value 'yes'"
+    main::_eprintln "                                       status code 0 means tag present, 1 means missing tag or"
+    main::_eprintln "                                       other error"
+    main::_eprintln "  is_tag_present <tag_name>            Checks if specified tag name is set"
+    main::_eprintln "                                       status code 0 means tag present, 1 means missing tag or"
+    main::_eprintln "                                       other error"
+    main::_eprintln "  get_tag_value <tag_name>             Reads value assigned to tag"
+    main::_eprintln "  current_instance_id                  Reads current ec2 instance id"
+    main::_eprintln "  current_region                       Reads current ec2 region name"
+    main::_eprintln "  set_feature_flag <feature> <value>   Update feature flag value"
+    main::_eprintln "  read_feature_flag <feature>          Reads current feature flag value"
+    main::_eprintln "  is_feature_flag_set <feature>        Checks if there is any value set for feature flag"
+    main::_eprintln "                                       status code 0 means flag is set, 1 otherwise"
+    main::_eprintln "  apply_features                       Apply feature updates to this host"
+
+    main::_eprintln ""
+    main::_eprintln "  node_get_instance_data               Reads instance description and normalizes it into"
+    main::_eprintln "                                       a summarized form with the most important parameters"
+    main::_eprintln "  node_get_sysconfig                   Prints statically provisioned environment variables"
+    main::_eprintln "  node_get_name                        Dynamically generates unique node name that is useful"
+    main::_eprintln "                                       for distinguishing between same types of nodes in a group"
+    main::_eprintln "  node_get_inventory_hostname          Dynamically generates descriptive inventory hostname tag"
+    main::_eprintln "                                       which can be used for improving automation readability"
+    main::_eprintln "  node_get_lifecycle_state             Reads instance autoscaling lifecycle state of current node"
+    main::_eprintln "  node_get_app_release_info            Reads application release info"
+    main::_eprintln "  node_get_group_name                  Reads autoscaling group name that this node belongs to"
+    main::_eprintln "  node_get_tags                        Lists all tags of this node"
+    main::_eprintln "  node_has_app_release                 Checks whether the node has app release installed"
+    main::_eprintln "  node_is_within_grace_period          Checks whether the node is still warmup healthcheck grace period"
+    main::_eprintln "  node_is_warming_up                   Checks if the node is currently warming up"
+    main::_eprintln "  node_is_launching                    Checks if the node is being launched now as part of an autocaling event"
+    main::_eprintln "  node_set_warm_up_started             Sets the current node state as warming up - this should be executed"
+    main::_eprintln "                                       as soon as the node starts fresh when being replaced into the group"
+    main::_eprintln "  node_set_warm_up_success             Sets the current node state as fully warmed up and ready - indirectly"
+    main::_eprintln "                                       notifies the group that it can be attached and accept traffic"
+    main::_eprintln "  node_update_name_tag                 Updates tag containing the dynamic group name"
+    main::_eprintln "  node_update_app_release_tags         Updates tags describing the current application release info"
+    main::_eprintln "  node_update_inventory_hostname_tag   Updates descriptive inventory hostname tag"
+    main::_eprintln "  node_update_tags                     Updates all dynamic node tags"
+
+    main::_eprintln ""
+    main::_eprintln " Mageops cli tools"
+    main::_eprintln "  (c) Creativestyle 2020"
+
     exit 1
 }
 
-main::main "$@"
+main::_main "$@"

@@ -20,7 +20,7 @@
       packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
       packages_install: "{{ mageops_packages_common + mageops_packages_varnish + mageops_packages_varnish_extra }}"
       packages_remove: "{{ mageops_packages_banned }}"
-    - role: cs.mageops-cli-profile
+    - role: cs.mageops-shell-profile
     - role: cs.mageops-cli-user
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:
@@ -63,7 +63,6 @@
       varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
     - role: cs.varnish-manager
       when: varnish_standalone and aws_use
-    - role: cs.mageops-cli-profile
     - role: cs.goaccess
       when: goaccess_enable
     - role: cs.aws-logs

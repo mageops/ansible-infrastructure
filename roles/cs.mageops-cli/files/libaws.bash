@@ -19,8 +19,12 @@ aws::_curl() {
     curl -Lsf -H "X-aws-ec2-metadata-token: $aws__token" "$@"
 }
 
-aws::current_instance_id() {
+aws::get_current_instance_id() {
     aws::_curl http://instance-data/latest/meta-data/instance-id || return 1
+}
+
+aws::get_current_instance_public_ip() {
+    aws::_curl http://instance-data/latest/meta-data/public-ipv4 || return 1
 }
 
 aws::get_current_region() {

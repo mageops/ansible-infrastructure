@@ -30,7 +30,7 @@
       packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
       packages_install: "{{ mageops_packages_common + mageops_packages_persistent + mageops_packages_persistent_extra }}"
       packages_remove: "{{ mageops_packages_banned }}"
-    - role: cs.mageops-cli-profile
+    - role: cs.mageops-shell-profile
     - role: cs.mageops-cli-user
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:

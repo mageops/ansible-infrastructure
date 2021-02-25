@@ -5,7 +5,7 @@ if [ -f /etc/bashrc ]; then
 fi
 
 
-# Skipp all further CLI setup if no interactive shell
+# Skip all further CLI setup if no interactive shell
 if [[ "$-" != *i* ]] ; then
 	return 0
 fi
@@ -43,9 +43,7 @@ export GPG_TTY="$(tty)"
 # Only since bash 5+ ...
 # shopt -s complete_fullquote
 shopt -s globstar
-
 shopt -u direxpand
-shopt -u progcomp
 shopt -u cdspell
 shopt -u dirspell
 shopt -u autocd
@@ -72,6 +70,11 @@ alias magento='{{ magento_live_release_dir }}/bin/magento'
 {% endif %}
 
 alias mageops-env="env | grep -e '^MAGEOPS_'"
+alias dmesg='dmesg -T --color'
+
+if which most 2>/dev/null >/dev/null ; then
+	export PAGER=most
+fi
 
 # --- Load MageOps modules ---
 
@@ -80,6 +83,9 @@ if [[ -d "$HOME/.bashrc.d/" ]] ; then
 		source "$FRAGMENT"
 	done
 fi
+
+MAGEOPS_PS1="\[\e[0;35m\][${MAGEOPS_NODE_NAME}.${MAGEOPS_PROJECT}-${MAGEOPS_ENVIRONMENT}]\[\e[0m\] "
+MAGEOPS_PS1="${MAGEOPS_PS1}\[\e[0;33m\]\u\[\e[0;32m\]@\h\[\e[0m\] \[\e[0;94m\]\w\[\e[0m\] \[\e[1;32m\]→\[\e[0m\] "
 
 export PS1="$MAGEOPS_PS1"
 

@@ -1,0 +1,16 @@
+[Unit]
+Description=Update dynamic AWS node tags
+After=sysinit.target network-online.target
+ConditionFileIsExecutable=/ets/sysconfig/mageops
+ConditionPathExists=/var/lib/cloud/instance/boot-finished
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+Environment=MAGEOPS_VERBOSE=1
+ExecStart=-/usr/local/bin/mageopscli node_update_tags
+
+[Install]
+WantedBy=multi-user.target
+

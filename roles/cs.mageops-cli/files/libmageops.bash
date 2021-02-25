@@ -18,7 +18,7 @@ mageops::get_tag_value() {
     local found_value
     local region
     region="$(aws::get_current_region)"
-    instance_id="$(aws::current_instance_id)"
+    instance_id="$(aws::get_current_instance_id)"
     found_value="$(mageops::get_ec2_tag_value "$region" \
         "$instance_id" "$tag_name")"
 
@@ -32,7 +32,7 @@ mageops::is_tag_exists() {
     local found_value
     local region
     region="$(aws::get_current_region)"
-    instance_id="$(aws::current_instance_id)"
+    instance_id="$(aws::get_current_instance_id)"
     found_value="$(mageops::get_ec2_tag_value "$region" \
         "$instance_id" "$tag_name")"
 
@@ -50,7 +50,7 @@ mageops::assert_tag_value() {
     local found_value
     local region
     region="$(aws::get_current_region)"
-    instance_id="$(aws::current_instance_id)"
+    instance_id="$(aws::get_current_instance_id)"
     found_value="$(mageops::get_ec2_tag_value "$region" \
         "$instance_id" "$tag_name")"
 

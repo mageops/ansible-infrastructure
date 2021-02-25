@@ -1,0 +1,18 @@
+- name: Install shell locale configuration file
+  template:
+    src: "{{ item }}"
+    dest: "/etc/profile.d/{{ item }}"
+    mode: 0755
+  loop:
+    - 001-mageops-locale.sh
+    - 002-mageops-env.sh
+    - 009-mageops-completions.sh
+
+- name: Setup nano config
+  include_tasks: nano.yml
+
+- name: Install bash completion
+  yum:
+      name: 
+        - bash-completion
+        - bash-completion-extras

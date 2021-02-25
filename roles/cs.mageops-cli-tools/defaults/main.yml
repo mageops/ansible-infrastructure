@@ -1,6 +1,0 @@
-mageops_cli_bash_lib_upstream_url: https://github.com/Szpadel/bash-lib/archive/v0.1.0.tar.gz
-mageops_cli_bash_lib_upstream_dir: /usr/local/share/mageops/bash/lib-szpadel
-mageops_cli_bash_lib_upstream_source_path: "{{ mageops_cli_bash_lib_upstream_dir }}/lib.bash"
-
-mageops_cli_bash_lib_dir: /usr/local/share/mageops/bash/lib
-mageops_cli_bash_lib_import_path: "{{ mageops_cli_bash_lib_dir }}/lib.bash"

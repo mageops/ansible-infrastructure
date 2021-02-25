@@ -43,7 +43,7 @@
     - role: cs.packages
       packages_install: "{{ mageops_packages_common + mageops_packages_app_node + mageops_packages_app_node_extra }}"
 
-    - role: cs.mageops-cli-profile
+    - role: cs.mageops-shell-profile
 
     - role: cs.mageops-cli-user
       mageops_cli_user: root
