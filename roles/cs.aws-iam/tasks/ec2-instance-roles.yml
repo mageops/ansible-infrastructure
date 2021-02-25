@@ -38,6 +38,39 @@
     state: present
   register: iam_ec2_list
 
+- name: Create EC2 ASG healthcheck self-report policy
+  iam_managed_policy:
+    policy_name: "{{ aws_iam_policy_ec2_asg_healtcheck_self_report_name }}"
+    policy_description: Allow autoscaled EC2 instances to self-report their healhcheck so they can let ASG know once Magento has warmed up
+    policy: "{{ aws_iam_policy_ec2_asg_healtcheck_self_report | to_json }}"
+    state: present
+  vars:
+    aws_iam_policy_ec2_asg_healtcheck_self_report:
+      Version: '2012-10-17'
+      Statement:
+        - Sid: AnsibleGeneratedRead
+          Effect: Allow
+          Action:
+            - autoscaling:DescribeAutoScalingNotificationTypes
+            - autoscaling:DescribeAutoScalingInstances
+            - autoscaling:DescribeScalingActivities
+            - autoscaling:DescribeAutoScalingGroups
+            - autoscaling:DescribeTags
+          Resource: "*"
+          
+        - Sid: AnsibleGeneratedWrite
+          Effect: Allow
+          Action:
+            - autoscaling:ExitStandby
+            - autoscaling:EnterStandby
+            - autoscaling:CreateOrUpdateTags
+            - autoscaling:SetInstanceHealth
+            - ec2:CreateTags
+          Resource: 
+            - "arn:aws:autoscaling:{{ aws_region }}:{{ aws_account_id }}:autoScalingGroup:*:autoScalingGroupName/*"
+            - "arn:aws:ec2:{{ aws_region }}:{{ aws_account_id }}:instance/*"
+  register: iam_ec2_asg_healtcheck_self_report
+
 - name: Create role for EC2 app instances
   iam_role:
     assume_role_policy_document: "{{ lookup('template', 'ec2_assume_policy_document.json') }}"
@@ -49,6 +82,7 @@
       - "{{ iam_cloudwatch_access.policy.arn }}"
       - "{{ iam_cloudwatch_logs_access.policy.arn }}"
       - "{{ iam_ec2_list.policy.arn }}"
+      - "{{ iam_ec2_asg_healtcheck_self_report.policy.arn }}"
       - "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
 
 - name: Create role for EC2 persistent instances
