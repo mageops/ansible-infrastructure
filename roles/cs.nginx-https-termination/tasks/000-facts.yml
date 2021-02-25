@@ -35,6 +35,11 @@
       server_redirect_path_mapping:   "{{ host.permanent_path_redirect_map | default({}) }}"
       server_redirect_path_code:  "301"
 
+      redirect_to:                "{{ host.redirect_to | default(false) }}"
+      redirect_to_kind:           "{{ host.redirect_to_kind | default('permanent') }}"
+      redirect_to_style:          "{{ host.redirect_to_style | default('deep') }}"
+      redirect_to_include_domain: "{{ host.redirect_to_include_domain | default(false) }}"
+
       crt_install_cert_src:   "{{ lookup('first_found', { 'files': host.cert_path       | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
       crt_install_key_src:    "{{ lookup('first_found', { 'files': host.cert_key_path   | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
       crt_install_chain_src:  "{{ lookup('first_found', { 'files': host.cert_chain_path | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
