@@ -13,7 +13,7 @@ autoscaling_asg_termination_policies: NewestInstance
 # The minimum time to wait since the node was started until it's considered
 # healthy, attached to the ASG (and next node can be replaced or refresh finished).
 # Note: In other words - it's the time for the node to warm itself up.
-autoscaling_asg_healthcheck_grace_period: 30
+autoscaling_healthcheck_grace_period: 30
 
 ### Built-in AWS rolling ASG instance refresh (update / replacement)
 # The relative minimum amount of instances that must must be up and healthy
@@ -32,11 +32,11 @@ autoscaling_asg_healthcheck_grace_period: 30
 #   at any point in time there will be *at least* 2 healthy instances in the ASG.
 #   Only one can be terminated / replaced at a time, so the full refresh will be
 #   made in 3 steps replacing them one-by-one.
-aws_asg_rolling_instance_refresh_min_healthy_percent: 90
+autoscaling_rolling_instance_refresh_min_healthy_percent: 90
 
 # The extra time to wait for the instance to be warm before replacing the next
-# one - *on top of* the value configured in `autoscaling_asg_healthcheck_grace_period`.
-aws_asg_rolling_instance_refresh_extra_warmup_grace_period: 15
+# one - *on top of* the value configured in `autoscaling_healthcheck_grace_period`.
+autoscaling_rolling_instance_refresh_extra_warmup_grace_period: 15
 
 # Max time to wait for the refresh to complete before giving up (15min default).
 aws_asg_instance_refresh_progress_check_timeout: 900
