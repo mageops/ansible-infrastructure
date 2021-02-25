@@ -29,9 +29,6 @@
       autoscaling_asg_max_size: "{{ aws_app_asg_max_size }}"
       autoscaling_asg_cooldown: "{{ aws_app_asg_cooldown }}"
 
-      autoscaling_asg_replace_all: "{{ not aws_app_asg_replace_with_check }}"
-      autoscaling_asg_replace_with_check: "{{ aws_app_asg_replace_with_check }}"
-
       autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
       autoscaling_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
       autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"

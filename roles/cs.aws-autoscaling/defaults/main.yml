@@ -27,16 +27,24 @@ autoscaling_asg_healthcheck_grace_period: 30
 #   is not killed before the new one is up, healthy and after the grace period.
 # - If this is set to 0 the all old instances are terminated *at once* and new
 #   replacements started.
-# - Assume there are currenty 3 instances in the group and we set this param to
-#   60%. The 60% out of 3 instances translated to the number 2, which means that
-#   at any point in time there will be *at least* 3 healthy instances in the ASG.
+# - Assuming that there are 3 instances in the group and this param is set to
+#   60%. The 60% out of 3 rounded up translates to 2, which means that
+#   at any point in time there will be *at least* 2 healthy instances in the ASG.
 #   Only one can be terminated / replaced at a time, so the full refresh will be
-#   made in 3 steps one-by-one.
+#   made in 3 steps replacing them one-by-one.
 aws_asg_rolling_instance_refresh_min_healthy_percent: 90
 
 # The extra time to wait for the instance to be warm before replacing the next
 # one - *on top of* the value configured in `autoscaling_asg_healthcheck_grace_period`.
 aws_asg_rolling_instance_refresh_extra_warmup_grace_period: 15
+
+# Max time to wait for the refresh to complete before giving up (15min default).
+aws_asg_instance_refresh_progress_check_timeout: 900
+
+# Delay of the retry loop that checks if the refresh has completed. Does not
+# matter much, just the interval between lines are printed. In some CI systems
+# that detects inacticvity you might want to adjust...
+aws_asg_instance_refresh_progress_check_interval: 10
 
 # Just common parameters to avoid copy-paster repetition
 aws_asg_instance_refresh_cli_args_base: [
