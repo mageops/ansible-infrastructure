@@ -57,7 +57,7 @@
       autoscaling_instance_start_script: |
         {{ aws_app_node_launch_script_extra }}
         {{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}
-        {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
+        {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}a
 
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
