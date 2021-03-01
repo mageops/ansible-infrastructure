@@ -102,6 +102,8 @@
       php_fpm_pool_group: "{{ magento_group }}"
       php_fpm_terminate_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
 
+    - role: cs.php-tideways
+
     - role: cs.varnish
       varnish_port: "{{ mageops_varnish_port }}"
       varnish_backend_port: "{{ mageops_varnish_backend_port }}"
