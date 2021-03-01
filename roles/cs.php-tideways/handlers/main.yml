@@ -1,0 +1,5 @@
+- name: Restart tideways daemon
+  service:
+    name: tideways-daemon
+    state: restarted
+

@@ -1,0 +1,32 @@
+tideways_enable: no
+tideways_environment: production
+tideways_api_key: ~
+tideways_auto_start: yes
+tideways_traces_only_keep_minimum_ms: 0
+
+# See: https://support.tideways.com/documentation/setup/configuration/configure-tideways-globally-via-php-ini.html
+tideways_service: web
+tideways_sample_rate: 25
+tideways_enable_cli: 0
+
+# If we're hosting magento optimize telling tideways which framework to expect
+tideways_framework: >-
+    {{ ( mageops_app_type 
+        | default('generic', true) == 'magento' )
+        | ternary('magento2', 'all') }}
+
+# See: https://support.tideways.com/documentation/setup/configuration/slow-sql-logging.html
+tideways_sql_long_query_time_ms: 250
+
+# See: https://support.tideways.com/documentation/setup/configuration/sampling.html
+# Choices: basic, disabled
+tideways_monitor_mode: basic
+
+# Warning! Do not enable full tracing for production:
+# > Usually increases the overhead of each request by at least 50% and more. 
+# > In certain cases we have seen overhead of 800% and more [...]
+# Choices: tracing, full
+tideways_collect_mode: tracing
+
+# Future improvements note - it might be nice to notify about deployment:
+# https://support.tideways.com/documentation/setup/configuration/deployment-events.html
