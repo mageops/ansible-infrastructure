@@ -1,4 +1,4 @@
-tideways_enable: no
+tideways_enable: yes
 tideways_environment: production
 tideways_api_key: ~
 tideways_auto_start: yes

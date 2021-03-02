@@ -1317,6 +1317,14 @@ blackfire_server_token:
 blackfire_install: "{{ mageops_install_development_tools }}"
 
 
+# ----------------------------
+# --------  Tideways  --------
+# ----------------------------
+
+# See `roles/cs.php-tideways/defaults/main.yml` for config details
+tideways_enable: no
+
+
 # -------------------------
 # --------  nginx  --------
 # -------------------------
