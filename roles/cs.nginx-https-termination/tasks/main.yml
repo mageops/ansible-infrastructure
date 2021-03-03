@@ -25,5 +25,3 @@
 - name: Setup automatically renewed ACME certificates
   import_tasks: 034-certificates-acme.yml
 
-- name: Ensure changes take effect
-  meta: flush_handlers
