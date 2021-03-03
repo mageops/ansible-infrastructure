@@ -2,5 +2,7 @@
 # Avg compression level is 3:1
 # Rule of thumb: set it to 3/4 of available memory
 # this will consume 1/4 or real memory
-#
-zram_size: 768M
+
+zram_swap_priority: 100
+zram_size_relative: 0.5
+zram_size: "{{ ( ansible_memtotal_mb | int * zram_size_relative | float ) | int }}MB"

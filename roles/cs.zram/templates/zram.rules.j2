@@ -1,1 +1,1 @@
-KERNEL=="zram0", SUBSYSTEM=="block", DRIVER=="", ACTION=="add", ATTR{disksize}=="0", ATTR{disksize}="{{ zram_size }}", RUN+="/sbin/mkswap $env{DEVNAME}" RUN+="/sbin/swapon -p 10 $env{DEVNAME}"
+KERNEL=="zram0", SUBSYSTEM=="block", DRIVER=="", ACTION=="add", ATTR{disksize}=="0", ATTR{disksize}="{{ zram_size }}", RUN+="/sbin/mkswap $env{DEVNAME}" RUN+="/sbin/swapon -p {{ zram_swap_priority }} $env{DEVNAME}"

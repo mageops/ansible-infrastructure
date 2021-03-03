@@ -657,12 +657,28 @@ mageops_install_development_tools: yes
 # setup language redirect
 mageops_language_redirect_enable: no
 
-# Tune sysctl to reduce iops
-mageops_reduce_iops: "{{ aws_use }}"
+# Configure a vmtouch daemon force-keeping magento sources / compiled opcache in RAM
+mageops_magento_preload_fscache_enable: >-
+  {{ ( ansible_memtotal_mb | default(512, true) | int >= 7168 ) 
+        and php_cli_opcache_file_cache_enable | default(false, true) }}
+
+# Tune Linux Virtual Memory kernel sysctl params for lower disk IO
+mageops_app_node_optimize_kernel_vm_io: yes
+
+# Enable zram swap device on app nodes
+mageops_app_node_zram_enable: >-
+  {{ ansible_memtotal_mb | default(512, true) | int <= 3072 }}
+
+# Size of zram device relative to total system memory
+mageops_app_node_zram_size_relative: 0.6
 
 # App node swap config
-mageops_swap_app_node_enable: yes
-mageops_zram_app_node_enable: "{{ mageops_reduce_iops }}"
+mageops_app_node_swap_enable: yes
+
+# Set minimal swapping if have only on-disk swapfile and increase to moderate
+# moderate swapping if we have zram (which has bigger priority than the swapfile).
+mageops_app_node_swappiness: >-
+  {{ mageops_app_node_zram_enable | ternary(50, 25) }}
 
 # Secret token used for accessing internal non-sensitive APIs and debugging
 # facilities.
