@@ -1,9 +1,17 @@
-- name: Reload nginx configs
+- name: Cleanup nginx configs
   include_tasks: 099-cleanup.yml
   when: nginx_config_cleanup
+  listen:
+    - Reload nginx configs
 
 - name: Restart nginx
-  service: name=nginx state=restarted
+  service:
+    name: nginx
+    state: restarted
 
 - name: Reload nginx
-  service: name=nginx state=reloaded
+  service:
+    name: nginx
+    state: reloaded
+  listen:
+    - Reload nginx configs
