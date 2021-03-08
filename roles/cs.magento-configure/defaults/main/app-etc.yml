@@ -103,6 +103,7 @@ magento_app_etc_config_cache_default_redis:
           server: "{{ mageops_redis_host }}"
           database: "0"
           port: "{{ mageops_redis_port }}"
+          persistent: "magento_redis_cache_default"
 
 
 magento_app_etc_config_cache_default_redis_l2:
@@ -141,6 +142,7 @@ magento_app_etc_config_cache_page_redis:
           server: "{{ mageops_redis_host }}"
           database: "1"
           port: "{{ mageops_redis_port }}"
+          persistent: "magento_redis_cache_page"
           compress_data: "0"
 
 # Optional RabbitMQ queue config
