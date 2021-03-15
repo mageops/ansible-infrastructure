@@ -126,6 +126,9 @@ varnish_vcl_backend_error_extra: ""
 
 varnish_strip_params: ['gclid']
 
+# More advanced form of varnish_strip_params that allows to control key and value
+varnish_strip_regex: []
+
 # Set to unique, secret value in order to enable
 # pass-through request debugging
 varnish_debug_request_token: ~
