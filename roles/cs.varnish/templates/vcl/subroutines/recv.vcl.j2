@@ -213,10 +213,11 @@ set req.url = regsuball(req.url,"\?{{ param }}=[^&]+$","");  # strips when QS = 
 {% endfor %}
 
 {% for param in varnish_strip_regex %}
-set req.url = regsuball(req.url,"&{{ param }}&","&");
-set req.url = regsuball(req.url,"&{{ param }}$","");
-set req.url = regsuball(req.url,"\?{{ param }}&","?");
-set req.url = regsuball(req.url,"\?{{ param }}$","");
+# remove all forms of param (advanced match): {{ param }} - The order is important!
+set req.url = regsuball(req.url,"&{{ param }}&","&");    # /url?foo=123&param&bar=123
+set req.url = regsuball(req.url,"\?{{ param }}&","?");   # /url?param&foo=123
+set req.url = regsuball(req.url,"&{{ param }}$","");     # /url?foo=123&param
+set req.url = regsuball(req.url,"\?{{ param }}$","");    # /url?param
 {% endfor %}
 
 
