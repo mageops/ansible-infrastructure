@@ -28,9 +28,9 @@
       become: yes
       become_user: "{{ magento_user }}"
       loop: 
-        - "bin/magento app:config:import --no-interaction"
-        - "bin/magento setup:upgrade --keep-generated"
-        - "bin/magento maintenance:disable"
+        - "bin/magento app:config:import --no-interaction --no-ansi"
+        - "bin/magento setup:upgrade --keep-generated --no-interaction --no-ansi"
+        - "bin/magento maintenance:disable --no-interaction --no-ansi"
         # - "bin/magento cache:flush full_page"
         - "{{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}"
       loop_control:

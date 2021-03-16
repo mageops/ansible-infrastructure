@@ -21,7 +21,8 @@
           {% if mageops_elasticsearch_host | default(false, true) -%}
             '--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}' \
           {% endif %}
-          '--base-url={{ magento_base_url }}'
+          '--base-url={{ magento_base_url }}' \
+          '--no-interaction' '--no-ansi'
       args:
         chdir: "{{ magento_deployment_dir }}"
   become: true

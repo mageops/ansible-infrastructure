@@ -28,3 +28,6 @@ jq
 
 # required if host running ansible have selinux installed
 selinux
+
+# required for error pages
+libsass

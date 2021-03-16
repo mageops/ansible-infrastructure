@@ -1,0 +1,142 @@
+- name: Install Magento (fresh)
+  block:
+    - name: Install Magento
+      shell: >
+        php {{ magento_release_dir }}/bin/magento setup:install \
+          '--backend-frontname={{ magento_admin_path }}' \
+          '--session-save=db' \
+          '--db-host={{ mageops_mysql_host }}' \
+          '--db-user={{ mageops_app_mysql_user }}' \
+          '--db-password={{ mageops_app_mysql_pass }}' \
+          '--db-name={{ mageops_app_mysql_db }}' \
+          '--use-rewrites=1' \
+          '--admin-user={{ magento_admin_user_username }}' \
+          '--admin-password={{ magento_admin_user_password }}' \
+          '--admin-email={{ magento_admin_user_email }}' \
+          '--admin-firstname={{ magento_admin_user_firstname }}' \
+          '--admin-lastname={{ magento_admin_user_lastname }}' \
+          '--language={{ magento_language }}' \
+          '--currency={{ magento_currency }}' \
+          '--key={{ magento_crypt_key }}' \
+          {% if elasticsuite_version is defined and elasticsuite_version is version_compare('2.5', '>=') -%}
+            '--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}' \
+          {% endif %}
+          '--base-url={{ magento_base_url }}' \
+          '--no-interaction' '--no-ansi'
+      args:
+        chdir: "{{ magento_deployment_dir }}"
+  become: true
+  become_user: "{{ magento_user }}"
+  when: not database_exists
+
+- name: Configure Magento environment (env.php)
+  block:
+    - name: Enable ElasticSuite 2.4+ configuration
+      when: elasticsuite_version is version_compare('2.4', '>=')
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_elasticsuite, recursive=true) }}
+
+    - name: Configure Redis caching
+      when: magento_redis_cache
+      block:
+        - name: Enable default Redis cache
+          when: not magento_redis_cache_l2
+          set_fact:
+            magento_app_etc_config: >-
+              {{ magento_app_etc_config
+                  | combine(magento_app_etc_config_cache_default_redis, recursive=true) }}
+
+        - name: Enable 2-level default Redis cache
+          when: magento_redis_cache_l2
+          set_fact:
+            magento_app_etc_config: >-
+              {{ magento_app_etc_config
+                  | combine(magento_app_etc_config_cache_default_redis_l2, recursive=true) }}
+
+        - name: Configure Redis page cache
+          set_fact:
+            magento_app_etc_config: >-
+              {{ magento_app_etc_config
+                  | combine(magento_app_etc_config_cache_page_redis, recursive=true) }}
+
+    - name: Enable RabbitMQ queue configuration
+      when: magento_rabbitmq_queue
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_queue_rabbitmq, recursive=true) }}
+
+    - name: Adjust configuration for consumer workers
+      when: magento_consumer_workers_enable and magento_version is version('2.3', '>=')
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_consumer_workers, recursive=true) }}
+
+    - name: Enable file lock provider
+      when: magento_lock_files_enabled
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_file_locking, recursive=true) }}
+
+    - name: Set extra options
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_extra, recursive=true) }}
+
+    - name: Export configuration as PHP code
+      command:
+        stdin: "{{ magento_app_etc_config | to_json }}"
+        argv:
+          - php
+          - -r
+          - >-
+            echo "<?php \n\n";
+            echo "return ";
+
+            $data = json_decode(
+              file_get_contents("php://stdin"),
+              true
+            );
+
+            if (false === $data) {
+              fwrite(STDOUT, json_last_error_msg());
+              exit(json_last_error());
+            }
+
+            var_export($data);
+
+            echo "; \n\n";
+      changed_when: false
+      register: magento_app_enc_config_export
+
+    - name: Install configuration file
+      copy:
+        content: "{{ magento_app_enc_config_export.stdout }}"
+        dest: "{{ magento_release_dir }}/app/etc/env.php"
+        owner: "{{ magento_user }}"
+        group: "{{ magento_group }}"
+        mode: 0640
+        force: 1
+
+- name: Configure Magento application (config.php)
+  template:
+    src: "{{ magento_app_etc_config_template }}"
+    dest: "{{ magento_release_dir }}/app/etc/config.php"
+    owner: "{{ magento_user }}"
+    group: "{{ magento_group }}"
+    mode: 0640
+    force: 1
+  when: deploy_install_new_release
+
+- name: Import new configuration
+  become: true
+  become_user: "{{ magento_user }}"
+  shell: php {{ magento_release_dir }}/bin/magento app:config:import --no-interaction --no-ansi
+  args:
+    chdir: "{{ magento_deployment_dir }}"
+  when: not deploy_install_new_release
