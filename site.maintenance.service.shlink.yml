@@ -53,10 +53,8 @@
 
     nginx_blacklist_vhost_check_include_file: ~
 
-    https_termination_hosts:
-      - name: "{{ shlink_short_domain }}"
-        server_name: "{{ shlink_short_domain }}"
-        letsencrypt: yes
+    https_termination_hosts: []
+
     https_termination_proxy_http_port: yes
 
     https_termination_upstream_host: 127.0.0.1
@@ -66,6 +64,22 @@
     https_termination_crt_acme_email: filip.sobalski@creativestyle.pl
 
   pre_tasks:
+    - name: Initialize short domain list
+      set_fact:
+        shlink_domains: "{{ [shlink_short_domain] + shlink_short_domains_extra | default([]) }}"
+
+    - name: Compute vhost configuration
+      set_fact:
+        https_termination_hosts: "{{ https_termination_hosts + [host] }}"
+      vars:
+        host:
+          name: "{{ domain }}"
+          server_name: "{{ domain }}"
+          letsencrypt: yes
+      loop: "{{ shlink_domains }}"
+      loop_control:
+        loop_var: domain
+
     - name: Automatically configure MySQL host as RDS instance
       when: >-
           aws_use
