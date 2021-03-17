@@ -1,7 +1,0 @@
-- name: Install node warmup script
-  template:
-    src: magento_node_warmup.sh.j2
-    dest: "{{ magento_release_dir }}{{ magento_node_warmup_script_path }}"
-    owner: "{{ magento_user }}"
-    group: "{{ magento_group }}"
-    mode: 0750

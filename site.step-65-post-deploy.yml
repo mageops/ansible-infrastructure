@@ -8,36 +8,27 @@
         delay: 10
         timeout: 300
 
-# Non-zero status means setup:upgrade is required
-# bin/magento setup:db:status 
-# systemctl stop supervisord 
-
-# su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento maintenance:enable'
-# su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento setup:upgrade --keep-generated'
-# su - {{ magento_user }} -c 'php {{ magento_live_release_dir }}/bin/magento maintenance:disable'
-
-# systemctl start supervisord
 - hosts: app:&current
   gather_facts: no
   tasks:
-    - name: Run Magento setup upgrade
+    - name: Run Magento post-deploy setup
       command: "{{ item.cmd | default(item) }}"
       args:
         chdir: "{{ item.dir | default(magento_live_release_dir) }}"
       run_once: true
       become: yes
       become_user: "{{ magento_user }}"
-      loop: 
-        - "bin/magento app:config:import --no-interaction"
-        - "bin/magento setup:upgrade --keep-generated"
-        - "bin/magento maintenance:disable"
-        # - "bin/magento cache:flush full_page"
-        - "{{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}"
+      loop: "{{ commands_base + magento_post_deploy_commands | default([]) }}"
       loop_control:
         label: "{{ item.cmd | default(item) }}"
       register: out
+      vars: 
+        commands_base:
+          - "bin/magento app:config:import --no-interaction"
+          - "bin/magento setup:upgrade --keep-generated"
+          - "bin/magento maintenance:disable"
 
-    - name: Show Magento post-deploy command output
+    - name: Show Magento post-deploy output
       debug:
         msg: "{{ result.stdout | default('--- N/A ---') }}"
       loop: "{{ out.results }}"
@@ -45,32 +36,13 @@
         loop_var: result
         label: "{{ result.cmd | default([]) | join(' ') }}"
 
-- hosts: app:&current
-  gather_facts: no
-  tasks:
-    - name: Run Magento post-deploy commands
-      command: "{{ item.cmd | default(item) }}"
-      args:
-        chdir: "{{ item.dir | default(magento_live_release_dir) }}"
-      run_once: true
-      become: yes
-      become_user: "{{ magento_user }}"
-      loop: "{{ magento_post_deploy_commands | default([]) }}"
+    - name: Start Magento services
+      service:
+        name: "{{ service_name }}"
+        state: started
+      loop:
+        - magento-node-warmup.service
+        - supervisord.service
       loop_control:
-        label: "{{ item.cmd | default(item) }}"
-      register: out
-
-    - name: Show Magento post-deploy command output
-      debug:
-        msg: "{{ result.stdout | default('--- N/A ---') }}"
-      loop: "{{ out.results }}"
-      loop_control:
-        loop_var: result
-        label: "{{ result.cmd | default([]) | join(' ') }}"
-
-
-- hosts: app:&current
-  gather_facts: no
-  tasks:
-    - name: Start supervisord Magento workers
-      command: /usr/bin/systemctl start supervisord
+        loop_var: service_name
+      
