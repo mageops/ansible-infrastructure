@@ -145,3 +145,6 @@ varnish_syscfg_limit_nofile: 131072
 varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
 varnish_syscfg_limit_core: "infinity"
+
+varnish_404_cache_time: 60s
+varnish_301_cache_time: 3h
