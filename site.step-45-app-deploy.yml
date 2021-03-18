@@ -35,6 +35,13 @@
 
           ---------------------------------------------
 
+    - name: Set artifact build number fact if available
+      when: deploy_artifact_build_json_data.nr | default(false, true)
+      set_fact:
+        mageops_artifact_build_nr: "{{ deploy_artifact_build_json_data.nr }}"
+      delegate_to: localhost
+      delegate_facts: yes
+
     - name: Check if previous release exists
       stat:
         path: "{{ deploy_current_release_dir }}"
@@ -152,6 +159,9 @@
     # Helper variables for sanity checks and messages
     deploy_artifact_composer_json_local_path: "{{ deploy_artifact_local_path ~ '/composer.json' }}"
     deploy_artifact_composer_json_data: "{{ lookup('file', deploy_artifact_composer_json_local_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"
+
+    deploy_artifact_build_json_local_path: "{{ deploy_artifact_local_path ~ '/pub/BUILD.json' }}"
+    deploy_artifact_build_json_data: "{{ lookup('file', ddeploy_artifact_build_json_local_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"
 
     magento_core_config_settings: "{{ magento_core_config_settings_default + magento_core_config_settings_extra }}"
     magento_core_config_settings_to_remove: "{{ magento_core_config_settings_to_remove_default + magento_core_config_settings_to_remove_extra }}"
