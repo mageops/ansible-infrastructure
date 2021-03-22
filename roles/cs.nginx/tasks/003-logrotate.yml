@@ -1,0 +1,5 @@
+- name: Install nginx logroate config
+  template:
+    src: nginx.logrotate
+    dest: /etc/logrotate.d/nginx
+    mode: 0644

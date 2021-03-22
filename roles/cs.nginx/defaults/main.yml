@@ -35,3 +35,12 @@ nginx_config_cleanup_dirs:
   - "{{ nginx_modules_conf_dir }}"
 
 nginx_config_cleanup: yes
+
+# Size of log file when it is legitimate for rotation
+nginx_logrotate_log_size: 256M
+
+# Amount of historic log files to keep
+nginx_logrotate_history: 52
+
+# Max age of kept log files in days
+nginx_logrotate_maxage_days: 14
