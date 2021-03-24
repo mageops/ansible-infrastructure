@@ -14,8 +14,8 @@
       aws_security_group_elasticsearch_create: "{{ mageops_elasticsearch_create }}"
     - role: cs.aws-s3
     - role: cs.aws-cloudfront
-      aws_cloudfront_use_lambda: "{{ aws_cloudfront_optimizing_edge_lambda_enable }}"
-      aws_cloudfront_lambda_arn: "{{ aws_cloudfront_lambda_latest_arn | default(omit, true) }}"
+      aws_cloudfront_use_lambda: no
+      aws_cloudfront_lambda_arn: ~
       when: aws_cloudfront_distribution_create | bool
     - role: cs.aws-rds
       when: aws_rds_create
