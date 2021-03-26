@@ -102,6 +102,7 @@ varnish_throttling: no
 # - `duration` (required) - time window over which the `limit` requests may be performed
 #   (use varnish duration format, See: https://varnish-cache.org/docs/6.0/reference/vcl.html#durations)
 # - `block` (optional) - if rate is exceded, ban user for this duration
+# - `secret` (optional) - default no, if set it will hide headers that expose rate limiting
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
