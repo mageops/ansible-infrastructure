@@ -8,6 +8,12 @@ import accept;
     import vsthrottle;
 {% endif %}
 
+{% if varnish_magento_vary_sign -%}
+    import blobdigest;
+    import cookie;
+    import blob;
+{% endif %}
+
 {% include "acl.vcl.j2" %}
 
 {% if varnish_standalone -%}

@@ -47,9 +47,9 @@ magento_app_etc_config_template: magento_app_etc_config.php.j2
 # See: https://devdocs.magento.com/guides/v2.4/config-guide/redis/redis-pg-cache.html#new-redis-cache-implementation
 magento_redis_cache_backend_legacy: yes
 magento_redis_cache_backend_fqcn: >-
-  {{ magento_redis_cache_backend_legacy 
+  {{ magento_redis_cache_backend_legacy
       | ternary(
-          'Cm_Cache_Backend_Redis', 
+          'Cm_Cache_Backend_Redis',
           '\Magento\Framework\Cache\Backend\Redis'
         ) }}
 
@@ -91,3 +91,5 @@ magento_scd_languages:
   - en_US
 
 
+magento_vary_secret: ""
+magento_vary_sign: no

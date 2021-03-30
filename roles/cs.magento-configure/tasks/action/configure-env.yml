@@ -2,7 +2,7 @@
   block:
     - name: Enable HTTP cache
       when: magento_http_cache_enable
-      set_fact: 
+      set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_http_cache, recursive=true) }}
@@ -58,6 +58,13 @@
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_file_locking, recursive=true) }}
 
+    - name: Configure X-Magento-Vary cookie signing
+      when: magento_vary_sign
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_cookie_sign, recursive=true) }}
+
     - name: Set extra options
       set_fact:
         magento_app_etc_config: >-
@@ -98,5 +105,3 @@
         group: "{{ magento_group }}"
         mode: 0640
         force: 1
-
-

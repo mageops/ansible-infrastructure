@@ -657,7 +657,7 @@ mageops_language_redirect_enable: no
 
 # Configure a vmtouch daemon force-keeping magento sources / compiled opcache in RAM
 mageops_magento_preload_fscache_enable: >-
-  {{ ( ansible_memtotal_mb | default(512, true) | int >= 7168 ) 
+  {{ ( ansible_memtotal_mb | default(512, true) | int >= 7168 )
         and php_cli_opcache_file_cache_enable | default(false, true) }}
 
 # Tune Linux Virtual Memory kernel sysctl params for lower disk IO
@@ -1784,3 +1784,13 @@ mageops_unison_server_port: 5566
 # ---------------------------
 
 mageops_monitoring_enabled: no
+
+
+# ----------------------------------------------
+# -------  X-Magento-Vary Cookie signing  ------
+# ----------------------------------------------
+
+mageops_magento_vary_sign_enabled: no
+mageops_magento_vary_sign_secret: ""
+magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
+magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"

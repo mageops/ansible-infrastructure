@@ -174,3 +174,8 @@ magento_app_etc_config_file_locking:
       path: "{{ magento_lock_files_dir }}"
 
 magento_app_etc_config_extra: {}
+
+# Optional config for X-Magento-Vary signing
+magento_app_etc_config_cookie_sign:
+  vary_cookie_sign:
+    key: "{{ magento_vary_secret }}"
