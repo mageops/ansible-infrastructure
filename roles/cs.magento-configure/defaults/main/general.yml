@@ -76,3 +76,6 @@ magento_scd_excluded_themes: []
 magento_scd_languages:
   - de_DE
   - en_US
+
+magento_vary_secret: ""
+magento_vary_sign: no

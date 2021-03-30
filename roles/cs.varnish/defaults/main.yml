@@ -15,6 +15,7 @@ varnish_purge_trusted_ips: []
 varnish_extra_packages:
   - varnish-modules-extra
   - varnish-module-accept
+  - varnish-module-blobdigest
 
 varnish_port: 80
 varnish_listen_address: ~
@@ -148,3 +149,6 @@ varnish_syscfg_limit_nofile: 131072
 varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
 varnish_syscfg_limit_core: "infinity"
+
+varnish_magento_vary_sign: no
+varnish_magento_vary_secret: ""
