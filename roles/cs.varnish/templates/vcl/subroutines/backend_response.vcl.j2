@@ -11,6 +11,7 @@ if (bereq.url ~ "\.js$" || beresp.http.content-type ~ "text") {
 # Cache 404 and 301 for 5min
 if(beresp.status == 404 || beresp.status == 301) {
     set beresp.ttl = 300s;
+    return (deliver);
 # cache only 200 and 204 for 24h
 } elsif (beresp.status != 200 && beresp.status != 204) {
     set beresp.ttl = 0s;
