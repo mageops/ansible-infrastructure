@@ -225,6 +225,7 @@ if (req.http.cookie ~ "X-Magento-Vary=") {
     cookie.parse(req.http.cookie);
     if(! sha1.update( blob.decode( encoded=cookie.get("X-Magento-Vary") + "{{ varnish_magento_vary_secret | quote }}" ) ) ) {
         return (synth(500, "Internal Server Error"));
+    }
 
     if ( blob.encode( encoding=HEX, case=LOWER, blob=sha1.final() ) != cookie.get("X-Magento-Vary-Sign") ) {
         cookie.delete("X-Magento-Vary");
