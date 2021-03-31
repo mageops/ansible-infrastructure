@@ -6,7 +6,8 @@ varnish_secure_site_user: varnish
 varnish_secure_site_password: varnish
 
 # Bypass basic auth protecting when remote IP matches any of these
-varnish_secure_site_trusted_ips: []
+# And allow sending debug headers
+varnish_trusted_ips: []
 
 # List of CIDRs that can perform PURGE requests
 # By defaults they are accepted only from 127.0.0.1
@@ -152,3 +153,9 @@ varnish_syscfg_limit_core: "infinity"
 
 varnish_magento_vary_sign: no
 varnish_magento_vary_secret: ""
+
+# This option will hide all informations from headers
+# that reveal if page was cached in varnish
+# If you are on varnish_trusted_ips list you will
+# still receive those headers
+varnish_do_not_expose_caching: no
