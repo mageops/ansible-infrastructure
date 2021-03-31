@@ -120,6 +120,19 @@
       include_tasks: "{{ mageops_extra_tasks_deploy }}"
       when: mageops_extra_tasks_deploy is defined and mageops_extra_tasks_deploy
 
+    - name: Save deploy release information to file
+      when: deploy_release_save_info_file_path | default(false, true)
+      copy:
+        dest: "{{ deploy_release_save_info_file_path }}"
+        content: "{{ deploy_release_info | to_nice_json }}"
+      vars:
+        deploy_release_info:
+          app_db_migrations_needed: "{{ magento_release_db_migrations_needed | default(none, true) }}"
+          app_db_migrations_info: "{{ magento_release_db_migrations_info | default(none, true )"
+          release_id: "{{ deploy_release_id | default(none, true) }}"
+          build_nr: "{{ mageops_artifact_build_nr | default(none, true) }}"
+      delegate_to: localhost
+
   vars:
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"
     deploy_keep_current_releases: 2
@@ -172,3 +185,5 @@
 
     magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
     magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
+
+    deploy_release_save_info_file_path: "{{ mageops_ansible_temp_dir }}/RELEASE.json"
