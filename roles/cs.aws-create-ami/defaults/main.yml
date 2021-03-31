@@ -7,3 +7,4 @@ aws_ami_build_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, 
 
 # If set then extra info about built AMI will be saved as JSON
 aws_ami_build_save_info_file_path: "{{ mageops_ansible_temp_dir }}/BUILD.AMI.json"
+aws_ami_release_info: "{{ lookup('file', deploy_release_save_info_file_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"

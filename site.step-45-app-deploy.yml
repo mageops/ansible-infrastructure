@@ -39,8 +39,6 @@
       when: deploy_artifact_build_json_data.nr | default(false, true)
       set_fact:
         mageops_artifact_build_nr: "{{ deploy_artifact_build_json_data.nr }}"
-      delegate_to: localhost
-      delegate_facts: yes
 
     - name: Check if previous release exists
       stat:
@@ -127,10 +125,10 @@
         content: "{{ deploy_release_info | to_nice_json }}"
       vars:
         deploy_release_info:
-          app_db_migrations_needed: "{{ magento_release_db_migrations_needed | default(none, true) }}"
-          app_db_migrations_info: "{{ magento_release_db_migrations_info | default(none, true )"
-          release_id: "{{ deploy_release_id | default(none, true) }}"
-          build_nr: "{{ mageops_artifact_build_nr | default(none, true) }}"
+          app_db_migrations_needed: "{{ magento_release_db_migrations_needed | default(none) }}"
+          app_db_migrations_info: "{{ magento_release_db_migrations_info | default(none) }}"
+          release_id: "{{ deploy_release_id | default(none) }}"
+          build_nr: "{{ mageops_artifact_build_nr | default(none) }}"
       delegate_to: localhost
 
   vars:
@@ -186,4 +184,4 @@
     magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
     magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
 
-    deploy_release_save_info_file_path: "{{ mageops_ansible_temp_dir }}/RELEASE.json"
+    
