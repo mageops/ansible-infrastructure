@@ -1640,6 +1640,9 @@ deploy_rsync_excludes_extra: []
 # Extra dirs that will be shared across releases
 deploy_shared_dirs_extra: []
 
+# Where to save the release info JSON locally
+deploy_release_save_info_file_path: "{{ mageops_ansible_temp_dir }}/RELEASE.json"
+
 # --------------------------------------
 # --------  System Maintenance  --------
 # --------------------------------------

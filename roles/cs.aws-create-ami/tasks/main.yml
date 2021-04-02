@@ -7,7 +7,6 @@
     wait: yes
   register: ami_builder_instance
 
-
 - name: Create AMI
   ec2_ami:
     region: "{{ aws_region }}"
@@ -27,6 +26,10 @@
   vars:
     ami_name_tags:
       Name: "{{ ami_description }}"
+      ArtifactBuildNr: "{{ aws_ami_release_info.build_nr | default('') }}"
+      DeployReleaseId: "{{ aws_ami_release_info.release_id | default('') }}"
+      NeedsDbMigrations: "{{ aws_ami_release_info.app_db_migrations_needed | default(true) | to_json }}"
+      CIJob: "{{ lookup('env', 'JOB_NAME') | default('', true) }} #{{ lookup('env', 'BUILD_NUMBER') | default('', true) }}"
     aws_ami_build_root_volume_mapping_gp3: 
       device_name: "{{ (ami_builder_instance.instances | first).root_device_name }}"
       volume_type: "{{ aws_ami_build_ebs_volume_type }}"
@@ -48,3 +51,17 @@
   retries: 360
   delay: 5
   when: ami_output is changed
+
+- name: Set info about built AMI
+  set_fact:
+    aws_create_ami_info:
+      image_id: "{{ ami_output.image_id }}"
+      build_nr: "{{ aws_ami_release_info.build_nr | default(none) }}"
+      release_id: "{{ aws_ami_release_info.release_id | default(none) }}"
+      
+- name: Save built AMI info into a file
+  when: aws_ami_build_save_info_file_path | default(false, true)
+  copy:
+    dest: "{{ aws_ami_build_save_info_file_path }}"
+    content: "{{ aws_create_ami_info | to_nice_json }}"
+  delegate_to: localhost

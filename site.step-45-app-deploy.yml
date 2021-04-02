@@ -35,6 +35,11 @@
 
           ---------------------------------------------
 
+    - name: Set artifact build number fact if available
+      when: deploy_artifact_build_json_data.nr | default(false, true)
+      set_fact:
+        mageops_artifact_build_nr: "{{ deploy_artifact_build_json_data.nr }}"
+
     - name: Check if previous release exists
       stat:
         path: "{{ deploy_current_release_dir }}"
@@ -113,6 +118,19 @@
       include_tasks: "{{ mageops_extra_tasks_deploy }}"
       when: mageops_extra_tasks_deploy is defined and mageops_extra_tasks_deploy
 
+    - name: Save deploy release information to file
+      when: deploy_release_save_info_file_path | default(false, true)
+      copy:
+        dest: "{{ deploy_release_save_info_file_path }}"
+        content: "{{ deploy_release_info | to_nice_json }}"
+      vars:
+        deploy_release_info:
+          app_db_migrations_needed: "{{ magento_release_db_migrations_needed | default(none) }}"
+          app_db_migrations_info: "{{ magento_release_db_migrations_info | default(none) }}"
+          release_id: "{{ deploy_release_id | default(none) }}"
+          build_nr: "{{ mageops_artifact_build_nr | default(none) }}"
+      delegate_to: localhost
+
   vars:
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"
     deploy_keep_current_releases: 2
@@ -153,6 +171,9 @@
     deploy_artifact_composer_json_local_path: "{{ deploy_artifact_local_path ~ '/composer.json' }}"
     deploy_artifact_composer_json_data: "{{ lookup('file', deploy_artifact_composer_json_local_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"
 
+    deploy_artifact_build_json_local_path: "{{ deploy_artifact_local_path ~ '/pub/BUILD.json' }}"
+    deploy_artifact_build_json_data: "{{ lookup('file', deploy_artifact_build_json_local_path, errors='warn', lstrip=true, rstrip=true) | default('{}', true) | from_json }}"
+
     magento_core_config_settings: "{{ magento_core_config_settings_default + magento_core_config_settings_extra }}"
     magento_core_config_settings_to_remove: "{{ magento_core_config_settings_to_remove_default + magento_core_config_settings_to_remove_extra }}"
     magento_varnish_host: "{{ mageops_varnish_host }}"
@@ -162,3 +183,5 @@
 
     magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
     magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
+
+    

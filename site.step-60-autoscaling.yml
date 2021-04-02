@@ -3,9 +3,13 @@
 # Removed because it is not working. Connection error 100%. Most likely because it tries to connect to builder that already died.
 - hosts: app:&current:&immutable
   gather_facts: no
+  roles:
+    - role: cs.aws-ami-facts
+      delegate_to: localhost
   tasks:
-    - name: Enable Magento maintenance mode
+    - name: Enable Magento maintenance mode (if AMI release has DB migrations)
       command: "bin/magento maintenance:enable"
+      when: aws_ami_app_node_needs_db_migrations | default(true)
       args:
         chdir: "{{ item.dir | default(magento_live_release_dir) }}"
       run_once: true
@@ -47,7 +51,7 @@
       autoscaling_asg_max_size: "{{ aws_app_asg_max_size }}"
       autoscaling_asg_cooldown: "{{ aws_app_asg_cooldown }}"
 
-      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
+      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id }}"
       autoscaling_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
       autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"
       autoscaling_instance_iam_role: "{{ aws_iam_role_app_node }}"
@@ -93,7 +97,7 @@
       autoscaling_asg_max_size: "{{ aws_extra_app_asg_max_size }}"
       autoscaling_asg_cooldown: "{{ aws_extra_app_asg_cooldown }}"
 
-      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
+      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id }}"
       autoscaling_instance_type: "{{ aws_extra_app_node_instance_type }}"
       autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"
       autoscaling_instance_iam_role: "{{ aws_iam_role_app_node }}"
