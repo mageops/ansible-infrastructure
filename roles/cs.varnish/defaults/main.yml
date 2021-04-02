@@ -96,6 +96,7 @@ varnish_throttling: no
 # Throttling rules, an array of items, each containing:
 # - `id` (required) - unqiue string used internally for hash computation
 # - `path_pattern` (required) - regex pattern that defined affects request paths
+# - `method` (optional) - match this limit only for specified http method
 # - `error_message` (optional) - custom error string returned to client when this rule is triggered
 # - `limit` (required) - number of requests until clien tis throttled
 # - `duration` (required) - time window over which the `limit` requests may be performed
@@ -105,7 +106,13 @@ varnish_throttling: no
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
+# When first rule matches other rules are not evaluated, you can use that to add exclusions with more relaxed limits
 varnish_throttling_rules: []
+
+# This rule behaves similarly to varnish_throttling_rules with one difference
+# All of this rules are evaluated instead of first matching one
+# This can be used to add for example generic POST limit
+varnish_throttling_rules_always: []
 
 varnish_backend_instances_extra: []
 varnish_backend_instances_app:
