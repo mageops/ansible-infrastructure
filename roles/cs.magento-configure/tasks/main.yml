@@ -23,6 +23,8 @@
 - name: Post setup tasks (that need root)
   block:
     - include_tasks: 150-configure-logrotate.yml
+
+- include_tasks: 160-gather-release-info.yml
     
 - name: Install final Magento configuration
   include_tasks: 200-config-finalize.yml
@@ -31,7 +33,6 @@
   when: magento_consumer_workers_enable and magento_version is version('2.3', '>=')
 
 - include_tasks: 250-setup-services.yml
-- include_tasks: 900-gather-release-info.yml
 
 
 
