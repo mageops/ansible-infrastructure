@@ -35,3 +35,5 @@ nginx_config_cleanup_dirs:
   - "{{ nginx_modules_conf_dir }}"
 
 nginx_config_cleanup: yes
+
+nginx_syscfg_limit_nofile: 131072

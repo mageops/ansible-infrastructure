@@ -20,9 +20,14 @@ RuntimeDirectoryMode=0755
 RestartSec=3
 Restart=always
 
+# Redis is latency critical, therefore assign real time priority
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=49
+
 TimeoutStartSec=30
 TimeoutStopSec=60
 
+# NOTE: this value is probably overwritten by limit.conf file
 LimitNOFILE=131072
 
 [Install]

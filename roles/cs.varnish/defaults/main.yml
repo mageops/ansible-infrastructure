@@ -155,8 +155,12 @@ varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
 varnish_syscfg_limit_core: "infinity"
 
+varnish_404_cache_time: 60s
+varnish_301_cache_time: 3h
+
 # This option will hide all informations from headers
 # that reveal if page was cached in varnish
 # If you are on varnish_trusted_ips list you will
 # still receive those headers
 varnish_do_not_expose_caching: no
+
