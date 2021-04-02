@@ -1,37 +1,14 @@
-- name: Install Magento (fresh)
-  block:
-    - name: Install Magento
-      shell: >
-        php {{ magento_release_dir }}/bin/magento setup:install \
-          '--backend-frontname={{ magento_admin_path }}' \
-          '--session-save=db' \
-          '--db-host={{ mageops_mysql_host }}' \
-          '--db-user={{ mageops_app_mysql_user }}' \
-          '--db-password={{ mageops_app_mysql_pass }}' \
-          '--db-name={{ mageops_app_mysql_db }}' \
-          '--use-rewrites=1' \
-          '--admin-user={{ magento_admin_user_username }}' \
-          '--admin-password={{ magento_admin_user_password }}' \
-          '--admin-email={{ magento_admin_user_email }}' \
-          '--admin-firstname={{ magento_admin_user_firstname }}' \
-          '--admin-lastname={{ magento_admin_user_lastname }}' \
-          '--language={{ magento_language }}' \
-          '--currency={{ magento_currency }}' \
-          '--key={{ magento_crypt_key }}' \
-          {% if elasticsuite_version is defined and elasticsuite_version is version_compare('2.5', '>=') -%}
-            '--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}' \
-          {% endif %}
-          '--base-url={{ magento_base_url }}'
-      args:
-        chdir: "{{ magento_deployment_dir }}"
-  become: true
-  become_user: "{{ magento_user }}"
-  when: not database_exists
-
 - name: Configure Magento environment (env.php)
   block:
-    - name: Enable ElasticSuite 2.4+ configuration
-      when: elasticsuite_version is version_compare('2.4', '>=')
+    - name: Enable HTTP cache
+      when: magento_http_cache_enable
+      set_fact: 
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_http_cache, recursive=true) }}
+
+    - name: Enable ElasticSuite configuration
+      when: elasticsuite_version | default(false, true)
       set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
@@ -122,20 +99,4 @@
         mode: 0640
         force: 1
 
-- name: Configure Magento application (config.php)
-  template:
-    src: "{{ magento_app_etc_config_template }}"
-    dest: "{{ magento_release_dir }}/app/etc/config.php"
-    owner: "{{ magento_user }}"
-    group: "{{ magento_group }}"
-    mode: 0640
-    force: 1
-  when: deploy_install_new_release
 
-- name: Import new configuration
-  become: true
-  become_user: "{{ magento_user }}"
-  shell: php {{ magento_release_dir }}/bin/magento app:config:import
-  args:
-    chdir: "{{ magento_deployment_dir }}"
-  when: not deploy_install_new_release

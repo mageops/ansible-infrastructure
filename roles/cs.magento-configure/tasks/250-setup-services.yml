@@ -1,0 +1,11 @@
+- name: Install node warmup service
+  template:
+    src: magento-node-warmup.service
+    dest: /etc/systemd/system/magento-node-warmup.service
+
+- name: Enable node warmup service
+  systemd:
+    name: magento-node-warmup.service
+    state: stopped
+    enabled: yes
+    daemon_reload: yes

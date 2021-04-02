@@ -1,5 +1,6 @@
 [Unit]
 Description=Redis persistent key-value database
+
 After=network.target
 After=network-online.target
 Wants=network-online.target
@@ -7,7 +8,7 @@ Wants=network-online.target
 [Service]
 Type=notify
 
-ExecStart=/usr/bin/redis-server {{ redis_conf_path }} --supervised systemd
+ExecStart=/usr/bin/redis-server {{ redis_conf_path }} --daemonize no --supervised systemd
 ExecStop=/usr/libexec/redis-shutdown {{ redis_daemon }}
 
 User=redis
@@ -18,6 +19,11 @@ RuntimeDirectoryMode=0755
 
 RestartSec=3
 Restart=always
+
+TimeoutStartSec=30
+TimeoutStopSec=60
+
+LimitNOFILE=131072
 
 [Install]
 WantedBy=multi-user.target

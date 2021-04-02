@@ -26,6 +26,9 @@ magento_lock_files_enabled: no
 # Path to the directory to place locks in
 magento_lock_files_dir: var/lock
 
+# Whether to enable http cache config in app/etc/env.php
+magento_http_cache_enable: yes #TODO: "{{ magento_varnish_host | default(false, true) }}"
+
 # ----------------------------------------
 # --------  Magento Redis Caching --------
 # ----------------------------------------
@@ -38,7 +41,17 @@ magento_redis_cache_l2_dir: /dev/shm
 magento_session_max_redis_concurrency: 15
 
 magento_app_etc_config_template: magento_app_etc_config.php.j2
-magento_app_etc_env_template: magento_app_etc_env.php.j2
+
+# Use legacy cache backend class 'Cm_Cache_Backend_Redis'
+# which is the only one available for Magento < 2.3.5 !
+# See: https://devdocs.magento.com/guides/v2.4/config-guide/redis/redis-pg-cache.html#new-redis-cache-implementation
+magento_redis_cache_backend_legacy: yes
+magento_redis_cache_backend_fqcn: >-
+  {{ magento_redis_cache_backend_legacy 
+      | ternary(
+          'Cm_Cache_Backend_Redis', 
+          '\Magento\Framework\Cache\Backend\Redis'
+        ) }}
 
 magento_consumer_workers_enable: yes
 magento_consumer_workers:
@@ -76,3 +89,5 @@ magento_scd_excluded_themes: []
 magento_scd_languages:
   - de_DE
   - en_US
+
+

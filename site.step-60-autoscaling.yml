@@ -1,3 +1,21 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+# Removed because it is not working. Connection error 100%. Most likely because it tries to connect to builder that already died.
+- hosts: app:&current:&immutable
+  gather_facts: no
+  tasks:
+    - name: Enable Magento maintenance mode
+      command: "bin/magento maintenance:enable"
+      args:
+        chdir: "{{ item.dir | default(magento_live_release_dir) }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+      register: enable_maintenance_mode
+      until: enable_maintenance_mode is not failed
+      retries: 10 
+      delay: 6
+
 - hosts: localhost
   connection: local
   vars:
@@ -29,9 +47,6 @@
       autoscaling_asg_max_size: "{{ aws_app_asg_max_size }}"
       autoscaling_asg_cooldown: "{{ aws_app_asg_cooldown }}"
 
-      autoscaling_asg_replace_all: "{{ not aws_app_asg_replace_with_check }}"
-      autoscaling_asg_replace_with_check: "{{ aws_app_asg_replace_with_check }}"
-
       autoscaling_instance_ami_id: "{{ aws_ami_app_node_id}}"
       autoscaling_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
       autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"
@@ -59,8 +74,10 @@
         }}
       autoscaling_instance_start_script: |
         {{ aws_app_node_launch_script_extra }}
-        {{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}
         {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
+
+        /usr/bin/systemctl enable supervisord
+        /usr/bin/systemctl start supervisord
 
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
@@ -104,5 +121,7 @@
         }}
       autoscaling_instance_start_script: |
         {{ aws_app_node_launch_script_extra }}
-        {{ magento_live_release_dir }}{{ magento_node_warmup_script_path }}
         {% if magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
+
+        /usr/bin/systemctl enable supervisord
+        /usr/bin/systemctl start supervisord

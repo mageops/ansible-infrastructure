@@ -6,7 +6,8 @@ varnish_secure_site_user: varnish
 varnish_secure_site_password: varnish
 
 # Bypass basic auth protecting when remote IP matches any of these
-varnish_secure_site_trusted_ips: []
+# And allow sending debug headers
+varnish_trusted_ips: []
 
 # List of CIDRs that can perform PURGE requests
 # By defaults they are accepted only from 127.0.0.1
@@ -101,6 +102,7 @@ varnish_throttling: no
 # - `duration` (required) - time window over which the `limit` requests may be performed
 #   (use varnish duration format, See: https://varnish-cache.org/docs/6.0/reference/vcl.html#durations)
 # - `block` (optional) - if rate is exceded, ban user for this duration
+# - `secret` (optional) - default no, if set it will hide headers that expose rate limiting
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
@@ -152,3 +154,9 @@ varnish_syscfg_limit_nofile: 131072
 varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
 varnish_syscfg_limit_core: "infinity"
+
+# This option will hide all informations from headers
+# that reveal if page was cached in varnish
+# If you are on varnish_trusted_ips list you will
+# still receive those headers
+varnish_do_not_expose_caching: no

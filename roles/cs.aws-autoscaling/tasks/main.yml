@@ -26,87 +26,30 @@
     launch_config_name: "{{ launch_configuration.name }}"
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
-    max_size: >-
-      {{
-        autoscaling_asg_replace_with_check | ternary(
-          autoscaling_asg_max_size + autoscaling_asg_desired_capacity,
-          autoscaling_asg_max_size
-        )
-      }}
-    desired_capacity: >-
-      {{
-        autoscaling_asg_replace_with_check | ternary(
-          autoscaling_asg_desired_capacity * 2,
-          autoscaling_asg_desired_capacity
-        )
-      }}
+    max_size: "{{ autoscaling_asg_max_size }}"
+    desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
-    wait_for_instances: "{{ autoscaling_asg_wait_for_instances }}"
-    wait_timeout: "{{ autoscaling_asg_wait_timeout }}"
-    replace_all_instances: "{{ autoscaling_asg_replace_all }}"
-    replace_batch_size: "{{ autoscaling_asg_replace_batch_size | default(omit) }}"
+    # Grace period for Healthcheck  tatus when new nodes are going up. 
+    # The 300s default we had is waaaay too long for our setup and makes the 
+    # deploy much, much longer (at least 300s long).
+    health_check_period: "{{ autoscaling_healthcheck_grace_period }}"
     termination_policies: "{{ autoscaling_asg_termination_policies }}"
     tags: "{{ aws_tags_default | combine(asg_name_tags, aws_tags_trait_immutable, autoscaling_instance_tags) | dict_to_tag_list }}"
+    # This ansible module does not handle instance replacement properly
+    # so we just update the ASG configuration here and will perform the
+    # replacement via AWS API in the next steps.
+    replace_instances: []
   vars:
     asg_name_tags:
       - Name: "{{ autoscaling_asg_name }}"
   register: _aws_asg
 
-- name: Handle bulk update of instances with health check
-  block:
-  - name: Make a list od instances for health check
-    ec2_instance_info:
-      region: "{{ aws_region }}"
-      instance_ids: "{{ _aws_asg.instances }}"
-    register: _aws_asg_instances
-
-  - name: Wait for nodes to get up (ssh availability)
-    wait_for:
-      port: 22
-      host: "{{ item.public_ip_address }}"
-    loop: "{{ _aws_asg_instances.instances }}"
-    loop_control:
-      label: "{{ item.public_dns_name }}"
-  rescue:
-  # Retry because of race condition when it will return instance that is shutting down
-  # The same thing as in block, because ansible doesn't allow to retry on block
-  - name: Make a list od instances for health check
-    ec2_instance_info:
-      region: "{{ aws_region }}"
-      instance_ids: "{{ _aws_asg.instances }}"
-    register: _aws_asg_instances
-
-  - name: Wait for nodes to get up (ssh availability)
-    wait_for:
-      port: 22
-      host: "{{ item.public_ip_address }}"
-    loop: "{{ _aws_asg_instances.instances }}"
-    loop_control:
-      label: "{{ item.public_dns_name }}"
-  when: autoscaling_asg_replace_with_check
-
-- name: Reduce AutoScaling Group - remove old instances
-  ec2_asg:
-    state: present
-    name: "{{ autoscaling_asg_name }}"
-    region: "{{ aws_region }}"
-    min_size: "{{ autoscaling_asg_min_size }}"
-    max_size: "{{ autoscaling_asg_max_size }}"
-    desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
-    termination_policies: >-
-      {{
-        [ 'OldestLaunchConfiguration' ]
-        + (autoscaling_asg_termination_policies is string | ternary(
-              [ autoscaling_asg_termination_policies ],
-              autoscaling_asg_termination_policies
-            )
-          )
-      }}
-    wait_for_instances: yes
-    replace_all_instances: yes
-  register: _aws_asg
-  when: autoscaling_asg_replace_with_check
+- name: Perform Rolling Instance Refresh
+  include_tasks: refresh-instances.yml
+  when: >-
+    _aws_asg is changed
+      and autoscaling_asg_desired_capacity > 0
 
 - name: Create ASG Termination Lifecycle Hook
   ec2_asg_lifecycle_hook:
@@ -118,13 +61,3 @@
     heartbeat_timeout: 120
     default_result: CONTINUE
   when: autoscaling_webnodedown_hook_create
-
-- name: Wait for desired capacity
-  when: autoscaling_asg_desired_capacity | int > 0
-  ec2_asg_info:
-    name: "{{ autoscaling_asg_name }}"
-    region: "{{ aws_region }}"
-  register: _asg_info
-  until: "_asg_info.results and (_asg_info.results[0].instances | length > 0) and (_asg_info.results[0].instances | length) == _asg_info.results[0].desired_capacity"
-  retries: 300
-  delay: 5

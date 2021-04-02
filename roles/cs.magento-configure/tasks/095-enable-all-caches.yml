@@ -1,4 +1,0 @@
-- name: Enable all caches types
-  become: yes
-  become_user: "{{ magento_user }}"
-  command: "php {{ magento_release_dir }}/bin/magento cache:enable"

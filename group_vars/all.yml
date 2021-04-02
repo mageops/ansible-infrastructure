@@ -422,8 +422,6 @@ aws_extra_app_asg_passthrough_url_pattern:
 aws_extra_app_asg_passthrough_uagent_pattern:
 aws_extra_app_asg_passthrough_ip_pattern:
 
-aws_app_asg_replace_with_check: no
-
 # Example regex to pass bot traffic to the extra instances:
 #aws_extra_app_asg_passthrough_uagent_pattern: "(?i)^alexa|^blitz\\.io|bot|^browsermob|crawl|^curl|^facebookexternalhit|feed|google web preview|^ia_archiver|indexer|^java|jakarta|^libwww-perl|^load impact|^magespeedtest|monitor|^Mozilla$|nagios |^\\.net|^pinterest|postrank|slurp|spider|uptime|^wget|yandex|^elb-healthchecker|binglocalsearch|^Ruby|^python-requests|^Mediapartners-Google|^Sogou"
 
@@ -1033,7 +1031,7 @@ magento_core_config_settings_default:
 
 
 # Extra core config settings to be set at deploy,
-# see roles/cs.magento-configure/tasks/080-configure-integrations.yml
+# see roles/cs.magento-configure/tasks/080-core-config.yml
 magento_core_config_settings_extra: []
 
 # Settings to remove by default
@@ -1198,7 +1196,7 @@ php_packages:
   - php-curl
   - php-mysqlnd
   - php-pecl-apcu-bc
-  - php-pecl-redis
+  - php-pecl-redis5
   - php-gd
   - php-gmp
   - php-mcrypt
@@ -1315,6 +1313,14 @@ php_fpm_pm_max_requests: 100
 blackfire_server_id:
 blackfire_server_token:
 blackfire_install: "{{ mageops_install_development_tools }}"
+
+
+# ----------------------------
+# --------  Tideways  --------
+# ----------------------------
+
+# See `roles/cs.php-tideways/defaults/main.yml` for config details
+tideways_enable: no
 
 
 # -------------------------

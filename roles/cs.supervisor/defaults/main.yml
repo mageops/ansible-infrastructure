@@ -6,3 +6,5 @@
 #
 ##
 supervisor_programs: []
+supervisor_service_autostart: yes
+supervisor_service_initial_state: started

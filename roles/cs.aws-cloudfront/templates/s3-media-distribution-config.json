@@ -155,16 +155,18 @@
         "AllowedMethods": {
             "Items": [
                 "HEAD",
-                "GET"
+                "GET",
+                "OPTIONS"
             ],
             "CachedMethods": {
                 "Items": [
                     "HEAD",
-                    "GET"
+                    "GET",
+                    "OPTIONS"
                 ],
-                "Quantity": 2
+                "Quantity": 3
             },
-            "Quantity": 2
+            "Quantity": 3
         },
         "MinTTL": 0,
         "Compress": false

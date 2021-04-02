@@ -5,6 +5,7 @@ aws_iam_name_prefix: MageOps
 aws_iam_policy_s3_access_name: "{{ aws_iam_name_prefix }}S3Access"
 aws_iam_policy_efs_access: "{{ aws_iam_name_prefix }}EFSAccess"
 aws_iam_policy_ec2_list_name: "{{ aws_iam_name_prefix }}EC2List"
+aws_iam_policy_ec2_asg_healtcheck_self_report_name: "{{ aws_iam_name_prefix }}AutoscalingInstanceHealthcheckSelfReport"
 aws_iam_policy_ec2_assign_iam_role: "{{ aws_iam_name_prefix }}EC2AssignIAMRole"
 aws_iam_policy_cloudwatch_logs_access: "{{ aws_iam_name_prefix }}CloudWatchLogsAccess"
 aws_iam_policy_cloudwatch_metrics_access: "{{ aws_iam_name_prefix }}CloudWatchMetricsAccess"

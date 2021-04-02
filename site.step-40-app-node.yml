@@ -75,6 +75,8 @@
 
     - role: cs.supervisor
       supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"
+      supervisor_service_autostart: no
+      supervisor_service_initial_state: stopped
 
     - role: cs.nginx-url-blacklist
 
@@ -101,6 +103,8 @@
       php_fpm_pool_user: "{{ magento_user }}"
       php_fpm_pool_group: "{{ magento_group }}"
       php_fpm_terminate_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
+
+    - role: cs.php-tideways
 
     - role: cs.varnish
       varnish_port: "{{ mageops_varnish_port }}"

@@ -8,7 +8,7 @@
     state: present
 
 - name: Install systemd service config
-  copy:
+  template:
     src: supervisord.service
     dest: /etc/systemd/system/supervisord.service
   register: _svd_unit_install
@@ -53,5 +53,5 @@
 - name: Enable and start supervisord
   service:
     name: supervisord
-    enabled: yes
-    state: started
+    enabled: "{{ supervisor_service_autostart }}"
+    state: "{{ supervisor_service_initial_state }}"

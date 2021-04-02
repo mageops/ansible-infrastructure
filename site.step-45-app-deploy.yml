@@ -49,12 +49,12 @@
       set_fact:
         deploy_release_id: "{{ ansible_date_time.iso8601_basic_short }}"
         deploy_keep_current_release: "{{ deploy_skip_installation | default(false) and deploy_previous_release_exists }}"
-        deploy_previous_release_id: "{{ deploy_previous_release_exists | ternary((_current_release_check.stat.lnk_target | default('')).split('/') | last, false) }}"
+        deploy_previous_release_id: "{{ deploy_previous_release_exists | ternary((_current_release_check.stat.lnk_target | default('')).rstrip('/').split('/') | last, false) }}"
 
     - name: "Skipping installation: reusing previous release"
       set_fact:
         deploy_release_id: "{{ deploy_previous_release_id }}"
-      when: "deploy_skip_installation"
+      when: deploy_skip_installation | bool
 
     - name: Compute release id
       set_fact:
@@ -87,21 +87,15 @@
       deploy_install_actions:
         - name: Configure Magento
           role: cs.magento-configure
-      deploy_install_abort:
-        - name: Failed deploy install stage - get rid of possible corrupted cache
-          role: cs.magento-configure
-          tasks_from: 060-flush-cache.yml
+      deploy_install_abort: []
       deploy_release_actions:
         - name: Setup shared storage mounts
           role: cs.magento-shared-storage
-      deploy_release_abort:
-        - name: Failed deploy release stage - get rid of possible corrupted cache
-          role: cs.magento-configure
-          tasks_from: 060-flush-cache.yml
+      deploy_release_abort: []
       deploy_post_actions:
         - name: Link static files version dir
           role: cs.magento-configure
-          tasks_from: 200-static-symlink.yml
+          tasks_from: 205-static-symlink.yml
 
     - role: cs.aws-magento-cron
 

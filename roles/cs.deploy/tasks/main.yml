@@ -29,6 +29,8 @@
       
   always:
     - import_tasks: 06-cleanup-post-install.yml
+      when: deploy_install_new_release
+      
     - include_tasks: hook/hook-actions.yml
       vars:
         deploy_hook_name: "Custom cleanup"
