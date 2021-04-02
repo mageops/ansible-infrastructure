@@ -6,7 +6,8 @@ varnish_secure_site_user: varnish
 varnish_secure_site_password: varnish
 
 # Bypass basic auth protecting when remote IP matches any of these
-varnish_secure_site_trusted_ips: []
+# And allow sending debug headers
+varnish_trusted_ips: []
 
 # List of CIDRs that can perform PURGE requests
 # By defaults they are accepted only from 127.0.0.1
@@ -95,15 +96,23 @@ varnish_throttling: no
 # Throttling rules, an array of items, each containing:
 # - `id` (required) - unqiue string used internally for hash computation
 # - `path_pattern` (required) - regex pattern that defined affects request paths
+# - `method` (optional) - match this limit only for specified http method
 # - `error_message` (optional) - custom error string returned to client when this rule is triggered
 # - `limit` (required) - number of requests until clien tis throttled
 # - `duration` (required) - time window over which the `limit` requests may be performed
 #   (use varnish duration format, See: https://varnish-cache.org/docs/6.0/reference/vcl.html#durations)
 # - `block` (optional) - if rate is exceded, ban user for this duration
+# - `secret` (optional) - default no, if set it will hide headers that expose rate limiting
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
+# When first rule matches other rules are not evaluated, you can use that to add exclusions with more relaxed limits
 varnish_throttling_rules: []
+
+# This rule behaves similarly to varnish_throttling_rules with one difference
+# All of this rules are evaluated instead of first matching one
+# This can be used to add for example generic POST limit
+varnish_throttling_rules_always: []
 
 varnish_backend_instances_extra: []
 varnish_backend_instances_app:
@@ -145,3 +154,13 @@ varnish_syscfg_limit_nofile: 131072
 varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
 varnish_syscfg_limit_core: "infinity"
+
+varnish_404_cache_time: 60s
+varnish_301_cache_time: 3h
+
+# This option will hide all informations from headers
+# that reveal if page was cached in varnish
+# If you are on varnish_trusted_ips list you will
+# still receive those headers
+varnish_do_not_expose_caching: no
+

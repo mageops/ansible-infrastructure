@@ -44,3 +44,5 @@ nginx_logrotate_history: 52
 
 # Max age of kept log files in days
 nginx_logrotate_maxage_days: 14
+nginx_syscfg_limit_nofile: 131072
+
