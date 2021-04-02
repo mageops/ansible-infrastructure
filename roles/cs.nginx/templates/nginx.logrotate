@@ -1,0 +1,25 @@
+/var/log/nginx/*.log {
+
+        compress
+        compresscmd /usr/bin/zstd
+        uncompresscmd /usr/bin/unzstd
+        compressext .zstd
+        compressoptions -19
+
+        rotate {{ nginx_logrotate_history }}
+        maxage {{ nginx_logrotate_maxage_days }}
+        size {{ nginx_logrotate_log_size }}
+        dateformat -%Y%m%d-%s
+
+        missingok
+        notifempty
+        copytruncate
+        create 640 nginx adm
+
+        sharedscripts
+        postrotate
+                if [ -f /var/run/nginx.pid ]; then
+                        kill -USR1 `cat /var/run/nginx.pid`
+                fi
+        endscript
+}
