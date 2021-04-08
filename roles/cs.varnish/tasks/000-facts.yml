@@ -49,6 +49,10 @@
   set_fact:
     varnish_throttling_enabled: "{{ (varnish_standalone and varnish_throttling and varnish_throttling_rules | length > 0)|bool }}"
 
+- name: Check if allowed cors origins are set
+  set_fact:
+    varnish_generate_allowed_origins: "{{ varnish_media_cors_allowed_origins is not defined }}"
+
 - name: Collect all app hosts for allowed origins
   block:
     - name: Collect main Magento installation host
@@ -63,5 +67,4 @@
               https_termination_hosts | default([])|selectattr('aliases', 'defined')|map(attribute='aliases')|list | flatten
           }}
       when: mageops_https_termination_enable | default(false)
-  when: varnish_media_cors_allowed_origins is not defined
-
+  when: varnish_generate_allowed_origins

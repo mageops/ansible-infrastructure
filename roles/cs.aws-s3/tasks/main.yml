@@ -19,6 +19,10 @@
     s3_bucket_tags:
       Name: "{{ aws_s3_secret_bucket }}"
 
+- name: Check if allowed cors origins are set
+  set_fact:
+    aws_s3_generate_allowed_origins: "{{ aws_s3_media_bucket_cors_allowed_origins is not defined }}"
+
 - name: Enable CORS for Media bucket
   block:
     - name: Collect all app hosts for allowed origins
@@ -39,7 +43,7 @@
           set_fact:
             aws_s3_media_bucket_cors_allowed_origins: "{{ aws_s3_media_bucket_cors_allowed_origins + [lb_domain] }}"
           when: aws_elb_create | default(false) and lb_domain is defined and lb_domain | length
-      when: aws_s3_media_bucket_cors_allowed_origins is not defined
+      when: aws_s3_generate_allowed_origins
 
     - name: Apply CORS configuration for Media bucket
       aws_s3_cors:
