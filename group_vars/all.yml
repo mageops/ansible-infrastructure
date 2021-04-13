@@ -657,7 +657,7 @@ mageops_language_redirect_enable: no
 
 # Configure a vmtouch daemon force-keeping magento sources / compiled opcache in RAM
 mageops_magento_preload_fscache_enable: >-
-  {{ ( ansible_memtotal_mb | default(512, true) | int >= 7168 ) 
+  {{ ( ansible_memtotal_mb | default(512, true) | int >= 7168 )
         and php_cli_opcache_file_cache_enable | default(false, true) }}
 
 # Tune Linux Virtual Memory kernel sysctl params for lower disk IO
@@ -1703,6 +1703,7 @@ mageops_packages_ops:
   - goaccess
   - atop
   - lsof
+  - ncdu
 
 # Handy packages installed on all nodes by default
 mageops_packages_common: "{{ mageops_packages_base + mageops_packages_tools + mageops_packages_ops }}"
