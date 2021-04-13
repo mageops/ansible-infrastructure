@@ -75,6 +75,7 @@
       monitoring_node_exporter_enabled: yes
       monitoring_varnish_exporter_enabled: yes
       when: mageops_monitoring_enabled
+    - role: cs.cleanup
 
   vars:
     mageops_node_role: varnish

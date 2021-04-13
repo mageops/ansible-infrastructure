@@ -1,0 +1,9 @@
+# Ansible yum handler do not correctly remove old rpm files from disk
+# therefore we need to clean up by ourself
+
+- name: Cleanup dnf caches
+  shell: dnf clean all
+  when: ansible_facts.pkg_mgr == "dnf"
+
+- name: Cleanup yum caches
+  shell: yum clean all

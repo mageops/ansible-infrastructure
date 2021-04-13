@@ -84,6 +84,7 @@
       monitoring_elasticsearch_exporter_enabled: yes
       monitoring_redis_exporter_enabled: yes
       when: mageops_monitoring_enabled
+    - role: cs.cleanup
 
   tasks:
     - include_tasks: "{{ mageops_extra_tasks_persistent_node }}"
