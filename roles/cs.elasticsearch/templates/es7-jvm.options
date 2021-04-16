@@ -47,6 +47,10 @@
 14-:-XX:+UseG1GC
 14-:-XX:G1ReservePercent=25
 14-:-XX:InitiatingHeapOccupancyPercent=30
+# The value will be a power of two and can range from 1MB to 32MB. The goal is to have around 2048 regions based on the minimum Java heap size.
+# since we do not have more than 4G instances of elasticsearch we can hardcode this to 1M
+14-:-XX:G1HeapRegionSize=1M
+14-:-XX:+UseStringDeduplication
 
 ## JVM temporary directory
 -Djava.io.tmpdir=${ES_TMPDIR}
