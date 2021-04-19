@@ -1,4 +1,5 @@
 allow_duplicates: no
 dependencies:
+  - cs.packages-dnf
   - cs.repo-epel
 

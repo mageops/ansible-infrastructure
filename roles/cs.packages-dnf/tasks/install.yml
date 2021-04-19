@@ -1,0 +1,11 @@
+- name: Install dnf
+  yum:
+    name:
+      - dnf
+      - dnf-plugins-core
+    state: present
+
+- name: Configure dnf
+  copy:
+    src: dnf.conf
+    dest: /etc/dnf/dnf.conf

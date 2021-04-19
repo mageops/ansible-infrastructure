@@ -1,0 +1,13 @@
+# [DEPRECEATED] Unused code - to be removed. We don't need this anymore because
+# at this point we're always using DNF instead of YUM. Also some of this fixed
+# were applicable to CentOS 6 and are probably not needed anymore.
+
+- name: Ensure /var/lib/rpm-state exists (fix for https://access.redhat.com/solutions/3573891)
+  file:
+    path: /var/lib/rpm-state
+    state: directory
+
+- name: Make sure there are no open yum transactions
+  shell: yum-complete-transaction -y --cleanup-only
+  args:
+    warn: no

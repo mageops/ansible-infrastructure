@@ -1,55 +1,84 @@
-
-- name: Ensure /var/lib/rpm-state exists (fix for https://access.redhat.com/solutions/3573891)
-  file:
-    path: /var/lib/rpm-state
-    state: directory
-
 - name: Get last package maintenance timestamp
   slurp:
-    path: "{{ packages_maintenance_marker_path }}"
-  register: packages_maintenance_last_timestamp
+    path: "{{ packages_maintenance_timestamp_lockfile }}"
+  register: packages_maintenance_timestamp_slurp
   changed_when: false
   failed_when: no
 
-- name: Perform one-time package maintenance
-  block:
-    - name: Set localized yum mirrorlist for core repos
-      ini_file:
-        path: "/etc/yum.repos.d/{{ item.file }}"
-        section: "{{ item.repo }}"
-        option: mirrorlist
-        value: "{{ item.url }}"
-        backup: yes
-        no_extra_spaces: yes
-      loop: "{{ packages_mirrorlists }}"
-      loop_control:
-        label: "{{ item.repo }}"
-      when: packages_mirrorlist_countrycode is defined and packages_mirrorlist_countrycode
+- name: Set package maintenance facts
+  vars:
+    packages_maintenance_timestamp: "{{ packages_maintenance_timestamp_slurp.content | default('0') | int }}"
+    packages_maintenance_elapsed: "{{ ansible_date_time.epoch | int - packages_maintenance_timestamp | int }}"
+  set_fact:
+    packages_maintenance_timestamp: "{{ packages_maintenance_timestamp }}"
+    packages_maintenance_elapsed: "{{ packages_maintenance_elapsed }}"
+    packages_maintenance_performed: "{{ packages_maintenance_timestamp | int != 0 }}"
+    packages_maintenance_needed: "{{ packages_maintenance_elapsed | int > packages_maintenance_interval | int }}"
 
-    - name: Make sure banned packages are not present
-      yum:
-        name: "{{ packages_remove | default([]) }}"
-        state: absent
-      when: packages_remove is defined and packages_remove | length
+- name: Print maintenance info
+  debug:
+    msg: |
+      ============= Package Maintenance ============
 
-    - name: Store information that package maintenance was done
-      copy:
-        content: "{{ ansible_date_time.epoch }}"
-        dest: "{{ packages_maintenance_marker_path }}"
-  when: >-
-    packages_maintenance_last_timestamp.content is not defined or (
-      (
-        packages_maintenance_last_timestamp.content | int - ansible_date_time.epoch | int
-      ) > packages_maintenance_interval | int
-    )
+      {% if packages_maintenance_performed %}
+      Maintenance last performed on {{
+        '%Y-%m-%d %H:%M:%S' | strftime(packages_maintenance_timestamp | int)
+      }} ({{
+        '%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) | to_datetime
+          - '%Y-%m-%d %H:%M:%S' | strftime(packages_maintenance_timestamp | int) | to_datetime
+      }} ago).
+      {% else %}
+      Maintenance has never been performed on this machine.
+      {% endif %}
 
-- name: Make sure there are no open yum transactions
-  shell: yum-complete-transaction -y --cleanup-only
-  args:
-    warn: no
+      {% if packages_maintenance_needed %}
+      {% if packages_maintenance_performed %}
+      Will be performed again because the last one has expired.
+      {% else %}
+      Will be performed for the first time.
+      {% endif %}
 
-- name: "Install packages"
-  yum:
+      {% if not packages_full_update and not packages_maintenance_performed %}
+      Full package upgrade forced because of first maintenance.
+      {% elif packages_full_update %}
+      Full package upgrade requested.
+      {% else %}
+      Package upgrade limited to security updates.
+      {% endif %}
+
+      {% else %}
+      Skipping maintenance because the last one is still valid.
+      {% endif %}
+
+
+- name: Perform package maintenance
+  include: perform-maintenance.yml
+  when: packages_maintenance_needed
+
+- name: Update package maintenance facts
+  when: packages_maintenance_needed
+  set_fact:
+    packages_maintenance_timestamp: "{{ ansible_date_time.epoch | int }}"
+    packages_maintenance_elapsed: 0
+    packages_maintenance_performed: yes
+    packages_maintenance_needed: no
+
+- name: Update package maintenance lockfile
+  when: packages_maintenance_needed
+  copy:
+    content: "{{ packages_maintenance_timestamp }}"
+    dest: "{{ packages_maintenance_timestamp_lockfile }}"
+
+- name: Remove banned packages
+  when: packages_remove | length > 0
+  dnf:
+    name: "{{ packages_remove | default([]) }}"
+    state: absent
+    update_cache: no
+
+- name: Install requested packages
+  when: packages_install | length > 0
+  dnf:
     name: "{{ packages_install }}"
     state: present
   register: packages_install_command
@@ -57,10 +86,7 @@
   delay: 5
   until: not packages_install_command is failed
 
-- name: "Ensure all packages are up to date"
-  yum:
-    name: '*'
-    state: latest
-    exclude: "{{ packages_full_update_exclude }}"
-  when: packages_full_update
-
+- name: Clean downloaded package cache
+  command:
+    cmd: dnf clean packages
+    warn: no
