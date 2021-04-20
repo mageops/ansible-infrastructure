@@ -1,5 +1,5 @@
-allow_duplicates: yes
-dependencies: 
+allow_duplicates: no
+dependencies:
   - cs.repo-mageops
 
 galaxy_info:

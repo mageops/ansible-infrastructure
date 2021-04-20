@@ -1,0 +1,3 @@
+# This must be in vars to ensure it's passed into php dependency
+php_install_fpm_package: yes
+php_debug_ini_enable: "{{ php_fpm_debug_pool_enable }}"
