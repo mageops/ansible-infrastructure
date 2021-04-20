@@ -52,11 +52,6 @@
     group: "{{ mageops_cli_user_group }}"
   loop: "{{ mageops_cli_user_bashrc_fragments_default + mageops_cli_user_bashrc_fragments }}"
 
-- name: Authorize local ssh key
-  tags: ssh_keys
-  authorized_key: user="{{ mageops_cli_user }}" key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
-  when: mageops_cli_user_authorize_local_key
-
 - name: Authorize ssh keys
   tags: ssh_keys
   authorized_key:
