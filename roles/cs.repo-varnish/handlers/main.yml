@@ -1,0 +1,4 @@
+- name: Refresh varnish repo cache
+  command: "dnf --repo={{ repo_varnish_name_prefix }}* makecache"
+  args:
+    warn: no

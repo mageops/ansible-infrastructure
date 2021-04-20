@@ -1,0 +1,4 @@
+- name: Refresh nginx repo cache
+  command: "dnf --repo={{ repo_nginx_name_prefix }}* makecache"
+  args:
+    warn: no

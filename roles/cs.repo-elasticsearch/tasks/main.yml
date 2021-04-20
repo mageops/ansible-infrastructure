@@ -1,6 +1,7 @@
 - name: Ensure Elasticsearch repo release package is installed and up-to-date
   yum:
     name: "{{ repo_elasticsearch_package_name }}"
+  notify: Refresh elasticsearch repo cache
 
 - name: Ensure chosen elasticsearch repo variants are enabled
   ini_file:
@@ -14,4 +15,5 @@
   loop: "{{ repo_elasticsearch_variants }}"
   loop_control:
     loop_var: variant
+  notify: Refresh elasticsearch repo cache
 

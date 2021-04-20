@@ -1,0 +1,4 @@
+- name: Refresh elasticsearch repo cache
+  command: "dnf --repo={{ repo_elasticsearch_name_prefix }}* makecache"
+  args:
+    warn: no

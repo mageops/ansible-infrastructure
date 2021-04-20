@@ -1,6 +1,7 @@
 - name: Ensure Remi's repo release package is installed and up-to-date
   yum:
     name: "{{ php_repo_remi_package_name }}"
+  notify: Refresh remi repo cache
 
 - name: Ensure chosen Remi's repo variants are enabled
   ini_file:
@@ -15,3 +16,4 @@
   loop_control:
     loop_var: variant
     label: "{{ variant.key }}"
+  notify: Refresh remi repo cache

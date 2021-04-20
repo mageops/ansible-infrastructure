@@ -1,6 +1,7 @@
 - name: Ensure MySQL Community repo release package is installed and up-to-date
   yum:
     name: "{{ repo_mysql_package_name }}"
+  notify: Refresh mysql repo cache
 
 - name: Ensure chosen mysql repo variants are enabled
   ini_file:
@@ -14,4 +15,4 @@
   loop: "{{ repo_mysql_variants }}"
   loop_control:
     loop_var: variant
-
+  notify: Refresh mysql repo cache

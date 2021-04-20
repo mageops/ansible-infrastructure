@@ -1,4 +1,4 @@
-- name: Regenerate yum cache for MageOps repo
-  command: yum --disablerepo="*" --enablerepo="mageops" makecache
+- name: Refresh mageops repo cache
+  command: "dnf --repo={{ repo_mageops_name }} makecache"
   args:
     warn: no

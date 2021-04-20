@@ -1,5 +1,6 @@
 allow_duplicates: no
-dependencies: []
+dependencies:
+  - cs.packages-dnf
 
 galaxy_info:
   author: Filip Sobalski <filip.sobalski@creativestyle.pl>

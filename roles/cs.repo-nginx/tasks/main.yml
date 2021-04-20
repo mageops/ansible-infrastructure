@@ -1,6 +1,7 @@
 - name: Ensure nginx repo release package is installed and up-to-date
   yum:
     name: "{{ repo_nginx_package_name }}"
+  notify: Refresh nginx repo cache
 
 - name: Ensure chosen nginx repo variants are enabled
   ini_file:
@@ -14,4 +15,5 @@
   loop: "{{ repo_nginx_variants }}"
   loop_control:
     loop_var: variant
+  notify: Refresh nginx repo cache
 

@@ -1,6 +1,7 @@
 - name: Ensure Varnish repo release package is installed and up-to-date
   yum:
     name: "{{ repo_varnish_package_name }}"
+  notify: Refresh varnish repo cache
 
 - name: Ensure chosen varnish repo variants are enabled
   ini_file:
@@ -14,4 +15,5 @@
   loop: "{{ repo_varnish_variants }}"
   loop_control:
     loop_var: variant
+  notify: Refresh varnish repo cache
 

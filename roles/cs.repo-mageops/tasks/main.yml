@@ -17,7 +17,7 @@
   retries: "{{ repo_mageops_installation_retries }}"
   delay: "{{ repo_mageops_installation_delay }}"
   when: not _repo_mageops_config_file_check.stat.exists
-  notify: Regenerate yum cache for MageOps repo
+  notify: Refresh mageops repo cache
 
 - name: Set higher priority for mageops repo
   block:
@@ -41,4 +41,4 @@
     name: "{{ repo_mageops_release_package_name }}"
     state: latest
   when: not _repo_mageops_config_file_check.stat.exists
-  notify: Regenerate yum cache for MageOps repo
+  notify: Refresh mageops repo cache

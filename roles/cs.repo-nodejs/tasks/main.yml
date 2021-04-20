@@ -1,6 +1,7 @@
 - name: Ensure nodejs repo release package is installed and up-to-date
   yum:
     name: "{{ repo_nodejs_package_name }}"
+  notify: Refresh nodejs repo cache
 
 - name: Ensure chosen nodejs repo variants are enabled
   ini_file:
@@ -15,4 +16,4 @@
   loop_control:
     loop_var: variant
     label: "{{ variant }} -> {% if variant in repo_nodejs_variants_enabled %}enabled{% else %}disabled{% endif %}"
-
+  notify: Refresh nodejs repo cache

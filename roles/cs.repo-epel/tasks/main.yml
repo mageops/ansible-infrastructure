@@ -1,6 +1,15 @@
 - name: Ensure EPEL repo release package is installed and up-to-date
   yum:
     name: "{{ repo_epel_package_name }}"
+  notify: Refresh epel repo cache
 
 - name: Ensure EPEL is enabled
-  command: yum-config-manager --enable epel
+  ini_file:
+    path: /etc/yum.repos.d/epel.repo
+    section: epel
+    option: enabled
+    no_extra_spaces: yes
+    create: no
+    value: "1"
+    state: present
+  notify: Refresh epel repo cache

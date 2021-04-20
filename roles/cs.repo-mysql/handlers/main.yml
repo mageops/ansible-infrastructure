@@ -1,0 +1,4 @@
+- name: Refresh mysql repo cache
+  command: "dnf --repo={{ repo_mysql_name_prefix }}* makecache"
+  args:
+    warn: no

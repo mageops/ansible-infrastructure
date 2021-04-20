@@ -1,6 +1,7 @@
 - name: Ensure RabbitMQ repo release package is installed and up-to-date
   yum:
     name: "{{ repo_rabbitmq_package_name }}"
+  notify: Refresh rabbitmq repo cache
 
 - name: Ensure chosen rabbitmq repo variants are enabled
   ini_file:
@@ -14,4 +15,4 @@
   loop: "{{ repo_rabbitmq_variants }}"
   loop_control:
     loop_var: variant
-
+  notify: Refresh rabbitmq repo cache

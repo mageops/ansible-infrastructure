@@ -1,0 +1,4 @@
+- name: Refresh rabbitmq repo cache
+  command: "dnf --repo={{ repo_rabbitmq_name_prefix }}* makecache"
+  args:
+    warn: no

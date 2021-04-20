@@ -1,0 +1,4 @@
+- name: Refresh epel repo cache
+  command: "dnf --repo={{ repo_epel_name }} makecache"
+  args:
+    warn: no

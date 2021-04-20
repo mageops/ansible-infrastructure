@@ -1,0 +1,4 @@
+- name: Refresh remi repo cache
+  command: "dnf --repo={{ php_repo_remi_name_prefix }}* makecache"
+  args:
+    warn: no

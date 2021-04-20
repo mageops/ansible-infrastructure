@@ -2,6 +2,8 @@ php_repo_remi_package_name: remi-release
 php_repo_remi_variants_enabled:
   - safe
 
+php_repo_remi_name_prefix: remi
+
 php_repo_remi_variants:
   safe:
     name: remi-safe
