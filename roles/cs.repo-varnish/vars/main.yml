@@ -1,1 +1,5 @@
 repo_varnish_filename: varnish
+
+
+repo_varnish_enabled_names: >-
+  {{ [repo_varnish_name_prefix] | product(repo_varnish_variants_enabled) | map('join') | list }}

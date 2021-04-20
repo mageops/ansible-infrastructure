@@ -1,1 +1,4 @@
 repo_nodejs_filename: nodejs
+
+repo_nodejs_enabled_names: >-
+  {{ [repo_nodejs_name_prefix] | product(repo_nodejs_variants_enabled) | map('join') | list }}  

@@ -1,4 +1,4 @@
 - name: Refresh epel repo cache
-  command: "dnf --repo={{ repo_epel_name }} makecache"
+  command: "dnf --repo={{ repo_epel_enabled_names | join(',') }} makecache"
   args:
     warn: no

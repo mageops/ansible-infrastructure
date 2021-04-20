@@ -17,3 +17,4 @@
     loop_var: variant
     label: "{{ variant }} -> {% if variant in repo_nodejs_variants_enabled %}enabled{% else %}disabled{% endif %}"
   notify: Refresh nodejs repo cache
+

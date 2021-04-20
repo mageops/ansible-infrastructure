@@ -87,7 +87,8 @@
       become: no
       when: aws_use
 
-    - role: cs.switch-to-dnf
+    - role: cs.packages-dnf
+
     - role: cs.deploy
       deploy_install_actions:
         - name: Configure Magento
@@ -184,4 +185,4 @@
     magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
     magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
 
-    
+

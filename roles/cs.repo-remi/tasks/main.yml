@@ -1,6 +1,7 @@
 - name: Ensure Remi's repo release package is installed and up-to-date
   yum:
     name: "{{ php_repo_remi_package_name }}"
+    state: latest
   notify: Refresh remi repo cache
 
 - name: Ensure chosen Remi's repo variants are enabled
@@ -8,12 +9,24 @@
     state: present
     create: no
     path: "/etc/yum.repos.d/{{ variant.value.filename }}.repo"
-    section: "{{ variant.value.name }}"
+    section: "{{ repo_name }}"
     option: enabled
-    value: "{{ (variant.key in php_repo_remi_variants_enabled) | ternary('1', '0') }}"
+    value: "{{ repo_enabled | ternary('1', '0') }}"
     no_extra_spaces: yes
+  vars:
+    repo_name: "{{ variant.value.name }}"
+    repo_enabled: "{{ (variant.key in php_repo_remi_variants_enabled) }}"
   loop: "{{ php_repo_remi_variants | dict2items }}"
   loop_control:
     loop_var: variant
     label: "{{ variant.key }}"
+  register: repo_remi_enable_variantes_ini
   notify: Refresh remi repo cache
+
+- name: Compute fact listing enabled repo names
+  set_fact:
+    php_repo_remi_enabled_names: >-
+      {{ repo_remi_enable_variantes_ini.results
+          | selectattr('invocation.module_args.value', '==', '1')
+          | map(attribute='variant.value.name')
+          | list }}

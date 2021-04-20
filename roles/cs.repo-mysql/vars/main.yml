@@ -1,1 +1,4 @@
 repo_mysql_filename: mysql-community
+
+repo_mysql_enabled_names: >-
+  {{ [repo_mysql_name_prefix] | product(repo_mysql_variants_enabled) | map('join') | list }}

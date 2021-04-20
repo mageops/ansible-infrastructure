@@ -1,1 +1,4 @@
 repo_nginx_filename: nginx
+
+repo_nginx_enabled_names: >-
+  {{ [repo_nginx_name_prefix] | product(repo_nginx_variants_enabled) | map('join') | list }}

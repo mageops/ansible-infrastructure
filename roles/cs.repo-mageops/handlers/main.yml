@@ -1,4 +1,4 @@
 - name: Refresh mageops repo cache
-  command: "dnf --repo={{ repo_mageops_name }} makecache"
+  command: "dnf --repo={{ repo_mageops_enabled_names | join(',') }} makecache"
   args:
     warn: no

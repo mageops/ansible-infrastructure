@@ -1,5 +1,5 @@
 - name: Refresh nodejs repo cache
-  command: "dnf --repo={{ repo_nodejs_name_prefix }}* makecache"
+  command: "dnf --repo={{ repo_nodejs_enabled_names | join(',') }} makecache"
   args:
     warn: no
 

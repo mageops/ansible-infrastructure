@@ -1,1 +1,4 @@
 repo_mageops_filename: mageops
+repo_mageops_enabled_names:
+  - "{{ repo_mageops_name }}"
+

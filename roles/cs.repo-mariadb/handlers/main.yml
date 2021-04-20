@@ -1,4 +1,4 @@
 - name: Refresh mariadb repo cache
-  command: "dnf --repo={{ repo_mariadb_name_prefix }}* makecache"
+  command: "dnf --repo={{ repo_mariadb_enabled_names | join(',') }} makecache"
   args:
     warn: no

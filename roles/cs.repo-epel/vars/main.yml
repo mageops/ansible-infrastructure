@@ -1,1 +1,3 @@
 repo_epel_filename: epel
+repo_epel_enabled_names: >-
+  {{ repo_epel_enabled | ternary([repo_epel_name], []) }}
