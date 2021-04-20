@@ -1,7 +1,7 @@
 allow_duplicates: no
 dependencies:
+  - cs.package-manager
   - cs.repo-epel
-  - cs.packages-dnf
 
 galaxy_info:
   author: Filip Sobalski <filip.sobalski@creativestyle.pl>

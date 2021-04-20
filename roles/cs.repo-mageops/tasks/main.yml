@@ -21,11 +21,6 @@
 
 - name: Set higher priority for mageops repo
   block:
-    - name: Install priorities plugin
-      yum:
-        name:
-          - yum-utils
-          - yum-plugin-priorities
     - name: Set priority for mageops repo
       ini_file:
         path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"

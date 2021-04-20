@@ -1,0 +1,20 @@
+- name: Install yum packages
+  package:
+    state: present
+    disablerepo: '*'
+    enablerepo: base,updates,extras,epel
+    name: "{{ yum_packages }}"
+  register: _install
+
+- name: Configure dnf package manger
+  template:
+    src: yum.conf
+    dest: /etc/yum.conf
+
+- name: Configure yum plugin fastestmirror
+  template:
+    src: yum.fastestmirror.conf
+    dest: /etc/yum/pluginconf.d/fastestmirror.conf
+
+
+

@@ -79,6 +79,9 @@
 
           ----------------------------------------
 
+    - import_role: cs.package-manager
+      tasks_from: dnf-switch.yml
+
   roles:
     - role: cs.aws-facts-all
       aws_facts_gather_ami: no
@@ -86,8 +89,6 @@
       delegate_facts: no
       become: no
       when: aws_use
-
-    - role: cs.packages-dnf
 
     - role: cs.deploy
       deploy_install_actions:

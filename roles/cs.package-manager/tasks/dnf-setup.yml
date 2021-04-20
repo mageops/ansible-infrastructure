@@ -1,0 +1,45 @@
+- name: Check if dnf is available
+  stat:
+    path: /usr/bin/dnf
+    follow: yes
+  register: dnf_bin_check
+
+- name: Install dnf packages
+  yum:
+    state: present
+    name: "{{ dnf_packages }}"
+    disablerepo: '*'
+    enablerepo: base,updates,extras,epel
+    # Use dnf early if available
+    use_backend: >-
+      (dnf_bin_check.stat.exists          | default(false)
+        and dnf_bin_check.stat.executable | default(false)
+        and dnf_bin_check.stat.isreg      | default(false)) | ternary('dnf', 'auto')
+
+  register: dnf_install
+
+# Prevent hitting locks during provisioning which cause random fails
+# and require retries on package operations.
+- name: Disable dnf background metadata update
+  systemd:
+    name: "{{ item }}"
+    state: stopped
+    masked: yes
+    enabled: no
+    daemon_reload: "{{ dnf_install is changed }}"
+  loop:
+    - dnf-makecache.timer
+    - dnf-makecache.service
+
+- name: Configure dnf package manger
+  template:
+    src: dnf.conf
+    dest: /etc/dnf/dnf.conf
+
+- name: Perform initial maintenance
+  when: dnf_install is changed
+  block:
+    - name: Perform maintenance
+      include_tasks: _maintenance.yml
+    - name: Refresh caches
+      include_tasks: _refresh.yml

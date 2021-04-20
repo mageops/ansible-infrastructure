@@ -7,21 +7,15 @@ packages_full_update_exclude: []
 
 # Time of last package maintenance where 0 means it was never performed
 packages_maintenance_timestamp: 0
-packages_maintenance_timestamp_lockfile: /var/cache/mageops.pkg-maint.lock
 
 # Was the maintenance performed at all?
 packages_maintenance_performed: no
+
 # Time between last and previous maintenance
 packages_maintenance_elapsed: ~
 
 # Minimum interval between package maintenace in seconds
 packages_maintenance_interval: "{{ 3600 * 12 }}"
 
-packages_mirrorlist_countrycode: no
-packages_mirrorlists:
-  - { file: CentOS-Base.repo, repo: base,       url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=os" }
-  - { file: CentOS-Base.repo, repo: updates,    url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=updates" }
-  - { file: CentOS-Base.repo, repo: extras,     url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=extras" }
-  - { file: CentOS-Base.repo, repo: centosplus, url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=centosplus" }
 
 

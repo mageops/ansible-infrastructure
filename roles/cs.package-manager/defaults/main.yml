@@ -1,0 +1,32 @@
+# Max downloads in parallel
+yum_max_parallel_downloads: 5
+
+# Minimum interval between dnf repo metadata updates (in seconds)
+yum_metadata_expire: 7200
+
+# Dnf dropped this setting
+yum_mirrorlist_expire: "{{ yum_metadata_expire }}"
+
+# Minimum interval between metadata updates via `dnf makecache --timer`
+dnf_metadata_timer_sync: "{{ yum_metadata_expire }}"
+
+dnf_packages:
+  - dnf
+  - dnf-plugins-core
+  - dnf-plugins-extras-versionlock
+
+  - python2-dnf
+  - python2-dnf-plugins-core
+  - python2-dnf-plugin-versionlock
+
+  # Allows for newer metadata storage format, see:
+  # https://dnf.readthedocs.io/en/latest/conf_ref.html#conf-repo-options-label
+  - zchunk
+
+yum_packages:
+  - yum-utils
+  - yum-plugin-verify
+  - yum-plugin-versionlock
+  - yum-plugin-fastestmirror
+
+yum_packages_mirrorlist_countrycode: "{{ packages_mirrorlist_countrycode | default(false) }}"

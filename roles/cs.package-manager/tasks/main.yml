@@ -1,0 +1,14 @@
+
+- name: Setup dnf
+  include_tasks: dnf-setup.yml
+
+# Switch to dnf before having to install yum pkgs
+- name: Override ansible pkg manager
+  include_tasks: dnf-switch.yml
+
+- name: Setup yum
+  include_tasks: yum-setup.yml
+
+
+
+

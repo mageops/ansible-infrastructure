@@ -1,0 +1,8 @@
+# Note: This files is not included in main.yml on purpose.
+# Tip: his task list should be only executed via include or handler at the end
+# of machine provisioning.
+- name: Clean downloaded package cache
+  command:
+    cmd: "{{ item }} clean packages"
+    warn: no
+  loop: [yum, dnf]

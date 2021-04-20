@@ -1,5 +1,6 @@
 - hosts: all
   roles:
+    - role: cs.package-manager
     - role: cs.firewalld
       when: firewall_enable
 
@@ -11,7 +12,7 @@
       mysql_root_user: "{{ mageops_mysql_root_user }}"
       mysql_root_pass: "{{ mageops_mysql_root_pass }}"
       when: mageops_mysql_create
-      
+
     - role: cs.mysql-configure
       when: mageops_mysql_host is defined
 

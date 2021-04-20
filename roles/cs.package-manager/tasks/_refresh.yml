@@ -1,0 +1,8 @@
+- name: Force update dnf metadata cache
+  command:
+    cmd: dnf makecache
+    warn: no
+  register: dnf_makecache
+  retries: 6
+  delay: 5
+  until: dnf_makecache is not failed

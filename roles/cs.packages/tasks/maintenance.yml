@@ -1,0 +1,73 @@
+- name: Set package maintenance facts
+  vars:
+    packages_maintenance_datetime: "{{ ansible_local.packages_maintenance_datetime | default(none) }}"
+    packages_maintenance_timestamp: "{{ ansible_local.packages_maintenance_datetime.epoch | default(0) }}"
+  set_fact:
+    packages_maintenance_datetime: "{{ packages_maintenance_datetime }}"
+    packages_maintenance_timestamp: "{{ packages_maintenance_timestamp }}"
+    packages_maintenance_elapsed: "{{ ansible_date_time.epoch | int - packages_maintenance_timestamp | int }}"
+    packages_maintenance_performed: "{{ packages_maintenance_timestamp | int != 0 }}"
+
+- name: Determine if maitenance is needed
+  set_fact:
+    packages_maintenance_needed: "{{ packages_maintenance_elapsed | int > packages_maintenance_interval | int }}"
+
+- name: Print maintenance info
+  debug:
+    msg: |
+      ============= Package Maintenance ============
+
+      {% if packages_maintenance_performed %}
+      Maintenance last performed on {{
+        '%Y-%m-%d %H:%M:%S' | strftime(packages_maintenance_timestamp | int)
+      }} ({{
+        '%Y-%m-%d %H:%M:%S' | strftime(ansible_date_time.epoch) | to_datetime
+          - '%Y-%m-%d %H:%M:%S' | strftime(packages_maintenance_timestamp | int) | to_datetime
+      }} ago).
+      {% else %}
+      Maintenance has never been performed on this machine.
+      {% endif %}
+
+      {% if packages_maintenance_needed %}
+      {% if packages_maintenance_performed %}
+      Will be performed again because the last one has expired.
+      {% else %}
+      Will be performed for the first time.
+      {% endif %}
+
+      {% if not packages_full_update and not packages_maintenance_performed %}
+      Full package upgrade forced because of first maintenance.
+      {% elif packages_full_update %}
+      Full package upgrade requested.
+      {% else %}
+      Package upgrade limited to security updates.
+      {% endif %}
+
+      {% else %}
+      Skipping maintenance because last one is newer than the interval of
+      {{ packages_maintenance_interval | int / 60 }} min.
+      {% endif %}
+
+- name: Perform package maintenance
+  when: packages_maintenance_needed
+  block:
+    - name: Execute package maintenance tasks
+      include_tasks: maintenance-tasks.yml
+
+    - name: Update local facts about last maintenance
+      set_fact:
+        ansible_local: "{{ ansible_local | combine(new_facts) }}"
+      vars:
+        new_facts:
+          packages_maintenance_datetime: "{{ ansible_date_time }}"
+      changed_when: true
+      notify: Save local facts
+
+    # Warning! This has to be the last step in this block because ansible evaluates
+    # the condition on every task and further steps would be skipped.
+    - name: Update package maintenance facts
+      set_fact:
+        packages_maintenance_datetime: "{{ ansible_local.packages_maintenance_datetime }}"
+        packages_maintenance_timestamp: "{{ ansible_local.packages_maintenance_datetime.epoch }}"
+        packages_maintenance_elapsed: 0
+        packages_maintenance_performed: yes

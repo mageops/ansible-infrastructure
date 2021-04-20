@@ -1,0 +1,12 @@
+# After lots of research and testing - this has to be done this way because:
+# - package modules examine the `ansible_facts.pkg_mgr` vars but updating it
+#   won't update the `ansible_pkg_mgr` top-level var which still may be used
+#   by some code (internal or ours)
+# - ansible_facts has to be extended or else we reset it contents to zero
+#   what may cause problems further down way as vars are missing...
+- name: Switch ansible package manager to dnf
+  set_fact: "{{ pkg_mgr_fact_overrides }}"
+  vars:
+    pkg_mgr_fact_overrides:
+      ansible_facts: "{{ ansible_facts | default({}) | combine({'pkg_mgr': 'dnf'}) }}"
+      ansible_pkg_mgr: dnf

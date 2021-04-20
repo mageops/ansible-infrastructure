@@ -12,13 +12,6 @@
   register: _rabbitmq_server_package
   notify: Restart rabbitmq
 
-- name: Ensure yum versionlock plugin is installed
-  yum:
-    name:
-      - yum-plugin-versionlock
-      - dnf-command(versionlock)
-  when: _rabbitmq_erlang_package is changed or _rabbitmq_server_package is changed
-
 # The versions need to be locked because the repository
 # has all major versions within the same package name and this
 # could cause an unintended bump to a version with breaking changes.

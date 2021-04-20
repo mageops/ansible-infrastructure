@@ -1,2 +1,4 @@
 dependencies:
+  - role: cs.package-manager
   - role: cs.repo-rabbitmq
+

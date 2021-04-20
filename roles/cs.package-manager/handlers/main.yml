@@ -1,0 +1,9 @@
+- name: Refresh dnf metadata
+  import_tasks: _refresh.yml
+  listen:
+    - Refresh yum metadata
+
+- name: Cleanup dnf package cache
+  import_tasks: _cleanup.yml
+  listen:
+    - Cleanup yum package cache

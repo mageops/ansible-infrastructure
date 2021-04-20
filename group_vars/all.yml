@@ -1193,6 +1193,7 @@ magento_efs_app_node_mounts: []
 # -----------------------
 
 php_version: 7.2
+
 php_packages:
   - php-cli
   - php-common
@@ -1679,8 +1680,6 @@ mageops_packages_base:
   - python
   - python2-pip
   - python2-PyMySQL
-  - yum-utils
-  - yum-plugin-verify
   - unzip
   - git
   - rsync

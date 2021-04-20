@@ -1,0 +1,5 @@
+yum_packages_mirrorlists:
+  - { file: CentOS-Base.repo, repo: base,       url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=os" }
+  - { file: CentOS-Base.repo, repo: updates,    url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=updates" }
+  - { file: CentOS-Base.repo, repo: extras,     url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=extras" }
+  - { file: CentOS-Base.repo, repo: centosplus, url: "http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&infra=$infra&cc={{ packages_mirrorlist_countrycode }}&repo=centosplus" }

@@ -1,0 +1,19 @@
+  - name: Perform package manager maintenance
+    include_role:
+      name: cs.package-manager
+      tasks_from: _maintenance.yml
+
+  - name: Perform system upgrade
+    dnf:
+      name: '*'
+      state: latest
+      update_only: no
+      update_cache: no
+      # Perform only security upgrades if full udpate is not requested, however,
+      # force full upgrade if no maintenance has been evenr performed.
+      security: "{{ not packages_full_update and packages_maintenance_performed }}"
+      exclude: "{{ packages_full_update_exclude }}"
+    register: dnf_upgrade
+    retries: 5
+    delay: 5
+    until: not dnf_upgrade is failed

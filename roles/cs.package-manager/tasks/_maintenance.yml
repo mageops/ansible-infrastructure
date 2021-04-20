@@ -1,0 +1,21 @@
+- name: Ensure repositories honor metadata expire interval
+  shell: >
+    find /etc/yum.repos.d -type f -iname '*.repo'
+    -exec sed --in-place=.ansible.backup -E
+    's/^[^#m]*(metadata_expire\s*=\s*\w+).*$/# \1 # managed by Ansible/gw /dev/stdout' {} \;
+  changed_when: dnf_repo_metada_expire_override.stdout_lines | length > 0
+  register: dnf_repo_metada_expire_override
+
+- name: Set localized yum mirrorlist (for core repos)
+  ini_file:
+    path: "/etc/yum.repos.d/{{ item.file }}"
+    section: "{{ item.repo }}"
+    option: mirrorlist
+    value: "{{ item.url }}"
+    backup: yes
+    no_extra_spaces: yes
+  loop: "{{ yum_packages_mirrorlists }}"
+  loop_control:
+    label: "{{ item.repo }}"
+  when: yum_packages_mirrorlist_countrycode | default(false, true)
+
