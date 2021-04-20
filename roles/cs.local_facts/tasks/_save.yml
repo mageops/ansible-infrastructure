@@ -1,0 +1,13 @@
+# This task file should be included or triggered using handler.
+- debug: var=ansible_local
+
+- name: Save local facts
+  copy:
+    content: "{{ fact.value | to_nice_json }}"
+    dest: "{{ fact_file }}"
+  loop: "{{ ansible_local | default({}) | dict2items }}"
+  loop_control:
+    loop_var: fact
+    label: "ansible_local.{{ fact.key }} -> {{ fact_file }}"
+  vars:
+    fact_file: "{{ local_facts_dir }}/{{ fact.key }}.fact"

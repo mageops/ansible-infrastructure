@@ -1,0 +1,16 @@
+- name: Create local facts dir
+  file:
+    state: directory
+    recurse: yes
+    path: "{{ local_facts_dir }}"
+  register: local_facts_dir_create
+
+- name: Read local facts
+  when: >
+    local_facts_dir_create is not changed
+         and ansible_local is not defined
+  setup:
+    gather_subset: "!all,local"
+    fact_path: "{{ local_facts_dir }}"
+
+

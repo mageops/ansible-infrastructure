@@ -1,0 +1,17 @@
+#!/bin/sh
+
+- name: Create dynamic local version fact
+  copy:
+    content: |
+      #!/bin/sh
+      php -r '
+          echo(
+              json_encode(
+                  phpversion(),
+                  JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+              )
+          );' \
+          2>/dev/null \
+      || echo null
+    mode: 0755
+    dest: "{{ local_facts_dir }}/php_version.fact"

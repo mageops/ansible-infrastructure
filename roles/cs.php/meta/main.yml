@@ -1,2 +1,3 @@
 dependencies:
   - role: cs.repo-remi
+  - role: cs.local_facts

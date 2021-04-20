@@ -1,0 +1,6 @@
+- name: Save local facts
+  import_tasks: _save.yml
+  listen:
+    - Persist local facts
+    - Update local facts
+    - Write ansible_local
