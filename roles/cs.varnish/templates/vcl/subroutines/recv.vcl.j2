@@ -171,14 +171,14 @@ if (req.url ~ "\.(xml|csv)$") {
 
 std.collect(req.http.Cookie);
 
-if (req.url ~ "^/(pub/)?(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)$") {
+if (req.url ~ "^/(pub/)?(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)(\?.*)?$") {
     unset req.http.Https;
     unset req.http.X-Forwarded-Proto;
     unset req.http.Cookie;
 }
 
 {% if varnish_secure_site %}
-    if (! req.url ~ "^/(pub/)?(media|static)/.*\.(html|json|ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)$"
+    if (! req.url ~ "^/(pub/)?(media|static)/.*\.(html|json|ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)(\?.*)?$"
         && ! req.url ~ "^/cron.php$"
         && ! req.url ~ "^/rest/.*$"
         && ! req.http.Authorization ~ "Basic {{ varnish_secure_site_http_auth_string | b64encode }}"
@@ -192,7 +192,7 @@ if (req.url ~ "^/(pub/)?(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp
 
 # Compression filter. See https://www.varnish-cache.org/trac/wiki/FAQ/Compression
 if (req.http.Accept-Encoding) {
-    if (req.url ~ "\.(jpg|jpeg|png|gif|gz|tgz|bz2|webp|tbz|mp3|ogg|swf|flv)$") {
+    if (req.url ~ "\.(jpg|jpeg|png|gif|gz|tgz|bz2|webp|tbz|mp3|ogg|swf|flv)(\?.*)?$") {
         # No point in compressing these
         unset req.http.Accept-Encoding;
     } elsif (req.http.Accept-Encoding ~ "gzip") {
@@ -213,6 +213,3 @@ set req.url = regsuball(req.url,"\?{{ param }}=[^&]+$","");  # strips when QS = 
 {% endfor %}
 
 return (hash);
-
-    
-    

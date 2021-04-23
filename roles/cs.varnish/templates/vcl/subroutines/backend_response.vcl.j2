@@ -4,7 +4,7 @@ if (beresp.http.content-type ~ "text") {
     set beresp.do_esi = true;
 }
 
-if (bereq.url ~ "\.js$" || beresp.http.content-type ~ "text") {
+if (bereq.url ~ "\.js(\?.*)?$" || beresp.http.content-type ~ "text") {
     set beresp.do_gzip = true;
 }
 
@@ -29,15 +29,21 @@ if (beresp.http.X-Magento-Debug) {
     set beresp.http.X-Magento-Cache-Control = beresp.http.Cache-Control;
 }
 
-# Do not cache static css and js files without size or empty
-if (bereq.url ~ "^/(pub/)?static/.*\.(css|js)$"
-    && (! beresp.http.Content-Length || beresp.http.Content-Length == "0")) {
-    set beresp.http.Cache-Control = "no-cache";
-    set beresp.ttl = 0s;
-    set beresp.uncacheable = true;
-    set beresp.do_gzip = true;
-    return (deliver);
+if (bereq.url ~ "^/(pub/)?static/.*\.$") {
+    # do_esi is needed here as workaround to disable chunked transfer that
+    # disable content-length header that allows cloudfront to cache incomplete content
+    set beresp.do_esi = true;
+
+    # Do not cache static files without size or empty
+    if (! beresp.http.Content-Length || beresp.http.Content-Length == "0") {
+        set beresp.http.Cache-Control = "no-cache";
+        set beresp.ttl = 0s;
+        set beresp.uncacheable = true;
+        set beresp.do_gzip = true;
+        return (deliver);
+    }
 }
+
 
 # validate if we need to cache it and prevent from setting cookie
 if (beresp.ttl > 0s && (bereq.method == "GET" || bereq.method == "HEAD")) {
