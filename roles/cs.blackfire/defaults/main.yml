@@ -1,6 +1,8 @@
 blackfire_packages:
-  - blackfire-agent
+  - blackfire
   - blackfire-php
+blackfire_deprecated_packages:
+  - blackfire-agent
 blackfire_server_id: ""
 blackfire_server_token: ""
 blackfire_install: yes
