@@ -212,4 +212,9 @@ set req.url = regsuball(req.url,"\?{{ param }}=[^&]+&","?"); # strips when QS = 
 set req.url = regsuball(req.url,"\?{{ param }}=[^&]+$","");  # strips when QS = "?param=AAA"
 {% endfor %}
 
+{% for param in varnish_url_replace %}
+set req.url = regsuball(req.url,"{{ param.from }}","{{ param.to }}");
+{% endfor %}
+
+
 return (hash);
