@@ -12,3 +12,7 @@
         {% endfor %}
     {% endfor %}
 {% endif %}
+
+{% if varnish_magento_vary_sign -%}
+    new sha1 =  blobdigest.digest(SHA1);
+{% endif %}

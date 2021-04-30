@@ -3,5 +3,8 @@
     name: "{{ [varnish_package_name] + varnish_extra_packages }}"
     state: present
 
-
-
+- name: Install blobdigest module
+  yum:
+    name: "varnish-module-blobdigest"
+    state: present
+  when: varnish_magento_vary_sign

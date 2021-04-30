@@ -160,6 +160,8 @@ varnish_syscfg_limit_memlock: 85983232
 varnish_syscfg_tasks_max: "infinity"
 varnish_syscfg_limit_core: "infinity"
 
+varnish_magento_vary_sign: no
+varnish_magento_vary_secret: ""
 varnish_404_cache_time: 60s
 varnish_301_cache_time: 3h
 

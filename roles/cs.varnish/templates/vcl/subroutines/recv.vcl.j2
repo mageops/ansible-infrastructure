@@ -216,5 +216,21 @@ set req.url = regsuball(req.url,"\?{{ param }}=[^&]+$","");  # strips when QS = 
 set req.url = regsuball(req.url,"{{ param.from }}","{{ param.to }}");
 {% endfor %}
 
+{% if varnish_magento_vary_sign %}
+if (req.http.cookie ~ "X-Magento-Vary=") {
+    cookie.parse(req.http.cookie);
+    if(! sha1.update( blob.decode( encoded=cookie.get("X-Magento-Vary") + "{{ varnish_magento_vary_secret | quote }}" ) ) ) {
+        return (synth(500, "Internal Server Error"));
+    }
+
+    if ( blob.encode( encoding=HEX, case=LOWER, blob=sha1.final() ) != cookie.get("X-Magento-Vary-Sign") ) {
+        cookie.delete("X-Magento-Vary");
+        set req.http.cookie = cookie.get_string();
+    }
+}
+{# NOTE: First if statement can only fail when `update` is called after `finish`,
+ # but this is not possible, however VCL do not allow calling object methods,
+ # therefore this function mainly as workaround to this limitation. #}
+{% endif %}
 
 return (hash);
