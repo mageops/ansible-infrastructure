@@ -542,6 +542,9 @@ aws_logs_log_magento_crash_reports: yes
 aws_autoscaling_triggers_list: []
 aws_autoscaling_lambda_functions_list: []
 
+# See defaults in role `cs.aws-autoscaling`
+aws_autoscaling_rolling_instance_refresh_min_healthy_percent: 90
+
 # ----------------------------------------
 # --------  MageOps Basic Config  --------
 # ----------------------------------------

@@ -53,3 +53,4 @@ aws_asg_instance_refresh_cli_args_base: [
     --color,        "off",
     --no-paginate,
 ]
+

@@ -5,13 +5,19 @@
           + aws_asg_instance_refresh_cli_args_base
           + [ '--cli-input-json', aws_asg_instance_refresh_params | to_json ] }}
   vars:
-    aws_asg_instance_refresh_params:
-      AutoScalingGroupName: "{{ autoscaling_asg_name }}"
-      # Note: A futureproof setting - there is no other strategy as of yet.
-      Strategy: Rolling
-      Preferences:
-          MinHealthyPercentage: "{{ autoscaling_rolling_instance_refresh_min_healthy_percent }}"
-          InstanceWarmup: "{{ autoscaling_rolling_instance_refresh_extra_warmup_grace_period }}"
+    # This is rendered in template string directly on purpose
+    # as otherwise ansible will pass numbers as string causing API error.
+    aws_asg_instance_refresh_params: >-
+      {{
+          {
+            "AutoScalingGroupName": autoscaling_asg_name,
+            "Strategy": "Rolling",
+            "Preferences": {
+              "MinHealthyPercentage": autoscaling_rolling_instance_refresh_min_healthy_percent | int,
+              "InstanceWarmup": autoscaling_rolling_instance_refresh_extra_warmup_grace_period | int
+            }
+          }
+      }}
   register: aws_asg_instance_refresh_command
 
 - name: Compute instance refresh task info
@@ -20,7 +26,7 @@
     aws_asg_instance_refresh_estimated_duration: >-
       {{ ( ( autoscaling_healthcheck_grace_period | int
           + autoscaling_rolling_instance_refresh_extra_warmup_grace_period | int )
-              * autoscaling_asg_desired_capacity | int 
+              * autoscaling_asg_desired_capacity | int
               * ( autoscaling_rolling_instance_refresh_min_healthy_percent | int + 100 )
               / 100 ) | round(1, 'ceil') }}
 
@@ -54,7 +60,7 @@
             "- \(.PercentageComplete)% complete", "/ \(.InstancesToUpdate) left",
             ( if .StatusReason then "(\(.StatusReason))" else "" end ) ] | join(" "))'; \
         done
-        
+
       ========================================================
 
 - name: Wait for the rolling Instance Refresh to complete
@@ -67,16 +73,16 @@
     aws_asg_instance_describe_refresh_params:
       AutoScalingGroupName: "{{ autoscaling_asg_name }}"
       InstanceRefreshIds: [ "{{ aws_asg_instance_refresh_id }}" ]
-    aws_asg_instance_describe_data: >- 
-      {{ ( aws_asg_describe_instance_refresh_command.stdout 
-            | default('{"Status": null, "PercentageComplete": -1}') 
+    aws_asg_instance_describe_data: >-
+      {{ ( aws_asg_describe_instance_refresh_command.stdout
+            | default('{"Status": null, "PercentageComplete": -1}')
             | from_json ).InstanceRefreshes | first }}
   register: aws_asg_describe_instance_refresh_command
   until: >-
-    aws_asg_describe_instance_refresh_command is not failed 
+    aws_asg_describe_instance_refresh_command is not failed
     and aws_asg_instance_describe_data.PercentageComplete | default(0, true) | int == 100
       and aws_asg_instance_describe_data.Status == 'Successful'
   delay: "{{ aws_asg_instance_refresh_progress_check_interval }}"
-  retries: >- 
-    {{ ( aws_asg_instance_refresh_progress_check_timeout | int 
+  retries: >-
+    {{ ( aws_asg_instance_refresh_progress_check_timeout | int
           / aws_asg_instance_refresh_progress_check_interval | int ) | int }}

@@ -34,6 +34,16 @@
 - hosts: localhost
   connection: local
   vars:
+    # Disable rolling updates when enabling maintenance mode to speed
+    # the refresh up...
+    autoscaling_rolling_instance_refresh_min_healthy_percent: >-
+      {{
+        aws_ami_app_node_needs_db_migrations | default(true) | ternary(
+          0,
+          aws_autoscaling_rolling_instance_refresh_min_healthy_percent
+        )
+      }}
+
     aws_app_node_security_group_ids: >-
         {{
             [
