@@ -135,6 +135,11 @@ varnish_vcl_backend_error_extra: ""
 
 varnish_strip_params: ['gclid']
 
+# To be used for advanced customizations
+varnish_url_replace: []
+# - from: "\.html\?.*$"
+#   to: ".html"
+
 # Set to unique, secret value in order to enable
 # pass-through request debugging
 varnish_debug_request_token: ~
@@ -163,4 +168,3 @@ varnish_301_cache_time: 3h
 # If you are on varnish_trusted_ips list you will
 # still receive those headers
 varnish_do_not_expose_caching: no
-
