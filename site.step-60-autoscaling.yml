@@ -7,18 +7,29 @@
     - role: cs.aws-ami-facts
       delegate_to: localhost
   tasks:
-    - name: Enable Magento maintenance mode (if AMI release has DB migrations)
-      command: "bin/magento maintenance:enable"
-      when: aws_ami_app_node_needs_db_migrations | default(true)
-      args:
-        chdir: "{{ item.dir | default(magento_live_release_dir) }}"
-      run_once: true
-      become: yes
-      become_user: "{{ magento_user }}"
-      register: enable_maintenance_mode
-      until: enable_maintenance_mode is not failed
-      retries: 10 
-      delay: 6
+    - block:
+        - name: Enable Magento maintenance mode (if AMI release has DB migrations)
+          command: "bin/magento maintenance:enable"
+          when: aws_ami_app_node_needs_db_migrations | default(true)
+          args:
+            chdir: "{{ item.dir | default(magento_live_release_dir) }}"
+          run_once: true
+          become: yes
+          become_user: "{{ magento_user }}"
+          register: enable_maintenance_mode
+          until: enable_maintenance_mode is not failed
+          retries: 10
+          delay: 6
+      rescue:
+        - name: Print failure warning
+          debug:
+            msg: |
+              =================================================
+              =  Warning! Failed to enable maintenance mode!  =
+              =================================================
+
+              Probably the currently deployed installation is
+              broken - proceeding with the asg update anyway...
 
 - hosts: localhost
   connection: local
