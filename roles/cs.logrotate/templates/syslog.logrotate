@@ -1,0 +1,21 @@
+/var/log/cron
+/var/log/maillog
+/var/log/messages
+/var/log/secure
+/var/log/spooler
+{
+    compress
+    compresscmd /usr/bin/zstd
+    uncompresscmd /usr/bin/unzstd
+    compressext .zstd
+    compressoptions -19
+
+    size 128M
+    rotate 5
+
+    missingok
+    sharedscripts
+    postrotate
+        /bin/kill -HUP `cat /var/run/syslogd.pid 2> /dev/null` 2> /dev/null || true
+    endscript
+}

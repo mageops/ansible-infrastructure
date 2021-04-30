@@ -27,3 +27,4 @@
     - "ansible_facts.data.groups"
   loop_control:
     label: "{{ item[1] }}"
+  ignore_errors: yes

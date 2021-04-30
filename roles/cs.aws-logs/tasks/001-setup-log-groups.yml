@@ -19,3 +19,4 @@
   loop_control:
     label: "{{ item.group_name }}"
   with_items: "{{ _aws_logs_loggers | default({}) }}"
+  ignore_errors: yes

@@ -28,7 +28,7 @@ redis_logdir: /var/log/redis
 redis_logfile: "{{ redis_logdir }}/{{ redis_daemon }}-server.log"
 
 redis_databases: 16
-redis_maxclients: 512
+redis_maxclients: 4096
 redis_somaxconn: 65535
 
 redis_persistence_enable: yes
@@ -75,4 +75,3 @@ redis_disabled_commands: []
 #  - SREM
 #  - RENAME
 #  - DEBUG
-

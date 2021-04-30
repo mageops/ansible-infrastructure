@@ -1,5 +1,7 @@
+{# IMPORTANT: all acl groups must be used because
+ # varnish fails to compile VCL with unused ACL #}
+
 {% if varnish_secure_site %}
-{# This ACL is used only when secure site is enabled and varnish fails to compile VCL with unused ACL #}
 acl client_ip_whitelist {
     "localhost";
     "10.0.0.0"/8;
@@ -18,9 +20,9 @@ acl purge {
     {% endfor %}
 }
 
-{% if varnish_secure_site %}
+{% if varnish_do_not_expose_caching or varnish_secure_site %}
 acl trusted {
-    {% for ip in varnish_secure_site_trusted_ips %}
+    {% for ip in varnish_trusted_ips %}
     {% if ip | ipaddr('network') %}
     "{{ ip | ipaddr('network') }}"/{{ ip | ipaddr('prefix') }};
     {% else %}

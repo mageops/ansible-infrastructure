@@ -1,6 +1,7 @@
 allow_duplicates: no
 dependencies:
   - cs.repo-nginx
+  - cs.logrotate
 
 galaxy_info:
   author: creativestyle
@@ -21,5 +22,3 @@ galaxy_info:
     - magento
     - magesuite
     - creativestyle
-
-

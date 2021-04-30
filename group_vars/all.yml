@@ -1640,6 +1640,9 @@ deploy_rsync_excludes_extra: []
 # Extra dirs that will be shared across releases
 deploy_shared_dirs_extra: []
 
+# Where to save the release info JSON locally
+deploy_release_save_info_file_path: "{{ mageops_ansible_temp_dir }}/RELEASE.json"
+
 # --------------------------------------
 # --------  System Maintenance  --------
 # --------------------------------------
@@ -1700,6 +1703,7 @@ mageops_packages_ops:
   - goaccess
   - atop
   - lsof
+  - ncdu
 
 # Handy packages installed on all nodes by default
 mageops_packages_common: "{{ mageops_packages_base + mageops_packages_tools + mageops_packages_ops }}"

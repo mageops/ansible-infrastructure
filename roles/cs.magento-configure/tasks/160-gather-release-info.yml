@@ -1,0 +1,18 @@
+- name: Check if release needs db migrations
+  command:
+    argv:
+      - "{{ magento_release_dir }}/bin/magento"
+      - "setup:db:status"
+  register: magento_db_status_cmd
+  failed_when: magento_db_status_cmd.rc not in [0, 2]
+  changed_when: no
+  become: yes
+  become_user: "{{ magento_user }}"
+
+- name: Set release info facts
+  set_fact:
+    magento_release_db_migrations_needed: "{{ magento_db_status_cmd.rc != 0 }}"
+    magento_release_db_migrations_info: "{{ magento_db_status_cmd.stdout }}"
+
+
+

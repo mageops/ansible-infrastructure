@@ -93,7 +93,6 @@ sshd_public_network_lockdown: yes
 sshd_trusted_networks: "{{ ['127.0.0.0/8'] + mageops_trusted_cidr_blocks }}"
 
 mageops_cli_user_groups: [wheel]
-mageops_cli_user_authorize_local_key: yes
 
 mageops_packages_mirrorlist_countrycode: pl
 mageops_packages_vagrant_node:
@@ -107,5 +106,3 @@ mageops_packages_vagrant_node:
 nodejs_use_yarn: yes
 nodejs_packages:
   - gulp-cli
-
-mageops_authorize_local_keys: yes

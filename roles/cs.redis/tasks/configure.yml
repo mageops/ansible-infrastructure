@@ -38,6 +38,21 @@
     - Reload systemctl daemon
     - Restart {{ redis_daemon }}
 
+- name: Ensure service override direcotry exists
+  file:
+    path: /etc/systemd/system/{{ redis_daemon }}.service.d
+    state: directory
+
+- name: Install systemd limits service file
+  template:
+    src: redis.limit.conf
+    dest: "/etc/systemd/system/{{ redis_daemon }}.service.d/limit.conf"
+    trim_blocks: yes
+    lstrip_blocks: yes
+  notify:
+    - Reload systemctl daemon
+    - Restart {{ redis_daemon }}
+
 - name: Install redis configuration
   template:
     src: redis.conf
@@ -101,5 +116,3 @@
     name: "{{ redis_daemon }}"
     state: started
     enabled: yes
-
-

@@ -1,0 +1,19 @@
+- name: Install logrotate and zstd
+  yum:
+    state: present
+    name:
+      - logrotate
+      - zstd
+
+- name: Schedule logrotate hourly
+  copy:
+    remote_src: yes
+    src: /etc/cron.daily/logrotate
+    dest: /etc/cron.hourly/logrotate
+    mode: 0755
+
+- name: Install syslog logroate config
+  template:
+    src: syslog.logrotate
+    dest: /etc/logrotate.d/syslog
+    mode: 0644

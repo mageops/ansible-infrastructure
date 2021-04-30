@@ -39,6 +39,20 @@
   command: systemd-tmpfiles --create
   when: tmpfiles_config is changed
 
+- name: Ensure nginx service override direcotry exists
+  file:
+    path: /etc/systemd/system/nginx.service.d
+    state: directory
+
+- name: Configure Nginx Systemd Service
+  template:
+    src: nginx.service.overrides.conf
+    dest: /etc/systemd/system/nginx.service.d/mageops.conf
+    trim_blocks: no
+  notify:
+    - Reload systemctl daemon
+    - Restart nginx
+
 - name: Create nginx configuration
   template:
     src: nginx.conf
@@ -49,6 +63,3 @@
   service:
     name: nginx
     enabled: yes
-
-
-

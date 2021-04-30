@@ -10,6 +10,11 @@
         src: blackfire.repo
         dest: /etc/yum.repos.d/blackfire.repo
 
+    - name: Ensure Blackfire deprecated packages are gone.
+      yum:
+        name: "{{ blackfire_deprecated_packages }}"
+        state: absent
+
     - name: Ensure Blackfire packages are installed.
       yum:
         name: "{{ blackfire_packages }}"
@@ -29,6 +34,12 @@
       template:
         src: blackfire.ini.j2
         dest: /etc/php.d/zz-blackfire.ini
+
+    - name: Enable blackfire agent service
+      service:
+        name: blackfire-agent
+        state: started
+        enabled: yes
 
     - name: Install feature flag module
       copy:

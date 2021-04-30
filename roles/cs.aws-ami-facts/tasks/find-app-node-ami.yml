@@ -1,7 +1,11 @@
 - name: Find app node AMIs
   ec2_ami_facts:
     region: "{{ aws_region }}"
-    filters: "{{ ami_facts_common_filters | combine(ami_facts_app_node_filters, ami_facts_app_node_tag_filters) }}"
+    filters: >-
+      {{ ami_facts_common_filters | combine(
+          ami_facts_app_node_base_filters, 
+          ami_facts_app_node_filters, 
+          ami_facts_app_node_tag_filters) }}
   vars:
     ami_facts_app_node_tag_filters: "{{ ami_facts_app_node_tags | prefix_keys('tag:') }}"
   register: ami_app_node_facts
@@ -18,11 +22,30 @@
         aws_ami_app_node_id: "{{ aws_ami_app_node_info.image_id }}"
         aws_ami_app_node_name: "{{ aws_ami_app_node_info.name }}"
         aws_ami_app_node_location: "{{ aws_ami_app_node_info.image_location }}"
+        aws_ami_app_node_needs_db_migrations: "{{ aws_ami_app_node_info.tags.NeedsDbMigrations | default('true') | from_json }}"          
+        aws_ami_app_node_artifact_build_nr: "{{ aws_ami_app_node_info.tags.ArtifactBuildNr | default('null') | from_json }}"
 
 - name: Print information about newest app node AMI found
   when: ami_app_node_facts.images | length > 0
   debug:
-    msg: "Found previous app node AMI: {{ aws_ami_app_node_name }} ({{ aws_ami_app_node_id }})"
+    msg: |
+      ===============================================================
+      =                     Found App Node AMI                      =
+      =============================================================== 
+
+      {% if ami_facts_app_node_force_id %}Note: Using forced specific AMI id.{% endif %}
+      
+      {{ aws_ami_app_node_name }} ({{ aws_ami_app_node_id }})
+
+      Baked App artifact build: #{{ aws_ami_app_node_artifact_build_nr | default('unknown', true) }}
+
+      {% if aws_ami_app_node_needs_db_migrations %}
+      Note: App release baked into this AMI performs DB migrations!
+      {% endif %}
+
+      --- Tags ---
+
+      {{ aws_ami_app_node_info.tags | default({}) | to_nice_yaml }}
 
 - name: Print information if no images were found
   when: ami_app_node_facts.images | length == 0

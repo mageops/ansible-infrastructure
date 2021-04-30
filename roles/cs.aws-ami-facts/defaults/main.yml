@@ -22,4 +22,15 @@ ami_facts_clean_base_filters:
 
 ami_facts_app_node_tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
 
+# Set to force specific AMI id for app node ASG
+ami_facts_app_node_force_id: ~
+
+ami_facts_app_node_base_filters: >-
+  {{ 
+      ami_facts_app_node_force_id | ternary(
+        { 'image-id': ami_facts_app_node_force_id },
+        {}
+      ) 
+  }}
+
 ami_facts_app_node_filters: {}
