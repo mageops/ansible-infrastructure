@@ -38,6 +38,7 @@
       when: aws_persistent_node_create
     - role: cs.mysql-configure
       mysql_user_localhost_access: "{{ not aws_rds_create }}"
+      when: aws_rds_create or mageops_mysql_host is not none
     - role: cs.aws-lambda-varnish
       when: varnish_standalone
     - role: cs.aws-lambda-node-coordinator
