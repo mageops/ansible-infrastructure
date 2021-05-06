@@ -81,9 +81,5 @@ if [[ -d "$HOME/.bashrc.d/" ]] ; then
 	done
 fi
 
-export PS1="$MAGEOPS_PS1"
-
 # Terminal tab name
 export PROMPT_COMMAND='echo -ne "\033]0;$(whoami)@${MAGEOPS_NODE_ROLE}.${MAGEOPS_PROJECT}-${MAGEOPS_ENVIRONMENT}\007"'
-
-
