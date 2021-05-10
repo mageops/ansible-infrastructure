@@ -77,4 +77,5 @@ nginx_magento_fastcgi_buffers_chunk_size: 256k
 # See: http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_buffer_size
 nginx_magento_fastcgi_buffers_head_size: 256k
 
-
+nginx_pio_worker_enabled: no
+nginx_pio_worker_address: 127.0.0.1:5080

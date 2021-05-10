@@ -208,6 +208,13 @@ location /media/ {
         deny all;
     }
 
+{% if nginx_pio_worker_enabled %}
+location ~* /media/(.*).webp& {
+    rewrite   /media/(.*).webp /$1  break;
+    proxy_pass http://{{ nginx_pio_worker_address }};
+}
+{% endif %}
+
     location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
         add_header Cache-Control "public";
         add_header X-Frame-Options "SAMEORIGIN";

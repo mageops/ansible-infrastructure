@@ -1,0 +1,4 @@
+pio_worker_rpm_url: https://cs-creativeshop-rpms.s3.eu-central-1.amazonaws.com/pio-worker-0.1.0-1.el7.x86_64.rpm
+pio_worker_address: 127.0.0.1:5280
+pio_worker_quality_min: 75
+pio_worker_quality_max: 95

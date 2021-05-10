@@ -1,0 +1,15 @@
+- name: Install worker package
+  yum:
+    name: "{{ pio_worker_rpm_url }}"
+    disable_gpg_check: yes
+
+- name: Configure worker
+  template:
+    src: worker.conf
+    dest: /etc/pio-worker.conf
+
+- name: Start worker service
+  service:
+    name: pio-worker
+    state: started
+    enabled: yes

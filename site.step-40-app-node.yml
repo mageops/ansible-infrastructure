@@ -78,6 +78,9 @@
       supervisor_service_autostart: no
       supervisor_service_initial_state: stopped
 
+    - role: cs.pio-worker
+      pio_worker_address: "{{ mageops_pio_worker_address }}"
+
     - role: cs.nginx-url-blacklist
 
     - role: cs.nginx
@@ -92,6 +95,8 @@
       nginx_blacklist_urls: "{{ mageops_app_node_https_termination_enable | ternary([], mageops_app_node_nginx_blacklist_urls) }}"
       nginx_fcgi_backend_socket: "{{ php_fpm_pool_fcgi_socket_path }}"
       nginx_fcgi_backend_debug_socket: "{{ php_fpm_debug_pool_fcgi_socket_path }}"
+      nginx_pio_worker_enabled: "{{ mageops_pio_worker_enabled }}"
+      nginx_pio_worker_address: "{{ mageops_pio_worker_address }}"
 
     - role: cs.nginx-https-termination
       when: mageops_app_node_https_termination_enable

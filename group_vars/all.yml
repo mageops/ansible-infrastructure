@@ -1801,3 +1801,10 @@ mageops_magento_vary_sign_enabled: no
 mageops_magento_vary_sign_secret: ""
 magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
 magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
+
+
+# -------------------------------------------
+# -------  Image optimization service  ------
+# -------------------------------------------
+mageops_pio_worker_address: 127.0.0.1:5280
+mageops_pio_worker_enabled: yes
