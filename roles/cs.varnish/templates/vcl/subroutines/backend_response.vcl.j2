@@ -29,7 +29,7 @@ if (beresp.http.X-Magento-Debug) {
     set beresp.http.X-Magento-Cache-Control = beresp.http.Cache-Control;
 }
 
-if (bereq.url ~ "^/static/.*\.$") {
+if (bereq.url ~ "^/static/.*$") {
     # do_esi is needed here as workaround to disable chunked transfer that
     # disable content-length header that allows cloudfront to cache incomplete content
     set beresp.do_esi = true;
