@@ -18,8 +18,8 @@
       aws_cloudfront_lambda_arn: ~
       when: aws_cloudfront_distribution_create | bool
     - role: cs.aws-ses
-      ses_email: "{{ mageops_email_ses_address }}"
-      ses_domain: "{{ mageops_email_ses_domain }}"        
+      ses_email: "{{ mageops_email_ses_address | default(omit, true) }}"
+      ses_domain: "{{ mageops_email_ses_domain | default(omit, true) }}"        
       when: mageops_email_use_ses
     - role: cs.aws-rds
       when: aws_rds_create
