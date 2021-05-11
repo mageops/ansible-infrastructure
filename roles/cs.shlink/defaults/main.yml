@@ -49,7 +49,7 @@ shlink_web_worker_num: 16
 shlink_task_worker_num: 16
 
 # Target docker container tag
-shlink_version: 2.4.2
+shlink_version: 2.6.2
 
 # GeoLite DB license key
 shlink_geolite_license_key: ~
