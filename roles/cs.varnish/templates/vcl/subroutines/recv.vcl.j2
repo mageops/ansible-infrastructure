@@ -99,19 +99,6 @@ if (req.restarts == 0) {
     }
 }
 
-{% if varnish_secure_site %}
-    if (! req.url ~ "^/(media|static)/.*\.(html|json|ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)(\?.*)?$"
-        && ! req.url ~ "^/cron.php$"
-        && ! req.url ~ "^/rest/.*$"
-        && ! req.http.Authorization ~ "Basic {{ varnish_secure_site_http_auth_string | b64encode }}"
-        # Allow local network to connect without auth directly, however show auth if request comes from front nginx (X-Real-Ip is set)
-        && (! client.ip ~ client_ip_whitelist || req.http.x-real-ip)
-        && (! std.ip(req.http.X-forwarded-for, "0.0.0.0") ~ trusted)
-    ) {
-        return (synth(401, "Restricted"));
-    }
-{% endif %}
-
 # We only deal with GET and HEAD by default
 if (req.method != "GET" && req.method != "HEAD") {
     return (pass);
@@ -189,6 +176,19 @@ if (req.url ~ "^/(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|g
     unset req.http.X-Forwarded-Proto;
     unset req.http.Cookie;
 }
+
+{% if varnish_secure_site %}
+    if (! req.url ~ "^/(media|static)/.*\.(html|json|ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)(\?.*)?$"
+        && ! req.url ~ "^/cron.php$"
+        && ! req.url ~ "^/rest/.*$"
+        && ! req.http.Authorization ~ "Basic {{ varnish_secure_site_http_auth_string | b64encode }}"
+        # Allow local network to connect without auth directly, however show auth if request comes from front nginx (X-Real-Ip is set)
+        && (! client.ip ~ client_ip_whitelist || req.http.x-real-ip)
+        && (! std.ip(req.http.X-forwarded-for, "0.0.0.0") ~ trusted)
+    ) {
+        return (synth(401, "Restricted"));
+    }
+{% endif %}
 
 # Compression filter. See https://www.varnish-cache.org/trac/wiki/FAQ/Compression
 if (req.http.Accept-Encoding) {
