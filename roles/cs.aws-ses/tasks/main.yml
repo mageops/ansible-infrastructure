@@ -28,7 +28,7 @@
       topic: "{{ _aws_sns_bounce.sns_arn }}"
       include_headers: False
     feedback_forwarding: False
-  when: ses_email is defined
+  when: ses_email | default(false, true)
 
 - name: Add domain to SES
   #community.aws.aws_ses_identity:
@@ -43,7 +43,7 @@
       topic: "{{ _aws_sns_bounce.sns_arn }}"
       include_headers: no
     feedback_forwarding: False
-  when: ses_domain is defined
+  when: ses_domain | default(false, true)
   
   # Could be falled back with
   # "{{ ses_domain | default(ses_email.split('@')[1]) }}"    
