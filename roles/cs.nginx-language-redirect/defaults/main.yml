@@ -8,7 +8,7 @@ nginx_language_redirect_site: default
 nginx_language_redirect_mode: geofence
 
 # When performing domain redirect (nginx_language_redirect_style se to domain)
-# this will app `_mageops_redirect_source` parameter to url with original hostname
+# this will app `{{ https_termination_redirect_source_domain_param }}` parameter to url with original hostname
 nginx_language_redirect_domain_redirect_include_domain: no
 
 # Site style used for redirection

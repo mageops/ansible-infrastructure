@@ -1422,6 +1422,7 @@ https_termination_proxy_read_timeout: "{{ mageops_http_pipeline_request_timeout_
 https_termination_page_cache_misses_logging: yes
 https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-cache-misses.json.log"
 
+https_termination_redirect_source_domain_param: _redirect_from
 
 # ---------------------------
 # --------  Varnish  --------
@@ -1497,7 +1498,7 @@ varnish_strip_params:
   - "trk_[^=&]+"
   - "dm_i"
   - "fbclid"
-  - "_mageops_redirect_source"
+  - "{{ https_termination_redirect_source_domain_param }}"
 
 varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
 
