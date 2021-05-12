@@ -36,7 +36,7 @@
       server_redirect_path_code:  "301"
 
       redirect_to:                "{{ host.redirect_to | default(false) }}"
-      redirect_to_kind:           "{{ host.redirect_to_kind | default('permanent') }}"
+      redirect_to_type:           "{{ host.redirect_to_type | default('permanent') }}"
       redirect_to_style:          "{{ host.redirect_to_style | default('deep') }}"
       redirect_to_include_domain: "{{ host.redirect_to_include_domain | default(false) }}"
 
