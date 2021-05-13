@@ -1,5 +1,5 @@
 rabbitmq_server_version: "rabbitmq-server-3.8.16"
-rabbitmq_erlang_version: "erlang-23.3.2"
+rabbitmq_erlang_version: "erlang-23.3.4"
 
 # Ensure the nodename is not auto-generated so we can use various tools
 rabbitmq_nodename: rabbit
