@@ -121,7 +121,7 @@
     rules:
       - proto: tcp
         ports: 3306
-        group_name: "{{ aws_security_group_app_name }}"
+        group_name: "{{ [aws_security_group_app_name] + aws_security_group_rds_access_extra_groups | default([]) }}"
       - proto: tcp
         ports: 3306
         cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
