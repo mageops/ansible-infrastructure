@@ -1,2 +1,2 @@
-PHP_FPM_EXPORTER_OPTS="--fix-process-count"
+PHP_FPM_EXPORTER_OPTS="--phpfpm.fix-process-count"
 PHP_FPM_SCRAPE_URI="unix://{{ php_fpm_pool_fcgi_socket_path }};{{ php_fpm_pm_status_path }}"
