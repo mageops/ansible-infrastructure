@@ -8,6 +8,7 @@
         if ( req.url ~ "{{ rule.path_pattern }}"
         {%- if rule.method | default(false, true) %} && req.method == "{{ rule.method | upper }}" {% endif -%}
         ) {
+            {% if rule.whitelisted | default(false, true) -%}
             set req.http.X-RateLimit-Identity = req.http.x-real-ip + "{{ rule.id }}";
             set req.http.X-RateLimit-Remaining = vsthrottle.remaining(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }});
 
@@ -22,6 +23,7 @@
                 unset req.http.X-RateLimit-Identity;
                 unset req.http.X-RateLimit-Remaining;
             {% endif %}
+            {%- endif %}
         }
 {%- endmacro %}
 
