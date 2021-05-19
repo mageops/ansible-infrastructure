@@ -13,6 +13,8 @@ ConditionPathExists=!{{ magento_live_release_dir }}/pub/WARMUP
 [Service]
 Type=oneshot
 RemainAfterExit=no
+Restart=on-failure
+RestartSec=5s
 
 ExecStartPre={{ magento_live_release_dir }}/bin/magento setup:db:status
 ExecStart={{ magento_live_release_dir }}/bin/magento cs:warm-node \
