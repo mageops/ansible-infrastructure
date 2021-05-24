@@ -10,14 +10,11 @@ Requires=php-fpm.service
 
 ConditionPathExists=!{{ magento_live_release_dir }}/pub/WARMUP
 
-StartLimitIntervalSec=60s
-StartLimitBurst=5
-
 [Service]
-Type=oneshot
+Type=simple
 RemainAfterExit=no
 Restart=on-failure
-RestartSec=5s
+RestartSec=30s
 
 ExecStartPre={{ magento_live_release_dir }}/bin/magento setup:db:status
 ExecStart={{ magento_live_release_dir }}/bin/magento cs:warm-node \
