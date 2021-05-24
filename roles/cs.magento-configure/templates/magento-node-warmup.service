@@ -10,6 +10,9 @@ Requires=php-fpm.service
 
 ConditionPathExists=!{{ magento_live_release_dir }}/pub/WARMUP
 
+StartLimitIntervalSec=60s
+StartLimitBurst=5
+
 [Service]
 Type=oneshot
 RemainAfterExit=no
