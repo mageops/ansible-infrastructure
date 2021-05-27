@@ -20,8 +20,5 @@ export MAGEOPS_MAGENTO_GROUP="{{ magento_group }}"
 export MAGEOPS_MAGENTO_VERSION="{{ magento_version }}"
 {% endif %}
 
-export MAGEOPS_PS1="\[\e[0;35m\][${MAGEOPS_NODE_ROLE}.${MAGEOPS_PROJECT}-${MAGEOPS_ENVIRONMENT}]\[\e[0m\] "
-export MAGEOPS_PS1="${MAGEOPS_PS1}\[\e[0;33m\]\u\[\e[0;32m\]@\h\[\e[0m\] \[\e[0;94m\]\w\[\e[0m\] \[\e[1;32m\]→\[\e[0m\] "
-
-
-
+export PS1="\[\e[0;35m\][${MAGEOPS_NODE_ROLE}.${MAGEOPS_PROJECT}-${MAGEOPS_ENVIRONMENT}]\[\e[0m\] "
+export PS1="${PS1}\[\e[0;33m\]\u\[\e[0;32m\]@\h\[\e[0m\] \[\e[0;94m\]\w\[\e[0m\] \[\e[1;32m\]→\[\e[0m\] "

@@ -1,8 +1,5 @@
-rabbitmq_server_version: "rabbitmq-server-3.7.9-1.el{{ rabbitmq_el_release }}"
-rabbitmq_erlang_version: "erlang-21.3.7-1.el{{ rabbitmq_el_release }}"
-
-# No other options are supported right now as our repos support EL7 only
-rabbitmq_el_release: 7
+rabbitmq_server_version: "rabbitmq-server-3.8.16"
+rabbitmq_erlang_version: "erlang-23.3.4"
 
 # Ensure the nodename is not auto-generated so we can use various tools
 rabbitmq_nodename: rabbit
