@@ -1,0 +1,47 @@
+# Choice mode for geoip level
+# geoip - use GeoIP location data to determine location
+#   language codes are uppercase 2 letter codes
+#   eg: PL, US
+# geolite2 - use geolite2 location data to determine location
+#   language codes are uppercase 2 letter codes
+#   eg: PL, US
+# none - disable logic
+nginx_language_redirect_multilevel_geoip_mode: geoip
+
+# Choice mode for accept_language detection
+# first_language - use first accept-language header send by browser
+#   this is usually most prefered language, but order isn't required by spec
+#   therefore this might not always be correct
+#   language codes are represented as "locale identifier"
+#   they may be 2-3 letter codes with optional specifier
+#   eg: en, en-US, fr-CA
+# none - disable logic
+nginx_language_redirect_multilevel_accept_language_mode: first_language
+
+# Array with list of rules
+# required_geoip_country - (optional) geoip detected country
+#   that is required to match
+# required_accept_language - (optional) accept_language detected language
+#   that is required to match
+# required_path_regex - (optional) path regex that need to match
+# required_server_name - (optional) server name that need to match
+# rewrite - (required)
+#   source - rewrite regex source
+#   target - tewrite target
+nginx_language_redirect_multilevel_rules: []
+# - required_geoip_country: EN
+#   required_accept_language: en
+#   required_path_regex: "^/$"
+#   required_server_name: "example.com"
+#   rewrite:
+#     source: "^/(.*)$"
+#     target: "/en/$1"
+
+
+
+
+# configuration file paths
+nginx_language_redirect_multilevel_conf_filename: "30-language-redirect.conf"
+nginx_language_redirect_multilevel_geoip_module_conf_path: "{{ nginx_modules_conf_dir }}/geoip_module.conf"
+nginx_language_redirect_multilevel_global_conf_path: "{{ nginx_confd_dir }}/{{ nginx_language_redirect_conf_filename }}"
+nginx_language_redirect_multilevel_server_default_conf_path: "{{ nginx_serverd_defaults_dir }}/{{ nginx_language_redirect_conf_filename }}"

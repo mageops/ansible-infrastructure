@@ -1,19 +1,25 @@
 {% if nginx_language_redirect_detection_method == "geoip" -%}
 geoip_country /usr/share/GeoIP/GeoIP.dat;
-
 {%- set lang_source_var = "$geoip_country_code" %}
 {%- endif %}
+
+
 {% if nginx_language_redirect_detection_method == "geolite2" -%}
 geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
   auto_reload 15m;
   $geoip2_data_country_code source=$remote_addr country iso_code;
 }
-
 {%- set lang_source_var = "$geoip2_data_country_code" %}
 {%- endif %}
+
+
 {%- if nginx_language_redirect_detection_method == "accept_language" -%}
 {%- set lang_source_var = "$first_language" %}
 {%- endif %}
+
+
+
+
 {% if nginx_language_redirect_style == "dir" %}
 map {{ lang_source_var }} $target {
 {%- for lang, path in nginx_language_redirect_directory_mapping.items() %}
@@ -21,6 +27,8 @@ map {{ lang_source_var }} $target {
 {%- endfor %}
 }
 {% endif %}
+
+
 {% if nginx_language_redirect_style == "domain" -%}
 map {{ lang_source_var }} $target {
 {%- for lang, domain in nginx_language_redirect_domain_mapping.items() %}

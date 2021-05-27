@@ -657,6 +657,7 @@ mageops_install_development_tools: yes
 
 # setup language redirect
 mageops_language_redirect_enable: no
+mageops_language_redirect_mode: normal
 
 # Configure a vmtouch daemon force-keeping magento sources / compiled opcache in RAM
 mageops_magento_preload_fscache_enable: >-

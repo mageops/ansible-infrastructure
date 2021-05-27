@@ -1,0 +1,6 @@
+- name: Install dependencies
+  import_tasks: 000-install.yml
+
+- name: Configure redirects
+  import_tasks: 001-configure.yml
+
