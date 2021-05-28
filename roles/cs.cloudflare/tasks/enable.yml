@@ -1,0 +1,15 @@
+- name: Install configuration script
+  template:
+    src: update_nginx_config.sh
+    dest: "{{ cloudflare_update_script }}"
+    mode: 0744
+
+- name: Run configuration script to generate config
+  shell: "{{ cloudflare_update_script }}"
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
+  vars:
+    provisioned_configs:
+      - "{{ cloudflare_nginx_config }}"

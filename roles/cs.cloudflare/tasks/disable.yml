@@ -1,0 +1,8 @@
+- name: Remove update script
+  file:
+    path: "{{ cloudflare_update_script }}"
+    state: absent
+- name: Remove configuration file
+  file:
+    path: "{{ cloudflare_nginx_config }}"
+    state: absent
