@@ -14,6 +14,11 @@ geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
 {%- if nginx_language_redirect_detection_method == "accept_language" -%}
 {%- set lang_source_var = "$first_language" %}
 {%- endif %}
+
+{%- if nginx_language_redirect_detection_method == "cloudflare" -%}
+{%- set lang_source_var = "$http_cf_ipcountry" %}
+{%- endif %}
+
 {% if nginx_language_redirect_style == "dir" %}
 map {{ lang_source_var }} $target {
 {%- for lang, path in nginx_language_redirect_directory_mapping.items() %}
