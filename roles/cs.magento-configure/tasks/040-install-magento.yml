@@ -1,3 +1,8 @@
+- name: Dump *non-optimized* composer autoload
+  become: yes
+  become_user: "{{ magento_user }}"
+  command: "php {{ magento_release_dir }}/vendor/bin/composer du -d {{ magento_release_dir }}"
+  
 - name: Install Magento (fresh)
   block:
     - name: Install Magento
