@@ -29,6 +29,9 @@ nginx_language_redirect_style: dir
 #   language codes are represented as "locale identifier"
 #   they may be 2-3 letter codes with optional specifier
 #   eg: en, en-US, fr-CA
+# cloudflare - use header provided by cloudflare
+#   language codes are uppercase 2 letter codes
+#   eg: PL, US
 nginx_language_redirect_detection_method: geoip
 
 # domain mapping used when nginx_language_redirect_style = domain
