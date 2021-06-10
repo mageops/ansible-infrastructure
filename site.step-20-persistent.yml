@@ -19,6 +19,8 @@
     - role: cs.switch-to-dnf
     - role: pinkeen.selinux-disable
     - role: cs.swap
+    - role: cs.aws-efs-logs
+      when: aws_use
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
     - role: cs.packages

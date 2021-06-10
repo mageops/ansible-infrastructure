@@ -1,0 +1,4 @@
+aws_efs_logs_enabled: no
+
+aws_efs_logs_efs_dir: /mnt/efs_logs
+aws_efs_mount_script_path: /usr/local/libexec/move-logs-to-efs

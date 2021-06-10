@@ -1,0 +1,27 @@
+- name: Check if /var/log is mounted
+  shell:
+    cmd: "mountpoint -q /var/log"
+  register: aws_efs_mount_stat
+  failed_when: False
+  changed_when: False
+
+- name: Restore /var/log
+  block:
+  - name: Disable service
+    service:
+      name: aws-efs-logs.service
+      state: stopped
+      enabled: no
+
+  - name: Remove service files
+    file:
+      name: "{{ item }}"
+      state: absent
+    with_items:
+      - "/etc/systemd/system/aws-efs-logs.service"
+      - "{{ aws_efs_mount_script_path }}"
+
+  - name: Schedule system reboot at 3:00
+    shell: "shutdown -r 3:00"
+
+  when: aws_efs_mount_stat.rc == 0

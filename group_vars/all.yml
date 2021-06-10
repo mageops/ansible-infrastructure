@@ -147,6 +147,10 @@ aws_tags_role_mysql_database:
 aws_tags_role_storage:
   Role: "storage"
 
+aws_tags_role_logs_storage:
+  RoleStorage: "logs"
+  RoleStoragePublic: "no"
+
 aws_tags_role_shared_storage:
   RoleStorage: "shared"
   RoleStoragePublic: "no"
@@ -335,6 +339,7 @@ aws_security_group_rds_name: "{{ mageops_app_name }}-rds-sg"
 aws_security_group_redis_name: "{{ mageops_app_name }}-redis-sg"
 aws_security_group_elasticsearch_name: "{{ mageops_app_name }}-elastic-sg"
 aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
+aws_security_group_efs_logs_name: "{{ mageops_app_name }}-efs-sg"
 
 # Allows to add extra ports to persistant server
 # e.g. to allow ssh from webnode:
@@ -375,7 +380,6 @@ aws_app_node_launch_script_extra: ''
 aws_app_node_webnodedown_hook_name: WebNodeGoingDown
 
 aws_varnish_node_launch_script_extra: ''
-
 
 # ---------------------------------------------
 # --------  AWS Elastic Load Balancer  --------
@@ -1138,6 +1142,7 @@ magento_efs_locks_data_app_path: "{{ mageops_app_web_dir }}/shared/var/lock"
 
 # EFS resource name
 magento_efs_app_node_name: "{{ mageops_app_name }}-app-shared"
+mageops_efs_logs_name: "{{ mageops_app_name }}-logs"
 
 # Use this to set up app additional instance mounts per-project
 mageops_efs_app_node_mounts: []

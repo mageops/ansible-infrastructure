@@ -1,0 +1,14 @@
+dependencies:
+  - role: cs.aws-vpc-facts
+    delegate_to: localhost
+    delegate_facts: no
+    become: no
+  - role: cs.aws-security-group-facts
+    delegate_to: localhost
+    delegate_facts: no
+    become: no
+  - role: cs.aws-efs
+    efs_name: "{{ mageops_efs_logs_name }}"
+    efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_role_logs_storage) }}"
+    efs_root_mountpoint: "{{ aws_efs_logs_efs_dir }}"
+    when: aws_efs_logs_enabled

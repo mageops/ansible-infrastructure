@@ -22,6 +22,12 @@
       become: no
       when: aws_use
 
+    - role: cs.aws-vpc-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+
     - role: cs.switch-to-dnf
 
     - role: pinkeen.selinux-disable
@@ -36,6 +42,9 @@
     - role: cs.swap
       swap_swappiness: "{{ mageops_app_node_swappiness }}"
       when: mageops_app_node_swap_enable
+
+    - role: cs.aws-efs-logs
+      when: aws_use
 
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
