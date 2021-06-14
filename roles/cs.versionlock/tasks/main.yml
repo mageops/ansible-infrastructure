@@ -1,0 +1,18 @@
+- name: Install versionlock plugin
+  yum:
+    name:
+      - yum-plugin-versionlock
+      - dnf-plugin-versionlock
+    state: latest
+
+- name: Install yum versionlock
+  template:
+    src: versionlock.list.j2
+    dest: /etc/yum/pluginconf.d/versionlock.list
+    mode: 0644
+
+- name: Install dnf versionlock
+  template:
+    src: versionlock.list.j2
+    dest: /etc/dnf/plugins/versionlock.list
+    mode: 0644
