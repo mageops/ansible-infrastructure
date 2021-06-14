@@ -1753,6 +1753,25 @@ packages_full_update: "{{ mageops_packages_full_update }}"
 packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode }}"
 packages_remove: "{{ mageops_packages_banned }}"
 
+# Package locks, for more info, check cs.versionlock role
+
+# Package locks per instance
+versionlock_varnish_packages: []
+versionlock_persistent_packages: []
+versionlock_app_node_packages: []
+
+# Package bans per instance
+versionlock_varnish_ban_packages: []
+versionlock_persistent_ban_packages: []
+versionlock_app_node_ban_packages: []
+
+# Per project customizations
+versionlock_varnish_packages_extra: []
+versionlock_varnish_ban_packages_extra: []
+versionlock_persistent_packages_extra: []
+versionlock_persistent_ban_packages_extra: []
+versionlock_app_node_packages_extra: []
+versionlock_app_node_ban_packages_extra: []
 
 # ------------------------------
 # --------  Time / NTP  --------
