@@ -1,15 +1,13 @@
 - name: Install RabbitMQ Erlang Package
   yum:
     allow_downgrade: no
-    name: "{{ rabbitmq_erlang_version }}"
-  register: _rabbitmq_erlang_package
+    name: "erlang"
   notify: Restart rabbitmq
 
 - name: Install RabbitMQ Package
   yum:
     allow_downgrade: no
-    name: "{{ rabbitmq_server_version }}"
-  register: _rabbitmq_server_package
+    name: "rabbitmq-server"
   notify: Restart rabbitmq
 
 - name: Install rabbitmq configuration file
