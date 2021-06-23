@@ -1,6 +1,8 @@
+ami_facts_arch: x86_64
+
 ami_facts_common_filters:
   state: "available"
-  architecture: "x86_64"
+  architecture: "{{ ami_facts_arch }}"
 
 # Deprecated - CentOS no longer updates the Marketplace AMIs
 # ami_facts_clean_base_filters:
@@ -13,9 +15,11 @@ ami_facts_common_filters:
 # values for eu-central-1.
 # Find the latest CentOS ami ids here: https://www.centos.org/download/aws-images/
 ami_centos7_id:
-  eu-central-1: ami-08b6d44b4f6f7b279
+  eu-central-1:
+    x86_64: ami-08b6d44b4f6f7b279
+    arm64: ami-0a305a7534a53874c
 
-ami_base_system_image_id: "{{ ami_centos7_id[aws_region | default('eu-central-1')] }}"
+ami_base_system_image_id: "{{ ami_centos7_id[aws_region | default('eu-central-1')][ami_facts_arch] }}"
 
 ami_facts_clean_base_filters:
   image-id: "{{ ami_base_system_image_id }}"
@@ -26,11 +30,11 @@ ami_facts_app_node_tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
 ami_facts_app_node_force_id: ~
 
 ami_facts_app_node_base_filters: >-
-  {{ 
+  {{
       ami_facts_app_node_force_id | ternary(
         { 'image-id': ami_facts_app_node_force_id },
         {}
-      ) 
+      )
   }}
 
 ami_facts_app_node_filters: {}

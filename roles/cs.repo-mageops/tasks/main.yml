@@ -19,6 +19,22 @@
   when: not _repo_mageops_config_file_check.stat.exists
   notify: Regenerate yum cache for MageOps repo
 
+- name: Make sure MageOps repo release package is up to date
+  yum:
+    name: "{{ repo_mageops_release_package_name }}"
+    state: latest
+  when: not _repo_mageops_config_file_check.stat.exists
+  notify: Regenerate yum cache for MageOps repo
+
+- name: Check for updated repo version
+  stat:
+    path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}.rpmnew"
+  register: _mageops_repo_update
+
+- name: Update repo file
+  shell: "mv /etc/yum.repos.d/{{ repo_mageops_config_name }}.rpmnew /etc/yum.repos.d/{{ repo_mageops_config_name }}"
+  when: _mageops_repo_update.stat.exists
+
 - name: Set higher priority for mageops repo
   block:
     - name: Install priorities plugin
@@ -34,11 +50,22 @@
         value: "{{ mageops_repo_priority | string }}"
         backup: no
         no_extra_spaces: yes
+    - name: Set priority for mageops repo
+      ini_file:
+        path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"
+        section: mageops-testing
+        option: priority
+        value: "{{ mageops_repo_priority | string }}"
+        backup: no
+        no_extra_spaces: yes
   when: mageops_repo_priority | bool
 
-- name: Make sure MageOps repo release package is up to date
-  yum:
-    name: "{{ repo_mageops_release_package_name }}"
-    state: latest
-  when: not _repo_mageops_config_file_check.stat.exists
-  notify: Regenerate yum cache for MageOps repo
+- name: Make sure testing testing repository is enabled/disabled
+  ini_file:
+    state: present
+    create: no
+    path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"
+    section: "mageops-testing"
+    option: enabled
+    value: "{{ repo_mageops_testing_enabled | ternary('1', '0') }}"
+    no_extra_spaces: yes

@@ -5,3 +5,4 @@ repo_mageops_release_package_url: https://mageops.github.io/packages-rpm/repo/el
 repo_mageops_installation_retries: 3
 repo_mageops_installation_delay: 10
 mageops_repo_priority: no
+repo_mageops_testing_enabled: no

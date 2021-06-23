@@ -1,3 +1,8 @@
+- include_role:
+    name: cs.aws-ami-facts
+  vars:
+    ami_facts_arch: "{{ aws_varnish_node_instance_arch }}"
+
 - name: Start varnish node instance
   ec2:
     region: "{{ aws_region }}"
@@ -49,9 +54,9 @@
   vars:
     aws_ebs_volume_modify_ids: >-
       {{ ( aws_varnish_ec2.instances + aws_varnish_ec2.tagged_instances )
-          | map(attribute='block_device_mapping') 
-          | map('dict2items') 
-          | flatten 
+          | map(attribute='block_device_mapping')
+          | map('dict2items')
+          | flatten
           | map(attribute='value')
           | map(attribute='volume_id')
           | list

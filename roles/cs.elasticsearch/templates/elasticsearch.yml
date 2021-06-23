@@ -23,4 +23,5 @@ node.master: true
 
 bootstrap.memory_lock: {{ elasticsearch_memlock_enable | ternary('true', 'false') }}
 
-
+# Not supported on aarch64
+xpack.ml.enabled: false

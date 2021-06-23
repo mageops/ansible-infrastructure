@@ -63,7 +63,7 @@ varnish_workspace_client: 64k
 varnish_workspace_thread: 4k
 
 # As of varnish 6.0 the default is 48k and lower values cause segfault with our VCL
-varnish_thread_pool_stack: 64k
+varnish_thread_pool_stack: 128k
 
 # Max. number of thread pools that should be at most the number of vCPUs
 # See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#thread-pool-max

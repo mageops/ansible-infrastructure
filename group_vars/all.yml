@@ -352,9 +352,11 @@ aws_persistent_node_create: yes
 
 # EC2 Instance types
 aws_app_node_instance_type: t3a.micro
+aws_app_node_instance_arch: x86_64
 aws_app_builder_node_instance_type: "{{ aws_app_node_instance_type }}"
 aws_extra_app_node_instance_type: "{{ aws_app_node_instance_type }}"
 aws_persistent_node_instance_type: t3a.micro
+aws_persistent_node_instance_arch: x86_64
 
 # EC2 Elastic IPs
 aws_varnish_node_elastic_ip:

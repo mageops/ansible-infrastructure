@@ -1,6 +1,6 @@
 # Install stable redis 6.x from remi-safe repo instead of the 3.x version
 # provided by the standard CentOS 6 epel repository.
-redis_enable_v6: no
+redis_enable_v6: yes
 
 # Set it if you want to host multiple redis instances on the same server.
 # This is useful if you want separately-configurable databases (for example with different maxmemory policies)
