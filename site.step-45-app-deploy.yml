@@ -133,7 +133,7 @@
 
   vars:
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"
-    deploy_keep_current_releases: 2
+    deploy_keep_current_releases: 1
     deploy_copy_previous_release: yes
     deploy_directory_permissions: "0775"
     deploy_file_permissions: "0664"
