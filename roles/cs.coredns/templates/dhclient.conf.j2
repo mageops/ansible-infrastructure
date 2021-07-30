@@ -1,0 +1,5 @@
+{% if coredns_dynamic_enabled %}
+prepend domain-name-servers 127.0.0.53;
+{% endif %}
+timeout 300;
+retry 60;

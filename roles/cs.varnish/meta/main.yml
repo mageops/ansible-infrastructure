@@ -1,5 +1,6 @@
 allow_duplicates: no
 dependencies:
+  - cs.repo-mageops
   - cs.ansible-plugins
   - cs.repo-varnish
 

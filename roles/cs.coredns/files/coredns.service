@@ -1,0 +1,10 @@
+[Unit]
+Description=Coredns serivce discovery and dns server
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/coredns -conf /etc/coredns/Corefile
+WorkingDirectory=/etc/coredns
+
+[Install]
+WantedBy=multi-user.target

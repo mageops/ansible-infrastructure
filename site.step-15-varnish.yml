@@ -52,6 +52,10 @@
       https_termination_upstream_port: "{{ mageops_varnish_port }}"
       when: mageops_https_termination_enable
     - role: cs.cloudflare
+    - role: cs.coredns
+      coredns_dynamic_enabled: "{{ mageops_coredns_enabled }}"
+      coredns_dynamic_http_port: "{{ mageops_coredns_dynamic_http_port }}"
+      coredns_dynamic_secret: "{{ mageops_coredns_dynamic_secret }}"
     - role: cs.varnish
       varnish_port: "{{ mageops_varnish_port }}"
       varnish_backend_port: "{{ mageops_varnish_backend_port }}"
@@ -67,8 +71,9 @@
       varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
       varnish_magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
       varnish_magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
+      varnish_dns_service_discovery: "{{ mageops_dynamic_node_enabled }}"
     - role: cs.varnish-manager
-      when: varnish_standalone and aws_use
+      when: varnish_lambda_backends_update and aws_use
     - role: cs.mageops-cli-profile
     - role: cs.goaccess
       when: goaccess_enable

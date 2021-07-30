@@ -1,6 +1,8 @@
 vcl 4.0;
 
+{% if not varnish_dns_backend_domain %}
 import directors;
+{% endif %}
 import std;
 import accept;
 

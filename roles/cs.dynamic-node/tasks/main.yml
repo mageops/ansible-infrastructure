@@ -1,0 +1,15 @@
+- name: Install dynamic node service
+  copy:
+    dest: "/etc/systemd/system/dynamic_node@.service"
+    src: "dynamic_node@.service"
+
+- name: Install dynamic node timer
+  copy:
+    dest: "/etc/systemd/system/dynamic_node@.timer"
+    src: "dynamic_node@.timer"
+
+- name: Enable dynamic node timer
+  service:
+    name: "dynamic_node@{{ dynamic_node_backend_name }}.timer"
+    state: started
+    enabled: yes

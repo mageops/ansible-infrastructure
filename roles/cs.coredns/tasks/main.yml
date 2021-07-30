@@ -1,0 +1,6 @@
+- name: Enable coredns
+  include_tasks: enable.yml
+  when: coredns_dynamic_enabled
+- name: Disable coredns
+  include_tasks: disable.yml
+  when: not coredns_dynamic_enabled

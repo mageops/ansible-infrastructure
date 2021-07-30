@@ -40,6 +40,9 @@
       - proto: tcp
         ports: ["{{ goaccess_vhost_port }}"]
         cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
+      - proto: tcp
+        ports: [ "{{ mageops_coredns_dynamic_http_port }}" ]
+        group_name: "{{ aws_security_group_app_name }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
@@ -214,7 +217,3 @@
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_varnish_name }}"
-
-
-
-

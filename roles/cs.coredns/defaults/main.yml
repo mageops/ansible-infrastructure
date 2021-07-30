@@ -1,0 +1,5 @@
+coredns_dynamic_enabled: no
+coredns_dynamic_domain: dynamic.internal
+# coredns_dynamic_http_port:
+# coredns_dynamic_secret:
+coredns_dynamic_timeout: 2m

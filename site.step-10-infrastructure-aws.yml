@@ -44,7 +44,7 @@
       mysql_user_localhost_access: "{{ not aws_rds_create }}"
       when: aws_rds_create or mageops_mysql_host is not none
     - role: cs.aws-lambda-varnish
-      when: varnish_standalone
+      when: varnish_lambda_backends_update
     - role: cs.aws-lambda-node-coordinator
       when: aws_magento_cron_enabled
     - role: cs.aws-lambda-import

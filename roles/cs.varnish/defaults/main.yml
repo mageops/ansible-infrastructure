@@ -172,3 +172,9 @@ varnish_301_cache_time: 3h
 # If you are on varnish_trusted_ips list you will
 # still receive those headers
 varnish_do_not_expose_caching: no
+
+varnish_dns_service_discovery: no
+varnish_dns_backend_domain: magento.dynamic.internal
+varnish_dns_extra_backend_domain: magento_extra.dynamic.internal
+varnish_dns_acl:
+  - 10/8 # Default aws network
