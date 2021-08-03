@@ -1,0 +1,10 @@
+{% if coredns_dynamic_enabled %}
+{{ coredns_dynamic_domain }}:53 {
+    bind 127.0.0.53
+    dynamic {
+        addr            :{{ coredns_dynamic_http_port }}
+        secret          {{ coredns_dynamic_secret }}
+        host_timeout    {{ coredns_dynamic_timeout }}
+    }
+}
+{% endif %}

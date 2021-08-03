@@ -14,6 +14,35 @@ probe app_probe {
 	.window = 3;
 }
 
+{% if varnish_dns_backend_domain %}
+import dynamic;
+
+acl allowed_backends {
+    {% for addr in varnish_dns_acl %}
+	"{{ addr }}";
+	{% endfor %}
+}
+
+backend dummy {
+    .host = "0.0.0.0";
+	.max_connections = 0;
+}
+
+sub backends_init {
+	new app_director = dynamic.director(
+		whitelist = allowed_backends,
+		domain_usage_timeout = 15m,
+		probe = app_probe,
+		ttl = 10s
+	);
+}
+
+sub vcl_backend_error {
+	# the director may resolve ::1 first
+	return (retry);
+}
+{% else %}
+
 {% for instance in (varnish_backend_instances_app + varnish_backend_instances_extra) %}
 backend {{ instance.instance_id | replace('-','') }} {
     .host = "{{ instance.private_ip_address }}";
@@ -37,3 +66,4 @@ sub backends_init {
 	extra_director.add_backend({{ instance.instance_id | replace('-','') }});
 {% endfor %}
 }
+{% endif %}

@@ -1,0 +1,32 @@
+- name: Update dhclient config
+  template:
+    dest: /etc/dhcp/dhclient.conf
+    src: dhclient.conf.j2
+  register: _update_dhclient
+
+- name: Restart network
+  service:
+    name: network
+    state: restarted
+  when: _update_dhclient is changed
+
+- name: Disable coredns service
+  service:
+    name: coredns
+    state: stopped
+    enabled: no
+
+- name: Remove coredns config
+  file:
+    path: /etc/coredns/Corefile
+    state: absent
+
+- name: Remove coredns service file
+  file:
+    path: /etc/systemd/system/coredns.service
+    state: absent
+
+- name: Uninstall coredns
+  yum:
+    name: coredns
+    state: absent

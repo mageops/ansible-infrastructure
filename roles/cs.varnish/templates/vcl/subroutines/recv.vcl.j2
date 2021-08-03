@@ -21,7 +21,11 @@
 
 {% if varnish_standalone %}
     {# This has to be first line, remember this is not declarative config, we always need the director! #}
+    {% if varnish_dns_service_discovery %}
+    set req.backend_hint = app_director.backend("{{ varnish_dns_backend_domain }}");
+    {% else %}
     set req.backend_hint = app_director.backend();
+    {% endif %}
 
     if (req.http.X-Use-Extra-Instance
         {% if aws_extra_app_asg_passthrough_uagent_pattern %}
@@ -34,11 +38,19 @@
             || req.http.x-forwarded-for ~ "{{ aws_extra_app_asg_passthrough_ip_pattern }}"
         {% endif %}
     ) {
-        set req.backend_hint = extra_director.backend();
+        {% if varnish_dns_service_discovery %}
+        set req.backend_hint = app_director.backend("{{ varnish_dns_extra_backend_domain }}");
+        {% else %}
+        set req.backend_hint = extra_app_director.backend();
+        {% endif %}
 
         {% if varnish_extra_instance_failover_enable %}
         if (!std.healthy(req.backend_hint)) {
+            {% if varnish_dns_service_discovery %}
+            set req.backend_hint = app_director.backend("{{ varnish_dns_backend_domain }}");
+            {% else %}
             set req.backend_hint = app_director.backend();
+            {% endif %}
         }
         {% else %}
         # Extra instance failover is disabled - requests will return 5xx

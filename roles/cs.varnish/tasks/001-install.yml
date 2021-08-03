@@ -8,3 +8,9 @@
     name: "varnish-module-blobdigest"
     state: present
   when: varnish_magento_vary_sign
+
+- name: Install dynamic module
+  yum:
+    name: "varnish-module-dynamic"
+    state: present
+  when: varnish_dns_service_discovery

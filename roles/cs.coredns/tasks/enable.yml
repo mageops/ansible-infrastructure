@@ -1,0 +1,46 @@
+- name: Install coredns
+  yum:
+    name: coredns
+    state: latest
+
+- name: Install service file
+  copy:
+    dest: /etc/systemd/system/coredns.service
+    src: coredns.service
+
+- name: Create coredns config directory
+  file:
+    name: /etc/coredns
+    state: directory
+
+- name: Configure coredns
+  template:
+    dest: /etc/coredns/Corefile
+    src: Corefile.j2
+  register: _corefile
+
+- name: Restart coredns service
+  service:
+    name: coredns
+    state: restarted
+    enabled: yes
+  when: _corefile is changed
+
+- name: Enable coredns service
+  service:
+    name: coredns
+    state: started
+    enabled: yes
+  when: _corefile is not changed
+
+- name: Update dhclient config
+  template:
+    dest: /etc/dhcp/dhclient.conf
+    src: dhclient.conf.j2
+  register: _update_dhclient
+
+- name: Restart network
+  service:
+    name: network
+    state: restarted
+  when: _update_dhclient is changed

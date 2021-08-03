@@ -1,0 +1,6 @@
+[Unit]
+Description=Register node as dynamic backend named %i
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/mageopscli register_dynamic_bakcend %i

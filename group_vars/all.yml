@@ -1485,7 +1485,7 @@ varnish_manager_ssh_key_filename: varnish/sesame
 
 # Is varnish hosted on a separate, dedicated node?
 varnish_standalone: yes
-
+varnish_lambda_backends_update: "{{ varnish_standalone and not mageops_coredns_enabled }}"
 # Shall standalone varnish instance be used as a loadbalancer (instead of AWS ELB)?
 varnish_as_loadbalancer: "{{ varnish_standalone and mageops_https_termination_enable }}"
 
@@ -1825,3 +1825,13 @@ mageops_magento_vary_sign_enabled: no
 mageops_magento_vary_sign_secret: ""
 magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
 magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
+
+# ---------------------------
+# --------  CoreDNS  --------
+# ---------------------------
+mageops_coredns_enabled: no
+mageops_coredns_dynamic_http_port: 2673
+# Required to be set
+# mageops_coredns_dynamic_secret:
+mageops_dynamic_node_enabled: "{{ mageops_coredns_enabled }}"
+varnish_dns_service_discovery: "{{ mageops_dynamic_node_enabled }}"

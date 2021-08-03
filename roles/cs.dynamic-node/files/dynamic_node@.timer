@@ -1,0 +1,10 @@
+[Unit]
+Description=Timer to keep dynamic backend named %i registered
+
+[Timer]
+OnUnitActiveSec=30sec
+AccuracySec=30sec
+OnActiveSec=10sec
+
+[Install]
+WantedBy=timers.target

@@ -113,6 +113,11 @@
     - role: cs.magento-cache-warmup-crawler
       when: magento_page_cache_warmer_enable
 
+    # TODO: add handling for extra node
+    - role: cs.dynamic-node
+      dynamic_node_backend_name: magento
+      when: mageops_dynamic_node_enabled
+
   tasks:
     - name: Execute custom post deploy tasks
       include_tasks: "{{ mageops_extra_tasks_deploy }}"
@@ -183,5 +188,3 @@
 
     magento_efs_app_mounts_extra: "{{ magento_efs_app_node_mounts }}"
     magento_s3_app_mounts_extra: "{{ magento_s3fs_buckets_extra }}"
-
-    
