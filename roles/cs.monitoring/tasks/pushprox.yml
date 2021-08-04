@@ -13,4 +13,4 @@
   service:
     name: pushprox-client
     enabled: yes
-    state: started
+    state: restarted
