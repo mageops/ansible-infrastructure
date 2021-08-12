@@ -19,7 +19,12 @@
           '--currency={{ magento_currency }}' \
           '--key={{ magento_crypt_key }}' \
           {% if mageops_elasticsearch_host | default(false, true) -%}
+          {% if elasticsuite_version | default(0, true) != "0" -%}
             '--es-hosts={{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}' \
+          {% else %}
+            '--elasticsearch-host={{ mageops_elasticsearch_host }}' \
+            '--elasticsearch-port={{ elasticsearch_http_port }}' \
+          {% endif %}
           {% endif %}
           '--base-url={{ magento_base_url }}'
       args:

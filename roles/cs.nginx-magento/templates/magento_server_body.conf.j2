@@ -93,7 +93,10 @@ location / {
 
 location /media/catalog/product/thumbnail {
     auth_basic  off;
-
+    add_header Cache-Control "public";
+    add_header X-Frame-Options "SAMEORIGIN";
+    expires +1y;
+    
     try_files $uri $uri/ /resize.php$is_args$args;
 }
 

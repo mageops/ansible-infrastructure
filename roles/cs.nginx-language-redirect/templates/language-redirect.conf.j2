@@ -17,7 +17,9 @@ geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
 {%- set lang_source_var = "$first_language" %}
 {%- endif %}
 
-
+{%- if nginx_language_redirect_detection_method == "cloudflare" -%}
+{%- set lang_source_var = "$http_cf_ipcountry" %}
+{%- endif %}
 
 
 {% if nginx_language_redirect_style == "dir" %}

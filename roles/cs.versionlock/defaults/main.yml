@@ -1,0 +1,8 @@
+# Packages in format packagename-epoch:version
+# eg: somepkg-0:0.1.2
+
+# Install only package in this version
+versionlock_packages: []
+
+# DO NOT allow to install package in this version
+versionlock_ban_packages: []
