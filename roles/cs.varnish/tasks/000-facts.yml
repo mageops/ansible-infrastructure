@@ -67,4 +67,13 @@
               https_termination_hosts | default([])|selectattr('aliases', 'defined')|map(attribute='aliases')|list | flatten
           }}
       when: mageops_https_termination_enable | default(false)
+    - name: Add Cloudfront domnains
+      set_fact:
+        varnish_media_cors_allowed_origins: |
+          {{
+            varnish_media_cors_allowed_origins +
+            [ aws_cloudfront_distribution_domain ] +
+            aws_cloudfront_domain_aliases | default([])
+          }}
+      when: aws_cloudfront_distribution_create | default(false) and aws_cloudfront_distribution_domain | default(false, true)
   when: varnish_generate_allowed_origins
