@@ -2,6 +2,9 @@ allow_duplicates: no
 dependencies:
   - cs.ansible-plugins
   - cs.repo-varnish
+  - role: cs.aws-cloudfront-facts
+    when: aws_use and aws_cloudfront_distribution_create
+
 
 galaxy_info:
   author: creativestyle
