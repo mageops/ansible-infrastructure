@@ -3,6 +3,7 @@ dependencies:
   - cs.ansible-plugins
   - cs.repo-varnish
   - role: cs.aws-cloudfront-facts
+    delegate_to: localhost
     when: aws_use and aws_cloudfront_distribution_create
 
 
