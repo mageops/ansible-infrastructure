@@ -114,8 +114,7 @@
         query_string: false
         cookies:
           forward: "none"
-        headers:
-          - Origin
+        headers: "{{ aws_cloudfront_forward_headers }}"
 
       smooth_streaming: false
       compress: false
