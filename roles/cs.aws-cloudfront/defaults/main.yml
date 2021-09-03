@@ -12,3 +12,5 @@ aws_cloudfront_custom_certificate_arn: no
 aws_cloudfront_domain_aliases: []
 aws_cloudfront_use_lambda: no
 aws_cloudfront_lambda_arn: ~
+aws_cloudfront_forward_headers:
+ - Origin
