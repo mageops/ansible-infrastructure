@@ -1452,7 +1452,7 @@ https_termination_page_cache_misses_logging: yes
 https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-cache-misses.json.log"
 
 https_termination_redirect_source_domain_param: _redirect_from
-
+https_termination_nginx_increase_proxy_buffers: yes
 # ---------------------------
 # --------  Varnish  --------
 # ---------------------------
