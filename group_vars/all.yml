@@ -951,6 +951,8 @@ magento_core_config_cron_use_separate_process_for_yotpo_yotpo_group: no
 magento_core_config_cron_use_separate_process_for_scconnector_group: no
 magento_core_config_cron_use_separate_process_for_consumers_group: no
 magento_core_config_cron_use_separate_process_for_ddg_automation_group: no
+magento_core_config_system_security_max_session_size_admin: 0
+magento_core_config_system_security_max_session_size_storefront: 0
 
 # Default core config settings set on deploy
 magento_core_config_settings_default:
@@ -991,6 +993,14 @@ magento_core_config_settings_default:
   - name: Separate process for ddg_automation cronjob group
     path: "system/cron/ddg_automation/use_separate_process"
     value: "{{ magento_core_config_cron_use_separate_process_for_ddg_automation_group | ternary(1, 0) | string }}"
+
+  - name: Set max session size for admin
+    path: "system/security/max_session_size_admin"
+    value: "{{ magento_core_config_system_security_max_session_size_admin }}"
+
+  - name: Set max session size for storefront
+    path: "system/security/max_session_size_storefront"
+    value: "{{ magento_core_config_system_security_max_session_size_storefront }}"
 
   - name: Set password for fake warmup customers
     path: "cache_warmer/general/password"
