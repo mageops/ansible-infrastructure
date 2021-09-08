@@ -1018,6 +1018,12 @@ magento_core_config_settings_default:
     path: "cache_warmer_crawler/general/default_target_ttfb"
     value: "{{ magento_page_cache_warmer_target_ttfb | string }}"
 
+  - name: Set sender e-mail to make 2FA possible
+    path: "trans_email/ident_general/email"
+    value: "{{ magento_bounce_email_address }}"
+    default: yes
+    enabled: yes
+
   # Automatically set cloudfront domain for static / media URLs
   # If cloudfront domain aliases are configured this setting
   # will be processed in "default" mode - it will not be updated
