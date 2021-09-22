@@ -8,6 +8,7 @@
       when: aws_use
     - role: cs.switch-to-dnf
     - role: cs.versionlock
+      node_name: varnish
       versionlock_packages: "{{ versionlock_varnish_packages + versionlock_varnish_packages_extra }}"
       versionlock_ban_packages: "{{ versionlock_varnish_ban_packages + versionlock_varnish_ban_packages_extra }}"
     - role: pinkeen.selinux-disable
