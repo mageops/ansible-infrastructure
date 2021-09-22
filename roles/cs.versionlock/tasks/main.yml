@@ -6,13 +6,17 @@
     state: latest
 
 - name: Install yum versionlock
-  template:
-    src: versionlock.list.j2
-    dest: /etc/yum/pluginconf.d/versionlock.list
+  blockinfile:
+    create: yes
     mode: 0644
+    path: /etc/yum/pluginconf.d/versionlock.list
+    marker: "# {mark} {{ node_name }}"
+    block: "{{ lookup('template', 'versionlock.list.j2') }}"
 
 - name: Install dnf versionlock
-  template:
-    src: versionlock.list.j2
-    dest: /etc/dnf/plugins/versionlock.list
+  blockinfile:
+    create: yes
     mode: 0644
+    path: /etc/dnf/plugins/versionlock.list
+    marker: "# {mark} {{ node_name }}"
+    block: "{{ lookup('template', 'versionlock.list.j2') }}"
