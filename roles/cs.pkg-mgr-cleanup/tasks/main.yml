@@ -1,0 +1,19 @@
+- name: Detect yum
+  stat:
+    path: /usr/bin/yum
+  register: cleanup_detect_yum
+
+- name: Clanup yum
+  shell:
+    cmd: yum clean packages
+  when: cleanup_detect_yum.stat.exists
+
+- name: Detect dnf
+  stat:
+    path: /usr/bin/dnf
+  register: cleanup_detect_dnf
+
+- name: Clanup dnf
+  shell:
+    cmd: dnf clean packages
+  when: cleanup_detect_dnf.stat.exists
