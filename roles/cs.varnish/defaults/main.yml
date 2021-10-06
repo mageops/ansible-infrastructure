@@ -172,3 +172,7 @@ varnish_301_cache_time: 3h
 # If you are on varnish_trusted_ips list you will
 # still receive those headers
 varnish_do_not_expose_caching: no
+
+# Retry this many times for 503 error from backend (no workers awailable)
+# before bailing out with error
+varnish_max_retries: 4

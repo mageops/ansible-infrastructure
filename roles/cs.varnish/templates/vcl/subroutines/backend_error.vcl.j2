@@ -5,5 +5,9 @@ if (beresp.status == 503) {
     set beresp.http.Pragma = "no-cache";
     set beresp.http.Expires = "0";
 
-    return (deliver);
+    if(bereq.retries == {{ varnish_max_retries }}) {
+        return (deliver);
+    } else {
+        return (retry);
+    }
 }
