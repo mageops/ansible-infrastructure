@@ -39,7 +39,7 @@ cs_vagrant_vm_enable_cd: no
 cs_vagrant_vm_enable_public_network: no
 
 # Private network / local ip - if changed then creativeshop.me will not work
-cs_vagrant_vm_private_ip: 192.168.100.100
+cs_vagrant_vm_private_ip: 192.168.57.100
 
 # Perform vagrant machine initialization if it does not exist
 cs_vagrant_initialize: no
