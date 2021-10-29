@@ -5,6 +5,7 @@ mageops_packages_full_update: yes
 mageops_trusted_cidr_blocks:
   - 127.0.0.0/8         # Loopback
   - 192.168.100.0/24    # Our VirtualBox / Vagrant Host-Only network
+  - 192.168.57.0/16     # Our VirtualBox / Vagrant Host-Only network
   - 10.0.2.0/24         # Default VirtualBox / Vagrant NAT network
 
 mageops_packages_app_node_extra:
