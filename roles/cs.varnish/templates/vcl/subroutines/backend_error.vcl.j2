@@ -4,7 +4,9 @@ if (beresp.status == 503) {
     set beresp.http.Cache-Control = "no-cache, no-store, must-revalidate";
     set beresp.http.Pragma = "no-cache";
     set beresp.http.Expires = "0";
+}
 
+if (beresp.status == 502 || beresp.status == 503 || beresp.status == 504) {
     if(bereq.retries == {{ varnish_max_retries }}) {
         return (deliver);
     } else {
