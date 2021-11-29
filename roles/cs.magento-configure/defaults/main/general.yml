@@ -62,6 +62,17 @@ magento_consumer_workers_max_messages: 500
 #    batch_size: 100
 #    process_count: 1
 
+magento_default_consumer_workers_enable: yes
+magento_default_consumer_workers:
+   - consumer: sales.rule.update.coupon.usage
+     batch_size: 100
+     process_count: 1
+     min_magento_version: 2.4.3
+  # - consumer: example.worker
+  #    batch_size: 100
+  #    process_count: 1
+  #    min_magento_version: 2.4.3 # inclusive Optional
+  #    max_magento_version: 2.5.0 # exclusive Optional
 # Containerized tasks to be executed post content deploy
 magento_scd_containerized_tasks: []
 

@@ -44,8 +44,7 @@
       include_headers: no
     feedback_forwarding: False
   when: ses_domain | default(false, true)
-  
-  # Could be falled back with
-  # "{{ ses_domain | default(ses_email.split('@')[1]) }}"    
-  # but it turns out we do not need domain.
 
+  # Could be falled back with
+  # "{{ ses_domain | default(ses_email.split('@')[1]) }}"
+  # but it turns out we do not need domain.
