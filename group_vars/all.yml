@@ -826,8 +826,6 @@ mageops_email_ses_address: "{{ magento_bounce_email_address }}"
 
 magento_hostname: "{{ magento_base_url|urlsplit('hostname') }}"
 
-magento_version: "2.3"
-
 magento_mode: "{{ mage_mode|default('production') }}"
 
 # This var should point to the final directory where the

@@ -16,5 +16,5 @@
   loop: "{{ magento_default_consumer_workers }}"
   when: >-
    magento_default_consumer_workers_enable
-   and ( item.min_magento_version is defined and item.min_magento_version is version(item.min_magento_version, '>=') )
-   and ( item.max_magento_version is defined and item.max_magento_version is version(item.max_magento_version, '<') )
+   and ( item.min_magento_version is defined and magento_version is version(item.min_magento_version, '>=') )
+   and ( item.max_magento_version is defined and magento_version is version(item.max_magento_version, '<') )

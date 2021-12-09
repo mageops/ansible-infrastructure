@@ -33,4 +33,20 @@
     # A list of *enabled* modules
     magento_modules: "{{ magento_config_php_enabled_modules_result.stdout_lines }}"
 
+- name: Set magento version if not defined
+  when: magento_version is not defined
+  block:
+  - name: Set Magento community version
+    when: magento_packages['magento/product-community-edition'] is defined
+    set_fact:
+      magento_version: "{{ magento_packages['magento/product-community-edition'] }}"
 
+  - name: Set Magento community version
+    when: magento_packages['magento-cloud-metapackage'] is defined
+    set_fact:
+      magento_version: "{{ magento_packages['magento-cloud-metapackage'] }}"
+
+  - name: Set Magento community version
+    when: magento_packages['magento/product-enterprise-edition'] is defined
+    set_fact:
+      magento_version: "{{ magento_packages['magento/product-enterprise-edition'] }}"

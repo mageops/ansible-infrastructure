@@ -1,2 +1,3 @@
 dependencies:
   - role: zauberpony.mysql-query
+  - role: cs.magento-facts
