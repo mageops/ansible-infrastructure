@@ -1,8 +1,25 @@
+- name: Detect on remote magento location
+  when: not magento_facts_detect_from_artifacts
+  set_fact:
+    _detect_magento_local: no
+    _magento_dir: "{{ magento_live_release_dir }}"
+    _passive: no
+
+# On local detection we do not want to execute magento
+# Nor we do not want to become root
+- name: Detect on local magento location
+  when: magento_facts_detect_from_artifacts
+  set_fact:
+    _detect_magento_local: yes
+    _magento_dir: "{{ deploy_artifact_local_path }}"
+    _passive: yes # Do not execute magento
+
 - name: Get commands supported by the Magento installation
+  when: not _passive
   shell: >-
     bin/magento list --format=json | jq -r '.commands | .[] | .name'
   args:
-    chdir: "{{ magento_live_release_dir }}"
+    chdir: "{{ magento_live_release_dir }}" # Do not need to use _magento_dir as this is not executed locally
   become: yes
   become_user: "{{ magento_user }}"
   register: magento_bin_list_commands_result
@@ -12,22 +29,26 @@
   shell: >-
     cat composer.lock | jq '.packages | map({(.name): .version}) | add'
   args:
-    chdir: "{{ magento_live_release_dir }}"
+    chdir: "{{ _magento_dir }}"
   register: magento_composer_lock_packages_result
   changed_when: false
+  delegate_to: "{{ _detect_magento_local | ternary('localhost', inventory_hostname) }}"
+  become: "{{ _detect_magento_local | ternary(false, true) }}"
 
 - name: Get enabled Magento modules
   shell: >-
       php -r 'echo(implode(array_keys(array_filter((include("app/etc/config.php"))["modules"])), "\n"));'
   args:
-    chdir: "{{ magento_live_release_dir }}"
+    chdir: "{{ _magento_dir }}"
   register: magento_config_php_enabled_modules_result
   changed_when: false
+  delegate_to: "{{ _detect_magento_local | ternary('localhost', inventory_hostname) }}"
+  become: "{{ _detect_magento_local | ternary(false, true) }}"
 
 - name: Set Magento facts
   set_fact:
     # List of bin/magento command names
-    magento_commands: "{{ magento_bin_list_commands_result.stdout_lines }}"
+    magento_commands: "{{ magento_bin_list_commands_result.stdout_lines | default([], true) }}"
     # A dict of package name => package version
     magento_packages: "{{ magento_composer_lock_packages_result.stdout | from_json }}"
     # A list of *enabled* modules

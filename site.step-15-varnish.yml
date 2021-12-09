@@ -92,3 +92,4 @@
 
   vars:
     mageops_node_role: varnish
+    magento_facts_detect_from_artifacts: yes
