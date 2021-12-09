@@ -1,2 +1,3 @@
 dependencies:
   - role: cs.nginx
+  - role: cs.magento-facts
