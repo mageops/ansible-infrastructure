@@ -4,6 +4,12 @@
     state: latest
   register: elasticsearch_packages_install
 
+# FIXME: Remove me after May 2022
+- name: Remove manualy applied log4j workaround (now included in generated template)
+  file:
+    path: /etc/elasticsearch/jvm.options.d/workaround-log4j.options
+    state: absent
+
 # In case `/var` or `/var/run` is a tmpfs (common thing nowadays)
 - name: Ensure var directories always exist
   lineinfile:
