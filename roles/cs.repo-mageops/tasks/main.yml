@@ -3,6 +3,15 @@
     path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"
   register: _repo_mageops_config_file_check
 
+- name: Check current keyring key
+  stat:
+    path: "{{ repo_mageops_gpg_key_location }}"
+  register: _repo_mageops_gpg_key_check
+
+- name: Decide if bootstrap is required
+  set_fact:
+    _repo_mageops_bootstrap_required: "{{ not _repo_mageops_config_file_check.stat.exists or not _repo_mageops_gpg_key_check.stat.exists }}"
+
 - name: Install Mageops GPG key
   rpm_key:
     state: present
@@ -16,7 +25,7 @@
   until: result is succeeded
   retries: "{{ repo_mageops_installation_retries }}"
   delay: "{{ repo_mageops_installation_delay }}"
-  when: not _repo_mageops_config_file_check.stat.exists
+  when: _repo_mageops_bootstrap_required
   notify: Regenerate yum cache for MageOps repo
 
 - name: Set higher priority for mageops repo
@@ -40,5 +49,5 @@
   yum:
     name: "{{ repo_mageops_release_package_name }}"
     state: latest
-  when: not _repo_mageops_config_file_check.stat.exists
+  when: _repo_mageops_bootstrap_required
   notify: Regenerate yum cache for MageOps repo
