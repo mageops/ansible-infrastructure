@@ -1,0 +1,10 @@
+- name: Remove modules directory
+  file:
+    path: /etc/nginx/modules
+    recurse: yes
+
+- name: Create symlink
+  file:
+    path: /etc/nginx/modules
+    src: ../../usr/lib64/nginx/modules
+    state: link
