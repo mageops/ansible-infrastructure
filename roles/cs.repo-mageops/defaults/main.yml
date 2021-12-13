@@ -4,4 +4,5 @@ repo_mageops_gpg_key: https://mageops.github.io/packages-rpm/repo/el/7/REPO-GPG-
 repo_mageops_release_package_url: https://mageops.github.io/packages-rpm/repo/el/7/mageops-release.noarch.rpm
 repo_mageops_installation_retries: 3
 repo_mageops_installation_delay: 10
+repo_mageops_gpg_key_location: /etc/pki/rpm-gpg/RPM-GPG-KEY-MAGEOPS-2021
 mageops_repo_priority: no
