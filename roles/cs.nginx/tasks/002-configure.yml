@@ -9,7 +9,6 @@
     - "{{ nginx_included_dir }}"
     - "{{ nginx_serverd_dir }}"
     - "{{ nginx_serverd_defaults_dir }}"
-    - "{{ nginx_modules_conf_dir }}"
 
 - name: Ensure var directories always exist
   lineinfile:
