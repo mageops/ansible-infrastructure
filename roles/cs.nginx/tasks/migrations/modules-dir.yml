@@ -1,7 +1,7 @@
 - name: Remove modules directory
   file:
     path: /etc/nginx/modules
-    recurse: yes
+    state: absent
 
 - name: Create symlink
   file:

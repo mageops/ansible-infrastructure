@@ -28,6 +28,18 @@
   when: _repo_mageops_bootstrap_required
   notify: Regenerate yum cache for MageOps repo
 
+- name: Check if repo update is required
+  stat:
+    path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}.rpmnew"
+  register: _repo_mageops_repo_update
+
+# There is not move functionality to move file.
+# Doing copy + delete is more complex so we just execute shell here
+# We could also run rpmconf command, but this makes no sense to install that just for this
+- name: Update repository configuration
+  command: "mv '/etc/yum.repos.d/{{ repo_mageops_config_name }}.rpmnew' '/etc/yum.repos.d/{{ repo_mageops_config_name }}'"
+  when: _repo_mageops_repo_update.stat.exists
+
 - name: Set higher priority for mageops repo
   block:
     - name: Install priorities plugin
