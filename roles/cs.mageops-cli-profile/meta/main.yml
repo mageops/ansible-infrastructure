@@ -1,3 +1,1 @@
 allow_duplicates: false
-dependencies:
-  - role: cs.magento-facts
