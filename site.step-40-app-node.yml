@@ -170,3 +170,6 @@
     nginx_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
     nginx_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
     nginx_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
+
+    # On app node we might not have yet magento code deployed
+    magento_facts_detect_from_artifacts: yes
