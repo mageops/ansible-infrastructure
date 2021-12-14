@@ -102,3 +102,4 @@ magento_scd_languages:
 
 magento_vary_secret: ""
 magento_vary_sign: no
+magento_configure_skip_facts: no

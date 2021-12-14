@@ -1,9 +1,21 @@
 - import_tasks: 010-set-permissions.yml
 
+# Refresh magento facts
+- name: Refresh magento facts
+  include_role:
+    name: cs.magento-facts
+  vars:
+    magento_code_directory: "{{ magento_release_dir }}"
+
 - name: Execute Magento setup
   block:
     - include_tasks: 000-prepare-runtime-config.yml
     - include_tasks: 040-install-magento.yml
+    # Load facts after install
+    - include_role:
+        name: cs.magento-facts
+      vars:
+        magento_code_directory: "{{ magento_release_dir }}"
     - include_tasks: 050-install-sample-data.yml
       when: magento_install_sample_data
     - include_tasks: action/flush-cache.yml
