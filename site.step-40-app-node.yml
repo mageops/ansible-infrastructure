@@ -53,8 +53,6 @@
     - role: cs.packages
       packages_install: "{{ mageops_packages_common + mageops_packages_app_node + mageops_packages_app_node_extra }}"
 
-    - role: cs.mageops-cli-profile
-
     - role: cs.mageops-cli-user
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:
@@ -67,6 +65,8 @@
       mageops_cli_user_gid: "{{ magento_gid }}"
       mageops_cli_user_bashrc_fragments:
         - magento
+
+    - role: cs.mageops-cli-profile
 
     - role: cs.mageops-authorize-keys
       mageops_ssh_authorize_app: yes
