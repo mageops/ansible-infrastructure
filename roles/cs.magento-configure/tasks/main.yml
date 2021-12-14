@@ -1,3 +1,9 @@
+# Refresh magento facts
+- name: Refresh magento facts
+  include_role:
+    name: cs.magento-facts
+  vars:
+    magento_code_directory: "{{ magento_release_dir }}"
 
 - import_tasks: 000-prepare-runtime-config.yml
 - name: Execute Magento setup
@@ -6,6 +12,11 @@
     - include_tasks: 035-clean-old-static-content.yml
     - include_tasks: 037-wait-for-services.yml
     - include_tasks: 040-install-magento.yml
+    # Load facts after install
+    - include_role:
+        name: cs.magento-facts
+      vars:
+        magento_code_directory: "{{ magento_release_dir }}"
     - name: Set up new code
       block:
         - include_tasks: 070-setup-modules.yml
@@ -19,12 +30,19 @@
   become: yes
   become_user: "{{ magento_user }}"
 
+# Refresh magento facts
+- name: Refresh magento facts
+  include_role:
+    name: cs.magento-facts
+  vars:
+    magento_code_directory: "{{ magento_release_dir }}"
+
 - name: Post setup tasks (that need root)
   block:
     - include_tasks: 150-configure-logrotate.yml
 
 - include_tasks: 160-gather-release-info.yml
-    
+
 - name: Install final Magento configuration
   include_tasks: 200-config-finalize.yml
 
@@ -32,6 +50,3 @@
   when: magento_consumer_workers_enable and magento_version is version('2.3', '>=')
 
 - include_tasks: 250-setup-services.yml
-
-
-

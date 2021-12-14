@@ -2,7 +2,7 @@
   when: not magento_facts_detect_from_artifacts
   set_fact:
     _detect_magento_local: no
-    _magento_dir: "{{ magento_live_release_dir }}"
+    _magento_dir: "{{ magento_code_directory }}"
     _passive: no
 
 # On local detection we do not want to execute magento
@@ -19,7 +19,7 @@
   shell: >-
     bin/magento list --format=json | jq -r '.commands | .[] | .name'
   args:
-    chdir: "{{ magento_live_release_dir }}" # Do not need to use _magento_dir as this is not executed locally
+    chdir: "{{ magento_code_directory }}" # Do not need to use _magento_dir as this is not executed locally
   become: yes
   become_user: "{{ magento_user }}"
   register: magento_bin_list_commands_result
