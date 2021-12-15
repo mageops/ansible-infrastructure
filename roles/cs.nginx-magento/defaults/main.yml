@@ -77,4 +77,17 @@ nginx_magento_fastcgi_buffers_chunk_size: 256k
 # See: http://nginx.org/en/docs/http/ngx_http_fastcgi_module.html#fastcgi_buffer_size
 nginx_magento_fastcgi_buffers_head_size: 256k
 
-
+# If not configured, then use default catch all logic
+# nginx_magento_routing_configuration:
+#   - hostname: example.com
+#     paths: # it requires at least one path
+#     - path: / # can use regex
+#       run_code: de
+#       run_type: store # store or website
+#       redirect: # run_code and run_type is ignoref when redirect is specified
+#         type: exact # exact or path or prefix
+#                     # exact   need to match full url
+#                     # path    need to match full path (query is passed)
+#                     # prefix  need to match start of the path (rest of the path and query is passed)
+#         target: /target_url
+nginx_magento_routing_configuration: no
