@@ -9,12 +9,12 @@
     dest: "/etc/supervisor.d/magento-consumer-{{ item.consumer }}.conf"
   loop: "{{ magento_consumer_workers }}"
 
-- name: Configure default consumer worker jobs
+- name: "Configure default consumer worker jobs for magento {{ magento_version }}"
   template:
     src: magento_consumer_worker.supervisor.conf.j2
     dest: "/etc/supervisor.d/magento-consumer-{{ item.consumer }}.conf"
   loop: "{{ magento_default_consumer_workers }}"
   when: >-
    magento_default_consumer_workers_enable
-   and ( item.min_magento_version is defined and magento_version is version(item.min_magento_version, '>=') )
-   and ( item.max_magento_version is defined and magento_version is version(item.max_magento_version, '<') )
+   and ( item.min_magento_version is not defined or magento_version is version(item.min_magento_version, '>=') )
+   and ( item.max_magento_version is not defined or magento_version is version(item.max_magento_version, '<') )
