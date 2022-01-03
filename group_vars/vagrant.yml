@@ -107,3 +107,5 @@ mageops_packages_vagrant_node:
 nodejs_use_yarn: yes
 nodejs_packages:
   - gulp-cli
+
+nginx_static_files_expires: "off"

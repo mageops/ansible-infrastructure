@@ -95,7 +95,7 @@ location /media/catalog/product/thumbnail {
     auth_basic  off;
     add_header Cache-Control "public";
     add_header X-Frame-Options "SAMEORIGIN";
-    expires +1y;
+    expires {{ nginx_static_files_expires }};
     
     try_files $uri $uri/ /resize.php$is_args$args;
 }
@@ -119,14 +119,14 @@ location /pub/ {
 location ~* (.*\.(jpeg|jpg|png|gif|bmp|tiff|svg|apng|ico))\.webp$ {
     add_header Cache-Control "public";
     add_header X-Frame-Options "SAMEORIGIN";
-    expires +1y;
+    expires {{ nginx_static_files_expires }};
     try_files $uri $uri/ $1;
 }
 
 location = /favicon.ico {
     add_header Cache-Control "public";
     add_header X-Frame-Options "SAMEORIGIN";
-    expires +1y;
+    expires {{ nginx_static_files_expires }};
     log_not_found off;
     log_subrequest off;
     access_log off;
@@ -135,7 +135,7 @@ location = /favicon.ico {
 }
 
 location = /404notlogged.html {
-    expires +1y;
+    expires {{ nginx_static_files_expires }};
     log_not_found off;
     log_subrequest off;
     access_log off;
@@ -143,7 +143,7 @@ location = /404notlogged.html {
 }
 
 location /static/ {
-    expires max;
+    expires {{ nginx_static_files_expires }};
 
     {% if magento_nginx_rewrite_static_assets_version|default(false) %}
     # Remove signature of the static files that is used to overcome the browser cache
@@ -180,7 +180,7 @@ location /static/ {
         add_header Vary "Accept-Encoding";
         add_header Cache-Control "public";
         add_header X-Frame-Options "SAMEORIGIN";
-        expires +1y;
+        expires {{ nginx_static_files_expires }};
 
         if (!-f $request_filename) {
             rewrite ^/static/?(.*)$ /static.php?resource=$1 last;
@@ -214,7 +214,7 @@ location /media/ {
     location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2)$ {
         add_header Cache-Control "public";
         add_header X-Frame-Options "SAMEORIGIN";
-        expires +1y;
+        expires {{ nginx_static_files_expires }};
         try_files $uri $uri/ /get.php$is_args$args;
     }
 
