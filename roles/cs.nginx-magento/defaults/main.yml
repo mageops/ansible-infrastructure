@@ -11,6 +11,9 @@ nginx_fcgi_connect_timeout: '600s'
 nginx_fcgi_backend_socket: '/var/run/php-fpm/backend.sock'
 nginx_fcgi_backend_debug_socket: "{{ nginx_fcgi_backend_socket }}"
 
+#Extracted to an variable so dev envs can have this low, and prod - 1 year.
+nginx_static_files_expires: "+1y"
+
 # Template files are configurable in case per-project overrides are needed
 # NOTE: Overriding core configs in project is strongly discouraged
 # as this often will cause non-trivial regressions when any of these
