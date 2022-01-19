@@ -86,5 +86,9 @@
       when: mageops_monitoring_enabled
     - role: cs.pkg-mgr-cleanup
 
+  tasks:
+    - include_tasks: "{{ mageops_extra_tasks_varnish_node }}"
+      when: mageops_extra_tasks_varnish_node is defined
+
   vars:
     mageops_node_role: varnish
