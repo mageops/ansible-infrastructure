@@ -76,16 +76,17 @@
     name: "{{ aws_security_group_app_name }}"
     description: "{{ mageops_app_name }} Webnodes security group"
     region: "{{ aws_region }}"
-    rules:
-      - proto: tcp
-        ports:
-          - "{{ mageops_varnish_backend_port }}"
-        group_name: "{{ aws_security_group_varnish_name }}"
+    rules: "{{ aws_security_group_app_rules + aws_security_group_app_extra_rules }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_app_name }}"
+    aws_security_group_app_rules:
+      - proto: tcp
+        ports:
+          - "{{ mageops_varnish_backend_port }}"
+        group_name: "{{ aws_security_group_varnish_name }}"
 
   register: aws_security_group_app
 
@@ -214,7 +215,3 @@
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_varnish_name }}"
-
-
-
-
