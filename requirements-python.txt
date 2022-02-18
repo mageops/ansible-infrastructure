@@ -28,3 +28,10 @@ jq
 
 # required if host running ansible have selinux installed
 selinux
+
+# distro 1.7.0 breaks fact discovery in ansible for some nodes
+# distro introduced breaking change that changed package
+# from using single file to directory module, this isn't compatible with
+# import used by our ansible version
+# We are pinning this to previous version until we upgrade to never ansible
+distro<1.7.0
