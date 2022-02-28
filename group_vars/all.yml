@@ -80,8 +80,15 @@ aws_tags_trait_immutable:
 
 # --- APP ---
 
-aws_tags_role_app:
-  Role: "app"
+aws_tags_pio:
+  RoleImage: "pio"
+
+aws_tags_role_app_tpl: [
+  { Role: "app" },
+  "{{ mageops_pio_worker_enable | ternary(aws_tags_pio, {}) }}"
+]
+
+aws_tags_role_app: "{{ aws_tags_role_app_tpl | combine }}"
 
 aws_tags_role_extra_app:
   RoleExtra: "app"
@@ -335,6 +342,21 @@ aws_security_group_rds_name: "{{ mageops_app_name }}-rds-sg"
 aws_security_group_redis_name: "{{ mageops_app_name }}-redis-sg"
 aws_security_group_elasticsearch_name: "{{ mageops_app_name }}-elastic-sg"
 aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
+
+aws_security_group_varnish_pio_rules:
+  - proto: tcp
+    ports:
+      - "50001"
+    group_name: "{{ aws_security_group_app_name }}"
+
+aws_security_group_varnish_rules_tpl: [
+  "{{ mageops_pio_worker_enable | ternary(aws_security_group_varnish_pio_rules, []) }}"
+]
+
+aws_security_group_varnish_rules: "{{ aws_security_group_varnish_rules_tpl | flatten }}"
+
+aws_security_group_app_rules: []
+aws_security_group_persistant_rules: []
 
 # Allows to add extra ports to persistant server
 # e.g. to allow ssh from webnode:
@@ -889,19 +911,23 @@ magento_cron_observer_relative_path: vendor/magento/module-cron/Observer/Process
 # --------  Magento Deploy  --------
 # ----------------------------------
 
+magento_post_deploy_commands_pio:
+  - "bin/magento config:set dev/lazy_resize/token_secret {{ lazy_resize_secret }}"
 
 # Magento commands that should be always executed as the last post-deploy step
 # on one of the *new* web-nodes (created from the AMI being deployed).
-magento_post_deploy_commands_basic:
+magento_post_deploy_commands_basic_tpl: [
   # Flush the full_page cache in case old page version got cached in varnish
   # between last flush and new nodes going up.
-  - "bin/magento cache:flush full_page"
+  [ "bin/magento cache:flush full_page" ],
+  [ "{{ mageops_pio_worker_enable | ternary(magento_post_deploy_commands_pio, []) }}" ]
+]
 
 # Use this variable to define custom per-project commands
 magento_post_deploy_commands_custom: []
 
 # Do not change this undless you want to get rid of the basic ones (never)
-magento_post_deploy_commands: "{{ magento_post_deploy_commands_basic + magento_post_deploy_commands_custom }}"
+magento_post_deploy_commands: "{{ (magento_post_deploy_commands_basic_tpl | flatten) + magento_post_deploy_commands_custom }}"
 
 
 
@@ -1608,7 +1634,14 @@ aws_cloudfront_distribution_create: yes
 aws_cloudfront_optimizing_edge_lambda_enable: yes
 
 # Use S3 as media origin
-aws_cloudfront_use_s3_website_origin: "{{ magento_media_storage_strategy == 'aws-s3' }}"
+aws_cloudfront_use_s3_website_origin: "{{ magento_media_storage_strategy == 'aws-s3' and not mageops_pio_worker_enable }}"
+
+aws_cloudfront_forward_headers_tpl: [
+  [Origin],
+  "{{ mageops_pio_worker_enable | ternary(['Accept'], []) }}"
+]
+
+aws_cloudfront_forward_headers: "{{ aws_cloudfront_forward_headers_tpl | flatten }}"
 
 
 # ------------------------------------------------
@@ -1843,3 +1876,10 @@ mageops_magento_vary_sign_enabled: no
 mageops_magento_vary_sign_secret: ""
 magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
 magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
+
+
+# -----------------------
+# --------- PIO ---------
+# -----------------------
+mageops_pio_worker_enable: no
+lazy_resize_secret: ""

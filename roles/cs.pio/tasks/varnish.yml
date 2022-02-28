@@ -1,0 +1,53 @@
+# This task should be executed with import_role:
+#
+# - name: Provision pio on varnish
+#   import_role:
+#     name: cs.pio
+#     tasks_from: varnish
+#
+- name: Manually require dependecy
+  import_role:
+    name: cs.nginx
+    allow_duplicates: no
+
+- name: Install pio-worker rpm
+  yum:
+    name: "{{ pio_package_url }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Write service config
+  template:
+    src: "pio-director.default.j2"
+    dest: "/etc/default/pio-director"
+    mode: 0644
+
+- name: Write config
+  template:
+    src: "pio-config.conf.j2"
+    dest: "/etc/pio_worker.conf"
+    mode: 0644
+
+- name: Enable service
+  service:
+    name: pio-director
+    enabled: true
+    state: restarted
+
+- name: Install nginx configuration
+  template:
+    src: "nginx-pio-director.conf.j2"
+    dest: "{{ nginx_included_dir }}/nginx-pio-director.conf"
+    mode: 0644
+
+- name: Register provisioned nginx config files
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
+  vars:
+    provisioned_configs:
+      - "{{ nginx_included_dir }}/nginx-pio-director.conf"
+
+- name: Reload nginx
+  service:
+    name: nginx
+    state: reloaded

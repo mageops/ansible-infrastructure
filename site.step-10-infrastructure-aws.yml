@@ -48,6 +48,12 @@
     - role: cs.aws-lambda-node-coordinator
       when: aws_magento_cron_enabled
     - role: cs.aws-lambda-import
+
+    - role: cs.pio
+      vars:
+        pio_tasks: aws_infrastructure
+      when: mageops_pio_worker_enable
+
     - role: cs.finalize
   tasks:
     - name: Refresh inventory to get info about newly created nodes
