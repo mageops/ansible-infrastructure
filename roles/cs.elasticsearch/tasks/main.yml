@@ -183,3 +183,7 @@
     port: "{{ elasticsearch_http_port }}"
     delay: 6
     timeout: 60
+
+- name: Fix deprecation indexes
+  shell: >-
+    for index in $(curl -s http://localhost:9200/_cat/shards?format=json | jq -r '.[] | select(.state == "UNASSIGNED") | select(.index | startswith(".ds-.logs")) | .index');do echo -e "\nFixing $index: ";curl -s -XPUT "http://localhost:9200/$index/_settings" -H "Content-Type: application/json" --data '{"index": {"number_of_replicas": 0}}' ;done;echo
