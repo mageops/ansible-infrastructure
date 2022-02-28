@@ -1,0 +1,15 @@
+# This task must be imported as soon as possible in infrastructure step, but after all facts tasks,
+# as it extends global configurations
+# This task should be executed with import_role:
+#
+# - name: Update pio infrastructure
+#   import_role:
+#     name: cs.pio
+#     tasks_from: aws_infrastructure
+#
+
+- name: Tag varnish node
+  ec2_tag:
+    region: "{{ aws_region }}"
+    resource: "{{ aws_varnish_node_instance.instance_id }}"
+    tags: "{{ aws_tags_pio }}"

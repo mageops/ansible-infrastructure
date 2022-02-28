@@ -54,13 +54,13 @@
     description: "{{ mageops_app_name }} - allows for connection between Varnish servers"
     region: "{{ aws_region }}"
     purge_rules: no
-    rules: "{{ aws_security_group_varnish_rules + aws_security_group_varnish_extra_rules }}"
+    rules: "{{ aws_security_group_varnish_rules_base + aws_security_group_varnish_rules + aws_security_group_varnish_extra_rules }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_varnish_name }}"
-    aws_security_group_varnish_rules:
+    aws_security_group_varnish_rules_base:
       - proto: tcp
         ports: "{{ mageops_varnish_port }}"
         group_name: "{{ aws_security_group_varnish_name }}"
@@ -77,13 +77,13 @@
     name: "{{ aws_security_group_app_name }}"
     description: "{{ mageops_app_name }} Webnodes security group"
     region: "{{ aws_region }}"
-    rules: "{{ aws_security_group_app_rules + aws_security_group_app_extra_rules }}"
+    rules: "{{ aws_security_group_app_rules_base + aws_security_group_app_rules + aws_security_group_app_extra_rules }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_app_name }}"
-    aws_security_group_app_rules:
+    aws_security_group_app_rules_base:
       - proto: tcp
         ports:
           - "{{ mageops_varnish_backend_port }}"
@@ -98,11 +98,11 @@
     region: "{{ aws_region }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
-    rules: "{{ aws_security_group_persistant_rules + aws_security_group_persistant_extra_rules }}"
+    rules: "{{ aws_security_group_persistant_rules_base + aws_security_group_persistant_rules + aws_security_group_persistant_extra_rules }}"
   vars:
     ec2_sg_tags:
       Name: "{{  aws_security_group_persistant_name  }}"
-    aws_security_group_persistant_rules:
+    aws_security_group_persistant_rules_base:
       # TODO: We have reached SG limits - that's why rabbitmq
       # is added to persistant SG. The whole SG approach needs to be
       # rethinked and refactored - probably we should use subnets
