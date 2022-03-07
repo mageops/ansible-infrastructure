@@ -72,12 +72,6 @@ location ~* ^/sitemap\.xml {
     rewrite ^/sitemap\.xml$ /media/$1 break;
 }
 
-{% if magento_version is version('2.2', '<') %}
-{# Magento 2.2+ handles robots.txt programatically #}
-location ~* ^/robots\.txt {
-    rewrite ^/robots\.txt$ /media/$1 break;
-}
-{% endif %}
 
 location / {
     {% if mageops_https_enable %}
@@ -96,7 +90,7 @@ location /media/catalog/product/thumbnail {
     add_header Cache-Control "public";
     add_header X-Frame-Options "SAMEORIGIN";
     expires {{ nginx_static_files_expires }};
-    
+
     try_files $uri $uri/ /resize.php$is_args$args;
 }
 

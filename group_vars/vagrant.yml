@@ -109,4 +109,3 @@ nodejs_packages:
   - gulp-cli
 
 nginx_static_files_expires: "off"
-magento_configure_skip_facts: no
