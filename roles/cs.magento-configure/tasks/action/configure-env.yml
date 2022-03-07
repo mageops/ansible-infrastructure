@@ -45,7 +45,7 @@
               | combine(magento_app_etc_config_queue_rabbitmq, recursive=true) }}
 
     - name: Adjust configuration for consumer workers
-      when: magento_consumer_workers_enable and magento_version is version('2.3', '>=')
+      when: magento_consumer_workers_enable
       set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
