@@ -842,6 +842,8 @@ magento_umask: "{{ mageops_app_umask }}"
 magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
 
 mageops_install_magerun: yes
+magento_configure_skip_facts: no
+
 
 # ----------------------------------------------------------
 # --------  Magento Project Specific Configuration  --------

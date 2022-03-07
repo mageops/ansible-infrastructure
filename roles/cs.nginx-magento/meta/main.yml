@@ -1,3 +1,4 @@
 dependencies:
   - role: cs.nginx
   - role: cs.magento-facts
+    when: not magento_configure_skip_facts
