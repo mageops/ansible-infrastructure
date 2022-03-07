@@ -1,6 +1,9 @@
 cloudflare_enabled: no
+# Accept only traffic comming from Cloudflare
+cloudflare_exclusive_traffic: yes
 
 # configuration file paths
 cloudflare_nginx_config_filename: 000-cloudflare.conf
 cloudflare_nginx_config: "{{ nginx_confd_dir }}/{{ cloudflare_nginx_config_filename }}"
 cloudflare_update_script: "/etc/cron.daily/update_nginx_config.sh"
+cloudflare_nginx_block_non_cf_traffic_config: "{{ nginx_confd_dir }}/server.d/default/ban-non-cf.conf"

@@ -7,6 +7,12 @@
 - name: Run configuration script to generate config
   shell: "{{ cloudflare_update_script }}"
 
+- name: Block traffic comming from outside of cloudflare
+  when: cloudflare_exclusive_traffic
+  template:
+    src: ban-non-cf-traffic.conf
+    dest: "{{ cloudflare_nginx_block_non_cf_traffic_config }}"
+
 - name: Register provisioned nginx config files
   set_fact:
     nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
