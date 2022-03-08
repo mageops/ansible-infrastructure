@@ -7,6 +7,12 @@
 - name: Run configuration script to generate config
   shell: "{{ cloudflare_update_script }}"
 
+- name: Create required direcotry
+  when: cloudflare_exclusive_traffic
+  file:
+    path: "{{ cloudflare_nginx_block_non_cf_traffic_config_directory }}"
+    state: directory
+
 - name: Block traffic comming from outside of cloudflare
   when: cloudflare_exclusive_traffic
   template:
@@ -19,3 +25,11 @@
   vars:
     provisioned_configs:
       - "{{ cloudflare_nginx_config }}"
+
+- name: Register provisioned nginx config files
+  when: cloudflare_exclusive_traffic
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
+  vars:
+    provisioned_configs:
+      - "{{ cloudflare_nginx_block_non_cf_traffic_config }}"
