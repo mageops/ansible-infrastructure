@@ -1,0 +1,3 @@
+
+# SSH base64 encoded private key to be used for ssh tunel, set in credentials
+# ssh_tunel_private_key_secret:

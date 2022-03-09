@@ -1,0 +1,11 @@
+[Unit]
+Description=Proxy service to gain static ip from persistant node
+After=network.target
+
+[Service]
+Restart=always
+RestartSec=5s
+ExecStart=/usr/bin/ssh -i /etc/ssh_tunel/key -o BatchMode=true -o StrictHostKeyChecking=no -N -D 8989 tunel@{{ mageops_elasticsearch_host }}
+
+[Install]
+WantedBy=multi-user.target

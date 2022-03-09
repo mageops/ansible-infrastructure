@@ -98,11 +98,11 @@
     region: "{{ aws_region }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
-    rules: "{{ aws_security_group_persistant_rules + aws_security_group_persistant_extra_rules }}"
+    rules: "{{ aws_security_group_persistant_rules_base + aws_security_group_persistant_rules + aws_security_group_persistant_extra_rules }}"
   vars:
     ec2_sg_tags:
       Name: "{{  aws_security_group_persistant_name  }}"
-    aws_security_group_persistant_rules:
+    aws_security_group_persistant_rules_base:
       # TODO: We have reached SG limits - that's why rabbitmq
       # is added to persistant SG. The whole SG approach needs to be
       # rethinked and refactored - probably we should use subnets
