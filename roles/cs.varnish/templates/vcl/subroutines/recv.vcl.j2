@@ -91,9 +91,16 @@ if (req.method != "GET" &&
 {% endif %}
 
 if (req.restarts == 0) {
-    if (req.http.x-forwarded-for) {
-        # leave only real client ip - always first ip
-        set req.http.X-Forwarded-For = regsub(req.http.X-Forwarded-For, "^([^,]+),?.*$", "\1");
+    # Trust headers only when request is from localhost (nginx)
+    if (client.ip == "127.0.0.1") {
+        if (req.http.x-real-ip) {
+            set req.http.X-Forwarded-For = req.http.x-real-ip;
+        } else if (req.http.x-forwarded-for) {
+            # leave only real client ip - always last ip omiting 127.0.0.1 as it nginx address added by varnish
+            set req.http.X-Forwarded-For = regsub(req.http.X-Forwarded-For, "([^ ,]+)(, ?127\.0\.0\.1)?$", "\1");
+        }else {
+            set req.http.X-Forwarded-For = client.ip;
+        }
     } else {
         set req.http.X-Forwarded-For = client.ip;
     }
