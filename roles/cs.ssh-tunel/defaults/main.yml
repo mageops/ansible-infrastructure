@@ -3,3 +3,4 @@
 # You can generate this secret with command:
 #     echo y | ssh-keygen -t ed25519 -f /dev/fd/3 3>&1 > /dev/null 2>/dev/null | base64 -w0;echo
 # ssh_tunel_private_key_secret:
+ssh_tunel_proxy_port: 8989

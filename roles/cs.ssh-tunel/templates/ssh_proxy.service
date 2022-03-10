@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Restart=always
 RestartSec=5s
-ExecStart=/usr/bin/ssh -i /etc/ssh_tunel/key -o BatchMode=true -o StrictHostKeyChecking=no -N -D 8989 tunel@{{ mageops_elasticsearch_host }}
+ExecStart=/usr/bin/ssh -i /etc/ssh_tunel/key -o BatchMode=true -o StrictHostKeyChecking=no -N -D {{ ssh_tunel_proxy_port }} tunel@{{ mageops_elasticsearch_host }}
 
 [Install]
 WantedBy=multi-user.target
