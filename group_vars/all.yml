@@ -345,6 +345,9 @@ aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
 #     group_name: "{{ aws_security_group_app_name }}"
 aws_security_group_persistant_extra_rules: []
 
+# Same as above for app node
+aws_security_group_app_extra_rules: []
+aws_security_group_varnish_extra_rules: []
 # --- EC2 Node Specific Types / Roles ---
 
 # Persistent Node EC2
@@ -822,8 +825,6 @@ mageops_email_ses_address: "{{ magento_bounce_email_address }}"
 # ---------------------------
 
 magento_hostname: "{{ magento_base_url|urlsplit('hostname') }}"
-
-magento_version: "2.3"
 
 magento_mode: "{{ mage_mode|default('production') }}"
 

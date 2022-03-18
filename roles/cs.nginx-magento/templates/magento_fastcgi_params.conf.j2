@@ -3,10 +3,13 @@ fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
 fastcgi_param  PHP_IDE_CONFIG   serverName=$PROJ_NAME;
 fastcgi_param  MAGE_MODE        $MAGE_MODE;
 fastcgi_param  ORIGINAL_URI     $request_uri;
+{% if nginx_magento_routing_configuration %}
+fastcgi_param  REQUEST_URI      $FASTCGI_REQUEST_URI;
+{% endif %}
 fastcgi_param  REMOTE_PORT      $http_x_remote_port;
 fastcgi_param  HTTPS            "{{ mageops_https_enable | ternary('on', 'off') }}";
 
-{% if nginx_magento_run_type in ('store', 'website') %}
+{% if nginx_magento_run_type in ('store', 'website') or nginx_magento_routing_configuration %}
 fastcgi_param MAGE_RUN_CODE $MAGE_RUN_CODE;
 fastcgi_param MAGE_RUN_TYPE $MAGE_RUN_TYPE;
 {% endif %}

@@ -1,5 +1,5 @@
 {% if nginx_magento_run_type in ('store', 'website') %}
-map $http_host $MAGE_RUN_CODE {
+map $host $MAGE_RUN_CODE {
 {% if nginx_mage_default_run_code %}
    default {{ nginx_mage_default_run_code }};
 {% endif %}
@@ -18,6 +18,77 @@ map $request_uri $perm_redirect_uri {
 }
 {% endif %}
 
+{% if nginx_magento_routing_configuration %}
+{% for config in nginx_magento_routing_configuration %}
+server {
+    listen {{ nginx_app_port }};
+
+    server_name {{ config.hostname }};
+
+    set $MAGE_ROOT {{ magento_live_release_dir }};
+    set $MAGE_MODE {{ nginx_magento_mode }};
+    set $PROJ_NAME {{ mageops_project }};
+    set $MAGE_RUN_TYPE {{ nginx_magento_run_type | default('store') }};
+{% if nginx_mage_default_run_code %}
+    set $MAGE_RUN_CODE {{ nginx_mage_default_run_code }};
+{% endif %}
+    set $FASTCGI_REQUEST_URI $request_uri;
+
+{% if nginx_custom_redirects %}
+    if ($perm_redirect_uri) {
+        return 301 $scheme://$host$perm_redirect_uri;
+    }
+{% endif %}
+
+{% for path_config in config.paths %}
+{% if path_config.redirect | default(false, true) %}
+{% if path_config.redirect.type == "exact" %}
+    rewrite ^{{ path_config.path }}/?$ {{ path_config.redirect.target }} permanent;
+{% endif %}
+{% if path_config.redirect.type == "prefix" %}
+    rewrite ^{{ path_config.path }}/?$ {{ path_config.redirect.target }} permanent;
+    rewrite ^{{ path_config.path }}/(.*)$ {{ path_config.redirect.target }}/$1 permanent;
+{% endif %}
+{% if path_config.redirect.type == "query" %}
+    rewrite ^{{ path_config.path }}/?$ {{ path_config.redirect.target }} permanent;
+    rewrite ^{{ path_config.path }}/?\?(.*)$ {{ path_config.redirect.target }}?$1 permanent;
+{% endif %}
+{% else %}
+{% if path_config.path != "/" %}
+    if ( $request_uri ~ ^{{ path_config.path }}[/?]?.*$ ) {
+{% endif %}
+{% if path_config.run_code|default(false, true) %}
+        set $MAGE_RUN_CODE {{ path_config.run_code }};
+{% endif %}
+{% if path_config.run_type|default(false, true) in ('store', 'website') %}
+        set $MAGE_RUN_TYPE {{ path_config.run_type }};
+{% endif %}
+{% if path_config.path != "/" %}
+    }
+
+    if ( $request_uri ~ ^{{ path_config.path }}$ ) {
+        set $FASTCGI_REQUEST_URI /;
+    }
+    rewrite ^{{ path_config.path }}$ / last;
+
+    if ( $request_uri ~ ^{{ path_config.path }}/(.*)$ ) {
+        set $FASTCGI_REQUEST_URI /$1;
+    }
+    rewrite ^{{ path_config.path }}/(.*)$ /$1 last;
+
+    if ( $request_uri ~ ^{{ path_config.path }}\?(.*)$ ) {
+        set $FASTCGI_REQUEST_URI /?$1;
+    }
+    rewrite ^{{ path_config.path }}\?(.*)$ /?$1 last;
+{% endif %}
+{% endif %}
+{% endfor %}
+
+    include {{ nginx_magento_server_body_include_path }};
+    include server.d/default/*.conf;
+}
+{% endfor %}
+{% else %}
 server {
     listen {{ nginx_app_port }};
 
@@ -37,3 +108,4 @@ server {
     include {{ nginx_magento_server_body_include_path }};
     include server.d/default/*.conf;
 }
+{% endif %}
