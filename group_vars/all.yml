@@ -1881,5 +1881,6 @@ magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
 # -----------------------
 # --------- PIO ---------
 # -----------------------
+pio_filesystem: "{{ magento_media_storage_strategy == 'aws-s3' | ternary('s3', 'local') }}"
 mageops_pio_worker_enable: no
 lazy_resize_secret: ""
