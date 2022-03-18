@@ -18,6 +18,6 @@ pio_optimize_media: yes
 # We cannot use magento_media_dir here as it might not be defined at this point
 pio_filesystem_local_dir: "{{ mageops_app_web_dir }}/shared/pub/media/"
 
-pio_filesystem: "{{ magento_media_storage_strategy == 'aws-s3' | ternary('s3', 'local') }}"
+pio_filesystem: "{{ (magento_media_storage_strategy == 'aws-s3') | ternary('s3', 'local') }}"
 # Url to pio-worker rpm
 # pio_package_url:
