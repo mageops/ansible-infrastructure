@@ -91,9 +91,16 @@ if (req.method != "GET" &&
 {% endif %}
 
 if (req.restarts == 0) {
-    if (req.http.x-forwarded-for) {
-        # leave only real client ip - always first ip
-        set req.http.X-Forwarded-For = regsub(req.http.X-Forwarded-For, "^([^,]+),?.*$", "\1");
+    # Trust headers only when request is from localhost (nginx)
+    if (client.ip == "127.0.0.1") {
+        if (req.http.x-real-ip) {
+            set req.http.X-Forwarded-For = req.http.x-real-ip;
+        } else if (req.http.x-forwarded-for) {
+            # leave only real client ip - always last ip omiting 127.0.0.1 as it nginx address added by varnish
+            set req.http.X-Forwarded-For = regsub(req.http.X-Forwarded-For, "([^ ,]+)(, ?127\.0\.0\.1)?$", "\1");
+        }else {
+            set req.http.X-Forwarded-For = client.ip;
+        }
     } else {
         set req.http.X-Forwarded-For = client.ip;
     }
@@ -171,14 +178,14 @@ if (req.url ~ "\.(xml|csv)$") {
 
 std.collect(req.http.Cookie);
 
-if (req.url ~ "^/(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)(\?.*)?$") {
+if (req.url ~ "^/(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf|mp4)(\?.*)?$") {
     unset req.http.Https;
     unset req.http.X-Forwarded-Proto;
     unset req.http.Cookie;
 }
 
 {% if varnish_secure_site %}
-    if (! req.url ~ "^/(media|static)/.*\.(html|json|ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf)(\?.*)?$"
+    if (! req.url ~ "^/(media|static)/.*\.(html|json|ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf|mp4)(\?.*)?$"
         && ! req.url ~ "^/cron.php$"
         && ! req.url ~ "^/rest/.*$"
         && ! req.http.Authorization ~ "Basic {{ varnish_secure_site_http_auth_string | b64encode }}"
@@ -192,7 +199,7 @@ if (req.url ~ "^/(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|g
 
 # Compression filter. See https://www.varnish-cache.org/trac/wiki/FAQ/Compression
 if (req.http.Accept-Encoding) {
-    if (req.url ~ "\.(jpg|jpeg|png|gif|gz|tgz|bz2|webp|tbz|mp3|ogg|swf|flv)(\?.*)?$") {
+    if (req.url ~ "\.(jpg|jpeg|png|gif|gz|tgz|bz2|webp|tbz|mp3|ogg|swf|flv|mp4)(\?.*)?$") {
         # No point in compressing these
         unset req.http.Accept-Encoding;
     } elsif (req.http.Accept-Encoding ~ "gzip") {

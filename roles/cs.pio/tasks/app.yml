@@ -1,0 +1,25 @@
+# This task should be executed with import_role:
+#
+# - name: Provision pio on app node
+#   import_role:
+#     name: cs.pio
+#     tasks_from: app
+#
+
+- name: Install pio-worker rpm
+  yum:
+    name: "{{ pio_package_url }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Write service config
+  template:
+    src: "pio-worker.default.j2"
+    dest: "/etc/default/pio-worker"
+    mode: 0644
+
+- name: Enable service
+  service:
+    name: pio-worker
+    enabled: true
+    state: restarted

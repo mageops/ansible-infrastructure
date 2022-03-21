@@ -80,10 +80,17 @@
       aws_logs_stream_name: "{{ mageops_node_role }}"
       aws_logs_loggers: "{{ aws_logs_loggers_varnish_default | combine(aws_logs_loggers_varnish_extra | default({}), recursive=True) }}"
       when: aws_use
+
+    - role: cs.pio
+      vars:
+        pio_tasks: varnish
+      when: mageops_pio_worker_enable
+
     - role: cs.monitoring
       monitoring_node_exporter_enabled: yes
       monitoring_varnish_exporter_enabled: yes
       when: mageops_monitoring_enabled
+
     - role: cs.pkg-mgr-cleanup
 
   tasks:

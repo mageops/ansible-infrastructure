@@ -1,0 +1,23 @@
+# Reference quality targets:
+# 0.001591 - q95
+# 0.000548 - q99
+# 0.0004 - q100
+# 0.0027010000000000003 - q90
+# For more targets check QUALITY_SSIM in pio-worker source code, but you might provide here arbitrary value in 0.0 - 1.0 range
+# but keep in mind that values above 0.1 are propably too crappy for anything
+# Real quality used might be different as we will try to seek for quality that will
+# have SSIM score closest to this value
+pio_media_target_ssim: 0.000548 # this is 99 quality
+# This quality will be used when performing fast and dirty temporary optimization
+# 85-95 should be ok
+pio_media_fast_quality: 95
+pio_target_directory: pio_cache
+pio_media_target_directory: pio_cache_cms
+pio_optimize_media: yes
+
+# We cannot use magento_media_dir here as it might not be defined at this point
+pio_filesystem_local_dir: "{{ mageops_app_web_dir }}/shared/pub/media/"
+
+pio_filesystem: "{{ (magento_media_storage_strategy == 'aws-s3') | ternary('s3', 'local') }}"
+# Url to pio-worker rpm
+# pio_package_url:

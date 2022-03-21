@@ -53,6 +53,16 @@ if (req.url ~ "^/media/" && req.http.Origin ~ "^https?:\/\/({{ varnish_media_cor
     set resp.http.Access-Control-Allow-Origin = req.http.Origin;
     set resp.http.Access-Control-Allow-Headers = "*";
 }
+
+# https://bugs.chromium.org/p/chromium/issues/detail?id=260239
+# Chrome aggressively cache requests and won't try CORS request if there is already response in cache
+# without Vary: Origin header.
+if (resp.http.Vary) {
+    set resp.http.Vary = resp.http.Vary + ", Origin";
+}else {
+    set resp.http.Vary = "Origin";
+}
+
 {% endif %}
 
 unset resp.http.Age;
