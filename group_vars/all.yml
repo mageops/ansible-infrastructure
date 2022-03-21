@@ -343,6 +343,19 @@ aws_security_group_redis_name: "{{ mageops_app_name }}-redis-sg"
 aws_security_group_elasticsearch_name: "{{ mageops_app_name }}-elastic-sg"
 aws_security_group_efs_name: "{{ mageops_app_name }}-efs-sg"
 
+aws_security_group_persistant_rules_ssh_proxy:
+  - proto: tcp
+    ports:
+      - "22"
+    group_name: "{{ aws_security_group_app_name }}"
+
+
+aws_security_group_persistant_rules_tpl: [
+  "{{ mageops_ssh_proxy_persistant | ternary(aws_security_group_persistant_rules_ssh_proxy, []) }}"
+]
+
+aws_security_group_persistant_rules: "{{ aws_security_group_persistant_rules_tpl | flatten }}"
+
 aws_security_group_varnish_pio_rules:
   - proto: tcp
     ports:
@@ -356,7 +369,6 @@ aws_security_group_varnish_rules_tpl: [
 aws_security_group_varnish_rules: "{{ aws_security_group_varnish_rules_tpl | flatten }}"
 
 aws_security_group_app_rules: []
-aws_security_group_persistant_rules: []
 
 # Allows to add extra ports to persistant server
 # e.g. to allow ssh from webnode:
@@ -1843,10 +1855,19 @@ mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | de
 # --------  SSHD  --------
 # ------------------------
 
-sshd_config_users:
+sshd_config_users_base:
   root: "{{ sshd_config_allow_all_forwards }}"
   magento: "{{ sshd_config_allow_all_forwards }}"
 
+sshd_config_users_ssh_proxy:
+  tunel: "{{ sshd_config_allow_all_forwards }}"
+
+sshd_config_users_tpl: [
+  "{{ sshd_config_users_base }}",
+  "{{ mageops_ssh_proxy_persistant | ternary(sshd_config_users_ssh_proxy, {}) }}",
+]
+
+sshd_config_users: "{{ sshd_config_users_tpl | combine }}"
 
 # ---------------------------
 # --------  Helpers  --------
@@ -1876,6 +1897,15 @@ mageops_magento_vary_sign_enabled: no
 mageops_magento_vary_sign_secret: ""
 magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
 magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
+
+# -------------------------
+# ------- SSH tunel -------
+# -------------------------
+
+# Set up proxy server to persitant node
+# when eg. static ip for api connection is required
+# This require `ssh_tunel_private_key_secret` to be set in credentials
+mageops_ssh_proxy_persistant: no
 
 
 # -----------------------
