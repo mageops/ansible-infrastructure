@@ -22,22 +22,23 @@
 
       $ brew install {{ unison_macos_brew_package_fsmonitor }} {{ unison_macos_brew_package }}
 
+- name: <macOS> Install raccoon repository
+  when: unison_brew_config_command is success
+  homebrew_tap:
+    name: Szpadel/raccoon
+
+- name: <macOS> Install ocaml
+  homebrew:
+    state: linked
+    name:
+      - "{{ unison_macos_brew_ocaml_package }}"
+
 - name: <macOS> Install unison using homebrew
   when: unison_brew_config_command is success
   homebrew:
-    state: present
+    state: linked
     name:
       - "{{ unison_macos_brew_package }}"
       - "{{ unison_macos_brew_package_fsmonitor }}"
     install_options:
       - force
-
-# Homebrew module doesn't allow specifying link options
-- name: <macOS> Make sure unison binaries are linked properly
-  when: unison_brew_config_command is success
-  command: >-
-    brew link --overwrite
-      {{ unison_macos_brew_package }}
-      {{ unison_macos_brew_package_fsmonitor }}
-
-
