@@ -39,6 +39,14 @@
     state: linked
     name:
       - "{{ unison_macos_brew_package }}"
+    install_options:
+      - force
+
+- name: <macOS> Install unison fsmonitor
+  when: unison_brew_config_command is success
+  homebrew:
+    state: latest
+    name:
       - "{{ unison_macos_brew_package_fsmonitor }}"
     install_options:
       - force
