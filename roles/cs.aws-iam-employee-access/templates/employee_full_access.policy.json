@@ -291,6 +291,13 @@
                 "aws-marketplace:ViewSubscriptions"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "aws-portal:ViewBilling"
+            ],
+            "Resource": "*"
         }
     ]
 }

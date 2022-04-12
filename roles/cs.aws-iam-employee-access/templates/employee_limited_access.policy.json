@@ -41,6 +41,18 @@
                 "aws-marketplace:ViewSubscriptions"
             ],
             "Resource": "*"
+        },
+        {
+            "Action": "pi:*",
+            "Effect": "Allow",
+            "Resource": "arn:aws:pi:*:*:metrics/rds/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "aws-portal:ViewBilling"
+            ],
+            "Resource": "*"
         }
     ]
 }
