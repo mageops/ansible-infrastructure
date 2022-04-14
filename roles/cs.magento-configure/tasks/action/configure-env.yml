@@ -51,6 +51,13 @@
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_consumer_workers, recursive=true) }}
 
+    - name: Adjust configuration for cron consumers
+      when: magento_cron_consumers_enable
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_cron_consumers, recursive=true) }}
+
     - name: Enable file lock provider
       when: magento_lock_files_enabled
       set_fact:
