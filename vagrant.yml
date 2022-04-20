@@ -13,7 +13,7 @@
     - role: cs.sshd
     - role: cs.vagrant-sudo
     - role: geerlingguy.composer
-      composer_version_branch: "{{ mageops_composer_version_branch | default("--2") }}"
+      composer_version_branch: "{{ mageops_composer_version_branch | default('--2') }}"
       composer_keep_updated: true
     - role: cs.nodejs
     - role: cs.unison-server
