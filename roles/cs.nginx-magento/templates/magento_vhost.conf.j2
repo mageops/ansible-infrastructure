@@ -66,18 +66,24 @@ server {
 {% if path_config.path != "/" %}
     }
 
+    # XXX: There is undocumented nginx quirk that escapes strings coming from regex anonymous groups (eg $1)
+    # and this causes some+string to be set as some%2Bstring
+    # This behavior does not manifest when we use named groups in expression
+    # This is why there is (?<rest>.*) used to extract values from url
+    # Note that is issue not appears in rewrite rules, therefore in we can keep anonymous groups there
+
     if ( $request_uri ~ ^{{ path_config.path }}$ ) {
         set $FASTCGI_REQUEST_URI /;
     }
     rewrite ^{{ path_config.path }}$ / last;
 
-    if ( $request_uri ~ ^{{ path_config.path }}/(.*)$ ) {
-        set $FASTCGI_REQUEST_URI /$1;
+    if ( $request_uri ~ ^{{ path_config.path }}/(?<rest>.*)$ ) {
+        set $FASTCGI_REQUEST_URI /$rest;
     }
     rewrite ^{{ path_config.path }}/(.*)$ /$1 last;
 
-    if ( $request_uri ~ ^{{ path_config.path }}\?(.*)$ ) {
-        set $FASTCGI_REQUEST_URI /?$1;
+    if ( $request_uri ~ ^{{ path_config.path }}\?(?<rest>.*)$ ) {
+        set $FASTCGI_REQUEST_URI /?$rest;
     }
     rewrite ^{{ path_config.path }}\?(.*)$ /?$1 last;
 {% endif %}

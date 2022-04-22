@@ -1,0 +1,26 @@
+- name: Install private key
+  file:
+    path: /etc/ssh_tunel
+    state: directory
+    owner: root
+    group: root
+    mode: 0700
+
+- name: Install private key
+  copy:
+    dest: /etc/ssh_tunel/key
+    mode: 0600
+    owner: root
+    group: root
+    content: "{{ ssh_tunel_private_key_secret | b64decode }}"
+
+- name: Install tunel service
+  template:
+    dest: /etc/systemd/system/ssh_proxy.service
+    src: ssh_proxy.service
+
+- name: Start service
+  service:
+    name: ssh_proxy
+    state: started
+    enabled: yes

@@ -1,0 +1,20 @@
+- name: Generate public key
+  shell: "ssh-keygen -y -f /dev/stdin <<< \"$( echo {{ ssh_tunel_private_key_secret }} | base64 -d )\""
+  args:
+    executable: /bin/bash
+  register: _ssh_tunel_public_key
+  delegate_to: localhost
+  become: no
+
+- name: Create tunel user
+  user:
+    name: tunel
+    state: present
+    shell: /sbin/nologin
+
+- name: Install key
+  authorized_key:
+    user: tunel
+    state: present
+    exclusive: yes
+    key: "{{ _ssh_tunel_public_key.stdout }}"

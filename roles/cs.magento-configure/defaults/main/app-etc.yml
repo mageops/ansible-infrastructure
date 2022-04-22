@@ -166,6 +166,10 @@ magento_app_etc_config_consumer_workers:
     cron_run: false
     max_messages: "{{ magento_consumer_workers_max_messages | default(500) }}"
 
+magento_app_etc_config_cron_consumers:
+  cron_consumers_runner:
+    cron_run: true
+    consumers: "{{ magento_cron_consumers }}"
 
 magento_app_etc_config_file_locking:
   lock:

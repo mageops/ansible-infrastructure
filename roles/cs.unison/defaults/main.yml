@@ -1,3 +1,4 @@
-unison_macos_brew_package: unison
+unison_macos_brew_package: unison@2.52.0
+unison_macos_brew_ocaml_package: ocaml@4.12.0
 unison_macos_brew_package_fsmonitor: autozimu/homebrew-formulas/unison-fsmonitor
 unison_linux_inotify_max_user_watches: 1000000

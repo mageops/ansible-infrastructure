@@ -83,6 +83,8 @@
       when: mageops_rabbitmq_create
     - role: cs.magento-cron-http-trigger
       when: mageops_app_is_magesuite
+    - role: cs.ssh-proxy-user
+      when: mageops_ssh_proxy_persistant
     - role: cs.monitoring
       monitoring_node_exporter_enabled: yes
       monitoring_elasticsearch_exporter_enabled: yes
