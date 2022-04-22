@@ -105,7 +105,7 @@ class VarsModule(BaseVarsPlugin):
                         found_files = loader.find_vars_files(config_dir_path, config_type, allow_dir=True)
 
                     for found in found_files:
-                        if re.search(r'/(tasks|certs|certificates|files|templates|resources|roles)/', found):
+                        if re.search(r'/(tasks|certs|certificates|files|templates|resources|roles|playbooks)/', found):
                             continue
 
                         self._display.vv("Loading MageOps configuration file: %s" % (found))
