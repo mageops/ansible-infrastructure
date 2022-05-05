@@ -1,5 +1,9 @@
 ansible>=2.9.16,<2.10
 
+# some tasks call aws command on localhost
+# make sure this is BEFORE boto3 and boto
+awscli
+
 # needed for inventory and aws modules
 boto3
 
@@ -16,9 +20,6 @@ PyMySQL
 
 # needed for running docker (e.g. building aws lambda artifacts)
 docker-py
-
-# some tasks call aws command on localhost
-awscli
 
 # required for awscli
 PyYAML<5.3
