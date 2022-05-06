@@ -155,6 +155,9 @@
     - role: cs.ssh-tunel
       when: mageops_ssh_proxy_persistant
 
+    - role: cs.new-relic
+      when: mageops_new_relic_enabled
+
     - role: cs.monitoring
       monitoring_node_exporter_enabled: yes
       monitoring_php_fpm_exporter_enabled: yes

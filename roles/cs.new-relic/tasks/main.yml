@@ -1,0 +1,39 @@
+- name: Install new relic repo
+  yum:
+    name: "{{ new_relic_repo_url }}"
+    state: present
+    disable_gpg_check: true
+
+- name: Install new relic packages
+  yum:
+    name: "{{ new_relic_packages }}"
+    state: latest
+
+- name: Initialize new relic
+  shell: "NR_INSTALL_SILENT=1 newrelic-install install"
+
+- name: Render config
+  template:
+    src: newrelic.ini.j2
+    dest: /etc/php.d/newrelic.ini
+
+- name: Reload php-fpm
+  service:
+    name: php-fpm
+    state: reloaded
+
+- name: Install feature flag module
+  copy:
+    src: newrelic_feature.bash
+    dest: "{{ mageops_cli_features_dir }}/newrelic_feature.bash"
+  when: aws_use
+
+- name: Set feature flag
+  shell: "mageopscli set_feature_flag newrelic_apm {{ new_relic_enabled | ternary('true', 'false') }}"
+  when: aws_use
+
+- name: Setup cron
+  template:
+    src: cron.j2
+    dest: /etc/cron.d/newrelic
+  when: new_relic_cron_enabled

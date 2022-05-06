@@ -1,0 +1,4 @@
+# Enable new relic features
+{{ new_relic_cron_start }} root sh -c 'mageopscli is_cron_node && mageopscli set_feature_flag newrelic_apm true'
+# Disable new relic features
+{{ new_relic_cron_stop }} root sh -c 'mageopscli is_cron_node && mageopscli set_feature_flag newrelic_apm false'
