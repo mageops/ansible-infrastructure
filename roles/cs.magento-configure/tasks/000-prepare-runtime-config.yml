@@ -70,14 +70,13 @@
     state: present
 
 - name: Check if database is initialized
-  command: mysql -u {{ mageops_app_mysql_user }} -p{{ mageops_app_mysql_pass }} -h {{ mageops_mysql_host }} -e "SELECT 1 FROM {{ mageops_app_mysql_db }}.admin_user LIMIT 1;"
-  failed_when: false
+  command: mysql -N --batch -u {{ mageops_app_mysql_user|quote }} -p{{ mageops_app_mysql_pass|quote }} -h {{ mageops_mysql_host|quote }} -e "SHOW TABLES FROM `{{ mageops_app_mysql_db }}` LIKE 'admin_user';"
   changed_when: false
   register: admins
 
 - name: Set database existence fact
   set_fact:
-    database_exists: "{{ admins.rc is defined and admins.rc == 0 and admins.stdout_lines | length > 0}}"
+    database_exists: "{{ admins.stdout_lines | length == 1 and admins.stdout_lines[0] == 'admin_user' }}"
 
 - name: Get ElasticSuite version
   shell: "cat {{ magento_release_dir }}/composer.lock | jq '.packages | .[] | select(.name == \"smile/elasticsuite\") | .version'"
