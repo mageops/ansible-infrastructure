@@ -13,6 +13,7 @@ charset off;
 
 set $PHP_MEMORY_LIMIT {{ php_http_request_memory_limit }};
 set $PHP_MAX_EXECUTION_TIME {{ php_http_request_max_execution_time }};
+set $PHP_EXTRA_VALUE "";
 
 location = /WARMUP {
     # This ensures that requests to /WARMUP file are never rewritten

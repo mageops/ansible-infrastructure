@@ -1,4 +1,4 @@
-fastcgi_param  PHP_VALUE        "memory_limit=${PHP_MEMORY_LIMIT} \n max_execution_time=${PHP_MAX_EXECUTION_TIME}";
+fastcgi_param  PHP_VALUE        "memory_limit=${PHP_MEMORY_LIMIT} \n max_execution_time=${PHP_MAX_EXECUTION_TIME} \n ${PHP_EXTRA_VALUE}";
 fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
 fastcgi_param  PHP_IDE_CONFIG   serverName=$PROJ_NAME;
 fastcgi_param  MAGE_MODE        $MAGE_MODE;
