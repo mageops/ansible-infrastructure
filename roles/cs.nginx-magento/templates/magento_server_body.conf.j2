@@ -288,6 +288,15 @@ location ~ {{ nginx_custom_php_scripts_path_pattern }} {
 }
 {% endif %}
 
+{% for custom in nginx_custom_php_scripts %}
+location ~ {{ custom.path_pattern }} {
+    {%- if custom.extra_nginx_config is defined %}
+    {{ custom.extra_nginx_config }}
+    {% endif %}
+    include {{ nginx_magento_fastcgi_pass_include_path}};
+}
+{% endfor %}
+
 location ~ .*\.php$ {
     deny all;
 }
