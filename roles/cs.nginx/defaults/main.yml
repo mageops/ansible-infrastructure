@@ -1,11 +1,6 @@
 nginx_remove_default_vhost: yes
 nginx_client_max_body_size: 20M
 
-# If you need to run custom PHP scripts from /pub you need to whitelist them here
-# This is an nginx regexp, use something like:
-# nginx_custom_php_scripts_path_pattern: '^/(script_name1|script_name2|scrip_prefix.*)\.php$'
-nginx_custom_php_scripts_path_pattern: no
-
 nginx_package: nginx
 nginx_packages_extra: []
 
@@ -45,4 +40,3 @@ nginx_logrotate_history: 52
 # Max age of kept log files in days
 nginx_logrotate_maxage_days: 14
 nginx_syscfg_limit_nofile: 131072
-
