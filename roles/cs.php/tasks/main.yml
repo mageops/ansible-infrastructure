@@ -4,7 +4,6 @@
       {{
           (
             php_packages + php_extra_packages | default([])
-              + php_install_fpm_package | ternary([php_fpm_package], [])
               + php_debug_ini_enable | ternary([php_xdebug_package], [])
           ) | unique
       }}
@@ -124,10 +123,9 @@
     enabled: no
     daemon_reload: yes
   when: php_tmpfiles_service_config is changed
-  
+
 - name: Ensure tmpfiles maintenance service is enabled
   systemd:
     name: php-tmpfiles
     state: started
     enabled: yes
-    

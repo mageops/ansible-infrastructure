@@ -9,7 +9,6 @@ php_packages:
   - php-intl
   - php-opcache
 
-php_install_fpm_package: no
 php_fpm_package: 'php-fpm'
 
 # --- Basic default PHP INI configuration ---
