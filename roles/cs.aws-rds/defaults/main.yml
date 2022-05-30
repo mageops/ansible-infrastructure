@@ -16,7 +16,10 @@ aws_rds_param_group_name: "{{ mageops_app_name }}"
 aws_rds_param_group_desc: "MageOps parameter group"
 aws_rds_db_engine_version: "5.7"
 aws_rds_param_group_engine: "mysql{{ aws_rds_db_engine_version }}"
-aws_rds_performance_insights: "{{ False if aws_rds_instance_type.startswith('db.t') else True }}"
+
+# https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.Engines.html
+aws_rds_performance_insights_unavailable_instances: [ db.t2.micro, db.t2.small, db.t3.micro, db.t3.small]
+aws_rds_performance_insights: "{{ False if aws_rds_instance_type in aws_rds_performance_insights_unavailable_instances else True }}"
 aws_rds_performance_insights_retention_period: 7
 aws_rds_slowlog_enabled: yes
 aws_rds_slowlog_time: 10
