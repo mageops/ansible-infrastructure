@@ -1,5 +1,7 @@
 # --- Base configuration ---
-  
+
+php_fpm_package: 'php-fpm'
+
 php_fpm_daemon_conf_file_path: "/etc/php-fpm.conf"
 php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"

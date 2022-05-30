@@ -9,8 +9,6 @@ php_packages:
   - php-intl
   - php-opcache
 
-php_fpm_package: 'php-fpm'
-
 # --- Basic default PHP INI configuration ---
 
 php_date_timezone: "Europe/Berlin"
