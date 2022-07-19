@@ -27,6 +27,9 @@
 - debug:
     msg: "Will use {{ php_fpm_pm_max_children }} workers, autodetected default: {{ php_fpm_pm_max_children_default }}"
 
+- name: Install packages
+  include_tasks: 000-install.yml
+
 - name: Configure daemons
   include_tasks: 001-daemon.yml
 

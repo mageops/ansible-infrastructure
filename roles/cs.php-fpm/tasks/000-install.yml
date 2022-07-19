@@ -1,0 +1,4 @@
+- name: Install PHP and dependency packages
+  yum:
+    name: "{{ php_fpm_package }}"
+    state: present
