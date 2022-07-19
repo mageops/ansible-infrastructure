@@ -3,7 +3,7 @@ aws_rds_backup_window: 02:00-04:00
 aws_rds_maintenance_window: Mon:04:00-Mon:05:00
 aws_rds_auto_minor_version_upgrade: yes
 aws_rds_allow_major_version_upgrade: no
-aws_rds_storage_size: 10
+aws_rds_storage_size: 20
 aws_rds_storage_encrypt: no
 aws_rds_dedicated_encryption_key: no
 aws_rds_db_engine: mariadb
