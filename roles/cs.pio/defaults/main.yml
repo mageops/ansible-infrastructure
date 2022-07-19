@@ -19,5 +19,10 @@ pio_optimize_media: yes
 pio_filesystem_local_dir: "{{ mageops_app_web_dir }}/shared/pub/media/"
 
 pio_filesystem: "{{ (magento_media_storage_strategy == 'aws-s3') | ternary('s3', 'local') }}"
+
+# Contain - make resuloting image contained in specified dimentions
+# ExpandWithEmptyBackground - resulting image with exact resolution, empty space filled with default background
+pio_resize_strategy: Contain
+
 # Url to pio-worker rpm
 # pio_package_url:

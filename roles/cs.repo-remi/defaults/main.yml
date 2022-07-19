@@ -118,6 +118,19 @@ php_repo_remi_variants:
     name: remi-php80-test-debuginfo
     filename: remi-php80
 
+  php81:
+    name: remi-php81
+    filename: remi-php81
+  php81-debuginfo:
+    name: remi-php81-debuginfo
+    filename: remi-php81
+  php81-test:
+    name: remi-php81-test
+    filename: remi-php81
+  php81-test-debuginfo:
+    name: remi-php81-test-debuginfo
+    filename: remi-php81
+
   glpi91:
     name: remi-glpi91
     filename: remi-glpi91

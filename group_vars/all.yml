@@ -1916,3 +1916,10 @@ mageops_ssh_proxy_persistant: no
 pio_filesystem: "{{ (magento_media_storage_strategy == 'aws-s3') | ternary('s3', 'local') }}"
 mageops_pio_worker_enable: no
 lazy_resize_secret: ""
+
+# ---------------------
+# ----- New Relic -----
+# ---------------------
+new_relic_app_name: "{{ mageops_app_name }}"
+mageops_new_relic_enabled: no
+# new_relic_license need to be set up

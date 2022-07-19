@@ -23,6 +23,7 @@
                 "rds:Describe*",
                 "rds:ListTagsForResource",
                 "route53:List*",
+                "tag:GetResources",
                 "s3:Get*",
                 "s3:List*",
                 "ses:Get*",

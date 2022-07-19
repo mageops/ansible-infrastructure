@@ -21,6 +21,7 @@
         secret: "{{ lazy_resize_secret }}",
         source_directory: "catalog/product",
         target_directory: "{{ pio_target_directory }}",
+        resize_strategy: "{{ pio_resize_strategy }}",
         additional_paths: [
 {% if pio_optimize_media %}
             (
