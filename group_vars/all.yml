@@ -1844,7 +1844,19 @@ versionlock_app_node_ban_packages_extra: []
 
 # Variable alias for passing this data into external NTP role
 ntp_timezone: "{{ mageops_timezone }}"
+ntp_manage_config: yes
 
+# Aws local ntp server
+ntp_servers_aws:
+  - 169.254.169.123 iburst
+
+# Default ntp public servers
+ntp_servers_default:
+  - "0{{ '.' + ntp_area if ntp_area else '' }}.pool.ntp.org iburst"
+  - "1{{ '.' + ntp_area if ntp_area else '' }}.pool.ntp.org iburst"
+  - "2{{ '.' + ntp_area if ntp_area else '' }}.pool.ntp.org iburst"
+  - "3{{ '.' + ntp_area if ntp_area else '' }}.pool.ntp.org iburst"
+ntp_servers: "{{ aws_use | ternary(ntp_servers_aws, ntp_servers_default) }}"
 
 # -------------------------------------------------
 # --------  Notifications Common Settings  --------
