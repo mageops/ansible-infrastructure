@@ -1,0 +1,141 @@
+- hosts: localhost
+  connection: local
+  vars:
+    aws_tags_role_update:
+      RoleBuilder: update_base
+    aws_sftp_node_name_tags:
+      Name: "Centos7 Update"
+  roles:
+    - role: cs.aws-ami-facts
+    - role: cs.aws-vpc-facts
+    - role: cs.aws-security-group-facts
+    - role: cs.aws-node-state
+      node_state_target: absent
+      node_state_instance_tags: >-
+        {{
+            aws_tags_base | combine(
+                aws_tags_role_update
+            )
+        }}
+  tasks:
+    - name: Spawn instance
+      ec2:
+        region: "{{ aws_region }}"
+        assign_public_ip: yes
+        monitoring: no
+        image: "{{ aws_ami_clean_base_id }}"
+        key_name: "{{ aws_ec2_ssh_key_name }}"
+        instance_tags: >-
+          {{
+              aws_tags_default | combine(
+                aws_tags_role_update,
+                aws_sftp_node_name_tags
+              )
+          }}
+        exact_count: 1
+        wait: yes
+        wait_timeout: 900
+        ebs_optimized: yes
+        count_tag: "{{ aws_sftp_node_name_tags }}"
+        vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+        instance_type: t3.micro
+        user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
+        group_id:
+          - "{{ aws_security_group_ssh_id }}"
+      register: builder_ec2
+
+    - name: Ensure builder disks are gp3 volumes
+      include_role:
+        name: cs.aws-ebs-vol
+      vars:
+        aws_ebs_volume_modify_ids: >-
+          {{ ( builder_ec2.instances + builder_ec2.tagged_instances )
+              | map(attribute='block_device_mapping')
+              | map('dict2items')
+              | flatten
+              | map(attribute='value')
+              | map(attribute='volume_id')
+              | list
+              | to_nice_json }}
+        aws_ebs_volume_modify_type: "gp3"
+        aws_ebs_volume_modify_iops: "3000"
+        aws_ebs_volume_modify_throughput: "125"
+
+
+    - name: Add builder host to inventory
+      add_host:
+        hostname: "{{ item.public_ip }}"
+        groups:
+          - "update_base"
+
+      loop: '{{ builder_ec2.tagged_instances }}'
+      loop_control:
+        label: "{{ item.public_ip }}"
+
+    - name: Wait for builder node instance to get up
+      wait_for:
+        port: 22
+        host: "{{ item.public_ip }}"
+      loop: '{{ builder_ec2.tagged_instances }}'
+      loop_control:
+        label: "{{ item.public_dns_name }}"
+
+- hosts: update_base
+  gather_facts: no
+  pre_tasks:
+    - name: Wait for builder's SSH to become available
+      wait_for_connection: ~
+
+    - name: Gather facts for first time
+      setup: ~
+  vars:
+    aws_tags_role_update:
+      RoleBuilder: update_base
+  roles:
+    - role: cs.aws-node-facts
+      delegate_to: localhost
+      become: no
+    - role: cs.switch-to-dnf
+    - role: cs.packages
+    - role: cs.pkg-mgr-cleanup
+
+- hosts: localhost
+  connection: local
+  vars:
+    aws_tags_role_update:
+      RoleBuilder: update_base
+
+  pre_tasks:
+    - name: Find EC2 instances to be processed
+      ec2_instance_info:
+        region: "{{ aws_region }}"
+        filters: "{{ node_state_filter | combine(node_state_instance_tags | prefix_keys('tag:')) }}"
+      register: node_state_ec2_instance_info
+      vars:
+        node_state_instance_tags: "{{ aws_tags_base | combine(aws_tags_role_update) }}"
+        node_state_filter:
+          instance-state-name: running
+
+  tasks:
+    - name: Create AMI
+      ec2_ami:
+        region: "{{ aws_region }}"
+        state: present
+        description: "Centos7 updated {{ ansible_date_time.date }}"
+        instance_id: "{{ node_state_ec2_instance_info.instances | map(attribute='instance_id') | list | first }}"
+        name: "cs-centos7-update-{{ ansible_date_time.date }}"
+        wait: yes
+        tags:
+          Os: centos
+          OsVersion: 7
+          Infrastructure: mageops
+        delete_snapshot: yes
+        launch_permissions:
+          group_names: ['all']
+    - name: Stop builder
+      ec2:
+        region: "{{ aws_region }}"
+        state: "absent"
+        instance_ids: "{{ node_state_ec2_instance_info.instances | map(attribute='instance_id') | list }}"
+        wait: yes
+      when: node_state_ec2_instance_info.instances | length > 0
