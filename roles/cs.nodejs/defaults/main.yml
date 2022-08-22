@@ -1,10 +1,8 @@
 # Nodejs version
-nodejs_version: '10.x'
+nodejs_version: '14.x'
 
 # Global user packages to install
 nodejs_packages: []
 
 # Whether to use Yarn or NPM for global package installation
 nodejs_use_yarn: yes
-
-
