@@ -164,7 +164,15 @@
       when: mageops_monitoring_enabled
 
   tasks:
-    - include_tasks: "{{ mageops_extra_tasks_app_node }}"
+    - set_fact:
+        mageops_extra_tasks_app_node: [
+          "{{ mageops_extra_tasks_app_node }}"
+        ]
+      when: |
+        mageops_extra_tasks_app_node is defined
+        and mageops_extra_tasks_app_node is string
+    - include_tasks: "{{ item }}"
+      loop: "{{ mageops_extra_tasks_app_node }}"
       when: mageops_extra_tasks_app_node is defined
 
   vars:
