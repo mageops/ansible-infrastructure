@@ -1,0 +1,30 @@
+- name: Install elrepo rpm key
+  rpm_key:
+    state: present
+    key: https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+
+- name: Install elrepo repo
+  dnf:
+    state: present
+    name: https://www.elrepo.org/elrepo-release-7.el7.elrepo.noarch.rpm
+
+- name: Elable el-kernel repo
+  ini_file:
+    state: present
+    create: no
+    path: /etc/yum.repos.d/elrepo.repo
+    section: elrepo-kernel
+    option: enabled
+    value: '1'
+    no_extra_spaces: yes
+
+- name: Switch default kernel setting
+  replace:
+    path: /etc/sysconfig/kernel
+    regexp: '^DEFAULTKERNEL=[^\n]*$'
+    replace: DEFAULTKERNEL={{ centos_update_kernel_kernel_name }}
+
+- name: Update kernel
+  dnf:
+    state: latest
+    name: "{{ centos_update_kernel_kernel_name }}"
