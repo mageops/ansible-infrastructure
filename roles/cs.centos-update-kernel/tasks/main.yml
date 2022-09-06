@@ -35,3 +35,17 @@
   dnf:
     state: latest
     name: "{{ centos_update_kernel_kernel_name }}"
+
+- name: Set modern network congestion algorithm
+  block:
+  - sysctl:
+      name: net.core.default_qdisc
+      value: fq
+      reload: yes
+      state: present
+  - sysctl:
+      name: net.ipv4.tcp_congestion_control
+      value: bbr
+      reload: yes
+      state: present
+  when: centos_update_kernel_network_tune
