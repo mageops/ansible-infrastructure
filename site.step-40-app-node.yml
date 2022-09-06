@@ -32,7 +32,7 @@
     - role: pinkeen.selinux-disable
 
     - role: cs.centos-update-kernel
-      when: mageops_app_upgrade_kernel
+      when: mageops_upgrade_kernel
 
     - role: cs.tuned
 

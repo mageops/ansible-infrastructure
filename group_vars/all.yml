@@ -641,8 +641,8 @@ mageops_app_uid: 1500
 mageops_app_gid: "{{ mageops_app_uid }}"
 mageops_app_umask: '0022'
 
-# Upgrade kernel to kernel from elrepo on app node
-mageops_app_upgrade_kernel: no
+# Upgrade kernel to kernel from elrepo
+mageops_upgrade_kernel: no
 
 # MySQL instance shall be provisioned? (or provide host)
 mageops_mysql_create: yes
