@@ -1,1 +1,2 @@
 centos_update_kernel_kernel_name: kernel-lt
+centos_update_kernel_disable_mitigations: no
