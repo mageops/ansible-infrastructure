@@ -34,6 +34,8 @@
     - role: cs.centos-update-kernel
       when: mageops_app_upgrade_kernel
 
+    - role: cs.tuned
+
     - role: cs.zram
       zram_size_relative: "{{ mageops_app_node_zram_size_relative }}"
       when: mageops_app_node_zram_enable
