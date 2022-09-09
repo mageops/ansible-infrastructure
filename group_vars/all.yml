@@ -83,9 +83,14 @@ aws_tags_trait_immutable:
 aws_tags_pio:
   RoleImage: "pio"
 
+aws_tags_pio_only:
+  RoleImage: "pio"
+  Role: "pio"
+
+
 aws_tags_role_app_tpl: [
   { Role: "app" },
-  "{{ mageops_pio_worker_enable | ternary(aws_tags_pio, {}) }}"
+  "{{ (mageops_pio_worker_enable and not mageops_pio_worker_dedicated_asg) | ternary(aws_tags_pio, {}) }}"
 ]
 
 aws_tags_role_app: "{{ aws_tags_role_app_tpl | combine }}"
@@ -202,6 +207,9 @@ aws_tags_node_app_with_varnish:
 
 aws_tags_node_persistent:
   NodePersistent: "{{ mageops_app_name }}"
+
+aws_tags_node_pio:
+  NodePio: "{{ mageops_app_name }}"
 
 # --- Encryption Keys ---
 
@@ -1941,6 +1949,15 @@ mageops_ssh_proxy_persistant: no
 pio_filesystem: "{{ (magento_media_storage_strategy == 'aws-s3') | ternary('s3', 'local') }}"
 mageops_pio_worker_enable: no
 lazy_resize_secret: ""
+
+# Use dedicated ASG for image optimization instead of reusing app nodes
+mageops_pio_worker_dedicated_asg: no
+aws_pio_asg_min_size: 1
+aws_pio_asg_max_size: 4
+aws_pio_asg_cooldown: 60
+aws_pio_asg_desired_capacity: 1
+aws_pio_instance_type: m6i.large
+aws_pio_ebs_volume_size: "{{ aws_app_node_ebs_volume_size }}"
 
 # ---------------------
 # ----- New Relic -----

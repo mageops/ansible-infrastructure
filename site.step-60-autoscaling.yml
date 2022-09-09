@@ -103,6 +103,9 @@
 
         /usr/bin/systemctl enable supervisord
         /usr/bin/systemctl start supervisord
+        {% if mageops_pio_worker_enable and mageops_pio_worker_dedicated_asg %}
+        /usr/bin/systemctl disable --now pio-worker
+        {% endif %}
 
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
@@ -150,3 +153,48 @@
 
         /usr/bin/systemctl enable supervisord
         /usr/bin/systemctl start supervisord
+        {% if mageops_pio_worker_enable and mageops_pio_worker_dedicated_asg %}
+        /usr/bin/systemctl disable --now pio-worker
+        {% endif %}
+
+    - role: cs.aws-autoscaling
+      autoscaling_asg_enabled: mageops_pio_worker_dedicated_asg and mageops_pio_worker_enable
+      autoscaling_assign_public_ip: yes
+      autoscaling_loadbalancers: no
+
+      autoscaling_asg_name: "{{ mageops_app_name }}-pio"
+      autoscaling_asg_desired_capacity: "{{ aws_pio_asg_desired_capacity }}"
+      autoscaling_asg_min_size: "{{ aws_pio_asg_min_size }}"
+      autoscaling_asg_max_size: "{{ aws_pio_asg_max_size }}"
+      autoscaling_asg_cooldown: "{{ aws_pio_asg_cooldown }}"
+
+      autoscaling_instance_ami_id: "{{ aws_ami_app_node_id }}"
+      autoscaling_instance_type: "{{ aws_pio_instance_type }}"
+      autoscaling_instance_security_groups: "{{ aws_app_node_security_group_ids }}"
+      autoscaling_instance_iam_role: "{{ aws_iam_role_app_node }}"
+      autoscaling_instance_volume_size: "{{ aws_pio_ebs_volume_size }}"
+      autoscaling_instance_tags: >-
+        {{
+            aws_tags_default | combine(
+              aws_tags_pio_only,
+              aws_tags_node_pio,
+            )
+        }}
+      autoscaling_instance_ami_search_tags: >-
+        {{
+            aws_tags_base | combine(
+              aws_tags_role_app
+            )
+        }}
+      autoscaling_instance_start_script: |
+        /usr/bin/systemctl disable --now php-fpm
+        /usr/bin/systemctl disable --now nginx
+        {% if mageops_monitoring_enabled %}
+        /usr/bin/systemctl disable --now php-fpm-exporter
+        {% endif %}
+        {% if blackfire_install %}
+        /usr/bin/systemctl disable --now blackfire-agent
+        {% endif %}
+        {% if tideways_enable %}
+        /usr/bin/systemctl disable --now tideways-daemon
+        {% endif %}
