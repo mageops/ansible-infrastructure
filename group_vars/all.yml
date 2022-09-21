@@ -1251,7 +1251,8 @@ magento_efs_app_node_mounts: []
 # -----------------------
 
 php_version: 7.4
-php_packages:
+
+php_packages_php7:
   - php-cli
   - php-common
   - php-pdo
@@ -1272,6 +1273,29 @@ php_packages:
   - php-bcmath
   - php-sodium
   - php-soap
+
+php_packages_php8:
+  - php-cli
+  - php-common
+  - php-pdo
+  - php-json
+  - php-intl
+  - php-curl
+  - php-mysqlnd
+  - php-pecl-redis5
+  - php-gd
+  - php-gmp
+  - php-mcrypt
+  - php-imagick
+  - php-xml
+  - php-pecl-zip
+  - php-opcache
+  - php-mbstring
+  - php-bcmath
+  - php-sodium
+  - php-soap
+
+php_packages: "{{ php_version is version('8.0', '>=') | ternary(php_packages_php8, php_packages_php7) }}"
 
 php_conf_fragment_dir_path: "/etc/php.d"
 

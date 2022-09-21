@@ -1,157 +1,161 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>{% block title %}Error {{ status_code }}{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="theme-color" content="#c20000">
-    <meta name="msapplication-navbutton-color" content="#c20000">
-    <meta name="apple-mobile-web-app-status-bar-style" content="#c20000">
-    <meta charset="utf-8">
     <meta name="robots" content="*"/>
+
     <style type="text/css">
+        :root {
+            --main-color: {{ _varnish_error_color_palete.main }};
+            --background-color: {{ _varnish_error_color_palete.background }};
+            --footer-background-color: {{ _varnish_error_color_palete.footer_background }};
+            --error-background-color: {{ _varnish_error_color_palete.error_background }};
+
+            --text-dark-color: {{ _varnish_error_color_palete.text_dark }};
+            --text-light-color: {{ _varnish_error_color_palete.text_light }};
+            --error-message-color: {{ _varnish_error_color_palete.error_message }};
+        }
+
         @import url('https://fonts.googleapis.com/css?family=Lato:400,700');
         html {
-            -webkit-box-sizing: border-box;
+            margin: 0;
             box-sizing: border-box;
+            font-size: 15px;
             font-family: 'Lato', sans-serif;
-            font-size: 1.2vw;
-            color: #212121;
+            color: var(--text-light-color);
         }
-
-        @media (max-width: 1280px) {
-            html {
-                font-size: 14px;
-            }
-        }
-
         *,
         *:before,
         *:after {
             -webkit-box-sizing: inherit;
             box-sizing: inherit;
         }
-
         body {
-            background-color: #F1F1F1;
+            background-color: #fff;
             margin: 0;
-            height: 100vh;
-            -webkit-transform-style: preserve-3d;
-            transform-style: preserve-3d;
-            overflow: hidden
-        }
-
-        .error-page {
             min-height: 100vh;
-            display: -webkit-box;
-            display: -ms-flexbox;
+            font-size: 15px;
+        }
+        h1,h2,h3,h4,h5,h6 {
+            color: var(--text-dark-color);
+        }
+        h1 {
+            font-size: 28px;
+            margin: 1.2rem 0;
+        }
+        h3 {
+            font-size: 22px;
+            margin: 1rem 0;
+        }
+        p {
+            margin: 1em 0;
+        }
+        .error-page {
+            background-color: var(--background-color);
+            min-height: 100vh;
+            height: 100%;
             display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-end;
+            text-align: center;
+        }
+        .error-page__content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            flex-direction: column;
+            padding: 1.2rem 0;
         }
-
-        .error-page__svg-wrapper {
-            display: -webkit-box;
-            display: -ms-flexbox;
-            display: flex;
-            -webkit-box-pack: center;
-            -ms-flex-pack: center;
-            justify-content: center;
-            -webkit-box-align: end;
-            -ms-flex-align: end;
-            align-items: flex-end;
-            overflow: hidden;
+        .error-page__footer {
             width: 100%;
+            background-color: var(--footer-background-color);
+            padding: 1.2rem 0;
+            align-self: end;
         }
-
-        .error-page__cable-img {
-            max-height: 300px;
-            width: 500px;
-            -webkit-box-flex: 0;
-            -ms-flex-positive: 0;
-            flex-grow: 0;
-            margin: 0 -5px;
-            fill: {{ varnish_error_page_color_primary }};
+        .error-page__logo {
+            max-width: 150px;
+            margin: 0 auto 2rem;
         }
-
-        @media (max-width: 500px) {
-            .error-page__cable-img {
-                margin: 0 -5rem;
-            }
+        .container {
+            margin: 0 auto;
+            width: 450px;
+            max-width: 100%;
+            padding: 0 15px;
         }
-
-        .error-page__cable-line {
-            background-color: {{ varnish_error_page_color_primary }};
-            height: 4px;
-            -webkit-box-flex: 1;
-            -ms-flex-positive: 1;
-            flex-grow: 1;
+        .container-wide {
+            margin: 0 auto;
+            width: 1190px;
+            max-width: 100%;
+            padding: 0 40px;
         }
-
-        .error-page__header {
-            margin-top: 3rem;
+        .color-special {
+            color: var(--main-color);
+        }
+        .color-dark {
+            color: var(--text-dark-color);
+        }
+        a {
+            color: var(--text-dark-color);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: none;
+        }
+        #error-details-box {
+            color: var(--text-dark-color);
+            margin-top: 1rem;
+        }
+        .error-page__details-box {
+            background: var(--error-background-color);
+            padding: 1.5rem;
+            text-align: left;
+        }
+        .error-page__details-title {
             text-align: center;
-            position: relative;
-            padding: 0 20px;
+            font-size: 18px;
+            margin-bottom: 1rem;
         }
-
-        .error-page__message {
-            text-transform: uppercase;
-            font-size: 2rem;
+        .error-page__details-title p {
             margin-top: 0;
         }
-
-        .error-page__text {
-            font-size: 1.3rem;
-        }
-
-        .error-page__text--muted {
-            opacity: 0.6;
-            font-size: 0.8rem;
-        }
-
-        .error-page__details-box {
-            background: #1C2431;
-            padding: 1.5rem;
-            margin: 0 auto;
-            border-radius: 0.3em;
-            position: absolute;
-            max-width: 40rem;
-            top: 5vw;
-            box-shadow: 0 0 1rem rgba(0, 0, 0, 0.2);
-        }
-
-        .error-page__details-title {
-            color: #af0087;
-            text-align: center;
-            font-size: 1.2rem;
-            margin: 0 0 1rem 0;
-            padding: 0;
-        }
-
         .error-page__details-message {
-            color: #0087FF;
-            text-align: left;
-            font-size: 1rem;
-            margin: 0;
+            color: var(--error-message-color);
         }
-
         .error-page__details-message ul {
             padding-left: 1em;
             margin: 1em 0 0 0;
         }
-
         .error-page__details-data {
             font-size: 0.8rem;
             margin: 1rem 0 0 0;
-            border-radius: 0.3rem;
             box-shadow: inset 0 0 0.5rem rgba(0, 0, 0, 0.1);
-            background: #fff;
             padding: 1rem;
             font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", "Roboto Mono", monospace;
             overflow-x: scroll;
+        }
+
+        @media (min-width: 768px) {
+            .error-page__footer {
+                padding: 3rem 0;
+            }
+            .error-page__logo {
+                max-width: 184px;
+                margin-bottom: 3rem;
+            }
+        }
+
+        @media (max-height: 650px) {
+            .error-page__logo {
+                margin-bottom: 1rem;
+            }
+            .error-page__footer {
+                padding: 0.2rem 0;
+            }
         }
 
         {% if varnish_error_page_url %}
@@ -160,7 +164,6 @@
                 margin: 0;
                 padding: 0;
             }
-
             iframe {
                 width: 100%;
                 width: 100vw;
@@ -178,66 +181,67 @@
         <iframe src="{{ varnish_error_page_url }}" frameborder="0" name="errorpage" scrolling="auto" width="100%"></iframe>
     {% else %}
         <div class="error-page">
-            <div class="error-page__svg-wrapper">
-                <div class="error-page__cable-line"></div>
-                <svg class="error-page__cable-img" id="cable-img" data-name="cable-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 525.2837 186.5615">
-                    <path d="M523.2837,182.4819H342.3979c-9.61-.0874-16.1963-3.335-19.0459-9.3916-3.585-7.62-.8389-19.0869,6.835-28.5361a40.2147,40.2147,0,0,1,17.41-12.6709A103.8342,103.8342,0,0,1,352.4,143.67c3.7617,10.4565,7.3145,20.3335,19.3359,20.3335,10.8,0,17.8154-4.8535,18.7676-12.9839,1.0723-9.1558-6.5791-20.707-21.2412-24.189a40.0076,40.0076,0,0,0-19.7432.2407,36.1029,36.1029,0,0,0-20.9951-16.8145,1.982,1.982,0,0,0-.6125-0.0856,5.1561,5.1561,0,0,0-.0076-0.9857,2.8616,2.8616,0,0,0-1.6484-2.4238l-8.5459-5.5352a10.8415,10.8415,0,0,0-6.4473-6.9423l-4.8877-1.8911-2.7242-.944,0.5054-1.3051a2,2,0,1,0-3.73-1.4443l-7.4972,19.3589-0.1581.4082h0l-1.2539,3.2377a2,2,0,1,0,3.73,1.4443l0.5442-1.4051,7.6248,2.8a10.8209,10.8209,0,0,0,9.4488-.7881l10.0375,1.6641a2.59,2.59,0,0,0,.8389.1406,3.0916,3.0916,0,0,0,2.0117-.8218,5.3922,5.3922,0,0,0,.9022-1.0287,1.9883,1.9883,0,0,0,.6525.3578,32.0591,32.0591,0,0,1,18.3086,14.2705,44.3571,44.3571,0,0,0-18.5342,13.6948c-8.7559,10.7817-11.6406,23.6411-7.3486,32.7607,2.4756,5.2607,8.41,11.5591,22.6465,11.6885H523.2837A2,2,0,0,0,523.2837,182.4819Zm-154.9453-51.76c12.3291,2.9282,19.043,12.5742,18.1924,19.832-0.7031,6.0049-6.0957,9.4492-14.7949,9.4492-8.7812,0-11.5088-6.3911-15.5723-17.6875a112.3743,112.3743,0,0,0-4.6855-11.6025A36.078,36.078,0,0,1,368.3384,130.7222Zm-63.5107-19.9214-7.5918-2.7876,2.1159-5.4644,2.8532-7.3675,2.7916,0.9667,4.82,1.8662A6.8628,6.8628,0,1,1,304.8276,110.8008Zm20.7568,0.6792c-0.459,1.1851-1.38,2.3013-2.0674,2.0352a1.0255,1.0255,0,0,0-.1982-0.0537l-8.3005-1.3758a10.7755,10.7755,0,0,0,3.1644-8.1694l7.062,4.574a1.0379,1.0379,0,0,0,.1826.0933,0.8572,0.8572,0,0,1,.4912.8447A4.4912,4.4912,0,0,1,325.5845,111.48Z"></path>
-                    <path d="M257.644,0a1,1,0,0,0-1,1V27.2852a1,1,0,0,0,2,0V1A1,1,0,0,0,257.644,0Z"></path>
-                    <path d="M315.1157,38.4355l-10.1895,10.19A1,1,0,1,0,306.34,50.04L316.53,39.85A1,1,0,0,0,315.1157,38.4355Z"></path>
-                    <path d="M199.354,38.4355a1,1,0,0,0,0,1.4141l10.1895,10.19a1,1,0,0,0,1.4141-1.4141l-10.1895-10.19A1,1,0,0,0,199.354,38.4355Z"></path>
-                    <path d="M257.644,34a1,1,0,0,0-1,1v4.1426a1,1,0,0,0,2,0V35A1,1,0,0,0,257.644,34Z"></path>
-                    <path d="M234.7158,97.7549L230.5465,99.37l-2.59-6.6878,4.6776-1.8116a1,1,0,0,0-.7227-1.8652l-4.6774,1.8115-1.0853-2.8022a2,2,0,0,0-2.5874-1.1431l-18.3755,7.1172a10.8415,10.8415,0,0,0-6.4468,6.9419l-8.5458,5.5352c-1.3295.58-1.8974,2.1091-1.5905,3.9675a1.9885,1.9885,0,0,0-.4315.1116,30.4922,30.4922,0,0,0-19.2256,32.0527l1.2354,10.3125a26.5,26.5,0,0,1-26.3115,29.6519H2a2,2,0,0,0,0,4H143.8691a30.5006,30.5006,0,0,0,30.2832-34.1274l-1.2354-10.3125a26.4936,26.4936,0,0,1,16.7041-27.85,1.979,1.979,0,0,0,.5616-0.3437,3.4305,3.4305,0,0,0,2.5317,1.3334,2.5788,2.5788,0,0,0,.8315-0.1387L203.58,113.46a11.0143,11.0143,0,0,0,1.1405.5941,10.79,10.79,0,0,0,8.311.1934l18.3755-7.1167a2,2,0,0,0,1.1431-2.5874l-1.2813-3.3082,4.1695-1.6147A1,1,0,0,0,234.7158,97.7549Zm-41.5869,15.41a1.03,1.03,0,0,0-.1978.0537c-0.687.2646-1.6084-.8491-2.0679-2.0347s-0.53-2.6309.1577-2.897a1.017,1.017,0,0,0,.1821-0.0933l7.0623-4.5744a10.797,10.797,0,0,0,3.1591,8.1706Zm18.4585-2.6484a6.8624,6.8624,0,0,1-4.957-12.7983l3.8884-1.506,3.012,7.777a1,1,0,0,0,1.8652-.7227L212.384,95.49l10.7566-4.1661,4.957,12.7988Z"></path>
-                </svg>
-                <div class="error-page__cable-line"></div>
-            </div>
-            <header class="error-page__header">
-                {% block content %}
+            <div class="error-page__content">
+                <div class="error-page__logo-warapper container">
+                    <div class="error-page__logo">
+                        {{ varnish_error_html_logo }}
+                    </div>
+                </div>
+                <div class="error-page__content-warapper container">
+                    {% block content %}
                     <h1 class="error-page__message" id="error-headline">
                         {% block error_headline %}Error <strong>{{ status_code }}</strong>{% endblock %}
                     </h1>
 
                     <p class="error-page__text" id="error-description">{% block error_description %}{% endblock %}</p>
-                {% endblock %}
-            </header>
-            <div class="error-page__details-box" id="error-details-box" style="display: none;">
-                <div class="error-page__details-title" id="error-details-title">
-                    Error returned by<em>varnish</em> | <strong>{{ status_code }} <em>{{ status_message | default('Unknown') }}</em></strong>
+                    {% endblock %}
+                    <p class="color-dark">Please try again later</p>
                 </div>
-                {% if self.error_details_message() | trim != "" %}
+                <div class="error-page__details-box container-wide" id="error-details-box" style="display: none;">
+                    <div class="error-page__details-title" id="error-details-title">
+                        <p>Error returned by <em>varnish</em> | <strong>{{ status_code }} <em>{{ status_message | default('Unknown') }}</em></strong></p>
+                    </div>
+                    {% if self.error_details_message() | trim != "" %}
                     <div class="error-page__details-message" id="error-details-message">
                         {% block error_details_message %}{% endblock %}
                     </div>
-                {% endif %}
-                <pre class="error-page__details-data" id="error-details-data" style="display: none;"></pre>
+                    {% endif %}
+                    <pre class="error-page__details-data" id="error-details-data" style="display: none;"></pre>
+                </div>
             </div>
+            <div class="error-page__footer">
+                {% if varnish_error_texts.contact_us_phone | default("") | trim != "" and varnish_error_texts.contact_us_text  | default("") | trim != "" %}
+                <div class="error-page__footer-wrapper container">
+                    <h3>Contact us<br />
+                    <span class="color-special">{{ varnish_error_texts.contact_us_phone | default("") }}</span>
+                    </h3>
+                    <p>{{ varnish_error_texts.contact_us_text | default("") }}</p>
+                </div>
+                {% endif %}
+            </div>
+
             <script>
-                    window.MGS = window.MGS || {};
-                    window.MGS.error = window.MGS.error || {code: {{ status_code }}};
-
-                    (function show_details() {
-                        var error = window.MGS.error || {};
-
-                        window.addEventListener('DOMContentLoaded', function(event) {
-                            console.log('Error page data', window.MGS.error);
-                        });
-
-                        document.onkeydown = function(evt) {
-                            evt = evt || window.event;
-
-                            if (evt.keyCode == 69) {
-                                if (typeof error.title !== 'undefined') {
-                                    document.getElementById('error-details-title').innerHTML = error.title;
-                                }
-
-                                if (typeof error.data !== 'undefined') {
-                                    document.getElementById('error-details-data').innerHTML = error.data;
-                                    document.getElementById('error-details-data').style.display = 'block';
-                                }
-
-                                document.getElementById('error-details-box').style.display = 'block';
+                window.MGS = window.MGS || {};
+                window.MGS.error = window.MGS.error || {code: {{ status_code }}};
+                (function show_details() {
+                    var error = window.MGS.error || {};
+                    window.addEventListener('DOMContentLoaded', function(event) {
+                        console.log('Error page data', window.MGS.error);
+                    });
+                    document.onkeydown = function(evt) {
+                        evt = evt || window.event;
+                        if (evt.keyCode == 69) {
+                            if (typeof error.title !== 'undefined') {
+                                document.getElementById('error-details-title').innerHTML = error.title;
                             }
+                            if (typeof error.data !== 'undefined') {
+                                document.getElementById('error-details-data').innerHTML = error.data;
+                                document.getElementById('error-details-data').style.display = 'block';
+                            }
+                            document.getElementById('error-details-box').style.display = 'block';
                         }
-                    })();
+                    }
+                })();
             </script>
         </div>
     {% endif %}

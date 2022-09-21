@@ -82,7 +82,25 @@ varnish_params_extra: {}
 varnish_extra_instance_failover_enable: yes
 
 # Error page color theme
-varnish_error_page_color_primary: "#212121"
+varnish_error_color_palete_default:
+  main: "#324dce"
+  background: "#f6f6f6"
+  footer_background: "#fff"
+  error_background: "#fff"
+  text_dark: "#212121"
+  text_light: "#898989"
+  error_message: "#C11115"
+
+# Overwrite colros here with the smae keys as in varnish_error_color_palete_default
+varnish_error_color_palete: {}
+
+# Contact us footer, if both fields are empty, footer is disabled
+varnish_error_texts:
+  contact_us_phone: ""
+  contact_us_text: ""
+
+# Html for shop logo, can be <svg> or <img>
+varnish_error_html_logo: ""
 
 # Display custom page in an IFRAME
 varnish_error_page_url: no

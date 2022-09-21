@@ -5,6 +5,8 @@ repo_nodejs_variants:
   - '11'
   - '12'
   - '13'
+  - '14'
+  - '15'
+  - '16'
 repo_nodejs_variants_enabled:
-  - '10'
-
+  - '14'

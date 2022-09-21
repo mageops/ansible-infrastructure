@@ -28,6 +28,7 @@
     dest: "/etc/varnish/error{{ item }}.html"
   vars:
     status_code: "{{ item }}"
+    _varnish_error_color_palete: "{{ varnish_error_color_palete_default | combine(varnish_error_color_palete) }}"
   with_items:
     - 401
     - 429

@@ -1,4 +1,4 @@
-{{ magento_live_release_dir }}/var/log/*.log {
+{{ magento_live_release_dir }}/var/log/*.log {{ magento_live_release_dir }}/var/log/*/*.log {
     size 20M
     rotate 2
     create 0664 {{ magento_user }} {{ magento_group }}
