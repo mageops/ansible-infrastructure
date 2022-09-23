@@ -8,7 +8,17 @@
 
 - name: Enable collecting slow log
   set_fact:
-    aws_rds_param_group_params: "{{ aws_rds_param_group_params | combine({'slow_query_log': 1, 'long_query_time': aws_rds_slowlog_time}, recursive=True) }}"
+    aws_rds_param_group_params: |
+      {{ aws_rds_param_group_params | combine({
+        'slow_query_log': 1,
+        'long_query_time': aws_rds_slowlog_time,
+        'general_log': 1,
+        'log_output': 'FILE',
+        'log_queries_not_using_indexes': 0,
+        'log_slow_filter': 'filesort_on_disk,full_join,tmp_table_on_disk',
+        'log_slow_verbosity': 'query_plan,explain',
+        'log_slow_admin_statements': 0,
+      }, recursive=True) }}
     aws_rds_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports + [ 'slowquery' ] }}"
   when: aws_rds_slowlog_enabled
 
