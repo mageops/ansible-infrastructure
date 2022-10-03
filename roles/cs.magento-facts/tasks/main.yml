@@ -55,7 +55,6 @@
     magento_modules: "{{ magento_config_php_enabled_modules_result.stdout_lines }}"
 
 - name: Set magento version if not defined
-  when: magento_version is not defined
   block:
   - name: Set Magento community version
     when: magento_packages['magento/product-community-edition'] is defined
