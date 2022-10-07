@@ -51,6 +51,10 @@
     apply_immediately: yes
     wait: yes
 
+- name: Wait for AWS to acknowledge that rds upgrade is happening (workaround)
+  pause:
+    minutes: 1
+
 - name: Wait for active rds modifications to finish
   rds_instance_info:
     region: "{{ aws_region }}"
