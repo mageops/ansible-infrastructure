@@ -29,6 +29,8 @@ aws_rds_upgrade_path:
   mariadb:
     '10.2':
       '10.4': ['10.3', '10.4']
+    '10.3':
+      '10.4': ['10.4']
 
 # Temporary variables
 aws_rds_temporary_parameter_groups: []
