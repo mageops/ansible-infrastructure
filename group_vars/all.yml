@@ -481,6 +481,7 @@ aws_rds_param_group_params_default:
       log_bin_trust_function_creators: 1
       max_heap_table_size: 67108864
       tmp_table_size: 67108864
+      explicit_defaults_for_timestamp: 1
 
 # Parameters to tune MySQL configuration
 aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws_rds_param_group_params_extra | default({}), recursive=True) }}"
