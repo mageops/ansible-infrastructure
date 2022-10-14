@@ -72,6 +72,45 @@
       until: aws_rds_wait_finish_result.instances[0].db_instance_status == "available"
   when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].db_instance_class != aws_rds_instance_type
 
+
+# When we have known upgrade path:
+# we create temporary parameter group for specific db version
+# we upgrade database to next engine version
+# then we procees with usual rds provisioning - this will switch to normal parameter group
+# we remowe all created temporary parameter groups
+- name: Set upgrade plan
+  set_fact:
+    aws_rds_upgrade_plan: |
+      {{ aws_rds_upgrade_path[aws_rds_db_engine][
+        aws_rds_current.instances[0].engine_version.split('.')[0]
+        + "."
+        + aws_rds_current.instances[0].engine_version.split('.')[1]
+      ][aws_rds_db_engine_version] }}
+  when: |
+    aws_rds_upgrade_path[aws_rds_db_engine] is defined
+    and aws_rds_current.instances|length > 0
+    and aws_rds_upgrade_path[aws_rds_db_engine][
+      aws_rds_current.instances[0].engine_version.split('.')[0]
+      + "."
+      + aws_rds_current.instances[0].engine_version.split('.')[1]
+    ] is defined
+    and aws_rds_upgrade_path[aws_rds_db_engine][
+      aws_rds_current.instances[0].engine_version.split('.')[0]
+      + "."
+      + aws_rds_current.instances[0].engine_version.split('.')[1]
+    ][aws_rds_db_engine_version] is defined
+
+- name: Print upgrade plan
+  debug:
+    msg: |
+      Upgrade plan from {{ aws_rds_current.instances[0].engine_version }} to {{ aws_rds_db_engine_version }}
+        {{ aws_rds_current.instances[0].engine_version }} --> {{ " --> ".join(aws_rds_upgrade_plan) }}
+  when: aws_rds_upgrade_plan|length > 0
+
+- name: Upgrade MySQL/MariaDB RDS engine
+  include_tasks: upgrade_iteration.yml
+  loop: "{{ aws_rds_upgrade_plan }}"
+
 - name: Create MySQL/MariaDB RDS
   rds_instance:
     region: "{{ aws_region }}"
@@ -99,4 +138,12 @@
     performance_insights_retention_period: "{{ aws_rds_performance_insights_retention_period if aws_rds_performance_insights else omit }}"
     performance_insights_kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
     enable_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports }}"
+    apply_immediately: yes
     wait: yes
+
+- name: Remove temporary parameter groups used for engine upgrade
+  rds_param_group:
+    state: absent
+    name: "{{ item }}"
+    region: "{{ aws_region }}"
+  loop: "{{ aws_rds_temporary_parameter_groups }}"
