@@ -3,6 +3,7 @@
     name:
       - nodejs
       - yarn
+    state: latest
 
 - name: Install user-global NPM packages
   npm:

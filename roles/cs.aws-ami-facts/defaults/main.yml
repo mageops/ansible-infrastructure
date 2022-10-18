@@ -13,7 +13,8 @@ ami_facts_common_filters:
 # values for eu-central-1.
 # Find the latest CentOS ami ids here: https://www.centos.org/download/aws-images/
 ami_centos7_id:
-  eu-central-1: ami-08b6d44b4f6f7b279
+#  eu-central-1: ami-08b6d44b4f6f7b279 # original
+  eu-central-1: ami-0e4f9c05326f650df # cs-centos7-update-2022-08-01
 
 ami_base_system_image_id: "{{ ami_centos7_id[aws_region | default('eu-central-1')] }}"
 
@@ -26,11 +27,11 @@ ami_facts_app_node_tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
 ami_facts_app_node_force_id: ~
 
 ami_facts_app_node_base_filters: >-
-  {{ 
+  {{
       ami_facts_app_node_force_id | ternary(
         { 'image-id': ami_facts_app_node_force_id },
         {}
-      ) 
+      )
   }}
 
 ami_facts_app_node_filters: {}
