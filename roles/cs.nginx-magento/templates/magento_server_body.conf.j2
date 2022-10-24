@@ -70,7 +70,7 @@ location ~* ^/update($|/) {
 {% endif %}
 
 location ~* ^/sitemap\.xml {
-    rewrite ^/sitemap\.xml$ /media/$1 break;
+    rewrite ^/sitemap\.xml$ /media/sitemap.xml break;
 }
 
 
