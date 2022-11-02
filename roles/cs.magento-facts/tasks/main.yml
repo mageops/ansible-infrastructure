@@ -52,6 +52,12 @@
   become: "{{ _detect_magento_local | ternary(false, true) }}"
   when: _magento_config_php_exists.stat.exists
 
+- fail:
+    msg: |
+      composer.lock not found in {{ _magento_dir }}
+      on {{ _detect_magento_local | ternary('localhost', inventory_hostname) }}
+  when: magento_composer_lock_packages_result.stdout == ''
+
 - name: Set Magento facts
   set_fact:
     # List of bin/magento command names
