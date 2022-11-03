@@ -1,5 +1,5 @@
 - name: Install s3fs from RPM
-  yum:
+  dnf:
     name: s3fs-fuse
     state: present
 

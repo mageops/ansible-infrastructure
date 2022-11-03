@@ -1,5 +1,5 @@
 - name: Install elasticsearch-exporter
-  yum:
+  dnf:
     name: elasticsearch-exporter
     state: latest
 

@@ -1,11 +1,11 @@
 - name: Install new relic repo
-  yum:
+  dnf:
     name: "{{ new_relic_repo_url }}"
     state: present
     disable_gpg_check: true
 
 - name: Install new relic packages
-  yum:
+  dnf:
     name: "{{ new_relic_packages }}"
     state: latest
 

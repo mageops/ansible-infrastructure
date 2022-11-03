@@ -1,5 +1,5 @@
 - name: Install AWS Exception Forwarder package
-  yum:
+  dnf:
     name: "{{ aws_cloudwatch_exception_forwarder_package }}"
 
 - name: Set up magento exception report pushing cronjob

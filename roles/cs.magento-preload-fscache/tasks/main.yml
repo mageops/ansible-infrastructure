@@ -1,5 +1,5 @@
 # TODO: Remove once we're made sure the old `magento-preload.service` is finally gone
-- name: Make sure the previous version of the service is disabled and stopped 
+- name: Make sure the previous version of the service is disabled and stopped
   shell: >-
     systemctl --no-legend --no-pager --plain \
         list-unit-files magento-preload.service \
@@ -13,7 +13,7 @@
   failed_when: no
 
 - name: Install vmtouch for preloading fs cache
-  yum:
+  dnf:
     name: vmtouch
     state: latest
 

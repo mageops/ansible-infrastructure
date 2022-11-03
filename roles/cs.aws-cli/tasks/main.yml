@@ -1,12 +1,11 @@
-- name: Make sure pip aws is not installed
-  pip:
-    name: awscli
-    state: absent
+# - name: Make sure pip aws is not installed
+#   pip:
+#     name: awscli
+#     state: absent
 
 - name: Install awscli
-  yum:
+  dnf:
     name: awscli
-    enablerepo: mageops
     state: latest
 
 - name: Ensure default AWS Region is set

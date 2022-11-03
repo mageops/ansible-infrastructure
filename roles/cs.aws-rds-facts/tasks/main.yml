@@ -1,5 +1,5 @@
 - name: Get list of RDS instances
-  rds_instance_facts:
+  community.aws.rds_instance_info:
     region: "{{ aws_region }}"
   register: rds_instances_info
 

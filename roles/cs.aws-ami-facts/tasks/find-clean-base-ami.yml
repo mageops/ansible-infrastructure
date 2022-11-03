@@ -1,5 +1,5 @@
 - name: Find clean base AMIs
-  ec2_ami_facts:
+  amazon.aws.ec2_ami_info:
     region: "{{ aws_region }}"
     filters: "{{ ami_facts_common_filters | combine(ami_facts_clean_base_filters) }}"
   register: ami_clean_base_facts
@@ -30,5 +30,5 @@
       ({{ aws_ami_clean_base_location }})
 
       --- Details ---
-      
+
       {{ aws_ami_clean_base_info | to_nice_yaml }}

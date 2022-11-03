@@ -25,7 +25,7 @@ export PATH
 name=varnish-purge-proxy
 program={{ varnish_pp_bin.path }}
 args='aws {{ varnish_pp_instance_tags }} --listen={{ varnish_pp_listen_address }} --destport={{ varnish_pp_listen_port }} --port={{ varnish_pp_listen_port }}'
-pidfile="/var/run/$name.pid"
+pidfile="/run/$name.pid"
 
 [ -r /etc/default/$name ] && . /etc/default/$name
 [ -r /etc/sysconfig/$name ] && . /etc/sysconfig/$name

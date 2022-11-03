@@ -172,7 +172,7 @@ varnish_media_cors_max_age: 2678400
 
 varnish_vcl_conf: /etc/varnish/default.vcl
 varnish_backends_vcl: /etc/varnish/backends.vcl
-varnish_run_dir: /var/run/varnish
+varnish_run_dir: /run/varnish
 varnish_pid_file: "{{ varnish_run_dir }}/varnish.pid"
 
 varnish_syscfg_limit_nofile: 131072

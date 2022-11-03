@@ -1,5 +1,5 @@
 - name: Ensure RabbitMQ repo release package is installed and up-to-date
-  yum:
+  dnf:
     name: "{{ repo_rabbitmq_package_name }}"
 
 - name: Ensure chosen rabbitmq repo variants are enabled
@@ -14,4 +14,3 @@
   loop: "{{ repo_rabbitmq_variants }}"
   loop_control:
     loop_var: variant
-

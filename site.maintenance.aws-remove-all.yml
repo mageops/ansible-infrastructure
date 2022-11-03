@@ -1,10 +1,18 @@
 - hosts: localhost
   connection: local
-  roles:
-    - role: cs.aws-region-facts
-    - role: cs.aws-rds-facts
-    - role: cs.aws-node-facts
-    - role: cs.aws-autoscaling-facts
+  pre_tasks:
+    - name: Get VPC data
+      block:
+        - name: Get VPC data
+          amazon.aws.ec2_vpc_net_info:
+            region: "{{ aws_region }}"
+            filters:
+              "tag:Project": "{{ mageops_project }}"
+              "tag:Environment": "{{ mageops_environment }}"
+          register: _aws_vpc
+        - name: Set VPC ID
+          set_fact:
+            _aws_vpc_id: "{{ _aws_vpc | json_query('vpcs[0].vpc_id')}}"
 
 
   tasks:
@@ -31,11 +39,35 @@
       when: remove_ec2
 
     - name: Remove RDS
-      rds_instance:
-        state: absent
-        region: "{{ aws_region }}"
-        db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-        skip_final_snapshot: yes
+      block:
+        - name: Get list of RDS instances
+          community.aws.rds_instance_info:
+            region: "{{ aws_region }}"
+          register: _rds_instances_info
+        - name: Set list of rds instances
+          set_fact:
+            _aws_rds_instances: "{{ _rds_instances_info.instances }}"
+        - name: Filter rds instance list by tags
+          set_fact:
+            _aws_rds_instances: "{{ _aws_rds_instances | json_query(rds_instances_tag_filter_query) | default([]) }}"
+          vars:
+            rds_instances_tag_filter_query: "[?{% for k, v in aws_rds_facts_mysql_tags.items() -%}tags.{{ k }} == '{{ v }}'{% if not loop.last %} && {% endif %}{% endfor %}]"
+        - name: Warn when more than one instance has been found
+          debug:
+            msg: |
+              Warning! More than one matching rds instance found, using first one.
+              Found: {{ _aws_rds_instances | map(attribute='db_instance_identifier') | join(', ') }}
+          when: _aws_rds_instances | length > 1
+        - name: Set facts about project's rds instance
+          set_fact:
+            aws_rds_instance_id: "{{ (_aws_rds_instances | first).db_instance_identifier }}"
+          when: _aws_rds_instances | length > 0
+        - name: Terminate RDS instance
+          when: _aws_rds_instance_id == aws_rds_instance_name
+          rds:
+            command: delete
+            instance_name: "{{ aws_rds_instance_name }}"
+            # snapshot: "{{ aws_rds_instance_name }}-snapshot"
       when: remove_rds
 
     - name: Remove Volumes
@@ -86,7 +118,7 @@
     - name: Remove Security Groups
       block:
         - name: Get list of Security Groups for VPC
-          ec2_group_facts:
+          amazon.aws.ec2_group_info:
             region: "{{ aws_region }}"
             filters:
               "vpc-id": "{{ _aws_vpc_id }}"

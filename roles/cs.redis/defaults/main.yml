@@ -1,7 +1,3 @@
-# Install stable redis 6.x from remi-safe repo instead of the 3.x version
-# provided by the standard CentOS 6 epel repository.
-redis_enable_v6: no
-
 # Set it if you want to host multiple redis instances on the same server.
 # This is useful if you want separately-configurable databases (for example with different maxmemory policies)
 # on the same server. Usually you'll want to separate session and cache storage, so cache does not evict sessions.
@@ -11,7 +7,7 @@ redis_package: redis
 redis_daemon: "redis{% if redis_instance_name %}-{{ redis_instance_name }}{% endif %}"
 
 redis_conf_path: "/etc/{{ redis_daemon }}.conf"
-redis_piddir: "/var/run/redis"
+redis_piddir: "/run/redis"
 redis_pidfile_path: "{{ redis_piddir }}/{{ redis_daemon }}.pid"
 
 redis_port: 6379

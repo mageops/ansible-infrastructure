@@ -7,7 +7,7 @@
 #
 
 - name: Install pio-worker rpm
-  yum:
+  dnf:
     name: "{{ pio_package_url }}"
     state: present
     disable_gpg_check: true

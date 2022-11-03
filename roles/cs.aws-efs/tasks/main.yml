@@ -39,7 +39,7 @@
           --lifecycle-policies '{{ efs_lifecycle_policies | to_json }}'
 
 - name: Install AWS EFS utils
-  yum:
+  dnf:
     name:
         - stunnel
         - nfs-utils

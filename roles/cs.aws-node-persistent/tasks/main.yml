@@ -60,14 +60,13 @@
     name: cs.aws-ebs-vol
   vars:
     aws_ebs_volume_modify_ids: >-
-      {{ ( aws_persistent_ec2.instances + aws_persistent_ec2.tagged_instances ) 
-          | map(attribute='block_device_mapping') 
-          | map('dict2items') 
-          | flatten 
+      {{ ( aws_persistent_ec2.instances + aws_persistent_ec2.tagged_instances )
+          | map(attribute='block_device_mapping')
+          | map('dict2items')
+          | flatten
           | map(attribute='value')
           | map(attribute='volume_id')
-          | list
-          | to_nice_json }}
+          | list }}
     aws_ebs_volume_modify_type: "{{ aws_persistent_node_ebs_volume_type }}"
     aws_ebs_volume_modify_iops: "{{ aws_persistent_node_ebs_gp3_iops }}"
     aws_ebs_volume_modify_throughput: "{{ aws_persistent_node_ebs_gp3_throughput }}"

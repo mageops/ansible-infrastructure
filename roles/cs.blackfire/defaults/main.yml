@@ -6,5 +6,5 @@ blackfire_deprecated_packages:
 blackfire_server_id: ""
 blackfire_server_token: ""
 blackfire_install: yes
-blackfire_agent_socket: "unix:///var/run/blackfire/agent.sock"
+blackfire_agent_socket: "unix:///run/blackfire/agent.sock"
 blackfire_enable_apm: no

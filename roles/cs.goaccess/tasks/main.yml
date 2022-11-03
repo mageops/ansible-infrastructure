@@ -14,7 +14,7 @@
     state: directory
 
 - name: Ensure goaccess is installed
-  yum:
+  dnf:
     name: goaccess
     state: present
 

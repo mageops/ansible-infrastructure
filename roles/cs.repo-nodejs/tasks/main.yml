@@ -1,5 +1,5 @@
 - name: Ensure nodejs repo release package is installed and up-to-date
-  yum:
+  dnf:
     name: "{{ repo_nodejs_package_name }}"
     state: latest
 

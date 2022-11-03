@@ -1,4 +1,4 @@
 containerized_tasks_internal_workdir_default: "/workdir"
 containerized_tasks_packages:
   - docker
-  - python-docker-py
+  - python3-docker

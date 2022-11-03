@@ -10,7 +10,7 @@
         state: mounted
 
     - name: Install development tools
-      yum:
+      dnf:
         name:
             - "dkms"
             - "@Development tools"

@@ -1,5 +1,5 @@
 - name: Ensure MySQL Community repo release package is installed and up-to-date
-  yum:
+  dnf:
     name: "{{ repo_mysql_package_name }}"
 
 - name: Ensure chosen mysql repo variants are enabled
@@ -14,4 +14,3 @@
   loop: "{{ repo_mysql_variants }}"
   loop_control:
     loop_var: variant
-

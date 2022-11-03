@@ -8,7 +8,7 @@ nginx_magento_mode: "{{ magento_mode | default('production') }}"
 nginx_fcgi_upstream_conf_file: "{{ nginx_confd_dir }}/000-php-fpm-upstream.conf"
 nginx_fcgi_read_timeout: '600s'
 nginx_fcgi_connect_timeout: '600s'
-nginx_fcgi_backend_socket: '/var/run/php-fpm/backend.sock'
+nginx_fcgi_backend_socket: '/run/php-fpm/backend.sock'
 nginx_fcgi_backend_debug_socket: "{{ nginx_fcgi_backend_socket }}"
 
 #Extracted to an variable so dev envs can have this low, and prod - 1 year.
