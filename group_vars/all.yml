@@ -932,6 +932,9 @@ magento_cron_http: "{{ not aws_use }}"
 aws_magento_cron_enabled: "{{ aws_use }}"
 magento_cron_observer_relative_path: vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 
+aws_magento_cron_crons_extra: []
+aws_magento_cron_crons_tpl: []
+aws_magento_cron_crons: "{{ (aws_magento_cron_crons_tpl | flatten) + aws_magento_cron_crons_extra }}"
 
 # ----------------------------------
 # --------  Magento Deploy  --------
