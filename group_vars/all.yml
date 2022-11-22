@@ -220,9 +220,9 @@ aws_tags_kms_database:
 # --------  AMI  --------
 # -----------------------
 
-# AMI Name search pattern matching official CentOS 7 Marketplace AMI
+# AMI Name search pattern matching official Rocky linux 9 Marketplace AMI
 # Warning! You need to be subscribed to it first!
-aws_ami_base_marketplace_name: "*b7ee8a69-ee97-4a49-9e68-afaee216db2e*"
+aws_ami_base_marketplace_name: "Rocky-9-EC2-*"
 
 # Whether to kill previously created builder or reuse it on next run
 aws_ami_build_force_fresh_builder: no

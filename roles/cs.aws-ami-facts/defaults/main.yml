@@ -1,25 +1,33 @@
+ami_facts_instance: ""
+ami_facts_architecture: "{{ ami_facts_architecture_map[ami_facts_instance.split('.')[0]] }}"
+
+ami_facts_architecture_map:
+  t3: x86_64
+  m6a: x86_64
+  m6i: x86_64
+  m6g: arm64
+  t4g: arm64
+  c6g: arm64
+  c5: x86_64
+  c5a: x86_64
+  c6i: x86_64
+  c6a: x86_64
+  c7g: arm64
+  r6a: x86_64
+  r6i: x86_64
+  r6g: arm64
+  r5: x86_64
+  r5a: x86_64
+  r5b: x86_64
+
 ami_facts_common_filters:
   state: "available"
-  architecture: "x86_64"
-
-# Deprecated - CentOS no longer updates the Marketplace AMIs
-# ami_facts_clean_base_filters:
-#   name: "{{ aws_ami_base_marketplace_name }}"
-#   is-public: "true"
-#   owner-alias: "aws-marketplace"
-
-# The image id of CentOS AWS images needs to be hardcoded and manually update now.
-# Warning! The ids are different for each region, for no we use a hardcoded
-# values for eu-central-1.
-# Find the latest CentOS ami ids here: https://www.centos.org/download/aws-images/
-ami_centos7_id:
-#  eu-central-1: ami-08b6d44b4f6f7b279 # original
-  eu-central-1: ami-06a38f9c5f75d09bd # rocky 9.0.20220706
-
-ami_base_system_image_id: "{{ ami_centos7_id[aws_region | default('eu-central-1')] }}"
+  architecture: "{{ ami_facts_architecture }}"
 
 ami_facts_clean_base_filters:
-  image-id: "{{ ami_base_system_image_id }}"
+  name: "{{ aws_ami_base_marketplace_name }}"
+  is-public: "true"
+  owner-alias: "aws-marketplace"
 
 ami_facts_app_node_tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
 
@@ -35,3 +43,4 @@ ami_facts_app_node_base_filters: >-
   }}
 
 ami_facts_app_node_filters: {}
+aws_ami_clean_base_info: {}
