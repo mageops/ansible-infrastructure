@@ -49,8 +49,12 @@ main::main() {
         main::is_feature_flag_set "$feature" || exit 1
     ;;
     apply_features)
-    if [ $# != 1 ];then main::help; fi
+        if [ $# != 1 ];then main::help; fi
         main::apply_features
+    ;;
+    clear_opcache)
+        if [ $# != 1 ];then main::help; fi
+        main::clear_opcache
     ;;
     *) main::help ;;
     esac
@@ -123,6 +127,10 @@ main::read_feature_flag() {
 
 main::apply_features() {
     features::update_host_state
+}
+
+main::clear_opcache() {
+    mageops::clear_php_opcache
 }
 
 main::help() {

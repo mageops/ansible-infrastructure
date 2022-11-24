@@ -645,6 +645,7 @@ mageops_app_is_magesuite: yes
 
 mageops_app_user: "{{ mageops_app_type }}"
 mageops_app_user_home: "/home/{{ mageops_app_user }}"
+php_opcache_user_home: "{{ mageops_app_user_home }}"
 mageops_app_group: "{{ mageops_app_user }}"
 mageops_app_uid: 1500
 mageops_app_gid: "{{ mageops_app_uid }}"
@@ -652,6 +653,17 @@ mageops_app_umask: '0022'
 
 # Upgrade kernel to kernel from elrepo
 mageops_upgrade_kernel: no
+
+# Opcache
+mageops_php_file_cache_web: no
+php_opcache_web_file_cache_enable: "{{ mageops_php_file_cache_web }}"
+php_opcache_precompile_script: "{{ php_opcache_precompile_script_dir }}/compile_opcache.php"
+php_opcache_precompile_path: /compile_opcache.php
+php_opcache_precompile_script_dir: /var/www/opcache
+php_opcache_prewarm_dirs:
+  - "{{ magento_live_release_dir }}/app"
+  - "{{ magento_live_release_dir }}/generated"
+  - "{{ magento_live_release_dir }}/vendor"
 
 # MySQL instance shall be provisioned? (or provide host)
 mageops_mysql_create: yes
