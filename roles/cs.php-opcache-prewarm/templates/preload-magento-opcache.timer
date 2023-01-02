@@ -1,0 +1,8 @@
+[Unit]
+Description=Run opcache preload on boot
+
+[Timer]
+OnBootSec=20s
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,3 @@
+centos_update_kernel_kernel_name: kernel-lt
+centos_update_kernel_disable_mitigations: no
+centos_update_kernel_network_tune: yes

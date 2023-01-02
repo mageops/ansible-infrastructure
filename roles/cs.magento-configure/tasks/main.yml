@@ -12,14 +12,14 @@
     - include_tasks: 035-clean-old-static-content.yml
     - include_tasks: 037-wait-for-services.yml
     - include_tasks: 040-install-magento.yml
-    # Load facts after install
-    - include_role:
-        name: cs.magento-facts
-      vars:
-        magento_code_directory: "{{ magento_release_dir }}"
     - name: Set up new code
       block:
         - include_tasks: 070-setup-modules.yml
+        # Load facts after install
+        - include_role:
+            name: cs.magento-facts
+          vars:
+            magento_code_directory: "{{ magento_release_dir }}"
         - include_tasks: 075-compile-di.yml
         - include_tasks: 076-optimize-autoload.yml
         - include_tasks: 080-core-config.yml

@@ -51,7 +51,7 @@ feature::update() {
     local config
 
     echo "Setting newrelic apm to $value"
-    sed -i -e "s/newrelic.enabled[[:space:]]=[[:space:]].*/newrelic.enabled = ${value}" /etc/php.d/newrelic.ini
+    sed -i -e "s/newrelic.enabled[[:space:]]=[[:space:]].*/newrelic.enabled = ${value}/" /etc/php.d/newrelic.ini
     echo "Reloading php-fpm"
     systemctl reload php-fpm
 }

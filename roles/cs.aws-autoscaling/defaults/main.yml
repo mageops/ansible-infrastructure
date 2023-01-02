@@ -54,3 +54,4 @@ aws_asg_instance_refresh_cli_args_base: [
     --no-paginate,
 ]
 
+autoscaling_asg_enabled: true

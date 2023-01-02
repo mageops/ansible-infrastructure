@@ -22,6 +22,9 @@
       versionlock_packages: "{{ versionlock_persistent_packages + versionlock_persistent_packages_extra }}"
       versionlock_ban_packages: "{{ versionlock_persistent_ban_packages + versionlock_persistent_ban_packages_extra }}"
     - role: pinkeen.selinux-disable
+    - role: cs.centos-update-kernel
+      when: mageops_upgrade_kernel
+    - role: cs.tuned
     - role: cs.swap
     - role: cs.earlyoom
       when: mageops_earlyoom_enable

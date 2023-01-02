@@ -1,0 +1,63 @@
+- name: Create Launch Configuration
+  ec2_lc:
+    state: present
+    name: "{{ autoscaling_launch_configuration_name }}"
+    region: "{{ aws_region }}"
+    assign_public_ip: "{{ autoscaling_assign_public_ip }}"
+    instance_type: "{{ autoscaling_instance_type }}"
+    image_id: "{{ autoscaling_instance_ami_id }}"
+    security_groups: "{{ autoscaling_instance_security_groups }}"
+    instance_profile_name: "{{ autoscaling_instance_iam_role }}"
+    key_name: "{{ aws_ec2_ssh_key_name }}"
+    instance_monitoring: False
+    user_data: "{{ aws_ec2_instance_user_data }}"
+    # This has zero costs on current-gen instances
+    ebs_optimized: yes
+  register: launch_configuration
+  vars:
+    aws_ec2_user_launch_script: "{{ autoscaling_instance_start_script }}"
+
+- name: Create AutoScaling Group
+  ec2_asg:
+    state: present
+    name: "{{ autoscaling_asg_name }}"
+    region: "{{ aws_region }}"
+    availability_zones: "{{ aws_app_asg_availability_zones | join(',') }}"
+    launch_config_name: "{{ launch_configuration.name }}"
+    load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
+    min_size: "{{ autoscaling_asg_min_size }}"
+    max_size: "{{ autoscaling_asg_max_size }}"
+    desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
+    vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
+    default_cooldown: "{{ autoscaling_asg_cooldown }}"
+    # Grace period for Healthcheck  tatus when new nodes are going up.
+    # The 300s default we had is waaaay too long for our setup and makes the
+    # deploy much, much longer (at least 300s long).
+    health_check_period: "{{ autoscaling_healthcheck_grace_period }}"
+    termination_policies: "{{ autoscaling_asg_termination_policies }}"
+    tags: "{{ aws_tags_default | combine(asg_name_tags, aws_tags_trait_immutable, autoscaling_instance_tags) | dict_to_tag_list }}"
+    # This ansible module does not handle instance replacement properly
+    # so we just update the ASG configuration here and will perform the
+    # replacement via AWS API in the next steps.
+    replace_instances: []
+  vars:
+    asg_name_tags:
+      - Name: "{{ autoscaling_asg_name }}"
+  register: _aws_asg
+
+- name: Perform Rolling Instance Refresh
+  include_tasks: refresh-instances.yml
+  when: >-
+    _aws_asg is changed
+      and autoscaling_asg_desired_capacity > 0
+
+- name: Create ASG Termination Lifecycle Hook
+  ec2_asg_lifecycle_hook:
+    state: present
+    region: "{{ aws_region }}"
+    autoscaling_group_name: "{{ autoscaling_asg_name }}"
+    lifecycle_hook_name: "{{ autoscaling_webnodedown_hook_name }}"
+    transition: "autoscaling:EC2_INSTANCE_TERMINATING"
+    heartbeat_timeout: 120
+    default_result: CONTINUE
+  when: autoscaling_webnodedown_hook_create
