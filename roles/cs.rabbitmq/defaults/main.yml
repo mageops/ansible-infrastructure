@@ -24,3 +24,4 @@ rabbitmq_users: []
 
 # See `vm_memory_high_watermark.relative` option.
 rabbitmq_highmem_relative: 0.3
+rabbitmq_extra_config: {}
