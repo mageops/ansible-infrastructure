@@ -43,7 +43,7 @@
 
 - name: Get enabled Magento modules
   shell: >-
-      php -r 'echo(implode("\n", array_keys(array_filter((include("app/etc/config.php"))["modules"]))));'
+      php -r 'echo(implode("\n", array_keys(array_filter((include("app/etc/config.php"))["modules"] ?? []))));'
   args:
     chdir: "{{ _magento_dir }}"
   register: magento_config_php_enabled_modules_result
