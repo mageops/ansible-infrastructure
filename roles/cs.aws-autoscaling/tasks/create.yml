@@ -10,8 +10,8 @@
     security_groups: "{{ autoscaling_instance_security_groups }}"
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
-    monitoring:
-     - enabled : False
+    monitoring
+      enabled: no
     user_data: "{{ aws_ec2_instance_user_data }}"
     # This has zero costs on current-gen instances
     ebs_optimized: true
@@ -24,7 +24,7 @@
     region: "{{ aws_region }}"
     availability_zones: "{{ aws_app_asg_availability_zones | join(',') }}"
     launch_template:
-      launch_template_name: "{{ autoscaling_launch_template_name }}" 
+      launch_template_name: "{{ autoscaling_launch_template_name }}"
     launch_config_name: "{{ launch_configuration.name }}"
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
