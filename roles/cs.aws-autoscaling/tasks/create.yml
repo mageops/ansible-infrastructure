@@ -25,7 +25,6 @@
     availability_zones: "{{ aws_app_asg_availability_zones | join(',') }}"
     launch_template:
       launch_template_name: "{{ autoscaling_launch_template_name }}"
-    launch_config_name: "{{ launch_configuration.name }}"
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
     max_size: "{{ autoscaling_asg_max_size }}"
