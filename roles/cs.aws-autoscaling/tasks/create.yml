@@ -10,7 +10,7 @@
     security_groups: "{{ autoscaling_instance_security_groups }}"
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
-    monitoring
+    monitoring:
       enabled: no
     user_data: "{{ aws_ec2_instance_user_data }}"
     # This has zero costs on current-gen instances
