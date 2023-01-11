@@ -1,29 +1,30 @@
-- name: Create Launch Configuration
-  ec2_lc:
+- name: Create Launch Template Configuration
+  ec2_launch_template:
     state: present
-    name: "{{ autoscaling_launch_configuration_name }}"
+    name: "{{ autoscaling_launch_template_name }}"
     region: "{{ aws_region }}"
-    assign_public_ip: "{{ autoscaling_assign_public_ip }}"
-    instance_type: "{{ autoscaling_instance_type }}"
     image_id: "{{ autoscaling_instance_ami_id }}"
-    security_groups: "{{ autoscaling_instance_security_groups }}"
-    instance_profile_name: "{{ autoscaling_instance_iam_role }}"
+    instance_type: "{{ autoscaling_instance_type }}"
+    iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
-    instance_monitoring: False
-    user_data: "{{ aws_ec2_instance_user_data }}"
+    network_interfaces:
+      - groups: "{{ autoscaling_instance_security_groups }}"
+        associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
+        device_index: 0
+        delete_on_termination: yes
+    user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
+    tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) }}"
     # This has zero costs on current-gen instances
-    ebs_optimized: yes
-  register: launch_configuration
-  vars:
-    aws_ec2_user_launch_script: "{{ autoscaling_instance_start_script }}"
-
+    ebs_optimized: true
+    
 - name: Create AutoScaling Group
   ec2_asg:
     state: present
     name: "{{ autoscaling_asg_name }}"
     region: "{{ aws_region }}"
     availability_zones: "{{ aws_app_asg_availability_zones | join(',') }}"
-    launch_config_name: "{{ launch_configuration.name }}"
+    launch_template:
+      launch_template_name: "{{ autoscaling_launch_template_name }}"
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
     max_size: "{{ autoscaling_asg_max_size }}"
