@@ -1,20 +1,20 @@
 - name: Create Launch Template Configuration
-   ec2_launch_template:
-     state: present
-     name: "{{ autoscaling_launch_template_name }}"
-     region: "{{ aws_region }}"
-     network_interfaces:
-      - associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
-     instance_type: "{{ autoscaling_instance_type }}"
-     image_id: "{{ autoscaling_instance_ami_id }}"
-     security_groups: "{{ autoscaling_instance_security_groups }}"
-     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
-     key_name: "{{ aws_ec2_ssh_key_name }}"
-     monitoring:
-      - enabled : False
-     user_data: "{{ aws_ec2_instance_user_data }}"
-     # This has zero costs on current-gen instances
-     ebs_optimized: true
+  ec2_launch_template:
+    state: present
+    name: "{{ autoscaling_launch_template_name }}"
+    region: "{{ aws_region }}"
+    network_interfaces:
+     - associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
+    instance_type: "{{ autoscaling_instance_type }}"
+    image_id: "{{ autoscaling_instance_ami_id }}"
+    security_groups: "{{ autoscaling_instance_security_groups }}"
+    iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
+    key_name: "{{ aws_ec2_ssh_key_name }}"
+    monitoring:
+     - enabled : False
+    user_data: "{{ aws_ec2_instance_user_data }}"
+    # This has zero costs on current-gen instances
+    ebs_optimized: true
 
 
 - name: Create AutoScaling Group
