@@ -4,7 +4,7 @@
     name: "{{ autoscaling_launch_template_name }}"
     region: "{{ aws_region }}"
     network_interfaces:
-      - DeviceIndex: 0
+      - DeviceIndex: AssociatePublicIpAddress
         associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
         Groups: "{{ autoscaling_instance_security_groups }}"
     instance_type: "{{ autoscaling_instance_type }}"
