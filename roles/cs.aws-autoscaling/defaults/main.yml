@@ -1,7 +1,7 @@
 autoscaling_asg_cooldown: 300
 autoscaling_webnodedown_hook_create: no
 autoscaling_instance_start_script: ''
-autoscaling_launch_configuration_name: "{{ autoscaling_asg_name }}-{{ ansible_date_time.epoch }}"
+autoscaling_launch_template_name: "{{ autoscaling_asg_name }}-{{ ansible_date_time.epoch }}"
 autoscaling_asg_replace_batch_size: 1
 autoscaling_instance_tags: {}
 autoscaling_asg_min_size: 1

@@ -1,32 +1,10 @@
-- name: Get available Lauch Configurations
-  ec2_lc_facts:
-    region: "{{ aws_region }}"
-    sort: created_time
-    sort_order: descending
-  register: _aws_ec2_cleanup_all_lcs
-
-- name: Set list of Launch Configurations for env
-  set_fact:
-    _aws_ec2_cleanup_env_lcs: "{{ _aws_ec2_cleanup_all_lcs | json_query(query) }}"
-  vars:
-    query: "launch_configurations[?key_name=='{{ aws_ec2_ssh_key_name }}']"
-
-# We keep X lc's of each type
-- name: Set list of Launch Configurations to keep
-  set_fact:
-    # to_json | from_json is a fix for https://github.com/ansible/ansible/issues/27299
-    _aws_ec2_cleanup_lcs_to_keep: "{{ _aws_ec2_cleanup_lcs_to_keep | default([]) + _aws_ec2_cleanup_env_lcs | to_json | from_json | json_query(query) }}"
-  vars:
-    query: "[?starts_with(launch_configuration_name, '{{ item }}')] | [:{{ aws_ec2_cleanup_lcs_to_keep }}]"
-  with_items: "{{ aws_ec2_cleanup_lc_name_prefixes }}"
 
 - name: Set list of AMI/LC ids to_keep
   set_fact:
     _aws_ec2_cleanup_ami_ids_to_keep: "{{ _aws_ec2_cleanup_lcs_to_keep | map(attribute='image_id')|list | unique }}"
-    _aws_ec2_cleanup_lc_ids_to_keep: "{{ _aws_ec2_cleanup_lcs_to_keep | map(attribute='launch_configuration_name')|list | unique }}"
 
 - debug:
-    msg: "Keeping {{ _aws_ec2_cleanup_lc_ids_to_keep | count }} LCs: {{ _aws_ec2_cleanup_lc_ids_to_keep | join(', ') }}"
+    msg: "Keeping {{ _aws_ec2_cleanup_lc_ids_to_keep | count }}"
 
 - debug:
     msg: "Keeping {{ _aws_ec2_cleanup_ami_ids_to_keep | count }} AMIs: {{ _aws_ec2_cleanup_ami_ids_to_keep | join(', ') }}"
@@ -39,14 +17,6 @@
   vars:
     aws_tags_role_app_filter: "{{ aws_tags_role_app | prefix_keys('tag:') }}"
   register: _aws_ec2_cleanup_env_amis
-
-- name: "Remove Launch Configurations not longer required"
-  ec2_lc:
-     region: "{{ aws_region }}"
-     state: absent
-     name: "{{ item.launch_configuration_name }}"
-  when: item.launch_configuration_name not in _aws_ec2_cleanup_lc_ids_to_keep
-  with_items: "{{ _aws_ec2_cleanup_env_lcs }}"
 
 - name: "Remove AMIs not longer required"
   ec2_ami:
