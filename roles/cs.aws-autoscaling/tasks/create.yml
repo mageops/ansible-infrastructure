@@ -12,7 +12,7 @@
     key_name: "{{ aws_ec2_ssh_key_name }}"
     monitoring:
       enabled: no
-    user_data: "{{ aws_ec2_instance_user_data }}"
+    user_data: "{{ aws_ec2_instance_user_data | b64code }}"
     # This has zero costs on current-gen instances
     ebs_optimized: true
 
