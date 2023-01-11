@@ -1,2 +1,3 @@
 aws_ec2_cleanup_lcs_to_keep: 10
 aws_ec2_cleanup_lc_name_prefixes: []
+autoscaling_launch_template_name: "{{ autoscaling_asg_name }}"
