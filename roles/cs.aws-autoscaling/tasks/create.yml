@@ -1,4 +1,4 @@
-- name: Create Launch Configuration
+- name: Create Launch Template Configuration
    ec2_launch_template:
      state: present
      name: "{{ autoscaling_launch_template_name }}"
@@ -23,6 +23,8 @@
     name: "{{ autoscaling_asg_name }}"
     region: "{{ aws_region }}"
     availability_zones: "{{ aws_app_asg_availability_zones | join(',') }}"
+    launch_template:
+      launch_template_name: "{{ autoscaling_launch_template_name }}" 
     launch_config_name: "{{ launch_configuration.name }}"
     load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
