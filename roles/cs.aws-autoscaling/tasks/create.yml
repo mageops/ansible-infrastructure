@@ -9,9 +9,9 @@
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
     network_interfaces:
-      - groups: "{{ autoscaling_instance_security_groups }}"
-        associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
-        device_index: 0
+      groups: "{{ autoscaling_instance_security_groups }}"
+      associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
+      device_index: 0
     monitoring:
       enabled: no
     user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
