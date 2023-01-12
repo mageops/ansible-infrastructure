@@ -4,6 +4,7 @@
     name: "{{ autoscaling_launch_template_name }}"
     region: "{{ aws_region }}"
     image_id: "{{ autoscaling_instance_ami_id }}"
+    instance_type: "{{ autoscaling_instance_type }}"
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
     network_interfaces:
@@ -12,7 +13,7 @@
         device_index: 0
         delete_on_termination: yes
     user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
-    #tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) | dict_to_tag_list }}"
+    tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) }}"
 
 
 - name: Create AutoScaling Group
