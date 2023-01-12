@@ -5,7 +5,7 @@
     region: "{{ aws_region }}"
     instance_type: "{{ autoscaling_instance_type }}"
     image_id: "{{ autoscaling_instance_ami_id }}"
-    security_groups: "{{ autoscaling_instance_security_groups }}"
+    security_group_ids: "{{ autoscaling_instance_security_groups }}"
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
     monitoring:
@@ -27,7 +27,7 @@
     min_size: "{{ autoscaling_asg_min_size }}"
     max_size: "{{ autoscaling_asg_max_size }}"
     desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
-    #vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
+    vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
     # Grace period for Healthcheck  tatus when new nodes are going up.
     # The 300s default we had is waaaay too long for our setup and makes the
