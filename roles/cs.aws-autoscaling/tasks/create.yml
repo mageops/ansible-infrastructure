@@ -11,7 +11,7 @@
     network_interfaces:
       - associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
       - groups: "{{ autoscaling_instance_security_groups }}"
-      - device_index: 0
+      - device_index: 1
     monitoring:
       enabled: no
     user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
