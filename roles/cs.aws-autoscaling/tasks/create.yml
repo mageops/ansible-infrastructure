@@ -3,20 +3,16 @@
     state: present
     name: "{{ autoscaling_launch_template_name }}"
     region: "{{ aws_region }}"
-    instance_type: "{{ autoscaling_instance_type }}"
     image_id: "{{ autoscaling_instance_ami_id }}"
-    security_group_ids: "{{ autoscaling_instance_security_groups }}"
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
     network_interfaces:
-      - groups: "{{ autoscaling_instance_security_groups | split(',') }}"
+      - groups: "{{ autoscaling_instance_security_groups }}"
         associate_public_ip_address: "{{ autoscaling_assign_public_ip }}"
         device_index: 0
-    monitoring:
-      enabled:
+        delete_on_termination: yes
     user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
-    # This has zero costs on current-gen instances
-    ebs_optimized: true
+    tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) | dict_to_tag_list }}"
 
 
 - name: Create AutoScaling Group
