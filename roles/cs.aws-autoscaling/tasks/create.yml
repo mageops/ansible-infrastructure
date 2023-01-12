@@ -12,7 +12,7 @@
         device_index: 0
         delete_on_termination: yes
     user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
-    tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) | dict_to_tag_list }}"
+    #tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) | dict_to_tag_list }}"
 
 
 - name: Create AutoScaling Group
