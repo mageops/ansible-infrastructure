@@ -9,7 +9,7 @@
         device_index: 0
     instance_type: "{{ autoscaling_instance_type }}"
     image_id: "{{ autoscaling_instance_ami_id }}"
-    security_groups: "{{ autoscaling_instance_security_groups }}"
+    security_groups_ids: "{{ autoscaling_instance_security_groups }}"
     iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
     monitoring:
