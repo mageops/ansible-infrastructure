@@ -1,8 +1,7 @@
 
 - name: Get latest version of lauch template
   command:
-    argv: >
-    aws ec2 describe-launch-templates --launch-template-names {{ autoscaling_launch_template_name }} --region '{{ aws_region }}'
+    cmd: aws ec2 describe-launch-templates --launch-template-names {{ autoscaling_launch_template_name }} --region '{{ aws_region }}'
   register: _ec2_launch_template_latest_version_query
 
 - name: Set facts default version
@@ -15,8 +14,7 @@
 
 - name: Get list of Launch Template
   command:
-    cmd:
-    aws ec2 describe-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'
+    cmd: aws ec2 describe-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'
   register: _ec2_launch_template_version_list_query
 
 - name: Set facts AMIs to delete
