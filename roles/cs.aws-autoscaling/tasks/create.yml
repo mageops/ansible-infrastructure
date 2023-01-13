@@ -14,8 +14,9 @@
         delete_on_termination: yes
     user_data: "{{ aws_ec2_instance_user_data | b64encode }}"
     tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) }}"
-
-
+    # This has zero costs on current-gen instances
+    ebs_optimized: true
+    
 - name: Create AutoScaling Group
   ec2_asg:
     state: present
