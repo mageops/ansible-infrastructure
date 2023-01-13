@@ -5,7 +5,7 @@
     aws ec2 describe-launch-templates --launch-template-names {{ autoscaling_launch_template_name }} --region '{{ aws_region }}'
   register: _ec2_launch_template_latest_version_query
 
--name: Set facts default version
+- name: Set facts default version
   set_fact:
     _ec2_launch_template_latest_version: {{ ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}
 
