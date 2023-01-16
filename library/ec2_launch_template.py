@@ -435,7 +435,7 @@ def existing_templates(module):
 
 
 def params_to_launch_data(module, template_params):
-    if template_params.get('resource'):
+    if template_params.get('resource_tags'):
         template_params['tag_specifications'] = [
             {
                 'resource_type': r_type,
@@ -567,7 +567,7 @@ def format_module_output(module):
     template_versions = [camel_dict_to_snake_dict(v) for v in template_versions]
     for v in template_versions:
         for ts in (v['launch_template_data'].get('tag_specifications') or []):
-            ts['resource_tags'] = boto3_tag_list_to_ansible_dict(ts.pop('tags'))
+            ts['tags'] = boto3_tag_list_to_ansible_dict(ts.pop('tags'))
     output.update(dict(template=template, versions=template_versions))
     output['default_template'] = [
         v for v in template_versions
