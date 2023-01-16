@@ -1,5 +1,5 @@
 # --- Base configuration ---
-  
+
 php_fpm_daemon_conf_file_path: "/etc/php-fpm.conf"
 php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
@@ -26,6 +26,7 @@ php_fpm_pool_ping_response: pong
 php_fpm_pool_conf_file_path: "{{ php_fpm_pool_conf_dir_path }}/{{ php_fpm_pool_name }}.conf"
 php_fpm_pool_fcgi_socket_path: "{{ php_fpm_run_dir_path }}/{{ php_fpm_pool_name }}.sock"
 
+php_fpm_weekly_restart: no
 
 # --- Extra configuration for the special debug pool ---
 
