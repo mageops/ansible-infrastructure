@@ -6,7 +6,7 @@
 
 - name: Set facts default version
   set_fact:
-    _ec2_launch_template_latest_version: {{ ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}
+    _ec2_launch_template_latest_version: "{{ ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}"
 
 - name: Set facts max version to delete
   set_fact:
@@ -19,11 +19,11 @@
 
 - name: Set facts AMIs to delete
   set_fact:
-    _ec2_ami_version_list: {{ _ec2_launch_template_version_list_query | from_json | json_query(ImageId) }}
+    _ec2_ami_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(ImageId) }}"
 
 - name: Set facts Launch Template to delete
   set_fact:
-    _ec2_launch_template_version_list: {{ _ec2_launch_template_version_list_query | from_json | json_query(VersionNumber) }}
+    _ec2_launch_template_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(VersionNumber) }}"
 
 - name: Delete obsoled version of launch template
   command:
