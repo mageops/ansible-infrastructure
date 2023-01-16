@@ -496,13 +496,13 @@ def create_or_update(module, template_options):
     template, template_versions = existing_templates(module)
     out = {}
     template_tags = [
-        snake_dict_to_camel_dict({
-            'resource_type': 'launch-template',
-            'tags': [
+        {
+            'ResourceType': 'launch-template',
+            'Tags': [
                 {'Key': k, 'Value': v} for k, v
                 in template_options['tags'].items()
             ]
-        }, capitalize_first=True)
+        }
     ]
     del template_options['tags']
 
