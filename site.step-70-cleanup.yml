@@ -3,8 +3,4 @@
   roles:
     - role: cs.aws-ec2-cleanup
       aws_ec2_cleanup_lt_to_keep: 3
-      aws_ec2_cleanup_lt_name_prefixes:
-        - "{{ mageops_app_name }}-app-"
-        - "{{ mageops_app_name }}-extra-app-"
-        - "{{ mageops_app_name }}-pio-"
     - role: cs.aws-cloudfront-post-deploy
