@@ -496,15 +496,16 @@ def create_or_update(module, template_options):
     template, template_versions = existing_templates(module)
     out = {}
     template_tags = [
-        {
+        snake_dict_to_camel_dict({
             'resource_type': 'launch-template',
             'tags': [
                 {'Key': k, 'Value': v} for k, v
                 in template_options['tags'].items()
             ]
-        }
+        }, capitalize_first=True)
     ]
     del template_options['tags']
+
     lt_data = params_to_launch_data(module, dict((k, v) for k, v in module.params.items() if k in template_options))
     if not (template or template_versions):
         # create a full new one
