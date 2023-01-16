@@ -1,7 +1,7 @@
 
 - name: Get latest version of lauch template
   command:
-    cmd: aws ec2 describe-launch-templates --launch-template-names {{ autoscaling_launch_template_name }} --region '{{ aws_region }}'
+    cmd: aws ec2 describe-launch-templates --region '{{ aws_region }}'
   register: _ec2_launch_template_latest_version_query
 
 - name: Set facts default version
@@ -12,28 +12,28 @@
   set_fact:
     _ec2_launch_template_max_version: "{{ _ec2_launch_template_latest_version }} - {{ aws_ec2_cleanup_lt_to_keep }}"
 
-- name: Get list of Launch Template
-  command:
-    cmd: aws ec2 describe-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'
-  register: _ec2_launch_template_version_list_query
+#- name: Get list of Launch Template
+#  command:
+#    cmd: aws ec2 describe-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'
+#  register: _ec2_launch_template_version_list_query
 
-- name: Set facts AMIs to delete
-  set_fact:
-    _ec2_ami_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(ImageId) }}"
+#- name: Set facts AMIs to delete
+#  set_fact:
+#    _ec2_ami_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(ImageId) }}"
 
-- name: Set facts Launch Template to delete
-  set_fact:
-    _ec2_launch_template_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(VersionNumber) }}"
+#- name: Set facts Launch Template to delete
+#  set_fact:
+#    _ec2_launch_template_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(VersionNumber) }}"
 
-- name: Delete obsoled version of launch template
-  command:
-    cmd: aws ec2 delete-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --versions {{ item.VersionNumber }} --region '{{ aws_region }}'
-  loop: "{{ _ec2_launch_template_version_list.VersionNumber }}"
+#- name: Delete obsoled version of launch template
+#  command:
+#    cmd: aws ec2 delete-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --versions {{ item.VersionNumber }} --region '{{ aws_region }}'
+#  loop: "{{ _ec2_launch_template_version_list.VersionNumber }}"
 
-- name: "Remove AMIs not longer required"
-  ec2_ami:
-     region: "{{ aws_region }}"
-     state: absent
-     delete_snapshot: yes
-     image_id: "{{ item.image_id }}"
-  with_items: "{{ _ec2_ami_version_list }}"
+#- name: "Remove AMIs not longer required"
+#  ec2_ami:
+#     region: "{{ aws_region }}"
+#     state: absent
+#     delete_snapshot: yes
+#     image_id: "{{ item.image_id }}"
+#  with_items: "{{ _ec2_ami_version_list }}"
