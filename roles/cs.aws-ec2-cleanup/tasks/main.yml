@@ -10,7 +10,7 @@
 
 - name: Set facts max version to delete
   set_fact:
-    _ec2_launch_template_max_version: {{ _ec2_launch_template_latest_version }} - {{ aws_ec2_cleanup_lt_to_keep }}
+    _ec2_launch_template_max_version: "{{ _ec2_launch_template_latest_version }} - {{ aws_ec2_cleanup_lt_to_keep }}"
 
 - name: Get list of Launch Template
   command:
