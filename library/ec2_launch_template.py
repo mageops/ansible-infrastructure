@@ -505,7 +505,7 @@ def create_or_update(module, template_options):
             ]
         }
     ]
-    del template_options['tags']
+    del module_params['tags']
 
     lt_data = params_to_launch_data(module, module_params)
     if not (template or template_versions):
