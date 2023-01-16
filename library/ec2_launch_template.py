@@ -495,18 +495,19 @@ def create_or_update(module, template_options):
     ec2 = module.client('ec2', retry_decorator=AWSRetry.jittered_backoff())
     template, template_versions = existing_templates(module)
     out = {}
+    module_params = dict((k, v) for k, v in module.params.items() if k in template_options)
     template_tags = [
         {
             'ResourceType': 'launch-template',
             'Tags': [
                 {'Key': k, 'Value': v} for k, v
-                in template_options['tags'].items()
+                in module_params['tags'].items()
             ]
         }
     ]
     del template_options['tags']
 
-    lt_data = params_to_launch_data(module, dict((k, v) for k, v in module.params.items() if k in template_options))
+    lt_data = params_to_launch_data(module, module_params)
     if not (template or template_versions):
         # create a full new one
         try:
