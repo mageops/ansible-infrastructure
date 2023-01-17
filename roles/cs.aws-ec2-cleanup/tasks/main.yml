@@ -6,7 +6,7 @@
 
 - name: Set facts default version
   set_fact:
-    _ec2_launch_template_latest_version: "{{ ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}"
+    _ec2_launch_template_latest_version: "{{ _ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}"
 
 - name: Set facts max version to delete
   set_fact:
