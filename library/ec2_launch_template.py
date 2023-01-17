@@ -543,7 +543,6 @@ def create_or_update(module, template_options):
                     DefaultVersion=to_text(resp['LaunchTemplateVersion']['VersionNumber']),
                     ClientToken=uuid4().hex,
                     aws_retry=True,
-                    TagSpecifications=template_tags,
                 )
             else:
                 try:
@@ -555,7 +554,6 @@ def create_or_update(module, template_options):
                     DefaultVersion=to_text(int(module.params.get('default_version'))),
                     ClientToken=uuid4().hex,
                     aws_retry=True,
-                    TagSpecifications=template_tags,
                 )
         except (ClientError, BotoCoreError) as e:
             module.fail_json_aws(e, msg="Couldn't create subsequent launch template version")
