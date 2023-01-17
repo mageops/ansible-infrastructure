@@ -4,13 +4,19 @@
     cmd: "aws ec2 describe-launch-templates --region '{{ aws_region }}'"
   register: _ec2_launch_template_latest_version_query
 
-- name: Set facts default version
-  set_fact:
-    _ec2_launch_template_latest_version: "{{ _ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}"
+- name: Display all LT names
+  ansible.builtin.debug:
+    var: item
+  loop: "{{ LaunchTemplateVersions | community.general.json_query('LaunchTemplateId') }}"
 
-- name: Set facts max version to delete
-  set_fact:
-    _ec2_launch_template_max_version: "{{ _ec2_launch_template_latest_version }} - {{ aws_ec2_cleanup_lt_to_keep }}"
+
+#- name: Set facts default version
+#  set_fact:
+#    _ec2_launch_template_latest_version: "{{ _ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}"
+
+#- name: Set facts max version to delete
+#  set_fact:
+#    _ec2_launch_template_max_version: "{{ _ec2_launch_template_latest_version }} - {{ aws_ec2_cleanup_lt_to_keep }}"
 
 #- name: Get list of Launch Template
 #  command:
