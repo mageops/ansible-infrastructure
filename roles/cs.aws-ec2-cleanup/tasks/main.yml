@@ -5,7 +5,7 @@
 
 - name: Display LT names
   ansible.builtin.debug:
-    var: item
+    var: _ec2_launch_template_list_query
 #  loop: "{ _ec2_launch_template_list_query.stdout | to_json }}"
 
 
