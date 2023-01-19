@@ -1,13 +1,13 @@
 
-- name: Get latest version of lauch template
-  command:
-    cmd: "aws ec2 describe-launch-templates --region '{{ aws_region }}'"
-  register: _ec2_launch_template_latest_version_query
+#- name: Get latest version of lauch template
+#  command:
+#    cmd: "aws ec2 describe-launch-templates --region '{{ aws_region }}'"
+#  register: _ec2_launch_template_latest_version_query
 
-- name: Display all LT names
-  ansible.builtin.debug:
-    var: item
-  loop: "{{ LaunchTemplateVersions | community.general.json_query('LaunchTemplateId') }}"
+#- name: Display all LT names
+#  ansible.builtin.debug:
+#    var: item
+#  loop: "{{ LaunchTemplateVersions | community.general.json_query('LaunchTemplateId') }}"
 
 
 #- name: Set facts default version
