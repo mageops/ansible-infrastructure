@@ -1,12 +1,12 @@
 
-- name: Get latest version of lauch template
-  command: "aws ec2 describe-launch-templates --region '{{ aws_region }}'"
-  register: _ec2_launch_template_latest_version_query
+- name: List of the LT to cleanup
+  command: "aws ec2 describe-launch-templates --region '{{ aws_region }}' --query 'LaunchTemplates[*].LaunchTemplateName' --filter \"Name=tag:Project,Values={{ mageops_project }} \" --filter \"Name=tag:Environment,Values={{ mageops_environment }} \""
+  register: _ec2_launch_template_list_query
 
-#- name: Display all LT names
-#  ansible.builtin.debug:
-#    var: item
-#  loop: "{{ LaunchTemplateVersions | community.general.json_query('LaunchTemplateId') }}"
+- name: Display LT names
+  ansible.builtin.debug:
+    var: item
+  loop: "{ _ec2_launch_template_list_query.stdout | to_json }}"
 
 
 #- name: Set facts default version
