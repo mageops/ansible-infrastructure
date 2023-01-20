@@ -5,7 +5,7 @@
 
 - name: Display LT names
   debug:
-    msg: _ec2_launch_template_list_query.stdout
+    msg: {{ _ec2_launch_template_list_query.stdout }}
 #  loop: "{ _ec2_launch_template_list_query.stdout | to_json }}"
 
 
