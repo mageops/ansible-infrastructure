@@ -4,8 +4,8 @@
   register: _ec2_launch_template_list_query
 
 - name: Display LT names
-  ansible.builtin.debug:
-    msg: _ec2_launch_template_list_query
+  debug:
+    msg: _ec2_launch_template_list_query.stdout
 #  loop: "{ _ec2_launch_template_list_query.stdout | to_json }}"
 
 
