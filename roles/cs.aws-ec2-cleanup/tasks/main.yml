@@ -9,9 +9,10 @@
 #  loop: "{ _ec2_launch_template_list_query.stdout | to_json }}"
 
 
-#- name: Set facts default version
-#  set_fact:
-#    _ec2_launch_template_latest_version: "{{ _ec2_launch_template_latest_version_query.stdout | from_json | json_query(LatestVersionNumber) }}"
+- name: Set facts default version
+  debug:
+    msg: "aws ec2 describe-launch-template-versions --launch-template-name {{ item }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'"
+  with_lines: "{{ _ec2_launch_template_list_query.stdout }}"
 
 #- name: Set facts max version to delete
 #  set_fact:
