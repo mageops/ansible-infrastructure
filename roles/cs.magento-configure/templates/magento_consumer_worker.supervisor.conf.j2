@@ -1,5 +1,5 @@
 [program:magento-consumer-{{ item.consumer }}]
-command=php {{ mageops_app_web_dir }}/current/bin/magento queue:consumers:start {{ item.consumer }} --batch-size={{ item.batch_size | default(100) }}
+command=php {{ mageops_app_web_dir }}/current/bin/magento queue:consumers:start {{ item.consumer }} {% if item.area_code is defined -%} --area-code={{ item.area_code }} {%- endif %} --batch-size={{ item.batch_size | default(100) }}
 directory={{ mageops_app_web_dir }}/current
 
 process_name = magento-consumer-{{ item.consumer }}-%(process_num)s
