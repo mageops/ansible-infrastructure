@@ -13,3 +13,4 @@
     region: "{{ aws_region }}"
     resource: "{{ aws_varnish_node_instance.instance_id }}"
     tags: "{{ aws_tags_pio }}"
+  when: aws_varnish_node_instance is defined
