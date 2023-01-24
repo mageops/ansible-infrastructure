@@ -1,44 +1,117 @@
+- name: Prepare aws cli filter
+  set_fact:
+    _tag_filter: "{{ (_tag_filter | default('')) + ' --filter=' + filter }}"
+  vars:
+    filter: "Name=tag:{{ item.key }},Values={{ item.value }}"
+  loop: "{{ aws_tags_default | dict2items }}"
 
-- name: List of the LT to cleanup
-  command: "aws ec2 describe-launch-templates --region '{{ aws_region }}' --query 'LaunchTemplates[*].LaunchTemplateName' --filter \"Name=tag:Project,Values={{ mageops_project }}\" --filter \"Name=tag:Environment,Values={{ mageops_environment }}\""
-  register: _ec2_launch_template_list_query
+- name: Query Launch templates
+  shell: |
+    aws ec2 describe-launch-templates \
+      --region '{{ aws_region }}' \
+      {{ _tag_filter }}
+  register: _launch_templates_output
 
-- name: Display LT names
+- name: Extract Launch Template names
+  set_fact:
+    _launch_template_names: "{{ (_launch_templates_output.stdout | from_json).LaunchTemplates | map(attribute='LaunchTemplateName') | list }}"
+    _to_keep: []
+    _ami_to_keep: []
+    _remove_template_version: []
+
+- name: List launch templates to query
   debug:
-    msg: "LT : {{ item }}"
-  loop: "{ _ec2_launch_template_list_query.stdout }}"
+    var: _launch_template_names
 
-#- name: Set facts default version
-#  debug:
-#    msg: "aws ec2 describe-launch-template-versions --launch-template-name {{ item }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'"
-#  with_lines: _ec2_launch_template_list_query.stdout
+- name: Query Launch template version
+  shell: |
+    for name in {{ launch_template_names }};do
+      aws ec2 describe-launch-template-versions \
+        --launch-template-name "$name" \
+        --region '{{ aws_region }}' | jq -cM
+    done
+  vars:
+    launch_template_names: "{{ _launch_template_names | map('quote') | join(' ') }}"
+  register: _launch_template_version_output
 
-#- name: Set facts max version to delete
-#  set_fact:
-#    _ec2_launch_template_max_version: "{{ _ec2_launch_template_latest_version }} - {{ aws_ec2_cleanup_lt_to_keep }}"
+- name: Keep all default versions
+  set_fact:
+    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(query) }}"
+  vars:
+    query: "[?DefaultVersion]"
+  loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
 
-#- name: Get list of Launch Template
-#  command:
-#    cmd: aws ec2 describe-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --max-version {{ _ec2_launch_template_max_version }} --region '{{ aws_region }}'
-#  register: _ec2_launch_template_version_list_query
+- name: Keep last N versions
+  set_fact:
+    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(query) }}"
+  vars:
+    query: "[:{{aws_ec2_cleanup_lt_to_keep}}]"
+  loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
 
-#- name: Set facts AMIs to delete
-#  set_fact:
-#    _ec2_ami_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(ImageId) }}"
+- name: Gather amis to keep
+  set_fact:
+    _ami_to_keep: "{{ _ami_to_keep + [item.LaunchTemplateData.ImageId ] }}"
+  when: item.LaunchTemplateData.ImageId not in _ami_to_keep
+  loop: "{{ _to_keep }}"
 
-#- name: Set facts Launch Template to delete
-#  set_fact:
-#    _ec2_launch_template_version_list: "{{ _ec2_launch_template_version_list_query | from_json | json_query(VersionNumber) }}"
+- name: Get available Launch Configurations (TEMPORARY STEP)
+  ec2_lc_info:
+    region: "{{ aws_region }}"
+  register: _aws_ec2_cleanup_all_lcs
 
-#- name: Delete obsoled version of launch template
-#  command:
-#    cmd: aws ec2 delete-launch-template-versions --launch-template-name {{ autoscaling_launch_template_name }} --versions {{ item.VersionNumber }} --region '{{ aws_region }}'
-#  loop: "{{ _ec2_launch_template_version_list.VersionNumber }}"
+- name: Keep amis required for all launch configurations (TEMPORARY STEP)
+  set_fact:
+    _ami_to_keep: "{{ _ami_to_keep + [item] }}"
+  when: item not in _ami_to_keep
+  loop: "{{ _aws_ec2_cleanup_all_lcs.launch_configurations | map(attribute='image_id') | list}}"
 
-#- name: "Remove AMIs not longer required"
-#  ec2_ami:
-#     region: "{{ aws_region }}"
-#     state: absent
-#     delete_snapshot: yes
-#     image_id: "{{ item.image_id }}"
-#  with_items: "{{ _ec2_ami_version_list }}"
+- name: Select versions to remove
+  set_fact:
+    _remove_template_version: "{{ _remove_template_version + [_version] }}"
+  vars:
+    _version:
+      name: "{{ item.LaunchTemplateName }}"
+      version: "{{ item.VersionNumber }}"
+  when: item not in _to_keep
+  loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | map(attribute='LaunchTemplateVersions') | flatten }}"
+
+- name: Get list of App AMIs
+  ec2_ami_info:
+    region: "{{ aws_region }}"
+    owner: self
+    filters: "{{ aws_tags_default | combine(aws_tags_role_app_base) | prefix_keys('tag:')}}"
+  register: _aws_ec2_cleanup_env_amis
+
+- name: Cleanup lists
+  set_fact:
+    _to_keep: "{{ _to_keep | unique }}"
+    _ami_to_keep: "{{ _ami_to_keep | unique }}"
+    _amis_found: "{{ _aws_ec2_cleanup_env_amis.images | map(attribute='image_id') | list }}"
+
+- name: Select amis to remove
+  set_fact:
+    _amis_to_remove: "{{ _amis_found | difference(_ami_to_keep) }}"
+
+- name: List launch templates to remove
+  debug:
+    msg: |
+      Launch template versions to keep:
+      {% for item in _to_keep %}
+        {{ item.LaunchTemplateName }}:{{ item.VersionNumber }} {% if item.DefaultVersion %}(Default){% endif %}
+
+      {% endfor %}
+
+      Launch template versions to remove
+      {% for item in _remove_template_version %}
+        {{ item.name }}:{{ item.version }}
+      {% endfor %}
+
+      Amis to keep:
+      {% for item in _ami_to_keep %}
+        {{ item }}
+      {% endfor %}
+
+      Amis to remove:
+      {% for item in _amis_to_remove %}
+        {{ item }}
+      {% endfor %}
