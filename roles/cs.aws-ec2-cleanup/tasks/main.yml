@@ -40,6 +40,7 @@
   vars:
     query: "[?DefaultVersion]"
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
+  when: aws_ec2_cleanup_lt_to_keep > 0
 
 - name: Keep last N versions
   set_fact:
@@ -47,6 +48,7 @@
   vars:
     query: "[:{{aws_ec2_cleanup_lt_to_keep}}]"
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
+  when: aws_ec2_cleanup_lt_to_keep > 0
 
 - name: Gather amis to keep
   set_fact:
@@ -72,7 +74,7 @@
     _version:
       name: "{{ item.LaunchTemplateName }}"
       version: "{{ item.VersionNumber }}"
-  when: item not in _to_keep
+  when: item not in _to_keep and aws_ec2_cleanup_lt_to_keep > 0
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | map(attribute='LaunchTemplateVersions') | flatten }}"
 
 - name: Get list of App AMIs
@@ -115,3 +117,25 @@
       {% for item in _amis_to_remove %}
         {{ item }}
       {% endfor %}
+
+- name: Remove obsoled LT version
+  command:
+    cmd: "aws ec2 delete-launch-template-versions --launch-template-name {{ item.name | quote }} --versions {{ item.version }} --region {{ aws_region }}"
+  loop: "{{ _remove_template_version }}"
+  when: aws_ec2_cleanup_lt_to_keep > 0
+
+- name: Delete whole LT
+  ec2_launch_template:
+    name: "{{item.name | quote }}"
+    state: absent
+    region: "{{ aws_region }}"
+  loop: "{{ _remove_template_version }}"
+  when: aws_ec2_cleanup_lt_to_keep == 0
+
+- name : Remove obsoled AMIs
+  ec2_ami:
+    image_id: "{{ item }}"
+    state: absent
+    delete_snapshot: True
+    region: "{{ aws_region }}"
+  loop: "{{ _amis_to_remove }}"

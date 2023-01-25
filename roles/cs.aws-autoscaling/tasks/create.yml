@@ -17,6 +17,8 @@
     resource_tags: "{{ aws_tags_default | combine(autoscaling_instance_tags) }}"
     # This has zero costs on current-gen instances
     ebs_optimized: true
+  vars:
+    aws_ec2_user_launch_script: "{{ autoscaling_instance_start_script }}"
 
 - name: Create AutoScaling Group
   ec2_asg:
