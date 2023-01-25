@@ -123,7 +123,7 @@
 
 - name : Remove obsoled AMIs
   ec2_ami:
-    image_id: {{ item }}
+    image_id: "{{ item }}"
     state: absent
     delete_snapshot: True
     region: {{ aws_region }}
