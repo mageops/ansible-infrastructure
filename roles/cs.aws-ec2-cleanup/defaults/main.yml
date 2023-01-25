@@ -1,2 +1,1 @@
-aws_ec2_cleanup_lcs_to_keep: 10
-aws_ec2_cleanup_lc_name_prefixes: []
+aws_ec2_cleanup_lt_to_keep: 10
