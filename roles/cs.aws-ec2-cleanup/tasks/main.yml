@@ -127,4 +127,4 @@
     state: absent
     delete_snapshot: True
     region: "{{ aws_region }}"
-  loop: " {{ _amis_to_remove }}"
+  loop: "{{ _amis_to_remove }}"
