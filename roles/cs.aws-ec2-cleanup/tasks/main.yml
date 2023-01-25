@@ -115,3 +115,16 @@
       {% for item in _amis_to_remove %}
         {{ item }}
       {% endfor %}
+
+- name: Remove obsoled LT version
+  command:
+    cmd: "aws ec2 delete-launch-template-versions --launch-template-name {{ item.name }} --versions {{ item.version }} --region '{{ aws_region }}"
+  loop: "{{ _remove_template_version }}"
+
+- name : Remove obsoled AMIs
+  ec2_ami:
+    image_id: {{ item }}
+    state: absent
+    delete_snapshot: True
+  loop: _amis_to_remove
+
