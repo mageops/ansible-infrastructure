@@ -118,7 +118,7 @@
 
 - name: Remove obsoled LT version
   command:
-    cmd: "aws ec2 delete-launch-template-versions --launch-template-name {{ item.name }} --versions {{ item.version }} --region '{{ aws_region }}"
+    cmd: "aws ec2 delete-launch-template-versions --launch-template-name {{ item.name }} --versions {{ item.version }} --region {{ aws_region }}"
   loop: "{{ _remove_template_version }}"
 
 - name : Remove obsoled AMIs
