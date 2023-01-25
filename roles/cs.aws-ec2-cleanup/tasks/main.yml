@@ -126,5 +126,5 @@
     image_id: {{ item }}
     state: absent
     delete_snapshot: True
-  loop: _amis_to_remove
-
+    region: {{ aws_region }}
+  loop: " {{ _amis_to_remove }}"
