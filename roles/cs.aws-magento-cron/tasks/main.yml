@@ -48,7 +48,7 @@
     name: "{{ item.name }}"
     job: |
       {%- if item.only_cron_node -%}
-        mageopscli is_cron_node &&
+        /usr/local/bin/mageopscli is_cron_node &&
       {%- endif -%}
       {%- if item.magento_command -%}
         cd {{ magento_live_release_dir }} && bin/magento {{ item.command }}
