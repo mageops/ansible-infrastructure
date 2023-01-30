@@ -19,7 +19,6 @@
       node_state_instance_tags: >-
         {{
             aws_tags_base | combine(
-                aws_tags_role_app,
                 aws_tags_role_app_builder
             )
         }}

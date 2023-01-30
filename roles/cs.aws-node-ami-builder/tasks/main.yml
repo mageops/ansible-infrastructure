@@ -17,8 +17,6 @@
     instance_tags: >-
       {{
           aws_tags_default | combine(
-            aws_tags_role_app,
-            aws_tags_node_app,
             builder_instance_tags,
             builder_instance_name_tags
           )
@@ -47,9 +45,9 @@
   vars:
     aws_ebs_volume_modify_ids: >-
       {{ ( builder_ec2.instances + builder_ec2.tagged_instances )
-          | map(attribute='block_device_mapping') 
-          | map('dict2items') 
-          | flatten 
+          | map(attribute='block_device_mapping')
+          | map('dict2items')
+          | flatten
           | map(attribute='value')
           | map(attribute='volume_id')
           | list
