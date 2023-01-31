@@ -47,9 +47,9 @@
       when: aws_use
     - role: cs.cron
     - role: geerlingguy.ntp
+    - role: cs.nginx
     - role: cs.nginx-url-blacklist
       nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
-    - role: cs.nginx
     - role: cs.nginx-language-redirect
       when: mageops_language_redirect_enable and mageops_language_redirect_mode == "normal"
     - role: cs.nginx-language-redirect-multilevel
