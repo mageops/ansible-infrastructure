@@ -4,3 +4,4 @@
 - name: Set list of provisioned nginx conf.d files
   set_fact:
     nginx_config_cleanup_provisioned_files: []
+  when: nginx_config_cleanup_provisioned_files is not defined
