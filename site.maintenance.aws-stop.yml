@@ -54,7 +54,7 @@
             - name: Get list of RDS instances
               rds_instance_facts:
                 region: "{{ aws_region }}"
-                register: _rds_instances_info
+              register: _rds_instances_info
             - name: Set list of rds instances
               set_fact:
                 _aws_rds_instances: "{{ _rds_instances_info.instances }}"
