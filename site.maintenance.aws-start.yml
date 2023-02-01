@@ -3,76 +3,55 @@
   connection: local
   roles:
     - role: cs.aws-region-facts
-    - role: cs.aws-vpc-facts
+    - role: cs.aws-rds-facts
+    - role: cs.aws-node-facts
+    - role: cs.aws-autoscaling-facts
 
   tasks:
     - name: Start standalone EC2 instances
       when: start_ec2
-      block:
-        - name: Get list of EC2 instances
-          ec2_instance_info:
-            region: "{{ aws_region }}"
-            filters:
-              "vpc-id": "{{ aws_vpc_id }}"
-          register: start_ec2_instance_info
-
-        - name: Start instances
-          ec2:
-            instance_ids: "{{ start_ec2_instance_ids }}"
-            region: "{{ aws_region }}"
-            state: running
-            wait_timeout: 600
-            wait: yes
-          vars:
-            start_ec2_instance_ids: "{{ start_ec2_instance_info | json_query('instances[].instance_id') }}"
+      ec2:
+        instance_ids: "{{ item.instance_id }}"
+        region: "{{ aws_region }}"
+        state: running
+        wait: no
+      with_items:
+        - "{{ aws_persistent_node_instance }}"
+        - "{{ aws_varnish_node_instance }}"
 
     - name: Scale up App Node ASGs
       when: start_asg
-      block:
-        - name: Get Auto Scaling Groups for App
-          ec2_asg_facts:
-            region: "{{ aws_region }}"
-            tags: "{{ aws_tags_base | combine(aws_tags_node_app) }}"
-          register: start_asg_facts
-
-        - name: Scale up ASG
-          ec2_asg:
-            name: "{{ item.name }}"
-            launch_config_name: "{{ item.lc }}"
-            region: "{{ aws_region }}"
-            state: present
-            desired_capacity: "{{ aws_app_asg_desired_capacity | default(1) }}"
-            min_size: "{{ aws_app_asg_min_size | default(1) }}"
-            wait_for_instances: yes
-            wait_timeout: 600
-          with_items: "{{ start_asgs }}"
-          vars:
-            start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"
+      ec2_asg:
+        name: "{{ item.auto_scaling_group_name }}"
+        region: "{{ aws_region }}"
+        state: present
+        desired_capacity: "{{ aws_app_asg_desired_capacity | default(1) }}"
+        min_size: "{{ aws_app_asg_min_size | default(1) }}"
+        wait_for_instances: yes
+        wait_timeout: 600
+      with_items: "{{ aws_autoscaling_app }}"
 
     - name: Scale up Extra App Node ASGs
       when: start_asg and (aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable)
-      block:
-        - name: Get Auto Scaling Groups for Extra App
-          ec2_asg_facts:
-            region: "{{ aws_region }}"
-            tags: "{{ aws_tags_base | combine(aws_tags_node_extra_app) }}"
-          register: start_asg_facts
+      ec2_asg:
+        name: "{{ item.auto_scaling_group_name }}"
+        region: "{{ aws_region }}"
+        state: present
+        desired_capacity: "{{ aws_extra_app_asg_desired_capacity | default(0) }}"
+        min_size: "{{ aws_extra_app_asg_min_size | default(0) }}"
+        wait_for_instances: yes
+        wait_timeout: 600
+      with_items: "{{ aws_autoscaling_app_extra }}"
 
-        - name: Scale up ASG
-          ec2_asg:
-            name: "{{ item.name }}"
-            launch_config_name: "{{ item.lc }}"
-            region: "{{ aws_region }}"
-            state: present
-            desired_capacity: "{{ aws_extra_app_asg_desired_capacity | default(0) }}"
-            min_size: "{{ aws_extra_app_asg_min_size | default(0) }}"
-            wait_for_instances: yes
-            wait_timeout: 600
-          with_items: "{{ start_asgs }}"
-          vars:
-            start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"
+    - name: Start RDS instance
+      rds_instance:
+        state: started
+        region: "{{ aws_region }}"
+        db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
+      when: start_rds
 
   vars:
     start: yes
     start_ec2: "{{ start }}"
     start_asg: "{{ start }}"
+    start_rds: "{{ start }}"

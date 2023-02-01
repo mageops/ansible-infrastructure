@@ -1,88 +1,41 @@
 - hosts: localhost
   connection: local
-  pre_tasks:
-    - name: Get VPC data
-      block:
-        - name: Get VPC data
-          ec2_vpc_net_facts:
-            region: "{{ aws_region }}"
-            filters:
-              "tag:Project": "{{ mageops_project }}"
-              "tag:Environment": "{{ mageops_environment }}"
-          register: _aws_vpc
-        - name: Set VPC ID
-          set_fact:
-            _aws_vpc_id: "{{ _aws_vpc | json_query('vpcs[0].vpc_id')}}"
+  roles:
+    - role: cs.aws-region-facts
+    - role: cs.aws-rds-facts
+    - role: cs.aws-node-facts
+    - role: cs.aws-autoscaling-facts
 
+
+  tasks:
     - name: Remove Auto Scaling Groups and App servers
-      block:
-        - name: Get Auto Scaling Groups
-          ec2_asg_facts:
-            region: "{{ aws_region }}"
-            tags: "{{ aws_tags_base }}"
-          register: _aws_asgs
-        - name: Set list of ASG to drop
-          set_fact:
-            _aws_asgs_to_remove: "{{ _aws_asgs | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}')}}"
-        - name: Remove ASGs
-          ec2_asg:
-            name: "{{ item.name }}"
-            launch_config_name: "{{ item.lc }}"
-            region: "{{ aws_region }}"
-            state: absent
-          with_items: "{{ _aws_asgs_to_remove }}"
+      ec2_asg:
+        name: "{{ item.auto_scaling_group_name }}"
+        region: "{{ aws_region }}"
+        state: absent
+      with_items:
+       - "{{ aws_autoscaling_app }}"
+       - "{{ aws_autoscaling_app_extra }}"
+       - "{{ aws_autoscaling_app_pio }}"
       when: remove_asg
 
     - name: Remove other EC2 Servers
-      block:
-        - name: Get list of EC2 instances
-          ec2_instance_info:
-            region: "{{ aws_region }}"
-            filters:
-              "vpc-id": "{{ _aws_vpc_id }}"
-          register: _aws_ec2
-        - name: Set list of EC2 instances to drop
-          set_fact:
-            _aws_ec2_to_remove: "{{ _aws_ec2|json_query('instances[].instance_id')}}"
-        - name: Terminate instances
-          when: _aws_ec2_to_remove | length > 0
-          ec2:
-            instance_ids: "{{ _aws_ec2_to_remove }}"
-            region: "{{ aws_region }}"
-            state: absent
-            wait: yes
+      ec2:
+        instance_ids: "{{ item.instance_id }}"
+        region: "{{ aws_region }}"
+        state: absent
+        wait: no
+      with_items:
+        - "{{ aws_persistent_node_instance }}"
+        - "{{ aws_varnish_node_instance }}"
       when: remove_ec2
 
     - name: Remove RDS
-      block:
-        - name: Get list of RDS instances
-          rds_instance_facts:
-            region: "{{ aws_region }}"
-          register: _rds_instances_info
-        - name: Set list of rds instances
-          set_fact:
-            _aws_rds_instances: "{{ _rds_instances_info.instances }}"
-        - name: Filter rds instance list by tags
-          set_fact:
-            _aws_rds_instances: "{{ _aws_rds_instances | json_query(rds_instances_tag_filter_query) | default([]) }}"
-          vars:
-            rds_instances_tag_filter_query: "[?{% for k, v in aws_rds_facts_mysql_tags.items() -%}tags.{{ k }} == '{{ v }}'{% if not loop.last %} && {% endif %}{% endfor %}]"
-        - name: Warn when more than one instance has been found
-          debug:
-            msg: |
-              Warning! More than one matching rds instance found, using first one.
-              Found: {{ _aws_rds_instances | map(attribute='db_instance_identifier') | join(', ') }}
-          when: _aws_rds_instances | length > 1
-        - name: Set facts about project's rds instance
-          set_fact:
-            aws_rds_instance_id: "{{ (_aws_rds_instances | first).db_instance_identifier }}"
-          when: _aws_rds_instances | length > 0
-        - name: Terminate RDS instance
-          when: _aws_rds_instance_id == aws_rds_instance_name
-          rds:
-            command: delete
-            instance_name: "{{ aws_rds_instance_name }}"
-            # snapshot: "{{ aws_rds_instance_name }}-snapshot"
+      rds_instance:
+        state: absent
+        region: "{{ aws_region }}"
+        db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
+        skip_final_snapshot: yes
       when: remove_rds
 
     - name: Remove Volumes
@@ -128,22 +81,6 @@
           with_items:
             - "handleAutoscalingEvent-{{ mageops_app_name }}"
             - "updateVarnishBackends-{{ mageops_app_name }}"
-        - name: Find ENIs
-          ec2_eni_facts:
-            region: "{{ aws_region }}"
-          register: _aws_fact
-        - name: Set list of ENIs to drop
-          set_fact:
-            _aws_eni_to_remove: "{{ _aws_fact | json_query(query) }}"
-          vars:
-            query: "network_interfaces[?vpc_id=='{{ _aws_vpc_id }}'].id"
-        - name: Remove ENI for Lambda
-          ec2_eni:
-            state: absent
-            region: "{{ aws_region }}"
-            eni_id: "{{ item }}"
-            force_detach: true
-          with_items: "{{ _aws_eni_to_remove }}"
       when: remove_lambda
 
     - name: Remove Security Groups
@@ -189,24 +126,22 @@
             - "{{ aws_s3_secret_bucket }}"
       when: remove_s3
 
-  roles:
-    - role: cs.aws-ec2-cleanup
-      aws_ec2_cleanup_lcs_to_keep: 0
-      aws_ec2_cleanup_lc_name_prefixes:
-        - "{{ mageops_app_name }}-app-"
-        - "{{ mageops_app_name }}-extra-app-"
+    - name: Remove LC
+      include_role:
+        name: cs.aws-ec2-cleanup
+      vars:
+        aws_ec2_cleanup_lcs_to_keep: 0
+        aws_ec2_cleanup_lc_name_prefixes:
+          - "{{ mageops_app_name }}-app-"
+          - "{{ mageops_app_name }}-extra-app-"
       when: remove_asg
 
-  vars_files:
-    - vars/app/credentials.yml
-    - vars/app/env.yml
-    - vars/aws/env.yml
   vars:
     remove_asg: yes
     remove_ec2: yes
-    remove_rds: no
+    remove_rds: yes
     remove_efs: yes
     remove_lambda: yes
     remove_sg: yes
-    remove_vol: no
+    remove_vol: yes
     remove_s3: no
