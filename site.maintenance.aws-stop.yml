@@ -56,8 +56,8 @@
           rds_instance:
             state: stopped
             region: "{{ aws_region }}"
-            id: "{{ _aws_rds_instance_id }}"
-          when: ( _aws_rds_instance_id == aws_rds_instance_name ) and stop_rds
+            db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
+          when: stop_rds
 
 
   vars:
