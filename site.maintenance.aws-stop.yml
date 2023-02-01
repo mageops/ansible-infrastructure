@@ -77,7 +77,8 @@
               when: _aws_rds_instance_id == aws_rds_instance_name
               rds_instance:
                 state: stopped
-                instance_name: "{{ aws_rds_instance_name }}"
+                region: "{{ aws_region }}"
+                id: "{{ _aws_rds_instance_id }}"
 
   vars:
     stop: yes
