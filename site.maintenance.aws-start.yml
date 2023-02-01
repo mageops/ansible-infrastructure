@@ -72,17 +72,18 @@
           vars:
             start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name, lc: launch_configuration_name}') }}"
 
-        - name: Collect RDS data
-          ansible.builtin.include_role:
-            name: cs.aws-rds-facts
-          when: start_rds
+    - name: Collect RDS data
+      ansible.builtin.include_role:
+        name: cs.aws-rds-facts
+      when: start_rds
 
-        - name: Stop RDS instance
-          rds_instance:
-            state: started
-            region: "{{ aws_region }}"
-            db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-          when: start_rds
+    - name: Start RDS instance
+      rds_instance:
+      state: started
+      region: "{{ aws_region }}"
+      db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
+      when: start_rds
+
   vars:
     start: yes
     start_ec2: "{{ start }}"
