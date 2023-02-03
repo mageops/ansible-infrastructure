@@ -4,6 +4,7 @@
   roles:
     - role: cs.aws-region-facts
     - role: cs.aws-vpc-facts
+    - role: cs.aws-rds-facts
 
   tasks:
     - name: Scale down all App Node ASGs
@@ -47,17 +48,12 @@
           vars:
             stop_ec2_instance_ids: "{{ stop_ec2_instance_info | json_query('instances[].instance_id') }}"
 
-        - name: Collect RDS data
-          ansible.builtin.include_role:
-            name: cs.aws-rds-facts
-          when: stop_rds
-
-        - name: Stop RDS instance
-          rds_instance:
-            state: stopped
-            region: "{{ aws_region }}"
-            db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-          when: stop_rds
+    - name: Stop RDS instance
+      rds_instance:
+        state: stopped
+        region: "{{ aws_region }}"
+        db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
+      when: stop_rds
 
 
   vars:
