@@ -12,6 +12,9 @@
 - name: Enable s3 website config for media bucket
   shell: "aws s3api put-bucket-website --bucket={{ aws_s3_media_bucket }} --website-configuration=file://{{ aws_cloudfront_s3_temp_dir.path }}/s3-website-config.json"
 
+- name: Disable block public access
+  shell: "aws s3api delete-public-access-block --bucket={{ aws_s3_media_bucket }}"
+
 - name: Set s3 website endpoint
   set_fact:
     aws_cloudfront_website_endpoint: "{{ aws_s3_media_bucket }}.{{ aws_s3_website_endpoint }}"
