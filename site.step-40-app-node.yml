@@ -31,6 +31,11 @@
 
     - role: pinkeen.selinux-disable
 
+    - role: cs.centos-update-kernel
+      when: mageops_upgrade_kernel
+
+    - role: cs.tuned
+
     - role: cs.zram
       zram_size_relative: "{{ mageops_app_node_zram_size_relative }}"
       when: mageops_app_node_zram_enable
@@ -83,9 +88,9 @@
       supervisor_service_autostart: no
       supervisor_service_initial_state: stopped
 
-    - role: cs.nginx-url-blacklist
-
     - role: cs.nginx
+
+    - role: cs.nginx-url-blacklist
 
     - role: cs.nginx-magento
       nginx_secure_cron_user: "{{ magento_cron_user }}"

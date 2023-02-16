@@ -70,7 +70,7 @@ location ~* ^/update($|/) {
 {% endif %}
 
 location ~* ^/sitemap\.xml {
-    rewrite ^/sitemap\.xml$ /media/$1 break;
+    rewrite ^/sitemap\.xml$ /media/sitemap.xml break;
 }
 
 
@@ -280,6 +280,17 @@ location ~ cron\.php {
     fastcgi_index cron.php;
     include {{ nginx_magento_fastcgi_pass_include_path}};
 }
+
+{% if mageops_php_file_cache_web %}
+location {{ php_opcache_precompile_path }} {
+    allow   127.0.0.1;
+    deny    all;
+    root    {{ php_opcache_precompile_script_dir }};
+    set $PHP_MAX_EXECUTION_TIME 1000;
+    set $PHP_MEMORY_LIMIT 4G;
+    include /etc/nginx/include.d/magento_fastcgi_pass;
+}
+{% endif %}
 
 {% if nginx_custom_php_scripts_path_pattern %}
 # Custom PHP scripts

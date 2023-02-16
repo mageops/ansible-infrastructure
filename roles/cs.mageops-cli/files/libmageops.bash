@@ -72,3 +72,12 @@ mageops::update_s3_file() {
 
     echo "$content" | aws s3 cp - "$url"
 }
+
+
+mageops::clear_php_opcache() {
+    for die in "${config__opcache_file_paths[@]}";do
+        echo "Clearing opcache $dir..."
+        rm -rf "${config__opcache_file_paths[@]}"
+    done
+    systemctl reload php-fpm
+}

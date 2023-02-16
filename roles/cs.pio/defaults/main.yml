@@ -1,10 +1,14 @@
 # Reference quality targets:
+# 0.0027010000000000003 - q90
 # 0.001591 - q95
+# 0.001218 - q96
+# 0.0009805 - q97
+# 0.000749 - q98
 # 0.000548 - q99
 # 0.0004 - q100
-# 0.0027010000000000003 - q90
 # For more targets check QUALITY_SSIM in pio-worker source code, but you might provide here arbitrary value in 0.0 - 1.0 range
 # but keep in mind that values above 0.1 are propably too crappy for anything
+# Recommended value is below 0.001 - as lower tend to generate visible artifacts on low contrast images
 # Real quality used might be different as we will try to seek for quality that will
 # have SSIM score closest to this value
 pio_media_target_ssim: 0.000548 # this is 99 quality

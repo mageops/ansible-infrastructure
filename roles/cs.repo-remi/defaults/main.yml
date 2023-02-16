@@ -131,18 +131,18 @@ php_repo_remi_variants:
     name: remi-php81-test-debuginfo
     filename: remi-php81
 
-  glpi91:
-    name: remi-glpi91
-    filename: remi-glpi91
-  glpi92:
-    name: remi-glpi92
-    filename: remi-glpi92
-  glpi93:
-    name: remi-glpi93
-    filename: remi-glpi93
-  glpi94:
-    name: remi-glpi94
-    filename: remi-glpi94
+  php82:
+    name: remi-php82
+    filename: remi-php82
+  php82-debuginfo:
+    name: remi-php82-debuginfo
+    filename: remi-php82
+  php82-test:
+    name: remi-php82-test
+    filename: remi-php82
+  php82-test-debuginfo:
+    name: remi-php82-test-debuginfo
+    filename: remi-php82
 
   modular:
     name: remi-modular

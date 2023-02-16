@@ -73,6 +73,9 @@ magento_default_consumer_workers:
   #    process_count: 1
   #    min_magento_version: 2.4.3 # inclusive Optional
   #    max_magento_version: 2.5.0 # exclusive Optional
+  #    area_code: # Optional
+  #    extra_args: # Optional array with additional cli flags
+  #      - --max-messages=1
 # Containerized tasks to be executed post content deploy
 magento_scd_containerized_tasks: []
 

@@ -7,6 +7,7 @@
     - role: cs.aws-node-facts
     - role: cs.aws-autoscaling-facts
 
+
   tasks:
     - name: Start standalone EC2 instances
       when: start_ec2
@@ -42,6 +43,13 @@
         wait_for_instances: yes
         wait_timeout: 600
       with_items: "{{ aws_autoscaling_app_extra }}"
+
+    - name: Start RDS instance
+      rds_instance:
+        state: started
+        region: "{{ aws_region }}"
+        db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
+      when: start_rds
 
     - name: Start RDS instance
       rds_instance:

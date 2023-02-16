@@ -35,15 +35,28 @@
   delegate_to: "{{ _detect_magento_local | ternary('localhost', inventory_hostname) }}"
   become: "{{ _detect_magento_local | ternary(false, true) }}"
 
+- name: Check if config.php is available
+  stat:
+    path: "{{ _magento_dir }}/app/etc/config.php"
+  register: _magento_config_php_exists
+
+
 - name: Get enabled Magento modules
   shell: >-
-      php -r 'echo(implode(array_keys(array_filter((include("app/etc/config.php"))["modules"])), "\n"));'
+      php -r 'echo(implode("\n", array_keys(array_filter((include("app/etc/config.php"))["modules"] ?? []))));'
   args:
     chdir: "{{ _magento_dir }}"
   register: magento_config_php_enabled_modules_result
   changed_when: false
   delegate_to: "{{ _detect_magento_local | ternary('localhost', inventory_hostname) }}"
   become: "{{ _detect_magento_local | ternary(false, true) }}"
+  when: _magento_config_php_exists.stat.exists
+
+- fail:
+    msg: |
+      composer.lock not found in {{ _magento_dir }}
+      on {{ _detect_magento_local | ternary('localhost', inventory_hostname) }}
+  when: magento_composer_lock_packages_result.stdout == ''
 
 - name: Set Magento facts
   set_fact:
@@ -52,7 +65,7 @@
     # A dict of package name => package version
     magento_packages: "{{ magento_composer_lock_packages_result.stdout | from_json }}"
     # A list of *enabled* modules
-    magento_modules: "{{ magento_config_php_enabled_modules_result.stdout_lines }}"
+    magento_modules: "{{ magento_config_php_enabled_modules_result.stdout_lines if _magento_config_php_exists.stat.exists else [] }}"
 
 - name: Set magento version if not defined
   when: magento_version is not defined

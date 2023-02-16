@@ -37,3 +37,12 @@
     loop_var: entry
     label: "{{ entry.path }}"
   register: tmpfiles_config
+
+- name: Create restart php-fpm workaround cron job
+  copy:
+    content: "systemctl reload php-fpm"
+    dest: /etc/cron.weekly/reload-php-fpm
+    owner: root
+    group: root
+    mode: u=rwx,g=rx,o=rx
+  when: php_fpm_weekly_restart

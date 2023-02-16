@@ -1,0 +1,5 @@
+php_opcache_prewarm_dirs: []
+php_opcache_prewarm_verbose: yes
+# php_opcache_precompile_script_dir:
+# php_opcache_precompile_path
+# php_opcache_precompile_script

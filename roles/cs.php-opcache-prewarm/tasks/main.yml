@@ -1,0 +1,40 @@
+- name: Create directory
+  file:
+    state: directory
+    path: "{{ php_opcache_precompile_script_dir }}"
+
+- name: Copy opcache compile script
+  copy:
+    dest: "{{ php_opcache_precompile_script }}"
+    src: compile_opcache.php
+
+- name: Precompile scripts
+  shell: |
+    FILES=$(curl -sf 'http://localhost{{php_opcache_precompile_path}}' --data 'VERBOSE={{ php_opcache_prewarm_verbose | ternary('1', '0') }}
+    {%- for dir in php_opcache_prewarm_dirs -%}
+      &DIRS%5B%5D={{ dir }}
+    {%- endfor -%}
+    ')
+    for file in $FILES;do
+      curl -sf 'http://localhost{{php_opcache_precompile_path}}' --data "VERBOSE={{ php_opcache_prewarm_verbose | ternary('1', '0') }}&FILE=$file"
+    done
+
+- name: Install vmtouch
+  yum:
+    name: vmtouch
+    state: present
+
+- name: Install systemd scripts
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: "preload-magento-opcache.service", dest: "/etc/systemd/system/preload-magento-opcache.service", mode: "0644" }
+    - { src: "preload-magento-opcache.timer", dest: "/etc/systemd/system/preload-magento-opcache.timer", mode: "0644" }
+
+- name: Enable preload
+  service:
+    name: preload-magento-opcache.timer
+    enabled: yes
+    state: started

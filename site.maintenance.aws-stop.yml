@@ -3,7 +3,6 @@
   connection: local
   roles:
     - role: cs.aws-region-facts
-    - role: cs.aws-vpc-facts
     - role: cs.aws-rds-facts
     - role: cs.aws-node-facts
     - role: cs.aws-autoscaling-facts
@@ -38,7 +37,6 @@
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
       when: stop_rds
-
 
   vars:
     stop: yes

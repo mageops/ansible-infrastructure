@@ -53,7 +53,7 @@ if ( $uri !~ {{ rule.required_path_regex }} ) {
 {% endif -%}
 
 {%- if rule.required_server_name is defined %}
-if ( $server_name = "{{ rule.required_server_name }}" ) {
+if ( $server_name != "{{ rule.required_server_name }}" ) {
   set $match_{{loop.index}} 0;
 }
 {% endif -%}
