@@ -53,7 +53,7 @@
         state: stopped
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-      when: stop_rds
+      when: stop_rds and aws_rds_instance is defined
 
 
   vars:
