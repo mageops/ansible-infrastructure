@@ -10,10 +10,6 @@ cluster.name: {{ elasticsearch_cluster_name }}
 cluster.initial_master_nodes: ["{{ elasticsearch_node_name }}"]
 {% endif %}
 
-{% if elasticsearch_version_number is version('7.16.0', '>=') %}
-cluster.deprecation_indexing.enabled: false
-{% endif %}
-
 path.data: /var/lib/elasticsearch
 path.logs: /var/log/elasticsearch
 
