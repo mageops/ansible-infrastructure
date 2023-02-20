@@ -10,7 +10,6 @@ cluster.name: {{ elasticsearch_cluster_name }}
 discovery.type: single-node
 {% endif %}
 
-
 {% if elasticsearch_version_number is version('7.16.0', '>=') %}
 cluster.deprecation_indexing.enabled: false
 xpack.security.enabled: false

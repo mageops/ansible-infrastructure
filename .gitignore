@@ -19,3 +19,4 @@ __pycache__/
 
 /test.*
 /callback_plugins/clean.py
+.vscode/

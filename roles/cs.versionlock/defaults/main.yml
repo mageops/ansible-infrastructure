@@ -8,6 +8,3 @@ versionlock_packages: []
 versionlock_ban_packages: []
 
 # node_name:
-
-#When ES is not limited to version
-mageops_elasticsearch_version:

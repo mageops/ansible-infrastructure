@@ -1511,6 +1511,7 @@ nginx_blacklist_vhost_check_include_file: "{{ nginx_etc_dir }}/magento_url_black
 # ElasticSuite. There's already 8.x though...
 repo_elasticsearch_variants_enabled: ['7']
 # mageops_elasticsearch_version: 8.4
+mageops_elasticsearch_version:
 
 elasticsearch_cluster_name: "{{ mageops_app_id }}"
 elasticsearch_node_name: master
