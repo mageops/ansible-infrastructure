@@ -119,15 +119,3 @@
       smooth_streaming: false
       compress: false
 
-      lambda_function_associations: >-
-        {{
-          aws_cloudfront_use_lambda | ternary(
-            [
-              {
-                "lambda_function_arn": aws_cloudfront_lambda_arn,
-                "event_type": "origin-request"
-              }
-            ],
-            []
-          )
-        }}
