@@ -7,11 +7,12 @@
 
 cluster.name: {{ elasticsearch_cluster_name }}
 {% if elasticsearch_version_number is version('7.0.0', '>=') %}
-cluster.initial_master_nodes: ["{{ elasticsearch_node_name }}"]
+discovery.type: single-node
 {% endif %}
 
 {% if elasticsearch_version_number is version('7.16.0', '>=') %}
 cluster.deprecation_indexing.enabled: false
+xpack.security.enabled: false
 {% endif %}
 
 path.data: /var/lib/elasticsearch
@@ -19,10 +20,28 @@ path.logs: /var/log/elasticsearch
 
 network.host: {{ elasticsearch_network_host }}
 http.port: {{ elasticsearch_http_port }}
+
+{% if elasticsearch_version_number is version('6.7', '>=') %}
+transport.port: {{ elasticsearch_transport_tcp_port }}
+{% else %}
 transport.tcp.port: {{ elasticsearch_transport_tcp_port }}
+{% endif %}
 
 node.name: {{ elasticsearch_node_name }}
-node.data: true
+{% if elasticsearch_version_number is version('7.9.0', '>=') %}
+node.roles: ['data','master']
+{% else %}
 node.master: true
+node.data: true
+{% endif %}
+{% if elasticsearch_version_number is version('8.0.0', '>=') %}
+# Enable or disable encryption for HTTP API client connections, such as Kibana, Logstash, and Agents
+xpack.security.http.ssl:
+  enabled: false
+
+# Enable or disable encryption and mutual authentication between cluster nodes
+xpack.security.transport.ssl:
+  enabled: false
+{% endif %}
 
 bootstrap.memory_lock: {{ elasticsearch_memlock_enable | ternary('true', 'false') }}
