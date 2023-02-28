@@ -955,6 +955,7 @@ magento_admin_user_lastname: Suite
 
 # Path to node warmup script executed at instance start relative to magento app root dir - never need to override...
 magento_node_warmup_script_path: /bin/node-warmup.sh
+mageops_wait_for_warmup_secs: 600
 
 # ------------------------------
 # --------  Magento SCD --------
