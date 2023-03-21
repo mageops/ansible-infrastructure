@@ -58,13 +58,6 @@
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_cron_consumers, recursive=true) }}
 
-    - name: Enable file lock provider
-      when: magento_lock_files_enabled
-      set_fact:
-        magento_app_etc_config: >-
-          {{ magento_app_etc_config
-              | combine(magento_app_etc_config_file_locking, recursive=true) }}
-
     - name: Configure X-Magento-Vary cookie signing
       when: magento_vary_sign
       set_fact:
