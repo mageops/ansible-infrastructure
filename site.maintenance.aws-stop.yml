@@ -21,16 +21,6 @@
         - "{{ aws_autoscaling_app }}"
         - "{{ aws_autoscaling_app_extra }}"
 
-    - name: Stop instances
-      ec2:
-        instance_ids: "{{ item.instance_id }}"
-        region: "{{ aws_region }}"
-        state: stopped
-        wait: no
-      with_items:
-        - "{{ aws_persistent_node_instance }}"
-        - "{{ aws_varnish_node_instance }}"
-
     - name: Stop RDS instance
       rds_instance:
         state: stopped

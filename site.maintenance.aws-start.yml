@@ -49,13 +49,6 @@
         state: started
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-      when: start_rds
-
-    - name: Start RDS instance
-      rds_instance:
-        state: started
-        region: "{{ aws_region }}"
-        db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
       when: start_rds and aws_rds_instance is defined
 
   vars:
