@@ -8,6 +8,17 @@
     - role: cs.aws-autoscaling-facts
 
   tasks:
+    - name: Stop standalone EC2 instances
+      when: stop_ec2
+      ec2:
+        instance_ids: "{{ item.instance_id }}"
+        region: "{{ aws_region }}"
+        state: stopped
+        wait: no
+      with_items:
+        - "{{ aws_persistent_node_instance }}"
+        - "{{ aws_varnish_node_instance }}"
+
     - name: Scale down all App Node ASGs
       when: stop_asg
       ec2_asg:
