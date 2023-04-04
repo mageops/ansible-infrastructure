@@ -26,7 +26,8 @@
             '--elasticsearch-port={{ elasticsearch_http_port }}' \
           {% endif %}
           {% endif %}
-          '--base-url={{ magento_base_url }}'
+          '--base-url={{ magento_base_url }}' \
+          '--no-interaction'
       args:
         chdir: "{{ magento_deployment_dir }}"
   become: true

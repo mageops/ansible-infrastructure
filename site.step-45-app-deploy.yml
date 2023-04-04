@@ -161,7 +161,6 @@
       - 'var/import'
       - 'var/export'
       - 'var/global'
-      - 'var/lock'
     deploy_shared_dirs: "{{ deploy_shared_dirs_basic + deploy_shared_dirs_extra }}"
     deploy_writable_dirs:
       - "var"

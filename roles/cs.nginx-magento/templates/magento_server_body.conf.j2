@@ -22,6 +22,9 @@ location = /WARMUP {
     # If the probe launches magento with no cache it will start
     # warming up by itself causing overload, timeouts and the file
     # generation to fail. In effect the whole env may be down.
+    limit_except HEAD {
+        deny all;
+    }
     try_files $uri =404;
 }
 

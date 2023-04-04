@@ -9,6 +9,10 @@
     s3_bucket_tags:
       Name: "{{ aws_s3_media_bucket }}"
 
+- name: Disable Public Access Block for Media bucket
+  when: aws_s3_media_bucket_create
+  shell: 'aws s3api delete-public-access-block --bucket "{{ aws_s3_media_bucket }}" --region "{{ aws_region }}"'
+
 - name: Create S3 Secret bucket
   s3_bucket:
     state: present

@@ -120,17 +120,7 @@
             "Quantity": 0
         },
         "LambdaFunctionAssociations": {
-{% if aws_cloudfront_use_lambda and aws_cloudfront_lambda_arn %}
-        "Items": [
-            {
-                "EventType": "origin-request",
-                "LambdaFunctionARN": "{{ aws_cloudfront_lambda_arn }}"
-            }
-        ],
-        "Quantity": 1
-{% else %}
-        "Quantity": 0
-{% endif %}
+            "Quantity": 0
         },
         "TargetOriginId": "S3Media",
         "ViewerProtocolPolicy": "allow-all",

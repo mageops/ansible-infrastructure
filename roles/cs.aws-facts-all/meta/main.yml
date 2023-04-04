@@ -13,3 +13,5 @@ dependencies:
     when: aws_facts_gather_security_group
   - role: cs.aws-ami-facts
     when: aws_facts_gather_ami
+  - role: cs.aws-autoscaling-facts
+    when: aws_facts_autoscaling
