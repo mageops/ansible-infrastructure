@@ -63,7 +63,7 @@
       varnish_secure_site: "{{ mageops_secure_site }}"
       varnish_secure_site_user: "{{ mageops_secure_site_user }}"
       varnish_secure_site_password: "{{ mageops_secure_site_password }}"
-      varnish_trusted_ips: "{{ mageops_trusted_cidr_blocks }}"
+      varnish_trusted_ips: "{{ mageops_trusted_cidr_blocks + mageops_trusted_cidrv6_blocks }}"
       varnish_purge_trusted_ips: "{{ (aws_vpc_subnet_prefix is defined)|ternary([aws_vpc_subnet_prefix ~ '.0.0/16'], []) }}"
       varnish_purge_logging: "{{ mageops_varnish_purge_logging }}"
       varnish_debug_request_token: "{{ mageops_debug_token }}"

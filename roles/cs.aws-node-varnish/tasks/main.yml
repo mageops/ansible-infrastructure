@@ -1,7 +1,11 @@
 - name: Start varnish node instance
   amazon.aws.ec2_instance:
     region: "{{ aws_region }}"
-    detailed_monitoring: no
+    detailed_monitoring: false
+    network:
+      assign_public_ip: yes
+      ipv6_addresses:
+        ipv6_address: "2a05:d014:1577:b500::1/64"
     # 2 lines below because of https://github.com/ansible/ansible/issues/20867
     # otherwise state: running would be ok.
     state: "{{ aws_varnish_instance_id | ternary('running', omit) }}"

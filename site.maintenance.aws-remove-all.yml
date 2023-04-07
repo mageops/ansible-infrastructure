@@ -56,6 +56,14 @@
             region: "{{ aws_region }}"
             state: absent
             wait: yes
+      ec2_instance:
+        instance_ids: "{{ item.instance_id }}"
+        region: "{{ aws_region }}"
+        state: absent
+        wait: no
+      with_items:
+        - "{{ aws_persistent_node_instance }}"
+        - "{{ aws_varnish_node_instance }}"
       when: remove_ec2
 
     - name: Remove RDS

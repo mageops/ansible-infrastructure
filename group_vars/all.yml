@@ -405,6 +405,7 @@ aws_persistent_node_instance_type: t3a.micro
 
 # EC2 Elastic IPs
 aws_varnish_node_elastic_ip:
+aws_varnish_node_ipv6:
 aws_persistent_node_elastic_ip:
 
 # EC2 instance EBS volume sizes in GB
@@ -855,7 +856,12 @@ mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_reques
 mageops_trusted_cidr_blocks_global: []
 mageops_trusted_cidr_blocks_extra: []
 
+mageops_trusted_cidrv6_blocks_global: []
+mageops_trusted_cidrv6_blocks_extra: []
+
+
 mageops_trusted_cidr_blocks: "{{ mageops_trusted_cidr_blocks_global + mageops_trusted_cidr_blocks_extra }}"
+mageops_trusted_cidrv6_blocks: "{{ mageops_trusted_cidrv6_blocks_global + mageops_trusted_cidrv6_blocks_extra }}"
 
 
 # -----------------------------------------------------
@@ -1728,7 +1734,7 @@ rabbitmq_amqp_port: 5672
 rabbitmq_enable_management: yes
 
 # This port will provide an HTTP API and management UI
-# - might be useful for debugging and will be accessible from `mageops_trusted_cidr_blocks`
+# - might be useful for debugging and will be accessible from `mageops_trusted_cidr_blocks` and `mageops_trusted_cidrv6_blocks`
 rabbitmq_http_port: 15672
 
 # --------------------------

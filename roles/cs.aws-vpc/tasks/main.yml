@@ -1,8 +1,9 @@
 - name: Create VPC network
-  ec2_vpc_net:
+  amazon.aws.ec2_vpc_net:
     state: present
     region: "{{ aws_region }}"
     cidr_block: "{{ aws_vpc_subnet_prefix }}.0.0/16"
+    ipv6_cidr: true
     name: "{{ aws_vpc_name }}"
     tags: "{{ aws_tags_default }}"
   register: vpc_net
@@ -25,6 +26,7 @@
     tags: "{{ aws_tags_default | combine(vpc_subnet_tags) }}"
     az: "{{ az_name }}"
     cidr: "{{ aws_vpc_subnet_prefix }}.{{ az_index + 1 }}.0/25"
+    ipv6_cidr: "{{ vpc_net.vpc.ipv6_cidr_block_association_set | map(attribute='ipv6_cidr_block') | list | join('') | regex_replace('00::/56','') + '0' + (az_index | string) + '::/64' }}"
   vars:
     vpc_subnet_tags:
       Name: "{{ aws_vpc_name }}-public-{{ az_name[-2:] }}"

@@ -24,7 +24,7 @@ acl purge {
 acl trusted {
     {% for ip in varnish_trusted_ips %}
     {% if ip | ipaddr('network') %}
-    "{{ ip | ipaddr('network') }}"/{{ ip | ipaddr('prefix') }};
+    "{{ ip | ipaddr('network') }}/{{ ip | ipaddr('prefix') }}";
     {% else %}
     "{{ ip | ipaddr('address') }}";
     {% endif %}
