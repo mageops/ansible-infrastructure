@@ -141,6 +141,16 @@
     apply_immediately: yes
     wait: yes
 
+- name: Wait for upgrade to finish
+  rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_instance_name }}"
+  register: _aws_rds_wait_upgrade_result
+  retries: 600
+  delay: 5
+  until: _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "available" or _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "Storage-optimization"
+  when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].engine_version != aws_rds_db_engine_version
+
 - name: Remove temporary parameter groups used for engine upgrade
   rds_param_group:
     state: absent
