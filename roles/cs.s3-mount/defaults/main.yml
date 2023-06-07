@@ -21,6 +21,7 @@ s3fs_options_s3fs:
     - "connect_timeout=900"
     - "iam_role={{ s3fs_iam_role }}"
     - "ensure_diskfree={{ s3fs_ensure_diskfree_mb }}"
+    - "endpoint={{ aws_region }}"
 
 s3fs_options_goofys:
     - "--uid={{ s3fs_owner_uid }}"
