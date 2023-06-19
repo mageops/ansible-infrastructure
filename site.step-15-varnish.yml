@@ -6,6 +6,11 @@
       delegate_to: localhost
       become: no
       when: aws_use
+    - role: cs.aws-vpc-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
     - role: cs.switch-to-dnf
     - role: cs.versionlock
       node_name: varnish
@@ -16,6 +21,8 @@
       when: mageops_upgrade_kernel
     - role: cs.tuned
     - role: cs.swap
+    - role: cs.aws-efs-logs
+      when: aws_use
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
     - role: cs.packages

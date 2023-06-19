@@ -194,6 +194,30 @@
       Name: "{{ aws_security_group_efs_name }}"
   register: aws_security_group_efs
 
+
+- name: Create security group for EFS Logs
+  ec2_group:
+    name: "{{ aws_security_group_efs_logs_name }}"
+    description: "{{ mageops_app_name }} EFS security group"
+    region: "{{ aws_region }}"
+    purge_rules: no
+    rules:
+      - proto: tcp
+        ports: [2049]
+        group_name: "{{ aws_security_group_app_name }}"
+      - proto: tcp
+        ports: [2049]
+        group_name: "{{ aws_security_group_persistant_name }}"
+      - proto: tcp
+        ports: [2049]
+        group_name: "{{ aws_security_group_lb_name }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
+  vars:
+    ec2_sg_tags:
+      Name: "{{ aws_security_group_efs_logs_name }}"
+  when: aws_efs_logs_enabled
+
 - name: Allow app to access varnish
   ec2_group:
     name: "{{ aws_security_group_varnish_name }}"

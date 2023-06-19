@@ -1,0 +1,6 @@
+- name: Enable AWS efs logs storage
+  include_tasks: enable.yml
+  when: aws_efs_logs_enabled
+- name: Disable AWS efs logs storage
+  include_tasks: disable.yml
+  when: not aws_efs_logs_enabled

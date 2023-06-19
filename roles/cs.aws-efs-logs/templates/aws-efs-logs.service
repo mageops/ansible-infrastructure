@@ -1,0 +1,13 @@
+[Unit]
+Description=Move /var/log to efs mount
+DefaultDependencies=no
+RequiresMountsFor=/var/log {{ aws_efs_logs_efs_dir }}
+IgnoreOnIsolate=yes
+
+[Service]
+Type=oneshot
+ExecStart={{ aws_efs_mount_script_path }}
+RemainAfterExit=yes
+
+[Install]
+WantedBy=network-online.target

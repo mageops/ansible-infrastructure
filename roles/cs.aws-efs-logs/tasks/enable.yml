@@ -1,0 +1,17 @@
+- name: Install migration script
+  template:
+    src: move-logs-to-efs.sh
+    dest: "{{ aws_efs_mount_script_path }}"
+    mode: 0700
+
+- name: Install service
+  template:
+    src: aws-efs-logs.service
+    dest: "/etc/systemd/system/aws-efs-logs.service"
+    mode: 0700
+
+- name: Enable service
+  service:
+    name: aws-efs-logs.service
+    state: started
+    enabled: yes
