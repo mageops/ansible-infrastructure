@@ -8,6 +8,27 @@
     - role: cs.aws-autoscaling-facts
 
   tasks:
+    - name: Scale down all App Node ASGs
+      when: stop_asg
+      block:
+        - name: Get App Node Auto Scaling Groups
+          ec2_asg_facts:
+            region: "{{ aws_region }}"
+            tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
+          register: stop_asg_facts
+
+        - name: Scale down ASG to zero
+          ec2_asg:
+            name: "{{ item.name }}"
+            region: "{{ aws_region }}"
+            state: present
+            desired_capacity: 0
+            min_size: 0
+            wait_for_instances: no
+          with_items: "{{ stop_asgs }}"
+          vars:
+            stop_asgs: "{{ stop_asg_facts | json_query('results[].{ name: auto_scaling_group_name }') }}"
+
     - name: Stop standalone EC2 instances
       when: stop_ec2
       ec2:
