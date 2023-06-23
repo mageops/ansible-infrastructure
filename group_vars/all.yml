@@ -224,7 +224,7 @@ aws_tags_kms_database:
 
 # AMI Name search pattern matching official Rocky linux 9 Marketplace AMI
 # Warning! You need to be subscribed to it first!
-aws_ami_base_marketplace_name: "Rocky-9-EC2-*"
+aws_ami_base_marketplace_name: "Rocky-9-EC2-Base-*"
 
 # Whether to kill previously created builder or reuse it on next run
 aws_ami_build_force_fresh_builder: no
