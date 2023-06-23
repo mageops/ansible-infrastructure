@@ -1,5 +1,5 @@
 - name: Install node-exporter
-  yum:
+  dnf:
     name: node-exporter
     state: latest
 

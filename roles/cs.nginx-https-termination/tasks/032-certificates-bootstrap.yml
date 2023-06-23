@@ -1,6 +1,6 @@
 - name: Install ansible runtime deps
-  yum:
-    name: python2-cryptography
+  dnf:
+    name: python3-cryptography
     state: present
 
 - name: Generate vhost private key

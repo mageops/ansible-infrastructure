@@ -6,4 +6,3 @@ repo_nginx_variants:
 
 repo_nginx_variants_enabled:
   - stable
-

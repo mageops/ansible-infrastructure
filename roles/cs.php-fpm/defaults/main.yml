@@ -3,7 +3,7 @@
 php_fpm_daemon_conf_file_path: "/etc/php-fpm.conf"
 php_fpm_pid_file_path: "{{ php_fpm_run_dir_path }}/php-fpm.pid"
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
-php_fpm_run_dir_path: "/var/run/php-fpm"
+php_fpm_run_dir_path: "/run/php-fpm"
 php_fpm_log_dir_path: "/var/log/php-fpm"
 
 php_fpm_listen_allowed_clients: "127.0.0.1"

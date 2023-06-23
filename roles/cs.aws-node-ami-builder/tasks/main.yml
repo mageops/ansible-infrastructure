@@ -50,8 +50,7 @@
           | flatten
           | map(attribute='value')
           | map(attribute='volume_id')
-          | list
-          | to_nice_json }}
+          | list }}
     aws_ebs_volume_modify_type: "{{ aws_builder_node_ebs_volume_type }}"
     aws_ebs_volume_modify_iops: "{{ aws_builder_node_ebs_gp3_iops }}"
     aws_ebs_volume_modify_throughput: "{{ aws_builder_node_ebs_gp3_throughput }}"

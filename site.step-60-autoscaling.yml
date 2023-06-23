@@ -5,6 +5,7 @@
   gather_facts: no
   roles:
     - role: cs.aws-ami-facts
+      ami_facts_instance: "{{ aws_app_node_instance_type }}"
       delegate_to: localhost
   tasks:
     - block:
@@ -59,6 +60,9 @@
             )
         }}
   roles:
+    - role: cs.aws-ami-facts
+      ami_facts_instance: "{{ aws_app_node_instance_type }}"
+      delegate_to: localhost
     - role: cs.aws-autoscaling
       autoscaling_assign_public_ip: yes
       autoscaling_loadbalancers: "{{ aws_app_asg_load_balancers }}"

@@ -1,18 +1,2 @@
 allow_duplicates: no
 dependencies:  []
-
-galaxy_info:
-  author: Filip Sobalski <filip.sobalski@creativestyle.pl>
-  description: A collection of ansible plugins
-  company: creativestyle Polska
-  license: license (BSD, MIT)
-  min_ansible_version: 2.7
-  galaxy_tags:
-    - plugins
-    - filters
-    - filter_plugins
-    - ansible
-    - meta
-    - library
-
-

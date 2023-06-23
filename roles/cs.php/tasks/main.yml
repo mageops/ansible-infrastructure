@@ -1,5 +1,8 @@
+- name: Enable php module
+  shell: "dnf module reset php -y && dnf module install -y php:remi-{{ php_version }}"
+
 - name: Install PHP and dependency packages
-  yum:
+  dnf:
     name: >-
       {{
           (
@@ -124,10 +127,9 @@
     enabled: no
     daemon_reload: yes
   when: php_tmpfiles_service_config is changed
-  
+
 - name: Ensure tmpfiles maintenance service is enabled
   systemd:
     name: php-tmpfiles
     state: started
     enabled: yes
-    

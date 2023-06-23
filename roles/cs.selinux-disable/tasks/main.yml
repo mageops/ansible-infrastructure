@@ -1,0 +1,25 @@
+- name: Check if selinux is installed
+  stat:
+    path: /etc/selinux/config
+  register: selinux_config_file
+
+- name: Disable selinux if installed
+  when: selinux_config_file.stat.exists is defined and selinux_config_file.stat.exists
+  block:
+    - name: Install libselinux
+      dnf:
+        name: python3-libselinux
+        state: present
+
+    - name: Make selinux permissive
+      ansible.posix.selinux:
+        policy: targeted
+        state: permissive
+
+    - name: disable in active system
+      shell: setenforce 0
+
+    - name: remove setroubleshoot-server
+      dnf:
+        name: setroubleshoot-server
+        state: absent

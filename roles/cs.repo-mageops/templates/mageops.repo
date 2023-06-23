@@ -1,0 +1,8 @@
+[mageops]
+name=Mageops repository
+baseurl=https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/$basearch
+gpgcheck=1
+gpgkey=https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/$basearch/RPM-GPG-KEY-MAGEOPS
+enabled=1
+failovermethod=priority
+autorefresh=1

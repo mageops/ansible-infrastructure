@@ -63,12 +63,6 @@
             magento_core_config_settings: "{{ magento_core_config_settings + magento_baler_js_bundling_core_config }}"
   when: magento_scd_advanced_js_bundling and magento_scd_advanced_js_bundling_strategy == 'baler'
 
-- name: Install required python modules
-  yum:
-    # Required for the `mysql_query` module
-    name: python2-PyMySQL
-    state: present
-
 - name: Check if database is initialized
   command: mysql -N --batch -u {{ mageops_app_mysql_user|quote }} -p{{ mageops_app_mysql_pass|quote }} -h {{ mageops_mysql_host|quote }} -e "SHOW TABLES FROM `{{ mageops_app_mysql_db }}` LIKE 'admin_user';"
   changed_when: false

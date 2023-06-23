@@ -11,7 +11,7 @@
     force: yes
 
 - name: Install php-fpm-exporter
-  yum:
+  dnf:
     name: php-fpm-exporter
     state: latest
 

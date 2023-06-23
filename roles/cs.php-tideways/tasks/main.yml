@@ -19,9 +19,9 @@
         description: Tideways
         baseurl: https://packages.tideways.com/yum-packages-main
         gpgkey: "{{ tideways_repo_gpgkeys }}"
-          
+
     - name: Install tideways packages
-      yum:
+      dnf:
         state: present
         name: "{{ tideways_packages }}"
       notify: PHP Configuration Changed
@@ -43,7 +43,7 @@
   when: not tideways_enable
   block:
     - name: Uninstall tideways packages
-      yum:
+      dnf:
         name: "{{ tideways_packages }}"
         state: absent
 
@@ -58,5 +58,3 @@
       loop_control:
         loop_var: filepath
       notify: PHP Configuration Changed
-
-

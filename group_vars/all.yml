@@ -220,9 +220,9 @@ aws_tags_kms_database:
 # --------  AMI  --------
 # -----------------------
 
-# AMI Name search pattern matching official CentOS 7 Marketplace AMI
+# AMI Name search pattern matching official Rocky linux 9 Marketplace AMI
 # Warning! You need to be subscribed to it first!
-aws_ami_base_marketplace_name: "*b7ee8a69-ee97-4a49-9e68-afaee216db2e*"
+aws_ami_base_marketplace_name: "Rocky-9-EC2-*"
 
 # Whether to kill previously created builder or reuse it on next run
 aws_ami_build_force_fresh_builder: no
@@ -721,9 +721,7 @@ mageops_language_redirect_enable: no
 mageops_language_redirect_mode: normal
 
 # Configure a vmtouch daemon force-keeping magento sources / compiled opcache in RAM
-mageops_magento_preload_fscache_enable: >-
-  {{ ( ansible_memtotal_mb | default(512, true) | int >= 7168 )
-        and php_cli_opcache_file_cache_enable | default(false, true) }}
+mageops_magento_preload_fscache_enable: no
 
 # Tune Linux Virtual Memory kernel sysctl params for lower disk IO
 mageops_app_node_optimize_kernel_vm_io: yes
@@ -1330,7 +1328,7 @@ php_fpm_pool_name: "{{ mageops_app_type }}"
 
 php_fpm_umask: "{{ mageops_app_umask }}"
 
-php_fpm_run_dir_path: "/var/run/php-fpm"
+php_fpm_run_dir_path: "/run/php-fpm"
 php_fpm_log_dir_path: "/var/log/php-fpm"
 
 php_fpm_pool_conf_dir_path: "/etc/php-fpm.d"
@@ -1556,7 +1554,7 @@ https_termination_proxy_http_port: "{{ https_termination_hide_varnish | default(
 https_termination_proxy_read_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
 
 # Special logging setup for requests for cacheable HTML pages which were a cache MISS
-https_termination_page_cache_misses_logging: yes
+https_termination_page_cache_misses_logging: no
 https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-cache-misses.json.log"
 
 https_termination_redirect_source_domain_param: _redirect_from
@@ -1772,10 +1770,10 @@ deploy_release_save_info_file_path: "{{ mageops_ansible_temp_dir }}/RELEASE.json
 # --------------------------------------
 
 # Whether to install and enable the earlyoom daemon
-mageops_earlyoom_enable: yes
+mageops_earlyoom_enable: no
 
 earlyoom_ram_min_percent: 7
-earlyoom_swap_min_percent: 40
+earlyoom_swap_min_percent: 10
 mageops_cli_features_dir: /usr/local/lib/mageops/features
 
 # ----------------------------
@@ -1794,11 +1792,8 @@ mageops_packages_banned:
 
 # Basic packages needed for ansible/provisioning
 mageops_packages_base:
-  - python
-  - python2-pip
-  - python2-PyMySQL
-  - yum-utils
-  - yum-plugin-verify
+  - python3-pip
+  - python3-PyMySQL
   - unzip
   - git
   - rsync
@@ -1872,7 +1867,8 @@ packages_remove: "{{ mageops_packages_banned }}"
 # Package locks, for more info, check cs.versionlock role
 
 # Package locks per instance
-versionlock_varnish_packages: []
+versionlock_varnish_packages:
+  - varnish-6.0.*
 versionlock_persistent_packages: []
 versionlock_app_node_packages: []
 

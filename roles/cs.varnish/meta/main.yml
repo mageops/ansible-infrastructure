@@ -5,26 +5,3 @@ dependencies:
   - role: cs.aws-cloudfront-facts
     delegate_to: localhost
     when: aws_use and aws_cloudfront_distribution_create
-
-
-galaxy_info:
-  author: creativestyle
-  description: Varnish server for MageOps Infrastructure
-  company: creativestyle Polska
-  license: license (BSD, MIT)
-  min_ansible_version: 2.7
-  platforms:
-    - name: EL
-      versions: [7]
-  galaxy_tags:
-    - varnish
-    - aws
-    - autoscaling
-    - webserver
-    - server
-    - http
-    - proxy
-    - mageops
-    - magento
-    - magesuite
-    - creativestyle

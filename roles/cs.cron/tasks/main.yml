@@ -1,5 +1,5 @@
 - name: Install Cron deamon
-  yum:
+  dnf:
     name: cronie
     state: latest
   become: true

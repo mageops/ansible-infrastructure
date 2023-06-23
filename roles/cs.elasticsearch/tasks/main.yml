@@ -25,7 +25,7 @@
       {{ entry.argument | default('-') }}
     create: yes
   loop:
-    - path: /var/run/elasticsearch/
+    - path: /run/elasticsearch/
     - path: /var/log/elasticsearch/
     - path: /var/lib/elasticsearch/
     - path: /var/log/elasticsearch/*.log

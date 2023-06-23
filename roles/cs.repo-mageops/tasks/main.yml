@@ -1,65 +1,10 @@
-- name: Check status MageOps repo config file
-  stat:
-    path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"
-  register: _repo_mageops_config_file_check
+- name: Install mageops repo
+  template:
+    src: mageops.repo
+    dest: "/etc/yum.repos.d/mageops.repo"
+    mode: 0644
 
-- name: Check current keyring key
-  stat:
-    path: "{{ repo_mageops_gpg_key_location }}"
-  register: _repo_mageops_gpg_key_check
-
-- name: Decide if bootstrap is required
-  set_fact:
-    _repo_mageops_bootstrap_required: "{{ not _repo_mageops_config_file_check.stat.exists or not _repo_mageops_gpg_key_check.stat.exists }}"
-
-- name: Install Mageops GPG key
+- name: Install gpg cert
   rpm_key:
     state: present
-    key: "{{ repo_mageops_gpg_key }}"
-
-- name: Bootstrap MageOps repo by installing remote package
-  yum:
-    name: "{{ repo_mageops_release_package_url }}"
-    state: present
-  register: result
-  until: result is succeeded
-  retries: "{{ repo_mageops_installation_retries }}"
-  delay: "{{ repo_mageops_installation_delay }}"
-  when: _repo_mageops_bootstrap_required
-  notify: Regenerate yum cache for MageOps repo
-
-- name: Check if repo update is required
-  stat:
-    path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}.rpmnew"
-  register: _repo_mageops_repo_update
-
-# There is not move functionality to move file.
-# Doing copy + delete is more complex so we just execute shell here
-# We could also run rpmconf command, but this makes no sense to install that just for this
-- name: Update repository configuration
-  command: "mv '/etc/yum.repos.d/{{ repo_mageops_config_name }}.rpmnew' '/etc/yum.repos.d/{{ repo_mageops_config_name }}'"
-  when: _repo_mageops_repo_update.stat.exists
-
-- name: Set higher priority for mageops repo
-  block:
-    - name: Install priorities plugin
-      yum:
-        name:
-          - yum-utils
-          - yum-plugin-priorities
-    - name: Set priority for mageops repo
-      ini_file:
-        path: "/etc/yum.repos.d/{{ repo_mageops_config_name }}"
-        section: mageops
-        option: priority
-        value: "{{ mageops_repo_priority | string }}"
-        backup: no
-        no_extra_spaces: yes
-  when: mageops_repo_priority | bool
-
-- name: Make sure MageOps repo release package is up to date
-  yum:
-    name: "{{ repo_mageops_release_package_name }}"
-    state: latest
-  when: _repo_mageops_bootstrap_required
-  notify: Regenerate yum cache for MageOps repo
+    key: https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY

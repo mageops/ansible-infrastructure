@@ -1,5 +1,5 @@
 - name: Install certbot
-  yum:
+  dnf:
     state: present
     name: certbot
 
@@ -99,4 +99,3 @@
     enabled: yes
     masked: no
   notify: Reload systemctl daemon
-

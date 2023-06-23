@@ -1,5 +1,5 @@
 - name: Get info about VPC networks
-  ec2_vpc_net_facts:
+  amazon.aws.ec2_vpc_net_info:
     region: "{{ aws_region }}"
     filters: "{{ aws_vpc_facts_net_filters | combine (aws_vpc_facts_net_tags | prefix_keys('tag:')) }}"
   register: vpc_net_facts

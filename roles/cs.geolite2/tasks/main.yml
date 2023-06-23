@@ -1,5 +1,5 @@
 - name: Install geolite2 pakcages
-  yum:
+  dnf:
     name: "{{ packages }}"
   vars:
     packages:

@@ -1,11 +1,11 @@
 - name: Install RabbitMQ Erlang Package
-  yum:
+  dnf:
     allow_downgrade: no
     name: "erlang"
   notify: Restart rabbitmq
 
 - name: Install RabbitMQ Package
-  yum:
+  dnf:
     allow_downgrade: no
     name: "rabbitmq-server"
   notify: Restart rabbitmq

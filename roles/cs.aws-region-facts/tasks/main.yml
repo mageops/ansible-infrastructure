@@ -1,5 +1,5 @@
 - name: Get AWS region
-  aws_region_facts:
+  community.aws.aws_region_info:
     region: "{{ aws_region }}"
   register: region_facts
 
@@ -42,4 +42,3 @@
   set_fact:
     aws_s3_website_endpoint: "{{ aws_s3_website_info.website_endpoint }}"
     cacheable: yes
-

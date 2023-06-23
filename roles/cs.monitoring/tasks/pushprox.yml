@@ -1,5 +1,5 @@
 - name: Install pushprox
-  yum:
+  dnf:
     name: pushprox-client
     state: latest
 

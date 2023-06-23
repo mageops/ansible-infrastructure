@@ -1,5 +1,5 @@
 - name: Install varnish-exporter
-  yum:
+  dnf:
     name: varnish-exporter
     state: latest
 

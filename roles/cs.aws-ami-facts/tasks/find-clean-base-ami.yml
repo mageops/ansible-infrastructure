@@ -1,24 +1,27 @@
-- name: Find clean base AMIs
-  ec2_ami_facts:
-    region: "{{ aws_region }}"
-    filters: "{{ ami_facts_common_filters | combine(ami_facts_clean_base_filters) }}"
-  register: ami_clean_base_facts
+- block:
+  - name: Find clean base AMIs
+    amazon.aws.ec2_ami_info:
+      region: "{{ aws_region }}"
+      filters: "{{ ami_facts_common_filters | combine(ami_facts_clean_base_filters) }}"
+    register: ami_clean_base_facts
 
-- name: Fail if no clean base AMI is found
-  fail:
-    msg: Error! No clean base AMI found!
-  when: ami_clean_base_facts.images | length == 0
+  - name: Fail if no clean base AMI is found
+    fail:
+      msg: Error! No clean base AMI found!
+    when: ami_clean_base_facts.images | length == 0
 
-- name: Set latest clean base AMI info fact
-  set_fact:
-    aws_ami_clean_base_info: "{{ ami_clean_base_facts.images | sort(attribute='creation_date') | last }}"
+  - name: Set latest clean base AMI info fact
+    set_fact:
+      aws_ami_clean_base_info_best: "{{ ami_clean_base_facts.images | sort(attribute='creation_date') | last }}"
+
+  - name: Set base clean AMI facts
+    set_fact:
+      aws_ami_clean_base_info: "{{ aws_ami_clean_base_info | combine( {ami_facts_architecture: aws_ami_clean_base_info_best} ) }}"
+  when: aws_ami_clean_base_info[ami_facts_architecture] is not defined
 
 - name: Set base clean AMI facts
   set_fact:
-    aws_ami_clean_base_id: "{{ aws_ami_clean_base_info.image_id }}"
-    aws_ami_clean_base_name: "{{ aws_ami_clean_base_info.name }}"
-    aws_ami_clean_base_location: "{{ aws_ami_clean_base_info.image_location }}"
-    aws_ami_root_device: "{{ aws_ami_clean_base_info.root_device_name }}"
+    aws_ami_clean_base_info: "{{ aws_ami_clean_base_info | combine( {ami_facts_instance: aws_ami_clean_base_info[ami_facts_architecture]} ) }}"
 
 - name: Print information about base AMI found
   debug:
@@ -26,9 +29,4 @@
       Clean base AMI information
       ==========================
 
-      {{ aws_ami_clean_base_name }} [{{ aws_ami_clean_base_id }}]
-      ({{ aws_ami_clean_base_location }})
-
-      --- Details ---
-      
       {{ aws_ami_clean_base_info | to_nice_yaml }}
