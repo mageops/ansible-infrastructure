@@ -17,8 +17,8 @@
     mysql_root_password_update: yes
     mysql_daemon: mysqld
     mysql_packages:
-      - mysql-server
-      - mysql-client
+      - mysql-community-server
+      - mysql-community-client
     mysql_syslog_tag: mysqld
     mysql_pid_file: /var/run/mysqld/mysqld.pid
     mysql_socket: /var/lib/mysql/mysql.sock
@@ -26,3 +26,4 @@
     mysql_log_error: /var/log/mysqld.err
     mysql_slow_query_log_enabled: yes
     mysql_slow_query_time: 1
+    mysql_log: ""

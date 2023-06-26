@@ -14,8 +14,6 @@
       aws_security_group_elasticsearch_create: "{{ mageops_elasticsearch_create }}"
     - role: cs.aws-s3
     - role: cs.aws-cloudfront
-      aws_cloudfront_use_lambda: no
-      aws_cloudfront_lambda_arn: ~
       when: aws_cloudfront_distribution_create | bool
     - role: cs.aws-ses
       ses_email: "{{ mageops_email_ses_address | default(none, true) }}"

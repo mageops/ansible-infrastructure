@@ -40,10 +40,6 @@ magento_efs_app_mounts_basic:
     remote_path: "{{ magento_efs_global_data_remote_path }}"
     owner: "{{ magento_user }}"
     group: "{{ magento_group }}"
-  - local_mountpoint: "{{ magento_efs_locks_data_app_path }}"
-    remote_path: "{{ magento_efs_locks_data_remote_path }}"
-    owner: "{{ magento_user }}"
-    group: "{{ magento_group }}"
 
 magento_efs_static_cache_release_remote_path: "{{ magento_efs_static_cache_releases_remote_path }}/{{ deploy_release_id }}"
 

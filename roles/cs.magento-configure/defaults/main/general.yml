@@ -17,15 +17,6 @@ magento_node_warmup_script_path: /bin/node-warmup.sh
 
 magento_install_sample_data: no
 
-# Note: When file locks are used they must be shared across app instances
-# so enable this feature only if the lock file dir is an EFS/NFSv4 share or
-# this is a single-instance non-AWS deployment!
-#
-# Whether to enable file lock provider (db is the default)
-magento_lock_files_enabled: no
-# Path to the directory to place locks in
-magento_lock_files_dir: var/lock
-
 # Whether to enable http cache config in app/etc/env.php
 magento_http_cache_enable: yes #TODO: "{{ magento_varnish_host | default(false, true) }}"
 
@@ -73,6 +64,9 @@ magento_default_consumer_workers:
   #    process_count: 1
   #    min_magento_version: 2.4.3 # inclusive Optional
   #    max_magento_version: 2.5.0 # exclusive Optional
+  #    area_code: # Optional
+  #    extra_args: # Optional array with additional cli flags
+  #      - --max-messages=1
 # Containerized tasks to be executed post content deploy
 magento_scd_containerized_tasks: []
 

@@ -42,3 +42,23 @@
           with_items: "{{ aws_magento_cron_files_install + aws_magento_cron_files_install_templated }}"
       when: aws_magento_cron_service_exists.stat.exists
   when: "not aws_magento_cron_enabled or magento_cron_disabled"
+
+- name: Install crons
+  cron:
+    name: "{{ item.name }}"
+    job: |
+      {%- if item.only_cron_node -%}
+        /usr/local/bin/mageopscli is_cron_node &&
+      {%- endif -%}
+      {%- if item.magento_command -%}
+        cd {{ magento_live_release_dir }} && bin/magento {{ item.command }}
+      {%- else -%}
+        {{ item.command }}
+      {%- endif -%}
+    user: "{{ item.magento_command | ternary(magento_user, item.user) }}"
+    month: "{{ item.month | default(omit) }}"
+    weekday: "{{ item.weekday | default(omit) }}"
+    day: "{{ item.day | default(omit) }}"
+    hour: "{{ item.hour | default(omit) }}"
+    minute: "{{ item.minute | default(omit) }}"
+  loop: "{{ aws_magento_cron_crons }}"

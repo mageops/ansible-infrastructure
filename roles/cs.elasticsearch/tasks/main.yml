@@ -29,7 +29,7 @@
     - path: /var/log/elasticsearch/
     - path: /var/lib/elasticsearch/
     - path: /var/log/elasticsearch/*.log
-      mode: '0644'
+      mode: "0644"
       type: z
   loop_control:
     loop_var: entry
@@ -156,7 +156,7 @@
     - name: Remove current elasticsearch plugins so new version is installed
       command: "/usr/share/elasticsearch/bin/elasticsearch-plugin remove {{ item }} --verbose"
       args:
-        removes:  "/usr/share/elasticsearch/plugins/{{ item }}"
+        removes: "/usr/share/elasticsearch/plugins/{{ item }}"
       loop: "{{ elasticsearch_plugin_list_command.stdout_lines }}"
   when: >-
     elasticsearch_version_number != elasticsearch_running_version_number
@@ -184,6 +184,7 @@
     delay: 6
     timeout: 60
 
-- name: Fix deprecation indexes
+- name: Fix deprecation indexes settings
   shell: >-
-    for index in $(curl -s http://localhost:9200/_cat/shards?format=json | jq -r '.[] | select(.state == "UNASSIGNED") | select(.index | startswith(".ds-.logs")) | .index');do echo -e "\nFixing $index: ";curl -s -XPUT "http://localhost:9200/$index/_settings" -H "Content-Type: application/json" --data '{"index": {"number_of_replicas": 0}}' ;done;echo
+    curl -XPUT -k "http://localhost:9200/_component_template/.deprecation-indexing-settings" -H 'Content-Type: application/json' -d '{"template":{"settings":{"index":{"lifecycle":{"name":".deprecation-indexing-ilm-policy"},"codec":"best_compression","hidden":"true","number_of_replicas":"0","auto_expand_replicas":"0-1","query":{"default_field":["message"]}}}},"version":1,"_meta":{"managed":true,"description":"default settings for Stack deprecation logs index template installed by x-pack"}}}'
+  when: elasticsearch_version_number is version('7.0.0', '>=')
