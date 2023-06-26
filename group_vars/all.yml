@@ -357,9 +357,15 @@ aws_security_group_persistant_rules_ssh_proxy:
       - "22"
     group_name: "{{ aws_security_group_app_name }}"
 
+aws_security_group_persistent_rules_tinyproxy:
+  - proto: tcp
+    ports:
+      - "{{ tinyproxy_port }}"
+    group_name: "{{ aws_security_group_app_name }}"
 
 aws_security_group_persistant_rules_tpl: [
-  "{{ mageops_ssh_proxy_persistant | ternary(aws_security_group_persistant_rules_ssh_proxy, []) }}"
+  "{{ mageops_ssh_proxy_persistant | ternary(aws_security_group_persistant_rules_ssh_proxy, []) }}",
+  "{{ mageops_tinyproxy_persistant_enabled | ternary(aws_security_group_persistent_rules_tinyproxy, []) }}"
 ]
 
 aws_security_group_persistant_rules: "{{ aws_security_group_persistant_rules_tpl | flatten }}"
@@ -1921,6 +1927,22 @@ sshd_config_users_tpl: [
 ]
 
 sshd_config_users: "{{ sshd_config_users_tpl | combine }}"
+
+mageops_tinyproxy_persistant_enabled: no
+tinyproxy_port: 8888
+
+tinyproxy_allowed_hosts_default:
+  - 127.0.0.1
+
+tinyproxy_allowed_hosts_aws:
+  - "{{ aws_vpc_subnet_prefix }}.0.0/16"
+
+tinyproxy_allowed_hosts_tpl: [
+  "{{ tinyproxy_allowed_hosts_default }}",
+  "{{ aws_use | ternary(tinyproxy_allowed_hosts_aws, []) }}"
+]
+tinyproxy_allowed_hosts: "{{ tinyproxy_allowed_hosts_tpl | flatten }}"
+
 
 # ---------------------------
 # --------  Helpers  --------
