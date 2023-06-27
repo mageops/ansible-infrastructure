@@ -9,9 +9,13 @@
           notify:
             - Clean packages
 
+        - name: Reload systemd
+          systemd:
+            daemon_reload: yes
+
         - name: Ensure docker daemon is started
           service:
-            name: docker
+            name: podman
             state: started
           notify:
             - Stop docker daemon

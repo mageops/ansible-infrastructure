@@ -1,6 +1,6 @@
 - name: Stop docker daemon
   service:
-    name: docker
+    name: podman
     state: stopped
     enabled: no
 
@@ -10,6 +10,4 @@
     state: absent
 
 - name: Clean docker data
-  file:
-    path: /var/lib/docker
-    state: absent
+  shell: "docker system prune -af"
