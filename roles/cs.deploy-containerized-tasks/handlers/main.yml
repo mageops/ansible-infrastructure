@@ -10,4 +10,4 @@
     state: absent
 
 - name: Clean docker data
-  shell: "docker system prune -af"
+  command: "docker system prune -af"
