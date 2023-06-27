@@ -5,7 +5,7 @@
   register: node_state_ec2_instance_info
 
 - name: Enforce target state instances found
-  ec2:
+  ec2_instance:
     region: "{{ aws_region }}"
     state: "{{ node_state_target }}"
     instance_ids: "{{ node_state_ec2_instance_info.instances | map(attribute='instance_id') | list }}"

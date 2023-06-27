@@ -1,5 +1,5 @@
 - name: Start varnish node instance
-  ec2:
+  ec2_instance:
     region: "{{ aws_region }}"
     monitoring: no
     assign_public_ip: yes
