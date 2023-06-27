@@ -2,6 +2,7 @@ roles:
 - src: geerlingguy.mysql
 - src: geerlingguy.composer
 - src: geerlingguy.ntp
+- src: zauberpony.mysql-query
 
 - src: pinkeen.postfix
   version: v1.1
