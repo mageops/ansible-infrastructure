@@ -18,8 +18,8 @@
             name: podman
             state: started
           notify:
-            - Stop docker daemon
             - Clean docker data
+            - Stop docker daemon
         - name: Remember that it has been prepared
           set_fact:
             containerized_tasks_env_is_prepared: yes
