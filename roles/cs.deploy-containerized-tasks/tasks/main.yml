@@ -40,7 +40,7 @@
         {{ item.commandline | default('') }}
       args:
         warn: no
-      ignore_errors: item.ignore_error | bool
+      ignore_errors: "{{ item.ignore_error | bool }}"
       register: containerized_tasks_result
       loop: "{{ containerized_tasks }}"
     - debug: var=containerized_tasks_result
