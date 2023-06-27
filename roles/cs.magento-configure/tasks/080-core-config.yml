@@ -19,11 +19,11 @@
       INSERT INTO `core_config_data`
       SET
         path = "{{ magento_db_setting.path | quote }}",
-        value = "{{ magento_db_setting.path | quote }}",
+        value = "{{ magento_db_setting.value | quote }}",
         scope_id = 0,
         scope = "default"
       ON DUPLICATE KEY UPDATE
-        value = "{{ magento_db_setting.path | quote }}"
+        value = "{{ magento_db_setting.value | quote }}"
   when: not magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
   loop: "{{ magento_core_config_settings }}"
   loop_control:
@@ -36,14 +36,12 @@
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
     query: |
-      INSERT INTO `core_config_data`
+      INSERT IGNORE INTO `core_config_data`
       SET
         path = "{{ magento_db_setting.path | quote }}",
-        value = "{{ magento_db_setting.path | quote }}",
+        value = "{{ magento_db_setting.value | quote }}",
         scope_id = 0,
         scope = "default"
-      ON DUPLICATE KEY UPDATE
-        path = path
   when: magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
   loop: "{{ magento_core_config_settings }}"
   loop_control:
