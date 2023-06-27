@@ -7,6 +7,7 @@
             name: "{{ containerized_tasks_packages }}"
             state: present
           notify:
+            - Clean docker data
             - Clean packages
 
         - name: Reload systemd
@@ -18,7 +19,6 @@
             name: podman
             state: started
           notify:
-            - Clean docker data
             - Stop docker daemon
         - name: Remember that it has been prepared
           set_fact:
