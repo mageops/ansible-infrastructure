@@ -1,8 +1,3 @@
-- name: stop tinyproxy service
-  service:
-    name: tinyproxy
-    state: stopped
-
 - name: uninstall tinyproxy
   yum:
     name: tinyproxy
