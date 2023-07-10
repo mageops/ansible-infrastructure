@@ -45,7 +45,7 @@
     storage_encrypted: "{{ aws_rds_storage_encrypt }}"
     kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
     enable_performance_insights: "{{ aws_rds_performance_insights }}"
-    performance_insights_retention_period: "{{ aws_rds_performance_insights_retention_period if aws_rds_performance_insights else omit }}"
+    # performance_insights_retention_period: "{{ aws_rds_performance_insights_retention_period if aws_rds_performance_insights else omit }}"
     performance_insights_kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
     enable_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports }}"
     apply_immediately: yes
