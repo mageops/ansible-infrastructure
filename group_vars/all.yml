@@ -729,11 +729,7 @@ mageops_magento_preload_fscache_enable: no
 mageops_app_node_optimize_kernel_vm_io: yes
 
 # Enable zram swap device on app nodes
-mageops_app_node_zram_enable: >-
-  {{ ansible_memtotal_mb | default(512, true) | int <= 3072 }}
-
-# Size of zram device relative to total system memory
-mageops_app_node_zram_size_relative: 0.6
+mageops_app_node_zram_enable: yes
 
 # App node swap config
 mageops_app_node_swap_enable: yes

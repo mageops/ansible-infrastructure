@@ -1,0 +1,24 @@
+{% for device in zram_devices %}
+[zram{{ loop.index0 }}]
+{% if device.zram_fraction is not none %}
+zram-fraction = {{ device.zram_fraction }}
+{% endif %}
+{% if device.host_memory_limit_mb is not none %}
+host-memory-limit = {{ device.host_memory_limit_mb }}M
+{% endif %}
+{% if device.max_zram_size_mb is not none %}
+max-zram-size = {{ device.max_zram_size_mb }}M
+{% endif %}
+{% if device.compression_algorithm is not none %}
+compression-algorithm = {{ device.compression_algorithm }}
+{% endif %}
+{% if device.swap_priority is not none %}
+swap-priority = {{ device.swap_priority }}
+{% endif %}
+{% if device.mount_point is not none %}
+mount-point = {{ device.mount_point }}
+{% endif %}
+{% if device.fs_type is not none %}
+fs-type = {{ device.fs_type }}
+{% endif %}
+{% endfor %}

@@ -1,9 +1,22 @@
-- name: Load zram on boot
-  copy:
-    content: zram
-    dest: /etc/modules-load.d/zram.conf
+---
+- name: Install zram-generator
+  package:
+    name: zram-generator
+    state: present
+  become: true
 
-- name: Use zram0 as swap device
+- name: Configure zram-generator
   template:
-    src: zram.rules.j2
-    dest: /etc/udev/rules.d/90-zram.rules
+    src: zram-generator.conf.j2
+    dest: /etc/systemd/zram-generator.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  notify: restart zram-generator
+
+- name: Enable zram-generator
+  systemd:
+    name: systemd-zram-generator
+    state: started
+    enabled: yes
