@@ -49,11 +49,11 @@
     name: cs.aws-ebs-vol
   vars:
     aws_ebs_volume_modify_ids: >-
-      {{ ( aws_varnish_ec2.instances + aws_varnish_ec2.tagged_instances )
+      {{ ( aws_varnish_ec2.instances )
           | map(attribute='block_device_mapping')
           | map('dict2items')
           | flatten
-          | map(attribute='value')
+          | map(attribute='ebs')
           | map(attribute='volume_id')
           | list }}
     aws_ebs_volume_modify_type: "{{ aws_varnish_node_ebs_volume_type }}"

@@ -61,11 +61,11 @@
     name: cs.aws-ebs-vol
   vars:
     aws_ebs_volume_modify_ids: >-
-      {{ ( aws_persistent_ec2.instances + aws_persistent_ec2.tagged_instances )
+      {{ ( aws_persistent_ec2.instances )
           | map(attribute='block_device_mapping')
           | map('dict2items')
           | flatten
-          | map(attribute='value')
+          | map(attribute='ebs')
           | map(attribute='volume_id')
           | list }}
     aws_ebs_volume_modify_type: "{{ aws_persistent_node_ebs_volume_type }}"

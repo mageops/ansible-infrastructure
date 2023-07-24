@@ -46,11 +46,11 @@
     name: cs.aws-ebs-vol
   vars:
     aws_ebs_volume_modify_ids: >-
-      {{ ( builder_ec2.instances + builder_ec2.tagged_instances )
+      {{ ( builder_ec2.instances )
           | map(attribute='block_device_mapping')
           | map('dict2items')
           | flatten
-          | map(attribute='value')
+          | map(attribute='ebs')
           | map(attribute='volume_id')
           | list }}
     aws_ebs_volume_modify_type: "{{ aws_builder_node_ebs_volume_type }}"
@@ -64,7 +64,7 @@
       - "{{ builder_instance_inventory_group }}"
       - "{{ mageops_app_host_group }}"
 
-  loop: '{{ builder_ec2.tagged_instances }}'
+  loop: '{{ builder_ec2.instances }}'
   loop_control:
     label: "{{ item.public_ip }}"
 
@@ -72,6 +72,6 @@
   wait_for:
     port: 22
     host: "{{ item.public_ip }}"
-  loop: '{{ builder_ec2.tagged_instances }}'
+  loop: '{{ builder_ec2.instances }}'
   loop_control:
     label: "{{ item.public_dns_name }}"
