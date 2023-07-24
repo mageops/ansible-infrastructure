@@ -51,7 +51,7 @@
             msg: "{{ _aws_ec2_to_remove }}"
         - name: Terminate instances
           when: (_aws_ec2_to_remove | length > 0) and not dry_run_mode
-          ec2_instance:
+          amazon.aws.ec2_instance:
             instance_ids: "{{ _aws_ec2_to_remove }}"
             region: "{{ aws_region }}"
             state: absent

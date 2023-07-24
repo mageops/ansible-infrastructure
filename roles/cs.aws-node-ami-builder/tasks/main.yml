@@ -3,7 +3,7 @@
     msg: "Using AMI {{ builder_base_ami_id }} for builder {{ builder_instance_name }}"
 
 - name: Create builder instance
-  ec2_instance:
+  amazon.aws.ec2_instance:
     region: "{{ aws_region }}"
     detailed_monitoring: no
     vpc_subnet_id: "{{ builder_instance_vpc_subnet_id }}"

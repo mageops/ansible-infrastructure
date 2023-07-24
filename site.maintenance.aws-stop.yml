@@ -31,7 +31,7 @@
 
     - name: Stop standalone EC2 instances
       when: stop_ec2
-      ec2_instance:
+      amazon.aws.ec2_instance:
         instance_ids: "{{ item.instance_id }}"
         region: "{{ aws_region }}"
         state: stopped
