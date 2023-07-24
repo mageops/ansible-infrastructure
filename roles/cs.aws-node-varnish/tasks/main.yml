@@ -14,7 +14,6 @@
     instance_role: "{{ aws_iam_role_varnish }}"
     instance_initiated_shutdown_behavior: stop
     user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
-    filters: "{{ aws_varnish_node_name_tags | prefix_keys('tag:') }}"
     tags: >-
       {{
           aws_tags_default | combine(
@@ -26,17 +25,18 @@
       }}
     volumes:
       - device_name: "{{ aws_varnish_node_root_device }}"
-        volume_type: "{{ aws_ec2_ebs_volume_type }}"
-        volume_size: "{{ aws_varnish_node_ebs_volume_size }}"
-        delete_on_termination: yes
-        encrypted: "{{ mageops_ebs_encrypt }}"
+        ebs:
+          volume_type: "{{ aws_ec2_ebs_volume_type }}"
+          volume_size: "{{ aws_varnish_node_ebs_volume_size }}"
+          delete_on_termination: yes
+          encrypted: "{{ mageops_ebs_encrypt }}"
     wait: yes
     wait_timeout: 1500
     # This has zero costs on current-gen instances
     ebs_optimized: yes
     network:
       assign_public_ip: yes
-      groups: "{{ aws_varnish_node_security_groups + varnish_as_loadbalancer | ternary([aws_security_group_lb_id], []) }}"
+    security_groups: "{{ aws_varnish_node_security_groups + varnish_as_loadbalancer | ternary([aws_security_group_lb_id], []) }}"
   vars:
     aws_ec2_user_launch_script: "{{ aws_varnish_node_launch_script_extra }}"
     aws_varnish_node_name_tags:
@@ -50,8 +50,7 @@
   vars:
     aws_ebs_volume_modify_ids: >-
       {{ ( aws_varnish_ec2.instances )
-          | map(attribute='block_device_mapping')
-          | map('dict2items')
+          | map(attribute='block_device_mappings')
           | flatten
           | map(attribute='ebs')
           | map(attribute='volume_id')
@@ -63,14 +62,14 @@
 - name: Wait for varnish node instance to get up
   wait_for:
     port: 22
-    host: "{{ item.public_ip }}"
+    host: "{{ item.public_ip_address }}"
   loop: '{{ aws_varnish_ec2.instances }}'
   loop_control:
     label: "{{ item.public_dns_name }}"
 
 - name: Add varnish host to inventory
   add_host:
-    hostname: "{{ item.public_ip }}"
+    hostname: "{{ item.public_ip_address }}"
     groupname:
       - app
       - builder_app
@@ -78,11 +77,11 @@
       - "{{ mageops_app_host_group }}"
   loop: '{{ aws_varnish_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_ip }}"
+    label: "{{ item.public_ip_address }}"
 
 - name: Assign elastic IP to varnish node
   ec2_eip:
     region: "{{ aws_region }}"
-    device_id: "{{ aws_varnish_ec2.instances[0].id }}"
+    device_id: "{{ aws_varnish_ec2.instances[0].instance_id }}"
     ip: "{{ aws_varnish_node_elastic_ip }}"
   when: aws_varnish_node_elastic_ip | default(false, true)

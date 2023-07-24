@@ -4,6 +4,7 @@
 /artifacts/
 /roles/*
 !/roles/cs.*
+/collections/*
 
 /vars/*
 /vars/global/*

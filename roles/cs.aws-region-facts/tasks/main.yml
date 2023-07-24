@@ -11,7 +11,7 @@
     cacheable: yes
 
 - name: Get availaibility zones for region
-  aws_az_facts:
+  amazon.aws.aws_az_info:
     region: "{{ aws_region }}"
   register: az_facts
 

@@ -13,10 +13,3 @@
     group: root
     mode: '0644'
   become: true
-  notify: restart zram-generator
-
-- name: Enable zram-generator
-  systemd:
-    name: systemd-zram-generator
-    state: started
-    enabled: yes

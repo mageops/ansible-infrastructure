@@ -6,6 +6,7 @@
   amazon.aws.ec2_instance:
     region: "{{ aws_region }}"
     detailed_monitoring: no
+    state: running
     vpc_subnet_id: "{{ builder_instance_vpc_subnet_id }}"
     image:
       id: "{{ builder_base_ami_id }}"
@@ -22,19 +23,19 @@
       }}
     volumes:
       - device_name: "{{ builder_instance_root_device }}"
-        volume_size: "{{ builder_instance_volume_size }}"
-        volume_type: "{{ aws_builder_node_ebs_volume_type }}"
-        delete_on_termination: yes
-        encrypted: "{{ mageops_ebs_encrypt }}"
+        ebs:
+          volume_size: "{{ builder_instance_volume_size }}"
+          volume_type: "{{ aws_builder_node_ebs_volume_type }}"
+          delete_on_termination: yes
+          encrypted: "{{ mageops_ebs_encrypt }}"
     exact_count: 1
-    filters: "{{ builder_instance_name_tags | prefix_keys('tag:') }}"
     wait: yes
     wait_timeout: "{{ builder_create_instance_timeout }}"
     # This has zero costs on current-gen instances
     ebs_optimized: yes
     network:
       assign_public_ip: yes
-      groups: "{{ builder_instance_security_groups }}"
+    security_groups: "{{ builder_instance_security_groups }}"
   vars:
     builder_instance_name_tags:
       Name: "{{ builder_instance_name }}"
@@ -47,8 +48,7 @@
   vars:
     aws_ebs_volume_modify_ids: >-
       {{ ( builder_ec2.instances )
-          | map(attribute='block_device_mapping')
-          | map('dict2items')
+          | map(attribute='block_device_mappings')
           | flatten
           | map(attribute='ebs')
           | map(attribute='volume_id')
@@ -59,19 +59,19 @@
 
 - name: Add builder host to inventory
   add_host:
-    hostname: "{{ item.public_ip }}"
+    hostname: "{{ item.public_ip_address }}"
     groups:
       - "{{ builder_instance_inventory_group }}"
       - "{{ mageops_app_host_group }}"
 
   loop: '{{ builder_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_ip }}"
+    label: "{{ item.public_ip_address }}"
 
 - name: Wait for builder node instance to get up
   wait_for:
     port: 22
-    host: "{{ item.public_ip }}"
+    host: "{{ item.public_ip_address }}"
   loop: '{{ builder_ec2.instances }}'
   loop_control:
     label: "{{ item.public_dns_name }}"

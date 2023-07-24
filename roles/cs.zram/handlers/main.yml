@@ -1,5 +1,0 @@
----
-- name: restart zram-generator
-  systemd:
-    name: systemd-zram-generator
-    state: restarted
