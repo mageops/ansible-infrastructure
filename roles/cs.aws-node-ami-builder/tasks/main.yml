@@ -27,7 +27,7 @@
         delete_on_termination: yes
         encrypted: "{{ mageops_ebs_encrypt }}"
     exact_count: 1
-    filters: "{{ builder_instance_name_tags }}"
+    filters: "{{ builder_instance_name_tags | prefix_keys('tag:') }}"
     wait: yes
     wait_timeout: "{{ builder_create_instance_timeout }}"
     # This has zero costs on current-gen instances
