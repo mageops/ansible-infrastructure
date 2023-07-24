@@ -1,34 +1,21 @@
 - name: Start persistent node instance
   ec2_instance:
     region: "{{ aws_region }}"
-    monitoring: no
-    assign_public_ip: yes
+    detailed_monitoring: no
     # 2 lines below because of https://github.com/ansible/ansible/issues/20867
     # otherwise state: running would be ok.
     state: "{{ aws_persistent_instance_id | ternary('running', omit) }}"
     exact_count: "{{ aws_persistent_instance_id | ternary(omit, 1) }}"
-    instance_id: "{{ aws_persistent_instance_id | ternary(aws_persistent_instance_id, omit) }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
-    group_id: >-
-      {{
-          aws_persistent_node_security_groups
-          + aws_security_group_redis_id | default(false, true) | ternary([aws_security_group_redis_id], [])
-          + aws_security_group_persistant_id | default(false, true) | ternary([aws_security_group_persistant_id], [])
-          + aws_security_group_elasticsearch_id | default(false, true) | ternary([aws_security_group_elasticsearch_id], [])
-          + varnish_is_in_autoscaling_group | ternary(
-              aws_security_group_varnish_id | default(false, true) | ternary([aws_security_group_varnish_id], []),
-              []
-          )
-      }}
     vpc_subnet_id: "{{ aws_persistent_node_vpc_subnet_id }}"
     image:
       id: "{{ aws_persistent_node_ami_id }}"
     instance_type: "{{ aws_persistent_node_instance_type }}"
-    instance_profile_name: "{{ aws_iam_role_varnish }}"
+    iam_instance_profile: "{{ aws_iam_role_varnish }}"
     instance_initiated_shutdown_behavior: stop
     user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
-    count_tag: "{{ aws_persistent_node_name_tags }}"
-    instance_tags: >-
+    filters: "{{ aws_persistent_node_name_tags }}"
+    tags: >-
       {{
           aws_tags_default | combine(
             aws_tags_role_persistent,
@@ -49,6 +36,19 @@
     wait_timeout: 1500
     # This has zero costs on current-gen instances
     ebs_optimized: yes
+    network:
+      assign_public_ip: yes
+      groups: >-
+        {{
+            aws_persistent_node_security_groups
+            + aws_security_group_redis_id | default(false, true) | ternary([aws_security_group_redis_id], [])
+            + aws_security_group_persistant_id | default(false, true) | ternary([aws_security_group_persistant_id], [])
+            + aws_security_group_elasticsearch_id | default(false, true) | ternary([aws_security_group_elasticsearch_id], [])
+            + varnish_is_in_autoscaling_group | ternary(
+                aws_security_group_varnish_id | default(false, true) | ternary([aws_security_group_varnish_id], []),
+                []
+            )
+        }}
   vars:
     aws_ec2_user_launch_script: "{{ aws_persistent_node_launch_script_extra }}"
     aws_persistent_node_name_tags:
