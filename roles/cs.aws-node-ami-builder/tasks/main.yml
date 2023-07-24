@@ -12,7 +12,7 @@
     key_name: "{{ builder_instance_ssh_key_name }}"
     instance_type: "{{ builder_instance_type }}"
     user_data: "{{ builder_instance_user_data }}"
-    iam_instance_profile: "{{ builder_instance_iam_role}}"
+    instance_role: "{{ builder_instance_iam_role}}"
     tags: >-
       {{
           aws_tags_default | combine(
