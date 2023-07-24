@@ -11,7 +11,8 @@
     key_name: "{{ aws_ec2_ssh_key_name }}"
     group_id: "{{ aws_varnish_node_security_groups + varnish_as_loadbalancer | ternary([aws_security_group_lb_id], []) }}"
     vpc_subnet_id: "{{ aws_varnish_node_vpc_subnet_id }}"
-    image: "{{ aws_varnish_node_ami_id }}"
+    image:
+      id: "{{ aws_varnish_node_ami_id }}"
     instance_type: "{{ aws_varnish_node_instance_type }}"
     instance_profile_name: "{{ aws_iam_role_varnish }}"
     instance_initiated_shutdown_behavior: stop

@@ -8,7 +8,8 @@
     assign_public_ip: yes
     monitoring: no
     vpc_subnet_id: "{{ builder_instance_vpc_subnet_id }}"
-    image: "{{ builder_base_ami_id }}"
+    image:
+      id: "{{ builder_base_ami_id }}"
     key_name: "{{ builder_instance_ssh_key_name }}"
     group_id: "{{ builder_instance_security_groups }}"
     instance_type: "{{ builder_instance_type }}"
