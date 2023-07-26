@@ -1,9 +1,4 @@
-#
-# Avg compression level is 3:1
-# Rule of thumb: set it to 3/4 of available memory
-# this will consume 1/4 or real memory
-
 zram_devices:
-  - zram_fraction: 0.75
+  - zram_fraction: 1.0
     compression_algorithm: zstd
     max-zram-size: none
