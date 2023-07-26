@@ -6,7 +6,7 @@
 - name: Ensure custom taks configuration exists
   template:
     src: "{{ mageops_project_templates_dir }}/{{ item.src }}"
-    dest: "/etc/supervisord.d/{{ item.name }}.conf"
+    dest: "/etc/supervisord.d/{{ item.name }}.ini"
   with_items: "{{ supervisor_programs }}"
   when: supervisor_programs | length > 0
   notify: Reload supervisord

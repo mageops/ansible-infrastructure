@@ -1,7 +1,7 @@
 - name: "Add supervisor config"
   template:
     src: "varnish-purge-proxy.conf.j2"
-    dest: "/etc/supervisord.d/varnish-purge-proxy.conf"
+    dest: "/etc/supervisord.d/varnish-purge-proxy.ini"
     owner: "root"
     force: yes
     mode: 0600

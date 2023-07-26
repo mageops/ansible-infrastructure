@@ -6,13 +6,13 @@
 - name: Configure consumer worker jobs
   template:
     src: magento_consumer_worker.supervisor.conf.j2
-    dest: "/etc/supervisord.d/magento-consumer-{{ item.consumer }}.conf"
+    dest: "/etc/supervisord.d/magento-consumer-{{ item.consumer }}.ini"
   loop: "{{ magento_consumer_workers }}"
 
 - name: "Configure default consumer worker jobs for magento {{ magento_version }}"
   template:
     src: magento_consumer_worker.supervisor.conf.j2
-    dest: "/etc/supervisord.d/magento-consumer-{{ item.consumer }}.conf"
+    dest: "/etc/supervisord.d/magento-consumer-{{ item.consumer }}.ini"
   loop: "{{ magento_default_consumer_workers }}"
   when: >-
    magento_default_consumer_workers_enable
