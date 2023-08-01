@@ -92,6 +92,6 @@
 - name: Assign elastic IP to persistent node
   ec2_eip:
     region: "{{ aws_region }}"
-    device_id: "{{ aws_persistent_ec2.instances[0].id }}"
+    device_id: "{{ aws_persistent_ec2.instances[0].instance_id }}"
     ip: "{{ aws_persistent_node_elastic_ip }}"
   when: aws_persistent_node_elastic_ip | default(false, true)
