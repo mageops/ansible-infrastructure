@@ -37,7 +37,7 @@
     # This has zero costs on current-gen instances
     ebs_optimized: yes
     network:
-      assign_public_ip: yes
+      assign_public_ip: "{{ aws_persistent_node_ip_assign }}"
     security_groups: >-
       {{
           aws_persistent_node_security_groups
@@ -74,20 +74,21 @@
 - name: Wait for persistent node instance to get up
   wait_for:
     port: 22
-    host: "{{ item.public_ip_address }}"
+    host: "{{ item.ipv6_address }}"
   loop: '{{ aws_persistent_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_dns_name }}"
+    label: "{{ item.ipv6_address }}"
 
 - name: Add persistent host to inventory
   add_host:
-    hostname: "{{ item.public_ip_address }}"
+    label: "{{ item.ipv6_address }}"
+    hostname: "{{ item.ipv6_address  }}"
     groupname:
       - persistent
       - "{{ mageops_app_host_group }}"
   loop: '{{ aws_persistent_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_ip_address }}"
+    label: "{{ item.ipv6_address }}"
 
 - name: Assign elastic IP to persistent node
   ec2_eip:

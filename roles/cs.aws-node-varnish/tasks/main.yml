@@ -3,9 +3,7 @@
     region: "{{ aws_region }}"
     detailed_monitoring: false
     network:
-      assign_public_ip: yes
-      ipv6_addresses:
-        ipv6_address: "2a05:d014:1577:b500::1/64"
+      assign_public_ip: "{{ aws_varnish_node_ip_assign }}"
     # 2 lines below because of https://github.com/ansible/ansible/issues/20867
     # otherwise state: running would be ok.
     state: "{{ aws_varnish_instance_id | ternary('running', omit) }}"
@@ -38,8 +36,6 @@
     wait_timeout: 1500
     # This has zero costs on current-gen instances
     ebs_optimized: yes
-    network:
-      assign_public_ip: yes
     security_groups: "{{ aws_varnish_node_security_groups + varnish_as_loadbalancer | ternary([aws_security_group_lb_id], []) }}"
   vars:
     aws_ec2_user_launch_script: "{{ aws_varnish_node_launch_script_extra }}"
@@ -66,14 +62,17 @@
 - name: Wait for varnish node instance to get up
   wait_for:
     port: 22
-    host: "{{ item.public_ip_address }}"
+    host: "{{ item.ipv6_address }}"
+#    host: "{{ item.public_ip_address }}"
   loop: '{{ aws_varnish_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_dns_name }}"
+    #label: "{{ item.public_dns_name }}"
+    label: "{{ item.ipv6_address }}"
 
 - name: Add varnish host to inventory
   add_host:
-    hostname: "{{ item.public_ip_address }}"
+  #  hostname: "{{ item.public_ip_address }}"
+    hostname: "{{ item.ipv6_address }}"
     groupname:
       - app
       - builder_app
@@ -81,7 +80,7 @@
       - "{{ mageops_app_host_group }}"
   loop: '{{ aws_varnish_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_ip_address }}"
+    label: "{{ item.ipv6_address }}"
 
 - name: Assign elastic IP to varnish node
   ec2_eip:

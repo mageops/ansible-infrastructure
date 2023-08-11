@@ -25,6 +25,7 @@
     vpc_id: "{{ vpc_net.vpc.id }}"
     tags: "{{ aws_tags_default | combine(vpc_subnet_tags) }}"
     az: "{{ az_name }}"
+    assign_instances_ipv6 : true
     cidr: "{{ aws_vpc_subnet_prefix }}.{{ az_index + 1 }}.0/25"
     ipv6_cidr: "{{ vpc_net.vpc.ipv6_cidr_block_association_set | map(attribute='ipv6_cidr_block') | list | join('') | regex_replace('00::/56','') + '0' + (az_index | string) + '::/64' }}"
   vars:

@@ -52,7 +52,9 @@ sshd_allow_tcp_forwarding: "yes"
 
 # Base configuration as convenience
 sshd_config_default:
-    ListenAddress: "0.0.0.0"
+    ListenAddress:
+    - "0.0.0.0"
+    - "::"
     AcceptEnv:
       - LANG LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
       - LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT

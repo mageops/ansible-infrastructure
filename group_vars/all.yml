@@ -405,8 +405,9 @@ aws_persistent_node_instance_type: t3a.micro
 
 # EC2 Elastic IPs
 aws_varnish_node_elastic_ip:
-aws_varnish_node_ipv6:
+aws_varnish_node_ip_assign: yes
 aws_persistent_node_elastic_ip:
+aws_persistent_node_ip_assign: yes
 
 # EC2 instance EBS volume sizes in GB
 aws_app_node_ebs_volume_size: 10
