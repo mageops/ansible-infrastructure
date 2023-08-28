@@ -11,9 +11,11 @@ filters:
     - pending
 
 hostnames:
-  - network-interface.ipv6-addresses.ipv6-address
   - dns-name
-  - private-dns-name
+  - network-interface.ipv6-addresses.ipv6-address
+
+compose:
+  ansible_host: ipv6_address | default(public_ip_address)
 
 keyed_groups:
   - key: tags.Name

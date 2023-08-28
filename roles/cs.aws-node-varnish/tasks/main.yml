@@ -1,3 +1,4 @@
+
 - name: Start varnish node instance
   amazon.aws.ec2_instance:
     region: "{{ aws_region }}"
@@ -16,6 +17,14 @@
     instance_role: "{{ aws_iam_role_varnish }}"
     instance_initiated_shutdown_behavior: stop
     user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
+    filters:
+      "tag:AppId": "{{ mageops_app_id }}"
+      "tag:Environment": "{{ mageops_environment }}"
+      "tag:Infrastructure": mageops
+      "tag:Project": "{{ mageops_project }}"
+      "tag:Tool": ansible
+      "tag:Name": "{{ aws_varnish_node_instance_name }}"
+      "instance-state-name": "running"
     tags: >-
       {{
           aws_tags_default | combine(
@@ -62,17 +71,14 @@
 - name: Wait for varnish node instance to get up
   wait_for:
     port: 22
-    host: "{{ item.ipv6_address }}"
-#    host: "{{ item.public_ip_address }}"
+    host: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
   loop: '{{ aws_varnish_ec2.instances }}'
   loop_control:
-    #label: "{{ item.public_dns_name }}"
-    label: "{{ item.ipv6_address }}"
+    label: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
 
 - name: Add varnish host to inventory
   add_host:
-  #  hostname: "{{ item.public_ip_address }}"
-    hostname: "{{ item.ipv6_address }}"
+    hostname: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
     groupname:
       - app
       - builder_app
@@ -80,7 +86,7 @@
       - "{{ mageops_app_host_group }}"
   loop: '{{ aws_varnish_ec2.instances }}'
   loop_control:
-    label: "{{ item.ipv6_address }}"
+    label: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
 
 - name: Assign elastic IP to varnish node
   ec2_eip:

@@ -1,12 +1,29 @@
 
-- name: Get info about VPC subnets
+- name: Get info about VPC public subnets
   amazon.aws.ec2_vpc_subnet_info:
     region: "{{ aws_region }}"
     filters: "{{ aws_vpc_facsts_subnet_filters_base | combine (aws_vpc_facts_subnet_filters, aws_vpc_facts_subnet_tags | prefix_keys('tag:')) }}"
   vars:
     aws_vpc_facsts_subnet_filters_base:
       vpc-id: "{{ aws_vpc_id }}"
-  register: vpc_subnet_facts
+      "tag:Name": "{{ aws_vpc_name }}-public*"
+  register: vpc_subnet_public_facts
+
+- name: Get info about VPC private subnets
+  amazon.aws.ec2_vpc_subnet_info:
+    region: "{{ aws_region }}"
+    filters: "{{ aws_vpc_facsts_subnet_filters_base | combine (aws_vpc_facts_subnet_filters, aws_vpc_facts_subnet_tags | prefix_keys('tag:')) }}"
+  vars:
+    aws_vpc_facsts_subnet_filters_base:
+      vpc-id: "{{ aws_vpc_id }}"
+      "tag:Name": "{{ aws_vpc_name }}-private-*"
+  register: vpc_subnet_private_facts
+  when: aws_vpc_ipv6_enabled
+
+- name: Get info about all VPC subnets
+  set_fact:
+    vpc_subnet_facts: "{{ aws_vpc_ipv6_enabled | ternary(vpc_subnet_private_facts, vpc_subnet_public_facts) }}"
+
 
 - name: Fail if no VPC subnet has been found
   fail:
@@ -17,6 +34,9 @@
   set_fact:
     aws_vpc_subnets_info: "{{ vpc_subnet_facts.subnets }}"
     aws_vpc_subnet_info: "{{ vpc_subnet_facts.subnets | selectattr('availability_zone', 'equalto', aws_preferred_availability_zone) | first }}"
+    aws_vpc_subnets_public_info: "{{ vpc_subnet_public_facts.subnets }}"
+    aws_vpc_subnet_public_info: "{{ vpc_subnet_public_facts.subnets | first }}"
+
     cacheable: yes
   when: aws_vpc_subnets_info is not defined
 
@@ -25,5 +45,7 @@
     aws_vpc_subnet_ids: "{{ aws_vpc_subnets_info | map(attribute='subnet_id') | list }}"
     aws_vpc_subnet_cidr_blocks: "{{ aws_vpc_subnets_info | map(attribute='cidr_block') | list }}"
     aws_vpc_subnet_id: "{{ aws_vpc_subnet_info.subnet_id }}"
+    aws_vpc_subnet_public_id: "{{ aws_vpc_subnet_public_info.subnet_id }}"
     aws_vpc_subnet_cidr_block: "{{ aws_vpc_subnet_info.cidr_block }}"
     cacheable: yes
+

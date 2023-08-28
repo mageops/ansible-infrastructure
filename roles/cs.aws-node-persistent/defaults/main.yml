@@ -1,7 +1,7 @@
 aws_persistent_node_ami_id: "{{ aws_ami_clean_base_info[aws_persistent_node_instance_type].image_id }}"
 aws_persistent_node_instance_type: t3a.micro
 aws_persistent_node_ebs_volume_size: 10
-aws_persistent_node_ip_assign: yes
+aws_persistent_node_ip_assign:  "{{ ( aws_vpc_ipv6_enabled is false ) or (( aws_persistent_node_elastic_ip | default('', true) | length > 0) and aws_vpc_ipv6_enabled ) }}"
 aws_ansible_persistent_node_inventory_group: persistent
 aws_persistent_node_instance_name: "{{ mageops_app_name }}-persistent"
 

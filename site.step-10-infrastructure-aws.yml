@@ -33,12 +33,12 @@
     - role: cs.aws-node-facts
     - role: cs.aws-node-varnish
       aws_varnish_node_root_device: "{{ aws_ami_clean_base_info[aws_varnish_node_instance_type].root_device_name }}"
-      aws_varnish_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+      aws_varnish_node_vpc_subnet_id: "{{ (aws_varnish_node_elastic_ip | default(false, true) ) | ternary( aws_vpc_subnet_public_id, aws_vpc_subnet_id ) }}"
       aws_varnish_instance_id: "{{ aws_varnish_node_instance.instance_id | default(false) }}"
       when: varnish_standalone
     - role: cs.aws-node-persistent
       aws_persistent_node_root_device: "{{ aws_ami_clean_base_info[aws_persistent_node_instance_type].root_device_name }}"
-      aws_persistent_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+      aws_persistent_node_vpc_subnet_id: "{{ (aws_persistent_node_elastic_ip | default(false, true) ) | ternary( aws_vpc_subnet_public_id, aws_vpc_subnet_id ) }}"
       aws_persistent_instance_id: "{{ aws_persistent_node_instance.instance_id | default(false) }}"
       when: aws_persistent_node_create
     - role: cs.mysql-configure

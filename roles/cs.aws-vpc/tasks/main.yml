@@ -3,7 +3,7 @@
     state: present
     region: "{{ aws_region }}"
     cidr_block: "{{ aws_vpc_subnet_prefix }}.0.0/16"
-    ipv6_cidr: true
+    ipv6_cidr: "{{ aws_vpc_ipv6_enabled | ternary(true, omit) }}"
     name: "{{ aws_vpc_name }}"
     tags: "{{ aws_tags_default }}"
   register: vpc_net
@@ -18,16 +18,34 @@
     vpc_igw_tags:
       Name: "{{ mageops_app_name }}"
 
-- name: Create public subnets in VPC
+- name: Create private subnets in VPC
   ec2_vpc_subnet:
     state: present
     region: "{{ aws_region }}"
     vpc_id: "{{ vpc_net.vpc.id }}"
     tags: "{{ aws_tags_default | combine(vpc_subnet_tags) }}"
     az: "{{ az_name }}"
-    assign_instances_ipv6 : true
+    assign_instances_ipv6 : "{{ aws_vpc_ipv6_enabled }}"
     cidr: "{{ aws_vpc_subnet_prefix }}.{{ az_index + 1 }}.0/25"
     ipv6_cidr: "{{ vpc_net.vpc.ipv6_cidr_block_association_set | map(attribute='ipv6_cidr_block') | list | join('') | regex_replace('00::/56','') + '0' + (az_index | string) + '::/64' }}"
+  vars:
+    vpc_subnet_tags:
+      Name: "{{ aws_vpc_name }}-private-{{ az_name[-2:] }}"
+  loop: "{{ aws_availability_zone_names }}"
+  loop_control:
+    loop_var: az_name
+    index_var: az_index
+  register: vpc_nat_subnet
+  when: aws_nat_eip is defined
+
+- name: Create public networks when IPv4 only
+  ec2_vpc_subnet:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    tags: "{{ aws_tags_default | combine(vpc_subnet_tags) }}"
+    az: "{{ az_name }}"
+    cidr: "{{ aws_vpc_subnet_prefix }}.{{ az_index + 1 }}.0/25"
   vars:
     vpc_subnet_tags:
       Name: "{{ aws_vpc_name }}-public-{{ az_name[-2:] }}"
@@ -35,18 +53,80 @@
   loop_control:
     loop_var: az_name
     index_var: az_index
-  register: vpc_subnet
+  register: vpc_subnet_ipv4
+  when: aws_nat_eip is not defined
 
-- name: Create route table
+
+- name: Create public subnet for NAT and EIP usage
+  ec2_vpc_subnet:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    tags: "{{ aws_tags_default | combine(vpc_subnet_tags) }}"
+    az: "{{ aws_preferred_availability_zone }}"
+    cidr: "{{ aws_vpc_subnet_prefix }}.255.0/25"
+    assign_instances_ipv6 : "{{ aws_vpc_ipv6_enabled }}"
+    ipv6_cidr: "{{ vpc_net.vpc.ipv6_cidr_block_association_set | map(attribute='ipv6_cidr_block') | list | join('') | regex_replace('00::/56','') + 'ff' + '::/64' }}"
+  vars:
+    vpc_subnet_tags:
+      Name: "{{ aws_vpc_name }}-public"
+  register: vpc_subnet
+  when: aws_nat_eip is defined
+
+- name: Create NAT gateway with EIP.
+  ec2_vpc_nat_gateway:
+    state: present
+    subnet_id: "{{ vpc_subnet.subnet.id }}"
+    tags: "{{ aws_tags_default | combine(vpc_nat_tags) }}"
+    wait: true
+    eip_address: "{{ aws_nat_eip }}"
+    region: "{{ aws_region }}"
+    if_exist_do_not_create: true
+  vars:
+    vpc_nat_tags:
+      Name: "{{ aws_vpc_name }}-nat"
+  register: nat_gateway
+  when: aws_nat_eip is defined
+
+- name: Create route table for NAT networks
   ec2_vpc_route_table:
     state: present
     region: "{{ aws_region }}"
     tags: "{{ aws_tags_default | combine(vpc_route_table_tags) }}"
     vpc_id: "{{ vpc_net.vpc.id }}"
-    subnets: "{{ vpc_subnet.results | map(attribute='subnet') | map(attribute='cidr_block') | list }}"
-    routes: "{{ aws_vpc_routes_default + aws_vpc_routes_extra | default([]) }}"
+    subnets: "{{ vpc_nat_subnet.results | map(attribute='subnet') | map(attribute='cidr_block') | list }}"
+    routes: "{{ aws_vpc_nat_routes_default + nat_gateway_id + aws_vpc_routes_extra | default([]) }}"
   vars:
     vpc_route_table_tags:
       Name: "{{ aws_vpc_name }}-routes"
+    nat_gateway_id:
+     - dest: '0.0.0.0/0'
+       gateway_id: "{{ nat_gateway.nat_gateway_id }}"
+  when: aws_nat_eip is defined
 
 
+- name: Create route table for public network
+  ec2_vpc_route_table:
+    state: present
+    region: "{{ aws_region }}"
+    tags: "{{ aws_tags_default | combine(vpc_route_table_tags) }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    subnets: "{{ vpc_subnet.subnet.id }}"
+    routes: "{{ aws_vpc_routes_default + aws_vpc_routes_extra | default([]) }}"
+  vars:
+    vpc_route_table_tags:
+      Name: "{{ aws_vpc_name }}-public-routes"
+  when: aws_nat_eip is defined
+
+- name: Create route table for public network (ipv4 only)
+  ec2_vpc_route_table:
+    state: present
+    region: "{{ aws_region }}"
+    tags: "{{ aws_tags_default | combine(vpc_route_table_tags) }}"
+    vpc_id: "{{ vpc_net.vpc.id }}"
+    subnets: "{{ vpc_subnet_ipv4.results | map(attribute='subnet') | map(attribute='cidr_block') | list }}"
+    routes: "{{ aws_vpc_routes_default + aws_vpc_routes_extra | default([]) }}"
+  vars:
+    vpc_route_table_tags:
+       Name: "{{ aws_vpc_name }}-routes"
+  when: aws_nat_eip is not defined

@@ -64,7 +64,7 @@
       ami_facts_instance: "{{ aws_app_node_instance_type }}"
       delegate_to: localhost
     - role: cs.aws-autoscaling
-      autoscaling_assign_public_ip: yes
+      autoscaling_assign_public_ip: "{{ aws_vpc_ipv6_enabled | ternary(false, true) }}"
       autoscaling_loadbalancers: "{{ aws_app_asg_load_balancers }}"
 
       autoscaling_webnodedown_hook_create: "{{ varnish_standalone }}"
@@ -113,7 +113,7 @@
 
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
-      autoscaling_assign_public_ip: yes
+      autoscaling_assign_public_ip: "{{ aws_vpc_ipv6_enabled | ternary(false, true) }}"
       autoscaling_loadbalancers: no
 
       autoscaling_webnodedown_hook_create: "{{ varnish_standalone }}"
@@ -163,7 +163,7 @@
 
     - role: cs.aws-autoscaling
       autoscaling_asg_enabled: mageops_pio_worker_dedicated_asg and mageops_pio_worker_enable
-      autoscaling_assign_public_ip: yes
+      autoscaling_assign_public_ip: "{{ aws_vpc_ipv6_enabled | ternary(false, true) }}"
       autoscaling_loadbalancers: no
 
       autoscaling_asg_name: "{{ mageops_app_name }}-pio"

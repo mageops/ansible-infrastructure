@@ -30,8 +30,7 @@
 # started using localhost facts
 - name: Get deploy host
   set_fact:
-    deploy_host: "{{ ansible_host }}"
-
+    deploy_host: "{{ aws_vpc_ipv6_enabled | ternary('[' + ansible_host + ']', ansible_host) }}"
 # Use rsync directly for speed up as ansible adds stuff like `--delay-updates`.
 # Also this fixes the problem where `synchronize` does not honor `become_user`.
 - name: Synchronize new artifact to remote temp dir

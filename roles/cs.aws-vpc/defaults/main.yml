@@ -1,9 +1,14 @@
 aws_vpc_create: true
 aws_vpc_subnet_prefix: '10.9'
+aws_vpc_ipv6_enabled: false
 
 aws_vpc_routes_default:
   - dest: '0.0.0.0/0'
     gateway_id: igw
   - dest: '::/0'
     gateway_id: igw
+aws_vpc_nat_routes_default:
+  - dest: '::/0'
+    gateway_id: igw
+
 aws_vpc_routes_extra: []

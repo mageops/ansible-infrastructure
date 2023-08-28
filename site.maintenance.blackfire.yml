@@ -14,7 +14,7 @@
       add_host:
         groups:  app_servers
         host: "{{ item }}"
-      with_items: "{{ _aws_ec2|json_query('instances[].public_ip_address')}}"
+      with_items: "{{ aws_vpc_ipv6_enabled | ternary(_aws_ec2|json_query('instances[].ipv6_address'), _aws_ec2|json_query('instances[].public_ip_address') ) }}"
   vars_files:
       - vars/app/env.yml
       - vars/aws/env.yml

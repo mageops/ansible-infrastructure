@@ -247,6 +247,9 @@ aws_vpc_create: yes
 aws_vpc_subnet_prefix: "10.9"
 
 # Or reuse an existing one
+
+aws_vpc_ipv6_enabled: false #Enable ipv6 stack. Option false, true
+
 # aws_vpc_id:
 
 # VPC name for identification purposes
@@ -405,9 +408,9 @@ aws_persistent_node_instance_type: t3a.micro
 
 # EC2 Elastic IPs
 aws_varnish_node_elastic_ip:
-aws_varnish_node_ip_assign: yes
+aws_varnish_node_ip_assign: "{{ ( aws_vpc_ipv6_enabled is false ) or (( aws_varnish_node_elastic_ip | default('', true) | length > 0) and aws_vpc_ipv6_enabled ) }}"
 aws_persistent_node_elastic_ip:
-aws_persistent_node_ip_assign: yes
+aws_persistent_node_ip_assign:  "{{ ( aws_vpc_ipv6_enabled is false ) or (( aws_persistent_node_elastic_ip | default('', true) | length > 0) and aws_vpc_ipv6_enabled ) }}"
 
 # EC2 instance EBS volume sizes in GB
 aws_app_node_ebs_volume_size: 10

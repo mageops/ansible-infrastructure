@@ -34,7 +34,7 @@
     # This has zero costs on current-gen instances
     ebs_optimized: yes
     network:
-      assign_public_ip: yes
+      assign_public_ip: "{{ aws_vpc_ipv6_enabled | ternary(false, true) }}"
     security_groups: "{{ builder_instance_security_groups }}"
   vars:
     builder_instance_name_tags:
@@ -59,19 +59,19 @@
 
 - name: Add builder host to inventory
   add_host:
-    hostname: "{{ item.public_ip_address }}"
+    hostname: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
     groups:
       - "{{ builder_instance_inventory_group }}"
       - "{{ mageops_app_host_group }}"
 
   loop: '{{ builder_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_ip_address }}"
+    label: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
 
 - name: Wait for builder node instance to get up
   wait_for:
     port: 22
-    host: "{{ item.public_ip_address }}"
+    host: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
   loop: '{{ builder_ec2.instances }}'
   loop_control:
-    label: "{{ item.public_dns_name }}"
+    label: "{{ aws_vpc_ipv6_enabled | ternary(item.ipv6_address, item.public_ip_address) }}"
