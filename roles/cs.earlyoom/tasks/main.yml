@@ -1,5 +1,5 @@
 - name: Install earlyoom packages
-  yum:
+  dnf:
     name: earlyoom
     state: present
 

@@ -1,5 +1,5 @@
 - name: Install nodejs and yarn
-  yum:
+  dnf:
     name:
       - nodejs
       - yarn

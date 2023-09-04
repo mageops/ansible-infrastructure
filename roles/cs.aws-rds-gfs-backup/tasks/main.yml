@@ -4,7 +4,7 @@
   when: rds_gfs_instance_id is not defined
 
 - name: Get facts about RDS instance
-  rds_instance_facts:
+  community.aws.rds_instance_info:
     db_instance_identifier: "{{ rds_gfs_instance_id }}"
     region: "{{ aws_region }}"
   register: rds_gfs_instance_data
@@ -45,5 +45,3 @@
 
 - import_tasks: cluster-db.yml
   when: rds_gfs_cluster_id != False
-
-

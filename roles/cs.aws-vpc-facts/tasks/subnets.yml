@@ -1,6 +1,6 @@
 
 - name: Get info about VPC subnets
-  ec2_vpc_subnet_facts:
+  amazon.aws.ec2_vpc_subnet_info:
     region: "{{ aws_region }}"
     filters: "{{ aws_vpc_facsts_subnet_filters_base | combine (aws_vpc_facts_subnet_filters, aws_vpc_facts_subnet_tags | prefix_keys('tag:')) }}"
   vars:

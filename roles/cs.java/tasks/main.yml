@@ -1,9 +1,9 @@
 - name: Ensure Java 7 is gone
-  yum:
+  dnf:
     name: java-1.7.0-openjdk
     state: absent
 
 - name: Ensure Java 8 is installed
-  yum:
+  dnf:
     name: java-1.8.0-openjdk
     state: latest

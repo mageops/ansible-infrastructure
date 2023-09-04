@@ -2,4 +2,3 @@ dependencies:
   - role: cs.ansible-plugins
   - role: cs.aws-vpc-facts
   - role: cs.aws-security-group-facts
-  - role: cs.aws-ami-facts

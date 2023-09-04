@@ -1,19 +1,29 @@
 - name: Install logrotate and zstd
-  yum:
+  dnf:
     state: present
     name:
       - logrotate
       - zstd
 
-- name: Schedule logrotate hourly
-  copy:
-    remote_src: yes
-    src: /etc/cron.daily/logrotate
-    dest: /etc/cron.hourly/logrotate
+- name: Ensure directory exists
+  file:
+    path: "/etc/systemd/system/logrotate.timer.d"
+    state: directory
     mode: 0755
+
+- name: Schedule logrotate hourly
+  template:
+    src: logrotate.override
+    dest: /etc/systemd/system/logrotate.timer.d/override.conf
+    mode: 0644
 
 - name: Install syslog logroate config
   template:
     src: syslog.logrotate
-    dest: /etc/logrotate.d/syslog
+    dest: /etc/logrotate.d/rsyslog
     mode: 0644
+
+- name: Reload logrotate
+  service:
+    name: logrotate.timer
+    state: restarted

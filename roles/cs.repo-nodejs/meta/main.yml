@@ -1,26 +1,3 @@
 allow_duplicates: yes
 dependencies:
   - cs.repo-mageops
-
-galaxy_info:
-  author: Filip Sobalski <filip.sobalski@creativestyle.pl>
-  description: NodeJS NodeSource + Yarn repository for CentOS
-  company: creativestyle Polska
-  license: license (BSD, MIT)
-  min_ansible_version: 2.7
-  platforms:
-    - name: EL
-      versions: [7]
-  galaxy_tags:
-    - nodejs
-    - yarn
-    - search
-    - repository
-    - packages
-    - rpm
-    - mageops
-    - magento
-    - magesuite
-    - creativestyle
-
-

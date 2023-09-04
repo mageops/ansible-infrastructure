@@ -1,5 +1,5 @@
 - name: Install latest nginx GeoIP module dependencies
-  yum:
+  dnf:
     name: "{{ packages }}"
     state: latest
   vars:
@@ -11,7 +11,7 @@
 
 # nging-module-geoip2 is available from mageops repo
 - name: Install latest nginx GeoIP module dependencies
-  yum:
+  dnf:
     name: "{{ packages }}"
     state: latest
   vars:

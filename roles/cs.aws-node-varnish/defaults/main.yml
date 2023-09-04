@@ -1,4 +1,4 @@
-aws_varnish_node_ami_id: "{{ aws_ami_clean_base_id }}"
+aws_varnish_node_ami_id: "{{ aws_ami_clean_base_info[aws_varnish_node_instance_type].image_id }}"
 aws_varnish_node_instance_type: t3a.micro
 aws_varnish_node_ebs_volume_size: 10
 aws_ansible_varnish_node_inventory_group: varnish
@@ -14,4 +14,3 @@ aws_varnish_node_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', t
 aws_varnish_node_ebs_gp3_convert: "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
 aws_varnish_node_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
 aws_varnish_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"
-

@@ -1,9 +1,9 @@
 - name: Install sudo package
-  yum: 
+  dnf:
     name: sudo
 
 - name: Add superuser group
-  group: 
+  group:
     name: wheel
     state: present
 

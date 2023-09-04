@@ -1,5 +1,5 @@
 - name: Install SSH Daemon packages
-  yum:
+  dnf:
     name: openssh-server
     state: present
   notify: Reload SSH Daemon
@@ -73,5 +73,3 @@
   until: sshd_service_reloaded is success
   retries: 5
   delay: 5
-
-

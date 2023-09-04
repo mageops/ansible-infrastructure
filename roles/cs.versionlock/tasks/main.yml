@@ -1,5 +1,5 @@
 - name: Install versionlock plugin
-  yum:
+  dnf:
     name:
       - yum-plugin-versionlock
       - dnf-plugin-versionlock

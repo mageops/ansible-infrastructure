@@ -1,5 +1,5 @@
 - name: Get available Lauch Configurations
-  ec2_lc_facts:
+  community.aws.ec2_lc_info:
     region: "{{ aws_region }}"
     sort: created_time
     sort_order: descending

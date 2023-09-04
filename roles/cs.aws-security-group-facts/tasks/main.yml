@@ -1,5 +1,5 @@
 - name: Get info about security groups
-  ec2_group_facts:
+  amazon.aws.ec2_group_info:
     region: "{{ aws_region }}"
     filters: "{{ aws_sg_facts_filters | combine (aws_sg_facts_tags | prefix_keys('tag:')) }}"
   register: ec2_group_facts
@@ -20,7 +20,7 @@
     aws_security_group_lb: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_lb_name) | list | default([false], true) | first }}"
     aws_security_group_ssh: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_ssh_name) | list | default([false], true) | first }}"
     aws_security_group_lambda_ssh: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_lambda_ssh_name) | list | default([false], true) | first }}"
-    aws_security_group_persistant: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_persistant_name) | list | default([false], true) | first }}"    
+    aws_security_group_persistant: "{{ aws_security_groups_info | selectattr('group_name', 'equalto', aws_security_group_persistant_name) | list | default([false], true) | first }}"
     cacheable: yes
 
 - name: Set id fact for each security group

@@ -1,8 +1,9 @@
 - name: Install dnf for speedup when installing packages
-  yum:
+  dnf:
     name:
       - dnf
-      - dnf-plugins-core
+      - python3-dnf-plugins-core
+      - python3-dnf-plugin-cow
     state: present
 
 - name: Set dnf configuration

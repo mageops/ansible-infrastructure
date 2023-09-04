@@ -44,7 +44,7 @@ https_termination_crt_acme_staging: no
 #   - header `Cache-Control` starts with `public`
 #   - header `X-Magento-Cache-Debug` equals `MISS`
 #   - reponse code is 200 OK
-https_termination_page_cache_misses_logging: yes
+https_termination_page_cache_misses_logging: no
 https_termination_page_cache_misses_logfile: "{{ nginx_log_dir }}/access.page-cache-misses.json.log"
 
 # An array of items each containing:

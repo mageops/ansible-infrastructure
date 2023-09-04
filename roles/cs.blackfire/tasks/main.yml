@@ -1,8 +1,8 @@
 - name: Install blackfire when configured
   block:
-    - name: Install pypgpme
-      yum:
-        name: pygpgme
+    - name: Install pgpme
+      dnf:
+        name: gpgme
         state: present
 
     - name: Add Blackfire repository
@@ -11,12 +11,12 @@
         dest: /etc/yum.repos.d/blackfire.repo
 
     - name: Ensure Blackfire deprecated packages are gone.
-      yum:
+      dnf:
         name: "{{ blackfire_deprecated_packages }}"
         state: absent
 
     - name: Ensure Blackfire packages are installed.
-      yum:
+      dnf:
         name: "{{ blackfire_packages }}"
         state: present
 

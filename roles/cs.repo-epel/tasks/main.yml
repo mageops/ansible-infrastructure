@@ -1,6 +1,12 @@
 - name: Ensure EPEL repo release package is installed and up-to-date
-  yum:
+  dnf:
     name: "{{ repo_epel_package_name }}"
 
 - name: Ensure EPEL is enabled
   command: yum-config-manager --enable epel
+
+- name: Ensure EPEL is enabled
+  command: yum-config-manager --enable epel-testing
+
+- name: Ensure crb is enabled
+  command: yum-config-manager --enable crb

@@ -10,52 +10,55 @@
   when: magento_varnish_host | default(false, true)
 
 - name: Ensure core config database settings' values
-  mysql_query:
-    name: "{{ mageops_app_mysql_db }}"
-    table: core_config_data
+  community.mysql.mysql_query:
+    login_db: "{{ mageops_app_mysql_db }}"
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
-    identifiers:
-      path: "{{ magento_db_setting.path }}"
-    values:
-      value: "{{ magento_db_setting.value }}"
-    defaults:
-      scope_id: 0
-      scope: "default"
+    query: |
+      INSERT INTO `core_config_data`
+      SET
+        path = "{{ magento_db_setting.path | quote }}",
+        value = "{{ magento_db_setting.path | quote }}",
+        scope_id = 0,
+        scope = "default"
+      ON DUPLICATE KEY UPDATE
+        value = "{{ magento_db_setting.path | quote }}"
   when: not magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
   loop: "{{ magento_core_config_settings }}"
   loop_control:
     loop_var: magento_db_setting
 
 - name: Ensure core config database default values (no update if exists)
-  mysql_query:
-    name: "{{ mageops_app_mysql_db }}"
-    table: core_config_data
+  community.mysql.mysql_query:
+    login_db: "{{ mageops_app_mysql_db }}"
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
-    identifiers:
-      path: "{{ magento_db_setting.path }}"
-    defaults:
-      scope_id: 0
-      scope: "default"
-      value: "{{ magento_db_setting.value }}"
+    query: |
+      INSERT INTO `core_config_data`
+      SET
+        path = "{{ magento_db_setting.path | quote }}",
+        value = "{{ magento_db_setting.path | quote }}",
+        scope_id = 0,
+        scope = "default"
+      ON DUPLICATE KEY UPDATE
+        path = path
   when: magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
   loop: "{{ magento_core_config_settings }}"
   loop_control:
     loop_var: magento_db_setting
 
 - name: Ensure core config database settings are absent (defaults are used)
-  mysql_query:
-    state: absent
-    name: "{{ mageops_app_mysql_db }}"
-    table: core_config_data
+  community.mysql.mysql_query:
+    login_db: "{{ mageops_app_mysql_db }}"
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
-    identifiers:
-      path: "{{ magento_db_setting_path }}"
+    query: |
+      DELETE FROM core_config_data
+      WHERE
+        path = "{{ magento_db_setting_path | quote }}"
   loop: "{{ magento_core_config_settings_to_remove }}"
   loop_control:
     loop_var: magento_db_setting_path

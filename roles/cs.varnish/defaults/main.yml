@@ -63,7 +63,8 @@ varnish_workspace_client: 64k
 varnish_workspace_thread: 4k
 
 # As of varnish 6.0 the default is 48k and lower values cause segfault with our VCL
-varnish_thread_pool_stack: 64k
+# 128k is minimum for aarch64
+varnish_thread_pool_stack: 128k
 
 # Max. number of thread pools that should be at most the number of vCPUs
 # See: https://varnish-cache.org/docs/6.0/reference/varnishd.html#thread-pool-max
@@ -172,7 +173,7 @@ varnish_media_cors_max_age: 2678400
 
 varnish_vcl_conf: /etc/varnish/default.vcl
 varnish_backends_vcl: /etc/varnish/backends.vcl
-varnish_run_dir: /var/run/varnish
+varnish_run_dir: /run/varnish
 varnish_pid_file: "{{ varnish_run_dir }}/varnish.pid"
 
 varnish_syscfg_limit_nofile: 131072

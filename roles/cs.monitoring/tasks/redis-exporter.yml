@@ -1,5 +1,5 @@
 - name: Install redis-exporter
-  yum:
+  dnf:
     name: redis-exporter
     state: latest
 

@@ -2,7 +2,7 @@
   become: yes
   tasks:
     - name: Install xdebug extension
-      yum:
+      dnf:
         state: present
         name: php-pecl-xdebug3
       when: xdebug_enable | bool
@@ -20,7 +20,7 @@
           regexp: "xdebug.remote_connect_back ="
       when: xdebug_enable | bool
     - name: Remove xdebug extension
-      yum:
+      dnf:
         state: absent
         name: php-pecl-xdebug3
       when: not xdebug_enable | bool

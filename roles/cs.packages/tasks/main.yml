@@ -1,9 +1,4 @@
 
-- name: Ensure /var/lib/rpm-state exists (fix for https://access.redhat.com/solutions/3573891)
-  file:
-    path: /var/lib/rpm-state
-    state: directory
-
 - name: Get last package maintenance timestamp
   slurp:
     path: "{{ packages_maintenance_marker_path }}"
@@ -13,21 +8,8 @@
 
 - name: Perform one-time package maintenance
   block:
-    - name: Set localized yum mirrorlist for core repos
-      ini_file:
-        path: "/etc/yum.repos.d/{{ item.file }}"
-        section: "{{ item.repo }}"
-        option: mirrorlist
-        value: "{{ item.url }}"
-        backup: yes
-        no_extra_spaces: yes
-      loop: "{{ packages_mirrorlists }}"
-      loop_control:
-        label: "{{ item.repo }}"
-      when: packages_mirrorlist_countrycode is defined and packages_mirrorlist_countrycode
-
     - name: Make sure banned packages are not present
-      yum:
+      dnf:
         name: "{{ packages_remove | default([]) }}"
         state: absent
       when: packages_remove is defined and packages_remove | length
@@ -43,24 +25,25 @@
       ) > packages_maintenance_interval | int
     )
 
-- name: Make sure there are no open yum transactions
-  shell: yum-complete-transaction -y --cleanup-only
-  args:
-    warn: no
-
+# Retries here are required because of funky fastly caching
+# and sometimes selected fastly mirror is not resolving some packages (404)
+# dns caches responses for 30s so we need this much to get another change at getting different mirror
 - name: "Install packages"
-  yum:
+  dnf:
     name: "{{ packages_install }}"
     state: present
   register: packages_install_command
-  retries: 5
-  delay: 5
+  retries: 10
+  delay: 30
   until: not packages_install_command is failed
 
 - name: "Ensure all packages are up to date"
-  yum:
+  dnf:
     name: '*'
     state: latest
     exclude: "{{ packages_full_update_exclude }}"
   when: packages_full_update
-
+  register: packages_update_command
+  retries: 10
+  delay: 30
+  until: not packages_update_command is failed
