@@ -26,8 +26,8 @@
 
     - role: cs.versionlock
       node_name: app
-      versionlock_packages: "{{ versionlock_app_node_packages + versionlock_app_node_packages_extra }}"
-      versionlock_ban_packages: "{{ versionlock_app_node_ban_packages + versionlock_app_node_ban_packages_extra }}"
+      versionlock_packages: "{{ versionlock_app_node_packages + versionlock_app_node_packages_base + versionlock_app_node_packages_extra }}"
+      versionlock_ban_packages: "{{ versionlock_app_node_ban_packages + versionlock_app_node_ban_packages + versionlock_app_node_ban_packages_extra }}"
 
     - role: pinkeen.selinux-disable
 

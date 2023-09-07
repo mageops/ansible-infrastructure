@@ -4,12 +4,6 @@
     state: latest
   register: elasticsearch_packages_install
 
-# FIXME: Remove me after May 2022
-- name: Remove manualy applied log4j workaround (now included in generated template)
-  file:
-    path: /etc/elasticsearch/jvm.options.d/workaround-log4j.options
-    state: absent
-
 # In case `/var` or `/var/run` is a tmpfs (common thing nowadays)
 - name: Ensure var directories always exist
   lineinfile:
@@ -89,21 +83,6 @@
   fail:
     msg: |
       ERROR! Invalid, undetected or unsupported elasticsearch version!
-
-- name: Configure elasticsearch 5
-  template:
-    src: "{{ item.key }}"
-    dest: /etc/elasticsearch/{{ item.value }}
-    owner: root
-    group: elasticsearch
-  with_dict:
-    es5-jvm.options: jvm.options
-    elasticsearch.yml: elasticsearch.yml
-    log4j2.properties: log4j2.properties
-  notify: Restart elasticsearch
-  when: >-
-    elasticsearch_version_number is version('5.0.0', '>=')
-      and elasticsearch_version_number is version('6.0.0', '<')
 
 - name: Configure elasticsearch 6
   template:

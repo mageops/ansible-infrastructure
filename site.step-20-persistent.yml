@@ -19,8 +19,8 @@
     - role: cs.switch-to-dnf
     - role: cs.versionlock
       node_name: persistent
-      versionlock_packages: "{{ versionlock_persistent_packages + versionlock_persistent_packages_extra }}"
-      versionlock_ban_packages: "{{ versionlock_persistent_ban_packages + versionlock_persistent_ban_packages_extra }}"
+      versionlock_packages: "{{ versionlock_persistent_packages + versionlock_persistent_packages_base + versionlock_persistent_packages_extra }}"
+      versionlock_ban_packages: "{{ versionlock_persistent_ban_packages + versionlock_persistent_ban_packages_base + versionlock_persistent_ban_packages_extra }}"
     - role: pinkeen.selinux-disable
     - role: cs.centos-update-kernel
       when: mageops_upgrade_kernel
@@ -88,6 +88,8 @@
       when: mageops_app_is_magesuite
     - role: cs.ssh-proxy-user
       when: mageops_ssh_proxy_persistant
+    - role: cs.tinyproxy
+      tinyproxy_enabled: "{{ mageops_tinyproxy_persistant_enabled  }}"
     - role: cs.monitoring
       monitoring_node_exporter_enabled: yes
       monitoring_elasticsearch_exporter_enabled: yes

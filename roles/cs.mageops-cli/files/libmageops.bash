@@ -75,9 +75,9 @@ mageops::update_s3_file() {
 
 
 mageops::clear_php_opcache() {
-    for die in "${config__opcache_file_paths[@]}";do
+    for dir in "${config__opcache_file_paths[@]}";do
         echo "Clearing opcache $dir..."
-        rm -rf "${config__opcache_file_paths[@]}"
+        rm -rf "$dir"
     done
     systemctl reload php-fpm
 }

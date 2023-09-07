@@ -4,6 +4,7 @@ repo_elasticsearch_variants:
   - '5'
   - '6'
   - '7'
-  
+  - '8'
+
 repo_elasticsearch_variants_enabled:
-  - '5'
+  - '7'
