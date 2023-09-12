@@ -1,6 +1,7 @@
-aws_lambda_varnish_deploy_package_url: "https://github.com/mageops/aws-lambdas-autoscaling/releases/download/1.6.0/autoscaling-lambdas-deploy-package.python3.7.zip"
-aws_lambda_varnish_deploy_package_path: "{{ mageops_ansible_temp_dir }}/varnish-lambda-deploy-package.zip"
-aws_lambda_varnish_runtime: python3.7
+aws_lambda_varnish_version: "1.7.2"
+aws_lambda_varnish_deploy_package_url: "https://github.com/mageops/aws-lambdas-autoscaling/releases/download/{{ aws_lambda_varnish_version }}/autoscaling-lambdas-deploy-package.python3.11.zip"
+aws_lambda_varnish_deploy_package_path: "{{ mageops_ansible_temp_dir }}/varnish-lambda-deploy-package-{{ aws_lambda_varnish_version }}-{{ aws_lambda_varnish_runtime }}.zip"
+aws_lambda_varnish_runtime: python3.11
 
 aws_lambda_handle_varnish_autoscaling_event_name: "handleVarnishAutoscalingEvent-{{ mageops_app_name }}"
 aws_lambda_update_varnish_backends_name: "updateVarnishBackends-{{ mageops_app_name }}"
