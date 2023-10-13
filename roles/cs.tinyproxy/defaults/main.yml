@@ -11,7 +11,7 @@ tinyproxy_allowed_hosts:
   - 10.0.0.0/8
 tinyproxy_log_level: "Info"
 tinyproxy_logfile: "/var/log/tinyproxy/tinyproxy.log"
-tinyproxy_pidfile: "/var/run/tinyproxy/tinyproxy.pid"
+tinyproxy_pidfile: "/run/tinyproxy/tinyproxy.pid"
 tinyproxy_upstream: []
 tinyproxy_start_servers: 1
 tinyproxy_max_requests_per_child: 1000
