@@ -107,3 +107,8 @@ nginx_custom_php_scripts: []
 #   extra_nginx_config: |-
 #     set $PHP_MEMORY_LIMIT 128M;
 #     set $PHP_MAX_EXECUTION_TIME 60;
+
+nginx_magento_custom_location: []
+# - path_pattern: '~ ^/custom_location'
+#   nginx_config: |-
+#    try_files /custom_path/$uri;

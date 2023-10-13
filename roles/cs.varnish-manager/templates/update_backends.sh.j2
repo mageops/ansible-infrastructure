@@ -10,6 +10,11 @@ if [ ! -f "$NEW_VCL_PATH" ] ; then
     exit 1
 fi
 
+restore_backup() {
+    echo "VCL didn't compile, restoring backup..."
+    cp "${BKP_VCL_PATH}" "${CUR_VCL_PATH}"
+}
+
 echo "Backing up vcl..."
 cp "${CUR_VCL_PATH}" "${BKP_VCL_PATH}"
 
@@ -17,11 +22,15 @@ echo "Using new backends vcl file ${NEW_VCL_PATH}..."
 cp "${NEW_VCL_PATH}" "${CUR_VCL_PATH}"
 
 echo "Reloading VCLs..."
-/bin/systemctl reload varnish
-
-if [ $? -ne 0 ] ; then
-    echo "VCL didn't compile, restoring backup..."
-    cp "${BKP_VCL_PATH}" "${CUR_VCL_PATH}"
-    exit 1
+if ! /bin/systemctl reload varnish;then
+    # Check if the new VCL compiles
+    if /usr/sbin/varnishd -Cf /etc/varnish/default.vcl > /dev/null 2>&1;then
+        /bin/systemctl restart varnish
+        if [ $? -ne 0 ] ; then
+            restore_backup
+            /bin/systemctl restart varnish
+        fi
+    else
+        restore_backup
+    fi
 fi
-
