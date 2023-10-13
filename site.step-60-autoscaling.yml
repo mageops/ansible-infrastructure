@@ -162,7 +162,7 @@
         {% endif %}
 
     - role: cs.aws-autoscaling
-      autoscaling_asg_enabled: mageops_pio_worker_dedicated_asg and mageops_pio_worker_enable
+      autoscaling_asg_enabled: "{{ mageops_pio_worker_dedicated_asg and mageops_pio_worker_enable }}"
       autoscaling_assign_public_ip: yes
       autoscaling_loadbalancers: no
 
