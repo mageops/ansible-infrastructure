@@ -16,12 +16,12 @@ RestartSec=300
 
 # QoS options
 MemoryAccounting=true
-# Throttle cron jobs when they consume more than 256M of memory
-MemoryHigh=256M
+# Throttle cron jobs when they consume more than {{ aws_magento_cron_memory_high }} of memory
+MemoryHigh={{ aws_magento_cron_memory_high }}
 CPUAccounting=true
 # Limit cpu usage to 50% (of single core)
-CPUQuota=50%
-CPUShares=2
+CPUQuota={{ aws_magento_cron_cpu_quota }}
+CPUShares={{ aws_magento_cron_cpu_shares }}
 
 [Install]
 WantedBy=multi-user.target

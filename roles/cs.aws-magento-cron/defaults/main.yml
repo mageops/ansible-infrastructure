@@ -34,3 +34,7 @@ aws_magento_cron_crons:
   #   only_cron_node: yes
   #   magento_command: yes
   #   minute: */1
+
+aws_magento_cron_memory_high: 1G
+aws_magento_cron_cpu_quota: 50%
+aws_magento_cron_cpu_shares: 2
