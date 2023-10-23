@@ -1,8 +1,1 @@
-- name: Detect if modules directory migration is required
-  stat:
-    path: /etc/nginx/modules
-  register: _nginx_migration_modules
-
-- name: Run modules directory migration
-  when: _nginx_migration_modules.stat.exists and not _nginx_migration_modules.stat.islnk
-  import_tasks: migrations/modules-dir.yml
+# None for now
