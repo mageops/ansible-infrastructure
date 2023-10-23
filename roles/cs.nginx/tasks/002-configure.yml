@@ -38,9 +38,14 @@
   command: systemd-tmpfiles --create
   when: tmpfiles_config is changed
 
-- name: Ensure nginx service override direcotry exists
+- name: Ensure nginx service override directory exists
   file:
     path: /etc/systemd/system/nginx.service.d
+    state: directory
+
+- name: Ensure nginx modules directory exists
+  file:
+    path: "{{ nginx_modules_conf_dir }}"
     state: directory
 
 - name: Configure Nginx Systemd Service
