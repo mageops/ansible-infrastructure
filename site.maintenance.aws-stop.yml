@@ -12,7 +12,7 @@
       when: stop_asg
       block:
         - name: Get App Node Auto Scaling Groups
-          ec2_asg_facts:
+          community.aws.ec2_asg_info:
             region: "{{ aws_region }}"
             tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
           register: stop_asg_facts

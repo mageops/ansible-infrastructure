@@ -24,7 +24,7 @@
       when: start_asg
       block:
         - name: Get Auto Scaling Groups for App
-          ec2_asg_facts:
+          community.aws.ec2_asg_info:
             region: "{{ aws_region }}"
             tags: "{{ aws_tags_base | combine(aws_tags_node_app) }}"
           register: start_asg_facts
@@ -46,7 +46,7 @@
       when: start_asg and (aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable)
       block:
         - name: Get Auto Scaling Groups for Extra App
-          ec2_asg_facts:
+          community.aws.ec2_asg_info:
             region: "{{ aws_region }}"
             tags: "{{ aws_tags_base | combine(aws_tags_node_extra_app) }}"
           register: start_asg_facts

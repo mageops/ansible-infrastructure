@@ -19,7 +19,7 @@
     - name: Remove Auto Scaling Groups and App servers
       block:
         - name: Get Auto Scaling Groups
-          ec2_asg_facts:
+          community.aws.ec2_asg_info:
             region: "{{ aws_region }}"
             tags: "{{ aws_tags_base }}"
           register: _aws_asgs
