@@ -165,6 +165,9 @@ magento_app_etc_config_consumer_workers:
   cron_consumers_runner:
     cron_run: false
     max_messages: "{{ magento_consumer_workers_max_messages | default(500) }}"
+  queue:
+    consumers_wait_for_messages: 0
+    only_spawn_when_message_available: 1
 
 magento_app_etc_config_cron_consumers:
   cron_consumers_runner:
