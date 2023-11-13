@@ -26,6 +26,18 @@
     dest: "{{ send_logs_to_slack_temp_dir.path }}/lambda.zip"
     format: zip
 
+- name: Check if lambda function exists
+  lambda_facts:
+    region: "{{ aws_region }}"
+  register: _lambda_facts
+
+- name: Delete lambda function if it exists with different runtime
+  lambda:
+    name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
+    state: absent
+    region: "{{ aws_region }}"
+  when: _lambda_facts.functions[aws_lambda_slack_exceptions_forwarder_name] is defined and _lambda_facts.functions[aws_lambda_slack_exceptions_forwarder_name].runtime != aws_lambda_slack_exceptions_forwarder_runtime
+
 - name: Create slack log forwarder lambda function
   lambda:
     name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
