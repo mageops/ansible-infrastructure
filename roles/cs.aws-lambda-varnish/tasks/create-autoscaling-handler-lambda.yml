@@ -6,6 +6,18 @@
   vars:
     _jq_map_ec2_instance_filter: '{Name: key, Values: [value]}'
 
+- name: Check if lambda function exists
+  lambda_facts:
+    region: "{{ aws_region }}"
+  register: _lambda_facts
+
+- name: Delete lambda function if it exists with different runtime
+  lambda:
+    name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
+    state: absent
+    region: "{{ aws_region }}"
+  when: _lambda_facts.functions[aws_lambda_handle_varnish_autoscaling_event_name] is defined and _lambda_facts.functions[aws_lambda_handle_varnish_autoscaling_event_name].runtime != aws_lambda_varnish_runtime
+
 - name: Register lambda handler for autoscaling event
   lambda:
     name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
