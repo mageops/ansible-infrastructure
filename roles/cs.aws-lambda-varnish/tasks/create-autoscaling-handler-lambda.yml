@@ -16,7 +16,7 @@
     name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
     state: absent
     region: "{{ aws_region }}"
-  when: _lambda_facts.functions[aws_lambda_handle_varnish_autoscaling_event_name] is defined and _lambda_facts.functions[aws_lambda_handle_varnish_autoscaling_event_name].runtime != aws_lambda_varnish_runtime
+  when: _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name].runtime != aws_lambda_varnish_runtime
 
 - name: Register lambda handler for autoscaling event
   lambda:
