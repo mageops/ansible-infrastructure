@@ -3,6 +3,18 @@
     url: "{{ aws_lambda_node_coordinator_package_url }}"
     dest: "{{ aws_lambda_node_coordinator_package_path }}"
 
+- name: Check if lambda function exists
+  lambda_facts:
+    region: "{{ aws_region }}"
+  register: _lambda_facts
+
+- name: Delete lambda function if it exists with different runtime
+  lambda:
+    name: "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}"
+    state: absent
+    region: "{{ aws_region }}"
+  when: _lambda_facts.functions[aws_lambda_handle_node_coordinator_autoscaling_event_name] is defined and _lambda_facts.functions[aws_lambda_handle_node_coordinator_autoscaling_event_name].runtime != aws_lambda_node_coordinator_runtime
+
 - name: Register lambda handler for coordinating nodes
   lambda:
     name: "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}"

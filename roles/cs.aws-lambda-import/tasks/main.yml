@@ -5,6 +5,19 @@
     dest: "{{ aws_lambda_import_scaling_deploy_package_path }}"
   when: magento_aws_ondemand_import_instance_enable
 
+- name: Check if lambda function exists
+  lambda_facts:
+    region: "{{ aws_region }}"
+  register: _lambda_facts
+  when: magento_aws_ondemand_import_instance_enable
+
+- name: Delete lambda function if it exists with different runtime
+  lambda:
+    name: "{{ aws_lambda_handle_import_scaling_name }}"
+    state: absent
+    region: "{{ aws_region }}"
+  when: magento_aws_ondemand_import_instance_enable and _lambda_facts.functions[aws_lambda_handle_import_scaling_name] is defined and _lambda_facts.functions[aws_lambda_handle_import_scaling_name].runtime != aws_lambda_handle_import_scaling_runtime
+
 - name: Register import scaling handler lambda
   lambda:
     name: "{{ aws_lambda_handle_import_scaling_name }}"
