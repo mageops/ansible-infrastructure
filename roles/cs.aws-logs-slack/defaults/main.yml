@@ -35,3 +35,4 @@ aws_logs_slack_log_groups_report:
 
 aws_lambda_slack_exceptions_forwarder_name: "forwardLogsToSlack-{{ mageops_app_name }}"
 aws_lambda_slack_exceptions_forwarder_name_log_group_name: "/aws/lambda/{{ aws_lambda_slack_exceptions_forwarder_name }}"
+aws_lambda_slack_exceptions_forwarder_runtime: "nodejs18.x"
