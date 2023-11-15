@@ -7,7 +7,7 @@
     _jq_map_ec2_instance_filter: '{Name: key, Values: [value]}'
 
 - name: Check if lambda function exists
-  lambda_facts:
+  community.aws.lambda_facts:
     region: "{{ aws_region }}"
   register: _lambda_facts
 

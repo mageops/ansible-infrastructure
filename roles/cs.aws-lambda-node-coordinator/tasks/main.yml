@@ -4,7 +4,7 @@
     dest: "{{ aws_lambda_node_coordinator_package_path }}"
 
 - name: Check if lambda function exists
-  lambda_facts:
+  community.aws.lambda_facts:
     region: "{{ aws_region }}"
   register: _lambda_facts
 

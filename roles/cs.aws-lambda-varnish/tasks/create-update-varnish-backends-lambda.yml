@@ -7,7 +7,7 @@
       varnish_backend_first_byte_timeout: "{{ varnish_backend_first_byte_timeout }}"
 
 - name: Check if lambda function exists
-  lambda_facts:
+  community.aws.lambda_facts:
     region: "{{ aws_region }}"
   register: _lambda_facts
 
