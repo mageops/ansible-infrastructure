@@ -6,7 +6,7 @@
   when: magento_aws_ondemand_import_instance_enable
 
 - name: Check if lambda function exists
-  community.aws.lambda_facts:
+  community.aws.lambda_info:
     region: "{{ aws_region }}"
   register: _lambda_facts
   when: magento_aws_ondemand_import_instance_enable

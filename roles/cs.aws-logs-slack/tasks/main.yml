@@ -27,7 +27,7 @@
     format: zip
 
 - name: Check if lambda function exists
-  community.aws.lambda_facts:
+  community.aws.lambda_info:
     region: "{{ aws_region }}"
   register: _lambda_facts
 
