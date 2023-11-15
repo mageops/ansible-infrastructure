@@ -5,6 +5,9 @@
     - role: cs.aws-rds-facts
     - role: cs.aws-node-facts
     - role: cs.aws-autoscaling-facts
+    - role: cs.aws-ec2-cleanup
+      aws_ec2_cleanup_lt_to_keep: 0
+      when: remove_asg and not dry_run_mode
 
 
   tasks:
@@ -17,7 +20,7 @@
        - "{{ aws_autoscaling_app }}"
        - "{{ aws_autoscaling_app_extra }}"
        - "{{ aws_autoscaling_app_pio }}"
-      when: remove_asg
+      when: remove_asg and not dry_run_mode
 
     - name: Remove other EC2 Servers
       ec2:
@@ -28,7 +31,7 @@
       with_items:
         - "{{ aws_persistent_node_instance }}"
         - "{{ aws_varnish_node_instance }}"
-      when: remove_ec2
+      when: remove_ec2 and not dry_run_mode
 
     - name: Remove RDS
       rds_instance:
@@ -36,7 +39,7 @@
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
         skip_final_snapshot: yes
-      when: remove_rds
+      when: remove_rds and not dry_run_mode
 
     - name: Remove Volumes
       # Currently not working. There seems to be a bug in Ansible and tags are required
@@ -69,6 +72,7 @@
             region: "{{ aws_region }}"
             state: absent
           with_items: "{{ _aws_efs_to_remove }}"
+          when: not dry_run_mode
       when: remove_efs
 
     - name: Remove Lambdas
@@ -81,6 +85,9 @@
           with_items:
             - "handleAutoscalingEvent-{{ mageops_app_name }}"
             - "updateVarnishBackends-{{ mageops_app_name }}"
+            - "handleNodeCoordinatorAutoscalingEvent-{{ mageops_app_name }}"
+            - "handleVarnishAutoscalingEvent-{{ mageops_app_name }}"
+          when: not dry_run_mode
       when: remove_lambda
 
     - name: Remove Security Groups
@@ -105,12 +112,15 @@
             name: "{{ item.name }}"
             description: "To be removed"
           with_items: "{{ _aws_groups_to_remove }}"
+          when: not dry_run_mode
         - name: Drop Security Groups
           ec2_group:
             region: "{{ aws_region }}"
             state: absent
             name: "{{ item.name }}"
           with_items: "{{ _aws_groups_to_remove }}"
+          ignore_errors: true
+          when: not dry_run_mode
       when: remove_sg
 
     - name: Remove S3 Buckets
@@ -124,17 +134,7 @@
           with_items:
             - "{{ aws_s3_media_bucket }}"
             - "{{ aws_s3_secret_bucket }}"
-      when: remove_s3
-
-    - name: Remove LC
-      include_role:
-        name: cs.aws-ec2-cleanup
-      vars:
-        aws_ec2_cleanup_lcs_to_keep: 0
-        aws_ec2_cleanup_lc_name_prefixes:
-          - "{{ mageops_app_name }}-app-"
-          - "{{ mageops_app_name }}-extra-app-"
-      when: remove_asg
+      when: remove_s3 and not dry_run_mode
 
   vars:
     remove_asg: yes
@@ -145,3 +145,4 @@
     remove_sg: yes
     remove_vol: yes
     remove_s3: no
+    dry_run_mode : no

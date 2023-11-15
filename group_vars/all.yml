@@ -87,9 +87,11 @@ aws_tags_pio_only:
   RoleImage: "pio"
   Role: "pio"
 
+aws_tags_role_app_base:
+  Role: "app"
 
 aws_tags_role_app_tpl: [
-  { Role: "app" },
+  "{{ aws_tags_role_app_base }}",
   "{{ (mageops_pio_worker_enable and not mageops_pio_worker_dedicated_asg) | ternary(aws_tags_pio, {}) }}"
 ]
 
