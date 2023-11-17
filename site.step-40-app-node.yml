@@ -22,7 +22,8 @@
       become: no
       when: aws_use
 
-    - role: cs.switch-to-dnf
+    - role: cs.switch-pkg-mgr
+      switch_pkg_mgr_option: "{{ mageops_pkg_mgr.centos7 }}"
 
     - role: cs.versionlock
       node_name: app

@@ -1,0 +1,12 @@
+- name: Switch to dnf
+  include_tasks: dnf.yml
+  when: switch_pkg_mgr_option == 'dnf'
+
+- name: Switch to yum
+  include_tasks: yum.yml
+  when: switch_pkg_mgr_option == 'yum'
+
+- name: Fail if option is invalid
+  fail:
+    msg: "Invalid switch_pkg_mgr_option value: {{ switch_pkg_mgr_option }}"
+  when: switch_pkg_mgr_option != 'dnf' and switch_pkg_mgr_option != 'yum' and switch_pkg_mgr_option is not empty
