@@ -1820,6 +1820,11 @@ mageops_cli_features_dir: /usr/local/lib/mageops/features
 # Whether to perform full update
 mageops_packages_full_update: yes
 
+# Package manager to use
+mageops_pkg_mgr:
+  # Supported options: dnf, yum
+  centos7: dnf
+
 # Packages that are ensured to be absent on all nodes
 mageops_packages_mirrorlist_countrycode: "de"
 
