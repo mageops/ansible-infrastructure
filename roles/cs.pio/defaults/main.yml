@@ -30,3 +30,5 @@ pio_resize_strategy: Contain
 
 # Url to pio-worker rpm
 # pio_package_url:
+
+pio_worker_cpu_shares: 2

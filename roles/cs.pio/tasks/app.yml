@@ -18,8 +18,15 @@
     dest: "/etc/default/pio-worker"
     mode: 0644
 
+- name: Write service override
+  template:
+    src: "pio-worker.override.conf.j2"
+    dest: "/etc/systemd/system/pio-worker.service.d/override.conf"
+    mode: 0644
+
 - name: Enable service
   service:
     name: pio-worker
     enabled: true
     state: restarted
+    daemon_reload: yes
