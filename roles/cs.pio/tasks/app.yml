@@ -18,6 +18,12 @@
     dest: "/etc/default/pio-worker"
     mode: 0644
 
+- name: Ensure service directory exists
+  file:
+    path: "/etc/systemd/system/pio-worker.service.d"
+    state: directory
+    mode: 0755
+
 - name: Write service override
   template:
     src: "pio-worker.override.conf.j2"
