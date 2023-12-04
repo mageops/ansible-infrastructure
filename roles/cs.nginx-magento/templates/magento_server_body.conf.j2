@@ -311,6 +311,12 @@ location ~ {{ custom.path_pattern }} {
 }
 {% endfor %}
 
+{% for custom in nginx_magento_custom_location %}
+location {{ custom.path_pattern }} {
+    {{ custom.nginx_config }}
+}
+{% endfor %}
+
 location ~ .*\.php$ {
     deny all;
 }

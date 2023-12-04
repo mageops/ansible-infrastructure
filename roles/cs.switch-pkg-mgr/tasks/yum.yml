@@ -1,0 +1,9 @@
+- name: Set yum configuration
+  copy:
+    src: yum.conf
+    dest: /etc/yum.conf
+
+- name: Switch package manager to yum
+  set_fact:
+    ansible_facts:
+      pkg_mgr: yum
