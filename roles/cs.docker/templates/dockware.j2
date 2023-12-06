@@ -1,0 +1,12 @@
+[Unit]
+Description=dockware
+
+[Service]
+Type=simple
+ExecStartPre=-/usr/bin/docker stop dockware
+ExecStartPre=-/usr/bin/docker rm dockware
+ExecStart=/usr/bin/docker run --name dockware -p 80:80 docker.io/dockware/play:latest
+ExecStop=/usr/bin/docker stop dockware
+
+[Install]
+WantedBy=multi-user.target

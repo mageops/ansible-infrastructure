@@ -1,4 +1,0 @@
-- name: Execute finalize roles
-  include_role:
-    name: "{{ item }}"
-  loop: "{{ finalize_roles }}"

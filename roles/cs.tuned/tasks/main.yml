@@ -1,7 +1,0 @@
-- name: Install tuned
-  dnf:
-    name: tuned
-    state: present
-
-- name: Set tuned profile
-  shell: "tuned-adm profile {{ tuned_profile }}"

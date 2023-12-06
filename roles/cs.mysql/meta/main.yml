@@ -1,5 +1,0 @@
-dependencies:
-    - role: cs.repo-mysql
-      when: not mysql_mariadb_flavor
-    - role: cs.repo-mariadb
-      when: mysql_mariadb_flavor

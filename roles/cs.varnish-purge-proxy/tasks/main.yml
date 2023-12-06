@@ -1,4 +1,0 @@
-- import_tasks: install.yml
-- import_tasks: create_init_script.yml
-- import_tasks: enable_service.yml
-# - import_tasks: create_supervisor_config.yml

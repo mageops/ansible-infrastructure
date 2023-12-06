@@ -1,0 +1,82 @@
+- name: Start shopware node instance
+  amazon.aws.ec2_instance:
+    region: "{{ aws_region }}"
+    detailed_monitoring: no
+    # 2 lines below because of https://github.com/ansible/ansible/issues/20867
+    # otherwise state: running would be ok.
+    state: "{{ aws_shopware_instance_id | ternary('running', omit) }}"
+    exact_count: "{{ aws_shopware_instance_id | ternary(omit, 1) }}"
+    key_name: "{{ aws_ec2_ssh_key_name }}"
+    vpc_subnet_id: "{{ aws_shopware_node_vpc_subnet_id }}"
+    image:
+      id: "{{ aws_shopware_node_ami_id }}"
+    instance_type: "{{ aws_shopware_node_instance_type }}"
+    instance_role: "{{ aws_iam_role_shopware }}"
+    instance_initiated_shutdown_behavior: stop
+    user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
+    tags: >-
+      {{
+          aws_tags_default | combine(aws_shopware_node_name_tags, aws_tags_role_shopware)
+      }}
+    volumes:
+      - device_name: "{{ aws_shopware_node_root_device }}"
+        ebs:
+          volume_type: "{{ aws_shopware_node_ebs_volume_type }}"
+          volume_size: "{{ aws_shopware_node_ebs_volume_size }}"
+          delete_on_termination: yes
+          encrypted: "{{ mageops_ebs_encrypt }}"
+    wait: yes
+    wait_timeout: 1500
+    # This has zero costs on current-gen instances
+    ebs_optimized: yes
+    network:
+      assign_public_ip: yes
+    security_groups: >-
+      {{
+          aws_shopware_node_security_groups
+      }}
+  vars:
+    aws_ec2_user_launch_script: "{{ aws_shopware_node_launch_script_extra }}"
+    aws_shopware_node_name_tags:
+      Name: "{{ aws_shopware_node_instance_name }}"
+  register: aws_shopware_ec2
+
+- name: Ensure persistent disks are gp3 volumes
+  when: aws_shopware_node_ebs_volume_type == 'gp3' and aws_shopware_node_ebs_gp3_convert
+  include_role:
+    name: cs.aws-ebs-vol
+  vars:
+    aws_ebs_volume_modify_ids: >-
+      {{ ( aws_shopware_ec2.instances )
+          | map(attribute='block_device_mappings')
+          | flatten
+          | map(attribute='ebs')
+          | map(attribute='volume_id')
+          | list }}
+    aws_ebs_volume_modify_type: "{{ aws_shopware_node_ebs_volume_type }}"
+    aws_ebs_volume_modify_iops: "{{ aws_shopware_node_ebs_gp3_iops }}"
+    aws_ebs_volume_modify_throughput: "{{ aws_shopware_node_ebs_gp3_throughput }}"
+
+- name: Wait for shopware node instance to get up
+  wait_for:
+    port: 22
+    host: "{{ item.public_ip_address }}"
+  loop: '{{ aws_shopware_ec2.instances }}'
+  loop_control:
+    label: "{{ item.public_dns_name }}"
+
+- name: Add shopware host to inventory
+  add_host:
+    hostname: "{{ item.public_ip_address }}"
+    groupname:
+      - shopware
+  loop: '{{ aws_shopware_ec2.instances }}'
+  loop_control:
+    label: "{{ item.public_ip_address }}"
+
+- name: Assign elastic IP to shopware node
+  ec2_eip:
+    region: "{{ aws_region }}"
+    device_id: "{{ aws_shopware_ec2.instances[0].instance_id }}"
+    ip: "{{ aws_shopware_node_elastic_ip }}"
+  when: aws_shopware_node_elastic_ip | default(false, true)

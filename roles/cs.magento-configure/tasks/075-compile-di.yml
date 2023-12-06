@@ -1,4 +1,0 @@
-- name: Compile Magento DI
-  become: yes
-  become_user: "{{ magento_user }}"
-  command: "php {{ magento_release_dir }}/bin/magento setup:di:compile"

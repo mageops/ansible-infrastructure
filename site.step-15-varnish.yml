@@ -1,108 +1,13 @@
-- import_playbook: site.common.group-current-hosts.yml
-
-- hosts: varnish:&current:!immutable
+- hosts: shopware
   roles:
-    - role: cs.aws-node-facts
-      delegate_to: localhost
-      become: no
-      when: aws_use
-    - role: cs.switch-to-dnf
-    - role: cs.versionlock
-      node_name: varnish
-      versionlock_packages: "{{ versionlock_varnish_packages + versionlock_varnish_packages_base + versionlock_varnish_packages_extra }}"
-      versionlock_ban_packages: "{{ versionlock_varnish_ban_packages + versionlock_varnish_ban_packages_base + versionlock_varnish_ban_packages_extra }}"
-    - role: cs.selinux-disable
-    - role: cs.optimize-kernel
-    - role: cs.tuned
-    - role: cs.swap
-    - role: cs.earlyoom
-      when: mageops_earlyoom_enable
-    - role: cs.packages
-      packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
-      packages_install: "{{ mageops_packages_common + mageops_packages_varnish + mageops_packages_varnish_extra }}"
-      packages_remove: "{{ mageops_packages_banned }}"
-      packages_full_update: no
-    - role: cs.mageops-cli-profile
-    - role: cs.mageops-cli-user
-      mageops_cli_user: root
-      mageops_cli_user_bashrc_fragments:
-        - varnish
-        - nginx
-    - role: cs.mageops-cli-user
-      mageops_cli_user: "{{ magento_user }}"
-      mageops_cli_user_group: "{{ magento_group }}"
-      mageops_cli_user_uid: "{{ magento_uid }}"
-      mageops_cli_user_gid: "{{ magento_gid }}"
-      mageops_cli_user_bashrc_fragments:
-        - debug-tunnel
-      when: mageops_xdebug_proxy_remote_connection_to_loadbalancer
-    - role: cs.mageops-authorize-keys
-      mageops_ssh_authorize_app: yes
-    - role: cs.aws-cli
-      when: aws_use
-    - role: cs.cron
-    - role: geerlingguy.ntp
-    - role: cs.nginx
-    - role: cs.nginx-url-blacklist
-      nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
-    - role: cs.nginx-language-redirect
-      when: mageops_language_redirect_enable and mageops_language_redirect_mode == "normal"
-    - role: cs.nginx-language-redirect-multilevel
-      when: mageops_language_redirect_enable and mageops_language_redirect_mode == "multilevel"
-    - role: cs.pio
-      vars:
-        pio_tasks: varnish
-      when: mageops_pio_worker_enable
-    - role: cs.nginx-https-termination
-      https_termination_upstream_port: "{{ mageops_varnish_port }}"
-      when: mageops_https_termination_enable
-    - role: cs.cloudflare
-    - role: cs.varnish
-      varnish_port: "{{ mageops_varnish_port }}"
-      varnish_backend_port: "{{ mageops_varnish_backend_port }}"
-      varnish_secure_site: "{{ mageops_secure_site }}"
-      varnish_secure_site_user: "{{ mageops_secure_site_user }}"
-      varnish_secure_site_password: "{{ mageops_secure_site_password }}"
-      varnish_trusted_ips: "{{ mageops_trusted_cidr_blocks }}"
-      varnish_purge_trusted_ips: "{{ (aws_vpc_subnet_prefix is defined)|ternary([aws_vpc_subnet_prefix ~ '.0.0/16'], []) }}"
-      varnish_purge_logging: "{{ mageops_varnish_purge_logging }}"
-      varnish_debug_request_token: "{{ mageops_debug_token }}"
-      varnish_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
-      varnish_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
-      varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
-      varnish_magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
-      varnish_magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
-    - role: cs.varnish-manager
-      when: varnish_standalone and aws_use
-    - role: cs.mageops-cli-profile
-    - role: cs.goaccess
-      when: goaccess_enable
-    - role: cs.aws-logs
-      aws_logs_log_magento_crash_reports: no
-      aws_logs_stream_name: "{{ mageops_node_role }}"
-      aws_logs_loggers: "{{ aws_logs_loggers_varnish_default | combine(aws_logs_loggers_varnish_extra | default({}), recursive=True) }}"
-      when: aws_use
+    #- cs.docker
+    - cs.repo-mageops
+    - cs.authorize-local-keys
+    - cs.mageops-authorize-keys
+    - cs.nginx-https-termination
 
-    - role: cs.monitoring
-      monitoring_node_exporter_enabled: yes
-      monitoring_varnish_exporter_enabled: yes
-      when: mageops_monitoring_enabled
-
-    - role: cs.packages
-    - role: cs.pkg-mgr-cleanup
+   # - cs.deploy
 
   tasks:
-    - set_fact:
-        mageops_extra_tasks_varnish_node: [
-          "{{ mageops_extra_tasks_varnish_node }}"
-        ]
-      when: |
-        mageops_extra_tasks_varnish_node is defined
-        and mageops_extra_tasks_varnish_node is string
-    - include_tasks: "{{ item }}"
-      loop: "{{ mageops_extra_tasks_varnish_node }}"
-      when: mageops_extra_tasks_varnish_node is defined
 
   vars:
-    mageops_node_role: varnish
-    magento_facts_detect_from_artifacts: yes

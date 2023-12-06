@@ -1,7 +1,0 @@
-- name: Install shell locale configuration file
-  template:
-    src: "{{ item }}"
-    dest: "/etc/profile.d/{{ item }}"
-    mode: 0755
-  loop:
-    - 002-mageops-env.sh

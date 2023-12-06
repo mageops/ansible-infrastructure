@@ -1,4 +1,0 @@
-allow_duplicates: no
-dependencies:
-  - cs.repo-epel
-  - cs.repo-mageops

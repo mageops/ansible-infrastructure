@@ -1,4 +1,0 @@
-sftp_user: files
-sftp_user_home: "/home/{{ sftp_user }}"
-sftp_authorized_keys: []
-

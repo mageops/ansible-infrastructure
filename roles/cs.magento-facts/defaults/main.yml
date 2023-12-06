@@ -1,2 +1,0 @@
-magento_facts_detect_from_artifacts: no
-magento_code_directory: "{{ magento_live_release_dir }}"

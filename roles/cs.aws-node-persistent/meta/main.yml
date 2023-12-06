@@ -1,3 +1,0 @@
-dependencies:
-  - role: cs.aws-vpc-facts
-  - role: cs.aws-security-group-facts

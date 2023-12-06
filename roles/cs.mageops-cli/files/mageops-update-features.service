@@ -1,6 +1,0 @@
-[Unit]
-Description=Update dynamic features
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/mageopscli apply_features

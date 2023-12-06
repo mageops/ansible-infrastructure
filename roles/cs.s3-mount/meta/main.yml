@@ -1,5 +1,0 @@
-dependencies:
-  - role: cs.s3-fuse-s3fs
-    when: not s3fs_mount_use_goofys
-  - role: cs.s3-fuse-goofys
-    when: s3fs_mount_use_goofys

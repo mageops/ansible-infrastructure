@@ -1,6 +1,0 @@
-# Disable compression for static and media files to prevent chunked response encodig
-# We need content-length in response headers to validate that we can safely cache
-# this resource forever
-if (bereq.url ~ "^/(static|media)/.*$") {
-    set bereq.http.Accept-Encoding = "identity";
-}

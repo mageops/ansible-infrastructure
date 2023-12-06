@@ -1,4 +1,0 @@
-- name: restart unison
-  service:
-    name: unison
-    state: restarted

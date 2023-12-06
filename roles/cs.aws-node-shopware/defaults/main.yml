@@ -1,0 +1,15 @@
+aws_shopware_node_ami_id: "{{ aws_ami_clean_base_info[aws_shopware_node_instance_type].image_id }}"
+aws_shopware_node_instance_type: t3a.small
+aws_shopware_node_ebs_volume_size: 20
+aws_ansible_shopware_node_inventory_group: shopware
+aws_shopware_node_instance_name: "{{ mageops_shopware_name }}-shopware"
+aws_shopware_node_launch_script_extra: ''
+aws_shopware_node_security_groups:
+  - "{{ aws_security_group_shopware_name }}"
+aws_shopware_instance_id: false
+
+# See `aws_ec2_ebs_gp3_*` vars in `group_vars/all.yml`
+aws_shopware_node_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', true) }}"
+aws_shopware_node_ebs_gp3_convert: "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
+aws_shopware_node_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
+aws_shopware_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"

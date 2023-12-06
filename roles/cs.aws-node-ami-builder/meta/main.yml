@@ -1,3 +1,0 @@
-dependencies:
-  - role: cs.aws-ami-facts
-    ami_facts_instance: "{{ aws_app_builder_node_instance_type }}"

@@ -1,6 +1,0 @@
-- name: "Create init.d script"
-  template:
-    src: "varnish-purge-proxy.init.d.j2"
-    dest: "/etc/init.d/varnish-purge-proxy"
-    mode: 0755
-  # notify: restart varnish-purge-proxy

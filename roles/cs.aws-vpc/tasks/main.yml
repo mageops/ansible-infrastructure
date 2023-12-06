@@ -15,7 +15,7 @@
     vpc_id: "{{ vpc_net.vpc.id }}"
   vars:
     vpc_igw_tags:
-      Name: "{{ mageops_app_name }}"
+      Name: "{{ mageops_shopware_name }}"
 
 - name: Create public subnets in VPC
   ec2_vpc_subnet:

@@ -1,4 +1,0 @@
-- name: Install goofys packages
-  dnf:
-    name: goofys
-    state: present

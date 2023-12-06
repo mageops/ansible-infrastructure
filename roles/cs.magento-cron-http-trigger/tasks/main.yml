@@ -1,6 +1,0 @@
-- name: Setup Magento HTTP cron trigger
-  cron:
-    disabled: "{{ magento_cron_disabled or not magento_cron_http }}"
-    name: "Magento {{ mageops_app_name }}"
-    job: "curl -u '{{ magento_cron_user }}:{{ magento_cron_password }}' {{ magento_base_url }}cron.php > /dev/null"
-  when: mageops_app_is_magesuite

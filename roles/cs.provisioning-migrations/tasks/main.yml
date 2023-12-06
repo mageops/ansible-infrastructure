@@ -1,5 +1,0 @@
-- include_tasks: process-migration.yml
-  loop: "{{ mageops_migrations }}"
-  loop_control:
-    loop_var: migration
-

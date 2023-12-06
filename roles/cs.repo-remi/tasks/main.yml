@@ -1,8 +1,0 @@
-- name: Install gpg cert
-  rpm_key:
-    state: present
-    key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2021
-
-- name: Ensure Remi's repo release package is installed and up-to-date
-  dnf:
-    name: "{{ php_repo_remi_package_name }}"

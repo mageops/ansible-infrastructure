@@ -1,6 +1,5 @@
 - hosts: localhost
-  connection: local
-  roles:
-    - role: cs.aws-ec2-cleanup
-      aws_ec2_cleanup_lt_to_keep: 3
-    - role: cs.aws-cloudfront-post-deploy
+
+  tasks:
+
+  vars:

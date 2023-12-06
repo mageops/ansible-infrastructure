@@ -1,4 +1,0 @@
-dependencies:
-  - role: cs.aws-region-facts
-  - role: cs.aws-cloudfront-facts
-  - role: cs.aws-s3

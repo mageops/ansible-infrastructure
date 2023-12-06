@@ -1,0 +1,40 @@
+- name: Install the latest version of docker
+  ansible.builtin.dnf:
+    name: docker
+    state: latest
+
+- name: Install dockerware service
+  template:
+    src: templates/dockware.j2
+    dest: /etc/systemd/system/dockware.service
+    owner: root
+    group: root
+
+- name: Reload systemd
+  ansible.builtin.shell: "systemctl daemon-reload"
+
+- name: Start service dockware, if not started
+  ansible.builtin.service:
+    name: dockware
+    state: started
+
+- name: Deployment finished, waiting for dockware up.
+  uri:
+    method: HEAD
+    url: "http://localhost/"
+    status_code: 200
+  register: _warmup_result
+  until: _warmup_result is not failed
+  retries: 10
+  delay: 100
+  changed_when: false
+
+
+- name: Setup domain
+  ansible.builtin.shell: "/usr/bin/docker exec dockware sh -c \"/var/www/html/bin/console sales-channel:update:domain {{mageops_url}}\""
+  ignore_errors: true
+
+- name: Install the latest version of docker
+  ansible.builtin.dnf:
+    name: nginx
+    state: latest

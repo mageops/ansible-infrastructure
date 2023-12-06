@@ -1,7 +1,0 @@
-- name: Enable ASG
-  include_tasks: create.yml
-  when: autoscaling_asg_enabled
-
-- name: Remove ASG
-  include_tasks: delete.yml
-  when: not autoscaling_asg_enabled

@@ -1,29 +1,5 @@
 - name: AWS Infrastructure
   import_playbook: site.step-10-infrastructure-aws.yml
 
-- name: Varnish Node
+- name: Shopware Node
   import_playbook: site.step-15-varnish.yml
-
-- name: Persistent Node
-  import_playbook: site.step-20-persistent.yml
-
-- name: Start App Node Image Builder
-  import_playbook: site.step-30-builder.yml
-
-- name: App Node
-  import_playbook: site.step-40-app-node.yml
-
-- name: App Node - Deploy Code
-  import_playbook: site.step-45-app-deploy.yml
-
-- name: Create App Node Image
-  import_playbook: site.step-50-ami.yml
-
-- name: Update App Node Autoscaling Group
-  import_playbook: site.step-60-autoscaling.yml
-
-- name: Post Deploy Cleanup Tasks
-  import_playbook: site.step-70-cleanup.yml
-
-- name: Post Deploy Monitoring Maintenance
-  import_playbook: site.step-80-monitoring.yml

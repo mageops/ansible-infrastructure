@@ -1,8 +1,0 @@
-mageops_migrations_deprecated_yum_repos:
-  - varnishcache_varnish41
-  - szpadel-centos-extras
-  - elasticsearch-5.x
-
-mageops_migrations: []
-
-

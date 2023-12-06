@@ -1,5 +1,0 @@
-- name: Remove AutoScaling Group
-  ec2_asg:
-    state: absent
-    name: "{{ autoscaling_asg_name }}"
-    region: "{{ aws_region }}"

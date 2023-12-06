@@ -1,3 +1,0 @@
-allow_duplicates: no
-dependencies:
-  - role: cs.repo-epel

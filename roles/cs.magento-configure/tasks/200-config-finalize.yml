@@ -1,6 +1,0 @@
-- name: Remove temporary Magento file cache
-  shell: "rm -rf {{ magento_release_dir }}/var/cache"
-
-- name: Configure FINAL env.php with target values
-  include_tasks: action/configure-env.yml
-

@@ -3,16 +3,8 @@
     region: "{{ aws_region }}"
     filters: "{{ aws_node_facts_base_filters | combine(aws_node_facts_base_tags | combine(node.tags) | prefix_keys('tag:')) }}"
   loop:
-    - name: app_builder
-      tags: "{{ aws_tags_role_app_builder }}"
-    - name: persistent
-      tags: "{{ aws_tags_role_persistent }}"
-    - name: varnish_loadbalancer
-      tags: "{{ aws_tags_role_loadbalancer | combine(aws_tags_role_varnish_http_cache) }}"
-    - name: elasticsearch
-      tags: "{{ aws_tags_role_elasticsearch }}"
-    - name: redis
-      tags: "{{ aws_tags_role_redis_cache }}"
+    - name: shopware
+      tags: "{{ aws_tags_role_shopware }}"
   loop_control:
     loop_var: node
     label: "{{ node.name }}"
@@ -40,37 +32,7 @@
 
 - name: Set facts about nodes
   set_fact:
-    aws_app_builder_node_instance: "{{ aws_nodes_info.app_builder | default(omit, true) }}"
-    aws_persistent_node_instance: "{{ aws_nodes_info.persistent | default(omit, true) }}"
-    aws_varnish_node_instance: "{{ aws_nodes_info.varnish_loadbalancer | default(omit, true) }}"
-    aws_app_builder_node_ami_id: "{{ aws_nodes_info.app_builder.image_id | default(omit, true) }}"
-    aws_persistent_node_ami_id: "{{ aws_nodes_info.persistent.image_id | default(omit, true) }}"
-    aws_varnish_node_ami_id: "{{ aws_nodes_info.varnish_loadbalancer.image_id | default(omit, true) }}"
+    aws_shopware_node_instance: "{{ aws_nodes_info.shopware| default(omit, true) }}"
+    aws_shopware_node_ami_id: "{{ aws_nodes_info.shopware.image_id | default(omit, true) }}"
     # Ansible require at least one variable to be set in set_fact, this dummy set is required in case there is no instances present
     _dummy: "_"
-
-- name: Set varnish host to varnish loadbalancer
-  set_fact:
-    mageops_varnish_host: "{{ aws_nodes_info.varnish_loadbalancer.private_ip_address }}"
-  when: varnish_as_loadbalancer and aws_nodes_info.varnish_loadbalancer
-
-- name: Set elasticsearch host if not predefined
-  set_fact:
-    mageops_elasticsearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
-  when: not mageops_elasticsearch_host | default(false, true) and aws_nodes_info.elasticsearch
-
-# TODO: Find RabbitMQ through tags, right now we don't have option to separate it anyway
-- name: Set RabbitMQ host if not predefined
-  set_fact:
-    mageops_rabbitmq_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
-  when: not mageops_rabbitmq_host | default(false, true) and aws_nodes_info.elasticsearch
-
-- name: Set redis host if not predefined
-  set_fact:
-    mageops_redis_host: "{{ aws_nodes_info.redis.private_ip_address }}"
-  when: not mageops_redis_host | default(false, true) and aws_nodes_info.redis
-
-- name: Set redis sessions host if not predefined
-  set_fact:
-    mageops_redis_sessions_host: "{{ aws_nodes_info.redis.private_ip_address }}"
-  when: not mageops_redis_sessions_host | default(false, true) and aws_nodes_info.redis

@@ -1,4 +1,0 @@
-zram_devices:
-  - zram_fraction: 1.0
-    compression_algorithm: zstd
-    max-zram-size: none

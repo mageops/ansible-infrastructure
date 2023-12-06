@@ -1,4 +1,0 @@
-- name: Install AWS Cloudwatch Agent
-  dnf:
-    name: "{{ aws_cloudwatch_agent_package }}"
-    state: latest

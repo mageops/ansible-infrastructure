@@ -1,9 +1,0 @@
-- name: Install AWS Exception Forwarder package
-  dnf:
-    name: "{{ aws_cloudwatch_exception_forwarder_package }}"
-
-- name: Set up magento exception report pushing cronjob
-  cron:
-    name: "Push magento exception reports to CloudWatch Logs"
-    minute: "*/2"
-    job: "/bin/aws-excfwd push:directory -v --formatter=serialized_array --region={{ aws_region }} --group=/{{ mageops_project }}/{{ mageops_environment }}/magento/report {{ aws_logs_project_root }}/var/report/ --stream={{ aws_logs_stream_name }}"

@@ -1,4 +1,0 @@
-- name: Ensure postfix map has Magento bounce address configured
-  include_tasks: setup_bounce_address.yml
-  when: magento_bounce_email_address | default(false, true)
-

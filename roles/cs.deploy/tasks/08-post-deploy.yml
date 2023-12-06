@@ -1,5 +1,0 @@
-- name: Restart services
-  service:
-    name: "{{ item }}"
-    state: restarted
-  with_items: "{{ deploy_restarted_services }}"

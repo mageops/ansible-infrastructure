@@ -30,8 +30,6 @@ ami_facts_clean_base_filters:
   is-public: "true"
   owner-alias: "aws-marketplace"
 
-ami_facts_app_node_tags: "{{ aws_tags_base | combine(aws_tags_role_app) }}"
-
 # Set to force specific AMI id for app node ASG
 ami_facts_app_node_force_id: ~
 

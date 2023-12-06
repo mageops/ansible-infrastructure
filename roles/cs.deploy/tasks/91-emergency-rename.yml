@@ -1,8 +1,0 @@
-- name: "Failed deploy! Damage control: Rename the deployed release directory to indicate it's broken"
-  command: "mv '{{ deploy_next_release_path }}' '{{ deploy_next_release_path }}.failed'"
-  args:
-    warn: no
-  become: yes
-  become_user: "{{ deploy_app_user }}"
-  ignore_errors: yes
-  when: deploy_next_release_path | default(false, true)

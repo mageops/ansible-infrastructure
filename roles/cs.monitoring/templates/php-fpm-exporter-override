@@ -1,2 +1,0 @@
-[Service]
-Group={{ php_fpm_pool_listen_group }}

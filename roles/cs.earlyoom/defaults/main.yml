@@ -1,5 +1,0 @@
-earlyoom_ram_min_percent: 10
-earlyoom_swap_min_percent: 10
-earlyoom_avoid_regexp: '(^|/)(init|systemd|systemd-journald|sshd|nginx|redis-server|zstd)$'
-earlyoom_prefer_regexp: '(^|/)(java|php)$'
-earlyoom_report_interval_sec: 60

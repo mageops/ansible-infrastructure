@@ -1,3 +1,0 @@
-magento_import_dispatcher_supervisor_config_path: "/etc/supervisord.d/import_dispatcher.ini"
-magento_import_dispatcher_supervisor_config_off_path: "/etc/supervisord.d/import_dispatcher.ini.off"
-magento_import_dispatcher_switch_script_path: /usr/bin/import_dispatcher_switch

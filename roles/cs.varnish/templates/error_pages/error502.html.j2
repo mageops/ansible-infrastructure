@@ -1,8 +1,0 @@
-{% extends "layout50x.html.j2" %}
-{% set status_message = 'Bad Gateway' %}
-{% block error_details_message %}
-    <em>Could not connect to upstream, possible causes:</em>
-    <ul>
-        <li>The php-fpm upstream on app node might be down</li>
-    </ul>
-{% endblock %}

@@ -1,7 +1,0 @@
-- name: Download lambda deploy packages
-  get_url:
-    url: "{{ aws_lambda_varnish_deploy_package_url }}"
-    dest: "{{ aws_lambda_varnish_deploy_package_path }}"
-
-- import_tasks: create-autoscaling-handler-lambda.yml
-- import_tasks: create-update-varnish-backends-lambda.yml

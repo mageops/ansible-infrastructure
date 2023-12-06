@@ -1,5 +1,0 @@
-{
-    "Version": "2008-10-17",
-    "Id": "{{ item }}-policy",
-    "Statement": {{ aws_s3_bucket_policies | selectattr('bucket', 'equalto', item)|map(attribute='policy_statement')|list | to_json }}
-}

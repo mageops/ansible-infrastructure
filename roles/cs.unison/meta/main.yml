@@ -1,3 +1,0 @@
-dependencies:
-  - role: cs.repo-mageops
-    when: ansible_distribution | lower == 'centos'
