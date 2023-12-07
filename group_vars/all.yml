@@ -1829,6 +1829,7 @@ mageops_packages_ops:
   - atop
   - lsof
   - ncdu
+  - net-tools
 
 # Handy packages installed on all nodes by default
 mageops_packages_common: "{{ mageops_packages_base + mageops_packages_tools + mageops_packages_ops }}"
