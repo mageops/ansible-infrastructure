@@ -33,7 +33,7 @@ if (req.http.{{ varnish_debug_request_info_header_name }}) {
         req.http.{{ varnish_debug_request_info_header_name }} + "; Backend-Response-Delivered";
 }
 
-if (resp.status == 502 || resp.status == 504) {
+if (resp.status == 500 || resp.status == 502 || resp.status == 504) {
     return(synth(resp.status));
 }
 

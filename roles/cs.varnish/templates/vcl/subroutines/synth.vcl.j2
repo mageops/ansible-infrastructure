@@ -19,7 +19,7 @@ if ((resp.status == 301 || resp.status == 302) && req.http.location) {
     return (deliver);
 }
 
-if (resp.status == 502 || resp.status == 503 || resp.status == 504) {
+if (resp.status == 500 || resp.status == 502 || resp.status == 503 || resp.status == 504) {
     {{ synthetic_error_page() }}
 
     return (deliver);
