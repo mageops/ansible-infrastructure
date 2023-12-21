@@ -9,3 +9,16 @@
     name: systemd-oomd
     enabled: yes
     state: started
+
+- name: Check if psi=1 is already in kernel parameters
+  ansible.builtin.shell:
+    cmd: grubby --info=DEFAULT | grep 'args.*psi=1'
+  register: _psi_check
+  changed_when: false
+  failed_when: _psi_check.rc > 1
+
+- name: Add psi=1 to kernel parameters using grubby
+  ansible.builtin.shell:
+    cmd: grubby --update-kernel=DEFAULT --args=psi=1
+  when: _psi_check.stdout == ""
+  notify: Reboot System
