@@ -65,6 +65,7 @@
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
     - role: cs.systemd-oomd
+      systemd_oomd_reboot_system: no
       when: mageops_oomd_enable
 
     - role: cs.aws-cli
