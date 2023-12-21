@@ -64,6 +64,8 @@
 
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
+    - role: cs.systemd-oomd
+      when: mageops_oomd_enable
 
     - role: cs.aws-cli
       when: aws_use

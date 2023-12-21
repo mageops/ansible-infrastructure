@@ -1777,6 +1777,7 @@ deploy_release_save_info_file_path: "{{ mageops_ansible_temp_dir }}/RELEASE.json
 
 # Whether to install and enable the earlyoom daemon
 mageops_earlyoom_enable: no
+mageops_oomd_enable: yes
 
 earlyoom_ram_min_percent: 7
 earlyoom_swap_min_percent: 10

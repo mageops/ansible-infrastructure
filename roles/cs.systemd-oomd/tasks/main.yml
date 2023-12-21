@@ -1,0 +1,11 @@
+---
+- name: Install systemd-oomd
+  ansible.builtin.yum:
+    name: systemd-oomd
+    state: present
+
+- name: Enable and start systemd-oomd
+  service:
+    name: systemd-oomd
+    enabled: yes
+    state: started

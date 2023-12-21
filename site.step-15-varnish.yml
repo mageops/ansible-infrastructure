@@ -17,6 +17,8 @@
     - role: cs.swap
     - role: cs.earlyoom
       when: mageops_earlyoom_enable
+    - role: cs.systemd-oomd
+      when: mageops_oomd_enable
     - role: cs.packages
       packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
       packages_install: "{{ mageops_packages_common + mageops_packages_varnish + mageops_packages_varnish_extra }}"
