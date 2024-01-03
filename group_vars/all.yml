@@ -1807,6 +1807,9 @@ mageops_packages_base:
   - jq
   - curl
   - wget
+  # This must be installed before new relic and blackfire
+  # Otherwise it will corrupt /etc/init.d directory and cause chkconfig fail to install
+  - initscripts
 
 # Handy tools for interactive users
 mageops_packages_tools:
