@@ -4,6 +4,8 @@ ami_facts_architecture: "{{ ami_facts_architecture_map[ami_facts_instance.split(
 ami_facts_architecture_map:
   t3: x86_64
   t3a: x86_64
+  m5: x86_64
+  m5a: x86_64
   m6a: x86_64
   m6i: x86_64
   m6g: arm64
