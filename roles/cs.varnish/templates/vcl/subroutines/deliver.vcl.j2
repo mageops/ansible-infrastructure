@@ -1,0 +1,92 @@
+<<<<<<< HEAD
+=======
+{% if varnish_do_not_expose_caching %}
+if ( client.ip ~ trusted ) {
+{% endif %}
+if (obj.hits > 0) {
+    set resp.http.X-Magento-Cache-Debug = "HIT";
+} else {
+    set resp.http.X-Magento-Cache-Debug = "MISS";
+}
+{% if varnish_do_not_expose_caching %}
+}else {
+    unset resp.http.X-Cached-At;
+}
+{% endif %}
+
+if (resp.http.X-Rewrite-HTML-Maxage) {
+    unset resp.http.X-Rewrite-HTML-Maxage;
+
+    {% if varnish_html_cache_control_max_age != 0 %}
+        # Rewrite only max-age, get rid of s-max-age
+        set resp.http.Cache-Control = "public, max-age={{ varnish_html_cache_control_max_age }}";
+
+        # Just in case somebody is using HTTP/1.0 fix the Expires header too
+        set resp.http.Expires = "" + (now + {{ varnish_html_cache_control_max_age }}s);
+    {% else %}
+        set resp.http.Cache-Control = "no-cache, no-store, must-revalidate";
+        set resp.http.Pragma = "no-cache";
+        set resp.http.Expires = "0";
+    {% endif %}
+}
+
+if (req.http.{{ varnish_debug_request_info_header_name }}) {
+    set resp.http.{{ varnish_debug_request_info_header_name }} =
+        req.http.{{ varnish_debug_request_info_header_name }} + "; Backend-Response-Delivered";
+}
+
+if (req.http.{{ varnish_bypass_request_info_header_name }}) {
+    set resp.http.{{ varnish_bypass_request_info_header_name }} =
+        req.http.{{ varnish_bypass_request_info_header_name }} + "; Backend-Response-Delivered";
+    set resp.http.Set-Cookie = "{{ varnish_bypass_request_cookie_name}} = {{ varnish_bypass_request_token }}; Secure";
+    set resp.http.Cache-Control = "no-cache";
+}
+
+if (req.http.{{ varnish_bypass_request_info_header_name }}) {
+    set resp.http.{{ varnish_bypass_request_info_header_name }} =
+        req.http.{{ varnish_bypass_request_info_header_name }} + "; Backend-Response-Delivered";
+    set resp.http.Set-Cookie = "{{ varnish_bypass_request_cookie_name}} = {{ varnish_bypass_request_token }}; Secure";
+    set resp.http.Cache-Control = "no-cache";
+}
+
+if (resp.status == 502 || resp.status == 504) {
+    return(synth(resp.status));
+}
+
+if (req.http.X-Warmup) {
+    set resp.http.X-Warmup = "skipped-body";
+    set resp.status = 204;
+}
+
+{% if varnish_throttling_enabled %}
+    {% include "vcl/subroutines/deliver_throttling.vcl.j2" %}
+{% endif %}
+
+{% if varnish_media_cors_enabled %}
+if (req.url ~ "^/media/" && req.http.Origin ~ "^https?:\/\/({{ varnish_media_cors_allowed_origins | join("|") | replace(".", "\.") | replace("-", "\-") }})$") {
+    set resp.http.Access-Control-Max-Age = "{{ varnish_media_cors_max_age }}";
+    set resp.http.Access-Control-Allow-Methods = "HEAD, GET, OPTIONS";
+    set resp.http.Access-Control-Allow-Origin = req.http.Origin;
+    set resp.http.Access-Control-Allow-Headers = "*";
+}
+
+# https://bugs.chromium.org/p/chromium/issues/detail?id=260239
+# Chrome aggressively cache requests and won't try CORS request if there is already response in cache
+# without Vary: Origin header.
+if (resp.http.Vary) {
+    set resp.http.Vary = resp.http.Vary + ", Origin";
+}else {
+    set resp.http.Vary = "Origin";
+}
+
+{% endif %}
+
+unset resp.http.Age;
+unset resp.http.X-Magento-Debug;
+unset resp.http.X-Magento-Tags;
+unset resp.http.X-Powered-By;
+unset resp.http.Server;
+unset resp.http.X-Varnish;
+unset resp.http.Via;
+unset resp.http.Link;
+>>>>>>> 599e99a (QA/Testing Team request to skip varnish cache.)
