@@ -3,7 +3,7 @@
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX=[^\n]*$'
     replace: GRUB_CMDLINE_LINUX="console=tty0 crashkernel=auto net.ifnames=0 console=ttyS0 noibrs noibpb nopti nospectre_v2 nospectre_v1 l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off tsx=on tsx_async_abort=off mitigations=off"
-  when: centos_update_kernel_disable_mitigations
+  when: optimize_kernel_disable_mitigations
 
 - name: Set modern network congestion algorithm
   block:
@@ -17,4 +17,4 @@
       value: bbr
       reload: yes
       state: present
-  when: centos_update_kernel_network_tune
+  when: optimize_kernel_network_tune

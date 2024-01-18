@@ -1,2 +1,2 @@
-centos_update_kernel_disable_mitigations: no
-centos_update_kernel_network_tune: yes
+optimize_kernel_disable_mitigations: yes
+optimize_kernel_network_tune: yes
