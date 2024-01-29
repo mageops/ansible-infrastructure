@@ -14,7 +14,7 @@ ami_facts_common_filters:
 # Find the latest CentOS ami ids here: https://www.centos.org/download/aws-images/
 ami_centos7_id:
 #  eu-central-1: ami-08b6d44b4f6f7b279 # original
-  eu-central-1: ami-0e4f9c05326f650df # cs-centos7-update-2022-08-01
+  eu-central-1: ami-092d03c265ba74b86 # cs-centos7-update-2024-01-29
 
 ami_base_system_image_id: "{{ ami_centos7_id[aws_region | default('eu-central-1')] }}"
 
