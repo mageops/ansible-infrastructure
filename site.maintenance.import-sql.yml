@@ -1,7 +1,11 @@
 
+
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: app:&current
+  vars:
+    mageops_import_db_task_before: []
+    mageops_import_db_task_after: []
   tasks:
     - name: Install pv
       dnf:
@@ -16,12 +20,13 @@
       args:
         chdir: /var/www/magento/current
     - name: Dump DB in case of restore
-      shell: /usr/local/bin/magerun db:dump --compression="gzip" --set-gtid-purged-off --strip="@trade" --no-single-transaction {{efs_root_mountpoint}}/{{ mageops_project }}-restore.sql
+      shell: /usr/local/bin/magerun db:dump --compression="gzip" --set-gtid-purged-off --no-single-transaction {{efs_root_mountpoint}}/{{ mageops_project }}-restore.sql
       args:
         chdir: "{{ magento_live_release_dir }}"
     - name: Download DB dump from owncloud
       shell: |-
         curl -u {{ owncloud_user | quote }}:{{ owncloud_password | quote }} -o {{ efs_root_mountpoint }}/{{mageops_project}}.sql.gz {{ owncloud_url | quote }}
+
     - name: Enable Magento maintenance mode
       command: "bin/magento maintenance:enable"
       args:
@@ -29,6 +34,18 @@
       run_once: true
       become: yes
       become_user: "{{ magento_user }}"
+
+    - name: Stop and disable magento-cron-aws.service
+      systemd:
+        name: magento-cron-aws.service
+        enabled: no
+        state: stopped
+
+    - name: Restart php-fpm service
+      systemd:
+        name: php-fpm
+        state: restarted
+
     - name: Run preimport task
       shell: |-
         {{ item }}
@@ -51,13 +68,35 @@
       become: yes
       become_user: "{{ mageops_app_user }}"
       with_items: "{{mageops_import_db_task_after}}"
-    - name: Enable Magento maintenance mode
+    - name: Run command magento app config import
+      command: "bin/magento app:config:import --no-interaction"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+    - name: Run command magento setup:upgrade
+      command: "bin/magento setup:upgrade --keep-generated"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+    - name: Run reindex
+      command: "bin/magento indexer:reindex"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+    - name: Disable Magento maintenance mode
       command: "bin/magento maintenance:disable"
       args:
         chdir: "{{ magento_live_release_dir }}"
       run_once: true
       become: yes
       become_user: "{{ magento_user }}"
+
     - name: Delete table file
       file:
         path: "{{ efs_root_mountpoint }}/{{ mageops_project }}-stage-table.sql"
@@ -66,6 +105,10 @@
       file:
        path: "{{ efs_root_mountpoint }}/{{mageops_project}}.sql.gz"
        state: absent
-
+    - name: Start and enable magento-cron-aws.service
+      systemd:
+        name: magento-cron-aws.service
+        enabled: yes
+        state: started
 
 

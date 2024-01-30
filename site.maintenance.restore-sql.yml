@@ -2,8 +2,59 @@
 
 - hosts: app:&current
   tasks:
+    - name: Install pv
+      dnf:
+        name: pv
+        state: latest
+    - name: Enable Magento maintenance mode
+      command: "bin/magento maintenance:enable"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+    - name: Stop and disable magento-cron-aws.service
+      systemd:
+        name: magento-cron-aws.service
+        enabled: no
+        state: stopped
+    - name: Restart php-fpm service
+      systemd:
+        name: php-fpm
+        state: restarted
     - name: Restore DB from EFS backup
       shell: |-
         /usr/local/bin/magerun db:import --compression gzip {{ efs_root_mountpoint }}/{{mageops_project}}-restore.sql.gz
       args:
         chdir: /var/www/magento/current
+    - name: Run command magento app config import
+      command: "bin/magento app:config:import --no-interaction"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+    - name: Run command magento setup:upgrade
+      command: "bin/magento setup:upgrade --keep-generated"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+    - name: Run reindex
+      command: "bin/magento indexer:reindex"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+      become_user: "{{ magento_user }}"
+    - name: Disable Magento maintenance mode
+      command: "bin/magento maintenance:disable"
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+      run_once: true
+      become: yes
+    - name: Start and enable magento-cron-aws.service
+      systemd:
+        name: magento-cron-aws.service
+        enabled: yes
+        state: started
