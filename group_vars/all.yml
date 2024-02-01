@@ -2055,5 +2055,4 @@ aws_pio_ebs_volume_size: "{{ aws_app_node_ebs_volume_size }}"
 # ----- New Relic -----
 # ---------------------
 new_relic_app_name: "{{ mageops_app_name }}"
-mageops_new_relic_enabled: no
-# new_relic_license need to be set up
+mageops_new_relic_enabled: yes
