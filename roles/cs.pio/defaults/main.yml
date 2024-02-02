@@ -18,6 +18,7 @@ pio_media_fast_quality: 95
 pio_target_directory: pio_cache
 pio_media_target_directory: pio_cache_cms
 pio_optimize_media: yes
+pio_quality_target_spread: 80
 
 # We cannot use magento_media_dir here as it might not be defined at this point
 pio_filesystem_local_dir: "{{ mageops_app_web_dir }}/shared/pub/media/"
