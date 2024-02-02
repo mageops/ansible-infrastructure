@@ -17,7 +17,7 @@
     http_server: (
         kind: "LazyResizeHttpServer",
         addr: "127.0.0.1:8441",
-        quality_target_spread: 100,
+        quality_target_spread: {{ pio_quality_target_spread }},
         secret: "{{ lazy_resize_secret }}",
         source_directory: "catalog/product",
         target_directory: "{{ pio_target_directory }}",
@@ -28,7 +28,7 @@
                 url: "/media",
                 quality: (
                     quality: {{ pio_media_fast_quality }},
-                    spread: 100
+                    spread: {{ pio_quality_target_spread }}
                 ),
                 target_ssim: {{ pio_media_target_ssim }},
                 source_directory: "",
