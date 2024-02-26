@@ -29,7 +29,6 @@
             "Effect": "Allow",
             "Resource": "arn:aws:pi:*:*:metrics/rds/*"
         },
-
         {
             "Action": "ec2:*",
             "Effect": "Allow",
@@ -306,6 +305,11 @@
                 "cur:ValidateReportDestination",
                 "freetier:Get*"
             ],
+            "Resource": "*"
+        },
+        {
+            "Action": "dlm:*",
+            "Effect": "Allow",
             "Resource": "*"
         }
     ]
