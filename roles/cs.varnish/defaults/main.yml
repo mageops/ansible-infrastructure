@@ -167,6 +167,14 @@ varnish_debug_request_query_param_name: ___varnish_debug_token___
 varnish_debug_request_cookie_name: ___varnish_debug_token___
 varnish_debug_request_header_name: X-Varnish-Debug-Token
 varnish_debug_request_info_header_name: X-Varnish-Debug-Request-Info
+
+varnish_bypass_request_token: ~
+varnish_bypass_request_query_param_name: ___varnish_bypass_token___
+varnish_bypass_request_cookie_name: ___varnish_bypass_token___
+varnish_bypass_request_header_name: X-Varnish-bypass-Token
+varnish_bypass_request_info_header_name: X-Varnish-bypass-Request-Info
+
+
 varnish_media_cors_enabled: yes
 varnish_media_cors_max_age: 2678400
 

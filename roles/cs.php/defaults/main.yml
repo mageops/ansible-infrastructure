@@ -153,6 +153,7 @@ php_xdebug_remote_log: "/var/log/php-xdebug-remote.log"
 php_xdebug_remote_timeout: 500
 
 
+php_extra_php_ini: ""
 # --- Performance Tuning ---
 
 # TODO: PERFORMANCE - Enable hugepages use in opcache for better performance

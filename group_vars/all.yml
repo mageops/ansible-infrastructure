@@ -816,6 +816,37 @@ mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
 # forward it from every app node at once or guess to which one the request goes.
 mageops_xdebug_proxy_remote_connection_to_loadbalancer: "{{ varnish_as_loadbalancer }}"
 
+# ---------------------------------------------
+# --------  MageOps Cache Bypass  --------
+# ---------------------------------------------
+# NOTE: All header/param/cookie names must use only alphanumeric characters
+# and underscores only! Any other character may and probably will break stuff.
+# This is due to intricacies of nginx / varnish configuration languages,
+# various HTTP considerations, better be safe than sorry!
+
+# Secret, unique string used for authorizing debugging sessions
+# and for accessing other debug functionality
+#
+# WARNING! Must be safe to be used as a HTTP request query argument value
+# so stick to alphanumeric characters only!
+
+mageops_bypass_token: "{{ mageops_secret_token }}"
+
+# Name of the HTTP requests's query parameter that triggers bypass mode
+mageops_bypass_token_query_param: "{{ mageops_query_param_prefix }}_bypass_token"
+
+# Name of the HTTP Cookie that triggers bypass mode
+mageops_bypass_token_request_cookie: "{{ mageops_cookie_prefix }}BypassToken"
+
+# Prefix for all HTTP headers related to bypass information or behavior
+# - This is nice to have in a variable in case we need to do special processing
+#   of all requests containing any of these headers.
+mageops_bypass_http_header_prefix: "{{ mageops_http_header_prefix }}-Bypass"
+
+# Name of the header that enables bypass mode (cache passthrough)
+mageops_bypass_token_http_header: "{{ mageops_bypass_http_header_prefix }}-Token"
+
+
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
@@ -929,6 +960,7 @@ magento_admin_user_lastname: Suite
 
 # Path to node warmup script executed at instance start relative to magento app root dir - never need to override...
 magento_node_warmup_script_path: /bin/node-warmup.sh
+mageops_wait_for_warmup_secs: 600
 
 # ------------------------------
 # --------  Magento SCD --------
@@ -1646,6 +1678,8 @@ varnish_strip_params:
   - "{{ https_termination_redirect_source_domain_param }}"
 
 varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
+varnish_bypass_request_info_header_name: "{{ mageops_bypass_http_header_prefix }}-Info-Varnish"
+
 
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------
@@ -2023,5 +2057,4 @@ aws_pio_ebs_volume_size: "{{ aws_app_node_ebs_volume_size }}"
 # ----- New Relic -----
 # ---------------------
 new_relic_app_name: "{{ mageops_app_name }}"
-mageops_new_relic_enabled: no
-# new_relic_license need to be set up
+mageops_new_relic_enabled: yes

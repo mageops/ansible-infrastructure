@@ -1,7 +1,7 @@
 new_relic_repo_url: http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm
 new_relic_packages:
   - newrelic-php5
-# new_relic_license:
+new_relic_license:
 new_relic_app_name: "New relic app name"
 new_relic_collector_enabled: yes
 new_relic_ignore_user_exception_handler: no
@@ -15,7 +15,7 @@ new_relic_stact_trace_threshold: "3s"
 new_relic_explain_enabled: yes
 new_relic_explain_threshold: "500ms"
 new_relic_framework: magento2
-new_relic_enabled: yes
+new_relic_enabled: "{{ new_relic_license != '' }}"
 
 new_relic_cron_enabled: no
 new_relic_cron_start: "0 7 * * *" # From 7:00
