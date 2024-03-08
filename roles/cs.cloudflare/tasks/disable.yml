@@ -6,6 +6,10 @@
   file:
     path: "{{ cloudflare_nginx_config }}"
     state: absent
+- name: Remove map file
+  file:
+    path: "{{ cloudflare_nginx_map }}"
+    state: absent
 - name: Remove CF exclusive traffic config
   file:
     path: "{{ cloudflare_nginx_block_non_cf_traffic_config }}"

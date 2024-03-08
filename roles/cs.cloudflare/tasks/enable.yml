@@ -19,6 +19,12 @@
     src: ban-non-cf-traffic.conf
     dest: "{{ cloudflare_nginx_block_non_cf_traffic_config }}"
 
+- name: Map x-forward-for to return only last IP
+  when: cloudflare_exclusive_traffic
+  template:
+    src: map_proper_x_forward_for.conf
+    dest: "{{ cloudflare_nginx_map }}"
+
 - name: Register provisioned nginx config files
   set_fact:
     nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + provisioned_configs }}"
@@ -33,3 +39,4 @@
   vars:
     provisioned_configs:
       - "{{ cloudflare_nginx_block_non_cf_traffic_config }}"
+      - "{{ cloudflare_nginx_map }}"
