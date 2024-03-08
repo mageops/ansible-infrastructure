@@ -142,6 +142,29 @@ if (
 }
 {% endif %}
 
+{% if varnish_bypass_request_token | default(false, true) %}
+#Bypass conditions
+{% set varnish_bypass_request_token_query_param_pattern =
+    ( varnish_bypass_request_query_param_name | regex_escape )
+    ~ '=' ~ ( varnish_bypass_request_token | regex_escape )
+%}
+
+{% set varnish_bypass_request_token_cookie_pattern =
+    ( varnish_bypass_request_cookie_name | regex_escape )
+    ~ '=' ~ ( varnish_bypass_request_token | regex_escape )
+%}
+
+if (
+    req.url ~ "{{ varnish_bypass_request_token_query_param_pattern }}"
+    || req.http.{{ varnish_bypass_request_header_name }} == "{{ varnish_bypass_request_token }}"
+    || req.http.Cookie ~ "(^|;\s*){{ varnish_bypass_request_token_cookie_pattern }}(;|$)"
+) {
+    set req.http.{{ varnish_bypass_request_info_header_name }} = "Token-Verified; Cache-Bypassed; Xid=" + req.xid + "";
+
+    return (pass);
+}
+{% endif %}
+
 if (req.http.X-Blackfire-Query) {
     if (req.esi_level > 0) {
         unset req.http.X-Blackfire-Query;
