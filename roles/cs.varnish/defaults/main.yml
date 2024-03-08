@@ -63,7 +63,6 @@ varnish_workspace_client: 64k
 varnish_workspace_thread: 4k
 
 # As of varnish 6.0 the default is 48k and lower values cause segfault with our VCL
-# 128k is minimum for aarch64
 varnish_thread_pool_stack: 128k
 
 # Max. number of thread pools that should be at most the number of vCPUs
@@ -168,6 +167,14 @@ varnish_debug_request_query_param_name: ___varnish_debug_token___
 varnish_debug_request_cookie_name: ___varnish_debug_token___
 varnish_debug_request_header_name: X-Varnish-Debug-Token
 varnish_debug_request_info_header_name: X-Varnish-Debug-Request-Info
+
+varnish_bypass_request_token: ~
+varnish_bypass_request_query_param_name: ___varnish_bypass_token___
+varnish_bypass_request_cookie_name: ___varnish_bypass_token___
+varnish_bypass_request_header_name: X-Varnish-bypass-Token
+varnish_bypass_request_info_header_name: X-Varnish-bypass-Request-Info
+
+
 varnish_media_cors_enabled: yes
 varnish_media_cors_max_age: 2678400
 
