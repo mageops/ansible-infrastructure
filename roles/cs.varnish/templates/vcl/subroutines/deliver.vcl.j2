@@ -33,6 +33,13 @@ if (req.http.{{ varnish_debug_request_info_header_name }}) {
         req.http.{{ varnish_debug_request_info_header_name }} + "; Backend-Response-Delivered";
 }
 
+if (req.http.{{ varnish_bypass_request_info_header_name }}) {
+    set resp.http.{{ varnish_bypass_request_info_header_name }} =
+        req.http.{{ varnish_bypass_request_info_header_name }} + "; Backend-Response-Delivered";
+    set resp.http.Set-Cookie = "{{ varnish_bypass_request_cookie_name}} = {{ varnish_bypass_request_token }}; Secure";
+    set resp.http.Cache-Control = "no-cache";
+}
+
 if (resp.status == 502 || resp.status == 504) {
     return(synth(resp.status));
 }

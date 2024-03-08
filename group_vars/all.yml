@@ -812,6 +812,36 @@ mageops_debug_token_http_header: "{{ mageops_debug_http_header_prefix }}-Token"
 # forward it from every app node at once or guess to which one the request goes.
 mageops_xdebug_proxy_remote_connection_to_loadbalancer: "{{ varnish_as_loadbalancer }}"
 
+# ---------------------------------------------
+# --------  MageOps Cache Bypass  --------
+# ---------------------------------------------
+# NOTE: All header/param/cookie names must use only alphanumeric characters
+# and underscores only! Any other character may and probably will break stuff.
+# This is due to intricacies of nginx / varnish configuration languages,
+# various HTTP considerations, better be safe than sorry!
+
+# Secret, unique string used for authorizing debugging sessions
+# and for accessing other debug functionality
+#
+# WARNING! Must be safe to be used as a HTTP request query argument value
+# so stick to alphanumeric characters only!
+
+mageops_bypass_token: "{{ mageops_secret_token }}"
+
+# Name of the HTTP requests's query parameter that triggers bypass mode
+mageops_bypass_token_query_param: "{{ mageops_query_param_prefix }}_bypass_token"
+
+# Name of the HTTP Cookie that triggers bypass mode
+mageops_bypass_token_request_cookie: "{{ mageops_cookie_prefix }}BypassToken"
+
+# Prefix for all HTTP headers related to bypass information or behavior
+# - This is nice to have in a variable in case we need to do special processing
+#   of all requests containing any of these headers.
+mageops_bypass_http_header_prefix: "{{ mageops_http_header_prefix }}-Bypass"
+
+# Name of the header that enables bypass mode (cache passthrough)
+mageops_bypass_token_http_header: "{{ mageops_bypass_http_header_prefix }}-Token"
+
 # ------------------------------------------
 # --------  SSH Key Authorizations  --------
 # ------------------------------------------
@@ -1807,7 +1837,7 @@ mageops_packages_base:
   - jq
   - curl
   - wget
-  # This must be installed before new relic and blackfire
+ # This must be installed before new relic and blackfire
   # Otherwise it will corrupt /etc/init.d directory and cause chkconfig fail to install
   - initscripts
 

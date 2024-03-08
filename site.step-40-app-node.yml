@@ -126,6 +126,10 @@
       varnish_debug_request_query_param_name: "{{ mageops_debug_token_query_param }}"
       varnish_debug_request_cookie_name: "{{ mageops_debug_token_request_cookie }}"
       varnish_debug_request_header_name: "{{ mageops_debug_token_http_header }}"
+      varnish_bypass_request_token: "{{ mageops_bypass_token }}"
+      varnish_bypass_request_query_param_name: "{{ mageops_bypass_token_query_param }}"
+      varnish_bypass_request_cookie_name: "{{ mageops_bypass_token_request_cookie }}"
+      varnish_bypass_request_header_name: "{{ mageops_bypass_token_http_header }}"
       when: not varnish_standalone
 
     - role: cs.blackfire
