@@ -10,7 +10,13 @@
 - name: Install geoupdate configuration
   template:
     src: GeoIP.conf.j2
-    dest: /etc/GeoIP.conf
+    dest: /usr/local/etc/GeoIP.conf
+
+- name: Symlink geoupdate configuration to new location
+  file:
+    dest: /usr/local/etc/GeoIP.conf
+    src: /etc/GeoIP.conf
+    state: link
 
 - name: Update geolite2 databases
   shell: geoipupdate
