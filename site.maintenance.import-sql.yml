@@ -1,0 +1,54 @@
+
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: app:&current
+  tasks:
+    - name: Install pv
+      dnf:
+        name: pv
+        state: latest
+    - name: Make sure old dump are deleted
+      file:
+        path: "{{ efs_root_mountpoint }}/{{ mageops_project }}-stage-table.sql"
+        state: absent
+    - name: Dump current tables to restore
+      shell: magerun db:dump --set-gtid-purged-off --include="admin_user admin_passwords core_config_data tfa_user_config authorization_role integration admin_user_session authorization_rule" --no-single-transaction {{ efs_root_mountpoint }}/{{ mageops_project }}-stage-table.sql
+      args:
+        chdir: /var/www/magento/current
+    - name: Download DB dump from owncloud
+      shell: |-
+        curl -u {{ owncloud_user | quote }}:{{ owncloud_password | quote }} -o {{ efs_root_mountpoint }}/{{mageops_project}}.sql.gz {{ owncloud_url | quote }}
+    - name: Run preimport task
+      shell: |-
+        {{ item }}
+      become: yes
+      become_user: "{{ mageops_app_user }}"
+      with_items: "{{mageops_import_db_task_before}}"
+    - name: Import prod DB
+      shell: |-
+        /usr/local/bin/magerun db:import --compression gzip {{ efs_root_mountpoint }}/{{mageops_project}}.sql.gz
+      args:
+        chdir: /var/www/magento/current
+    - name: Import env dump
+      shell: |-
+        /usr/local/bin/magerun db:import {{ efs_root_mountpoint }}/{{ mageops_project }}-stage-table.sql
+      args:
+        chdir: /var/www/magento/current
+    - name: Run postimport task
+      command: |-
+        {{ item }}
+      become: yes
+      become_user: "{{ mageops_app_user }}"
+      with_items: "{{mageops_import_db_task_after}}"
+
+    - name: Delete table file
+      file:
+        path: "{{ efs_root_mountpoint }}/{{ mageops_project }}-stage-table.sql"
+        state: absent
+    - name: Delete DB dump file
+      file:
+       path: "{{ efs_root_mountpoint }}/{{mageops_project}}.sql.gz"
+       state: absent
+
+
+

@@ -1,0 +1,20 @@
+
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: app:&current
+  tasks:
+    - name: Make sure old dump are deleted
+      file:
+        path: "{{ efs_root_mountpoint }}/{{ mageops_project }}.sql.gz"
+        state: absent
+    - name: Dump DB
+      shell: /usr/local/bin/magerun db:dump --compression="gzip" --set-gtid-purged-off --strip="@trade" --no-single-transaction {{efs_root_mountpoint}}/{{ mageops_project }}.sql
+      args:
+        chdir: "{{ magento_live_release_dir }}"
+    - name: Upload to owncloud
+      shell: |-
+        curl -u {{ owncloud_user | quote }}:{{ owncloud_password | quote }} -T {{efs_root_mountpoint}}/{{mageops_project}}.sql.gz {{ owncloud_url | quote }}
+    - name: Delete file after upload
+      file:
+        path: "{{ efs_root_mountpoint }}/{{ mageops_project }}.sql.gz"
+        state: absent
