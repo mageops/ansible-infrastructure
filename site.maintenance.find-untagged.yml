@@ -1,0 +1,61 @@
+- hosts: localhost
+  connection: local
+  vars:
+    _ec2_filters:
+      - "running"
+      - "stopped"
+      - "pending"
+      - "shutting-down"
+      - "stopping"
+    _ec2_ebs_list_to_review: []
+    _ec2_untagged_list: []
+    _ec2_list_to_review :
+  roles:
+     - role: cs.aws-rds-facts
+  tasks:
+    - name: List of mageops instances
+      ec2_instance_info:
+        filters:
+          "tag:Infrastructure": 'mageops'
+          "tag:Tool": 'ansible'
+          instance-state-name: "{{ _ec2_filters }}"
+        region: "{{ aws_region }}"
+      register: _ec2_list_mageops
+
+    - name: List of all EC2 instances
+      ec2_instance_info:
+        filters:
+          instance-state-name: "{{ _ec2_filters }}"
+        region: "{{ aws_region }}"
+      register: _ec2_list_all
+
+    - name: Generate difference between both list
+      set_fact:
+        _ec2_untagged_list: "{{ _ec2_untagged_list + [{ 'id' : item.instance_id, 'name' : item.tags.Name | default('') }] }}"
+      when: item.instance_id not in aws_ec2_whitelist
+      with_items: "{{ _ec2_list_all.instances | difference(_ec2_list_mageops.instances) }}"
+
+    - name: Find unused EBS volumes
+      ec2_vol_info:
+        filters:
+          status: "available"
+        region: "{{ aws_region }}"
+      register: _ec2_ebs_list
+
+    - name: Set unused EBS volumes list
+      set_fact:
+        _ec2_ebs_list_to_review: "{{ _ec2_ebs_list_to_review + [item.id] }}"
+      with_items: "{{ _ec2_ebs_list.volumes }}"
+
+    - name: Generate string to EC2 end output
+      set_fact:
+        _ec2_list_to_review: "{{ (_ec2_list_to_review) }} ID :  {{ item.id }} Name : {{ item.name }}"
+      with_items: "{{ _ec2_untagged_list }}"
+
+    - name: Failed when some resources found
+      fail:
+        msg: |
+          {% if (_ec2_ebs_list.volumes | length) > 0 %} EBS volumes to review: {{ _ec2_ebs_list_to_review | join(',') }} {% endif %}
+          {% if (_ec2_untagged_list | length) > 0 %} EC2 instances to review:
+          {{ _ec2_list_to_review }} {% endif %}
+      when: "{{ (_ec2_untagged_list | length > 0) or (_ec2_ebs_list.volumes | length >0) }}"
