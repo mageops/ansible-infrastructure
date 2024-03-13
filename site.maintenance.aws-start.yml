@@ -15,10 +15,18 @@
         instance_ids: "{{ item.instance_id }}"
         region: "{{ aws_region }}"
         state: running
-        wait: no
+        wait: yes
       with_items:
         - "{{ aws_persistent_node_instance }}"
         - "{{ aws_varnish_node_instance }}"
+
+    - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
+      ansible.builtin.wait_for:
+        port: 22
+        host: '{{ aws_varnish_node_elastic_ip }}'
+        search_regex: OpenSSH
+        delay: 10
+      connection: local
 
     - name: Scale up App Node ASGs
       when: start_asg
