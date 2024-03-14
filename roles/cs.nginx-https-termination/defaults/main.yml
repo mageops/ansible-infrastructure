@@ -126,3 +126,7 @@ https_termination_nginx_server_cookie_rewrite_config: {}
 #        rewrite_domain:
 #            *.example.com: example.com
 https_termination_redirect_source_domain_param: _redirect_from
+
+# Include header with upstream ttfb in response headers
+https_termination_nginx_include_upstream_response_time_header: yes
+https_termination_nginx_include_upstream_response_time_name: X-Upstream-Response-Time
