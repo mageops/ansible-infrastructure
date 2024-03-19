@@ -1,0 +1,28 @@
+shlink_instance_suffix: "{{ shlink_instance | default(false, true) | ternary('_' ~ shlink_instance, '') }}"
+shlink_service_name: "shlink{{ shlink_instance_suffix }}"
+
+shlink_container_name: "shlink{{ shlink_instance_suffix }}"
+shlink_container_image: "docker.io/shlinkio/shlink:{{ shlink_version }}"
+
+shlink_conf_volume_src: "{{ shlink_home }}/conf"
+shlink_conf_mountpoint: "/etc/shlink/config/params"
+
+shlink_sqlite_dbdir: persistent
+
+shlink_data_volume_src: "{{ shlink_home }}/data"
+shlink_data_mountpoint_base: "/etc/shlink/data"
+shlink_data_mounts:
+  - "{{ shlink_sqlite_dbdir }}"
+  - log
+
+shlink_db_config_mysql:
+  driver:   pdo_mysql
+  host:     "{{ shlink_mysql_db_host }}"
+  dbname:   "{{ shlink_mysql_db_name }}"
+  user:     "{{ shlink_mysql_db_user }}"
+  password: "{{ shlink_mysql_db_pass }}"
+  port:     "{{ shlink_mysql_db_port }}"
+
+shlink_db_config_sqlite:
+  driver:   pdo_sqlite
+  path:     "{{ shlink_data_mountpoint_base }}/{{ shlink_sqlite_dbdir }}/database.sqlite"
