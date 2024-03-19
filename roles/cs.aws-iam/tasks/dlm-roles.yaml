@@ -2,7 +2,7 @@
   iam_managed_policy:
     policy_name: "{{ aws_iam_policy_dlm_sts_access }}"
     policy_description: Allow DLM to assume STS role
-    policy: "{{ lookup('template', 'dlm_sts_access.policy.json') }}"
+    policy: "{{ lookup('template', 'aws_dlm_sts_access.policy.json') }}"
     state: present
   register: iam_dlm_sts_access
 
@@ -10,13 +10,13 @@
   iam_managed_policy:
     policy_name: "{{ aws_iam_policy_dlm_aws_access }}"
     policy_description: Allow DLM to access AWS resources
-    policy: "{{ lookup('template', 'dlm_aws_access.policy.json') }}"
+    policy: "{{ lookup('template', 'aws_dlm_access.policy.json') }}"
     state: present
   register: iam_dlm_aws_access
 
 - name: Create role for DLM
   iam_role:
-    assume_role_policy_document: "{{ lookup('template', 'dlm_sts_access.policy.json') }}"
+    assume_role_policy_document: "{{ lookup('template', 'aws_dlm_sts_access.policy.json') }}"
     name: "{{ aws_iam_role_dlm }}"
     state: present
     managed_policy:
