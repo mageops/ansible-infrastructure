@@ -10,7 +10,12 @@
 - name: Install geoupdate configuration
   template:
     src: GeoIP.conf.j2
-    dest: /etc/GeoIP.conf
+    dest: /usr/local/etc/GeoIP.conf
+
+- name: Install geoupdate 6.x configuration
+  template:
+    src: GeoIP6.conf.j2
+    dest: /usr/local/etc/GeoIP.conf
 
 - name: Update geolite2 databases
   shell: geoipupdate
