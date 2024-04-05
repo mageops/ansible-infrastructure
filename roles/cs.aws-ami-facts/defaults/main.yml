@@ -4,24 +4,36 @@ ami_facts_architecture: "{{ ami_facts_architecture_map[ami_facts_instance.split(
 ami_facts_architecture_map:
   t3: x86_64
   t3a: x86_64
+  t4g: arm64
   m5: x86_64
   m5a: x86_64
   m6a: x86_64
   m6i: x86_64
   m6g: arm64
-  t4g: arm64
+  m7g: arm64
+  m7a: x86_64
+  m7i: x86_64
+  m7i-flex: x86_64
   c6g: arm64
   c5: x86_64
   c5a: x86_64
   c6i: x86_64
   c6a: x86_64
   c7g: arm64
+  c7gn: arm64
+  c7i: x86_64
+  c7a: x86_64
   r6a: x86_64
   r6i: x86_64
   r6g: arm64
   r5: x86_64
   r5a: x86_64
   r5b: x86_64
+  r7a: x86_64
+  r7iz: x86_64
+  r7i: x86_64
+  r7g: arm64
+  r8g: arm64
 
 ami_facts_common_filters:
   state: "available"
