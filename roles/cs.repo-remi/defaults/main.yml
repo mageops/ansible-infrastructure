@@ -144,6 +144,19 @@ php_repo_remi_variants:
     name: remi-php82-test-debuginfo
     filename: remi-php82
 
+  php83:
+    name: remi-php83
+    filename: remi-php83
+  php83-debuginfo:
+    name: remi-php83-debuginfo
+    filename: remi-php83
+  php83-test:
+    name: remi-php83-test
+    filename: remi-php83
+  php83-test-debuginfo:
+    name: remi-php83-test-debuginfo
+    filename: remi-php83
+
   modular:
     name: remi-modular
     filename: remi-modular
