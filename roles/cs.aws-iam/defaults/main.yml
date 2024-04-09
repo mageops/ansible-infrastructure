@@ -12,9 +12,6 @@ aws_iam_policy_cloudwatch_metrics_access: "{{ aws_iam_name_prefix }}CloudWatchMe
 aws_iam_policy_lambda_access: "{{ aws_iam_name_prefix }}LambdaAccess"
 aws_iam_policy_kms_access: "{{ aws_iam_name_prefix }}KmsAccess"
 
-aws_iam_policy_dlm_sts_access: "{{ aws_iam_name_prefix }}DLMAllowSTSAccess"
-aws_iam_policy_dlm_aws_access: "{{ aws_iam_name_prefix }}DLMAccess"
-
 aws_iam_group_custom_policies: "{{ aws_iam_name_prefix }}CustomPolicies"
 aws_iam_group_standard_policies: "{{ aws_iam_name_prefix }}StandardPolicies"
 
@@ -32,5 +29,3 @@ aws_iam_role_node_coordinator_lambda_execution: "{{ aws_iam_name_prefix }}Handle
 aws_iam_role_app_node: "{{ aws_iam_name_prefix }}AppNode"
 aws_iam_role_varnish: "{{ aws_iam_role_app_node }}"
 aws_iam_role_persistent_node: "{{ aws_iam_name_prefix }}PersistentNode"
-
-aws_iam_role_dlm: "{{ aws_iam_name_prefix }}DLM"

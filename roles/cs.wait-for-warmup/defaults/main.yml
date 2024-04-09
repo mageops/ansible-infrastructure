@@ -1,2 +1,0 @@
-wait_for_warmup_retries: "{{ (mageops_wait_for_warmup_secs / wait_for_warmup_delay)|int }}"
-wait_for_warmup_delay: 5

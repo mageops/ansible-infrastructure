@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 {% if varnish_do_not_expose_caching %}
 if ( client.ip ~ trusted ) {
 {% endif %}
@@ -33,13 +31,6 @@ if (resp.http.X-Rewrite-HTML-Maxage) {
 if (req.http.{{ varnish_debug_request_info_header_name }}) {
     set resp.http.{{ varnish_debug_request_info_header_name }} =
         req.http.{{ varnish_debug_request_info_header_name }} + "; Backend-Response-Delivered";
-}
-
-if (req.http.{{ varnish_bypass_request_info_header_name }}) {
-    set resp.http.{{ varnish_bypass_request_info_header_name }} =
-        req.http.{{ varnish_bypass_request_info_header_name }} + "; Backend-Response-Delivered";
-    set resp.http.Set-Cookie = "{{ varnish_bypass_request_cookie_name}} = {{ varnish_bypass_request_token }}; Secure";
-    set resp.http.Cache-Control = "no-cache";
 }
 
 if (req.http.{{ varnish_bypass_request_info_header_name }}) {
@@ -89,4 +80,3 @@ unset resp.http.Server;
 unset resp.http.X-Varnish;
 unset resp.http.Via;
 unset resp.http.Link;
->>>>>>> 599e99a (QA/Testing Team request to skip varnish cache.)

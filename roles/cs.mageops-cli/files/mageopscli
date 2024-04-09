@@ -151,7 +151,6 @@ main::help() {
     main::eprintln "  is_feature_flag_set <feature>        Checks if there is any value set for feature flag"
     main::eprintln "                                       status code 0 means flag is set, 1 otherwise"
     main::eprintln "  apply_features                       Apply feature updates to this host"
-    main::eprintln "  clear_opcache                        Clears opcache for php and php-fpm"
     main::eprintln ""
     main::eprintln " Mageops cli tools"
     main::eprintln "  (c) Creativestyle 2020"

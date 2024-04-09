@@ -32,10 +32,6 @@
   shell: "mageopscli set_feature_flag newrelic_apm {{ new_relic_enabled | ternary('true', 'false') }}"
   when: aws_use
 
-- name: Set license key feature flag
-  shell: "mageopscli set_feature_flag newrelic_license_key \"{{ new_relic_license }}\""
-  when: aws_use
-
 - name: Setup cron
   template:
     src: cron.j2

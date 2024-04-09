@@ -1,3 +1,9 @@
+- name: Download CA RDS
+  ansible.builtin.get_url:
+    url: https://truststore.pki.rds.amazonaws.com/eu-central-1/eu-central-1-bundle.pem
+    dest: /tmp/eu-central-1-bundle.pem
+    mode: '0666'
+
 - name: Ensure project database exists
   mysql_db:
     login_host: "{{ mageops_mysql_host }}"
@@ -5,6 +11,7 @@
     login_password: "{{ mageops_mysql_root_pass }}"
     name: "{{ mageops_app_mysql_db }}"
     state: present
+    ca_cert: /tmp/eu-central-1-bundle.pem
 
 - name: Ensure project db user for external connections exists
   mysql_user:
@@ -15,6 +22,7 @@
     password: "{{ mageops_app_mysql_pass }}"
     host: "%"
     state: present
+    ca_cert: /tmp/eu-central-1-bundle.pem
     priv: "{{ mageops_app_mysql_db }}.*:{{ mysql_configure_all_db_permissions }}"
 
 - name: Ensure project db user for localhost exists
@@ -26,5 +34,6 @@
     password: "{{ mageops_app_mysql_pass }}"
     host: "localhost"
     state: present
+    ca_cert: /tmp/eu-central-1-bundle.pem
     priv: "{{ mageops_app_mysql_db }}.*:{{ mysql_configure_all_db_permissions }}"
   when: mysql_user_localhost_access

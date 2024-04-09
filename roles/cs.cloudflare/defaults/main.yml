@@ -1,5 +1,5 @@
 cloudflare_enabled: no
-# Accept only traffic coming from Cloudflare
+# Accept only traffic comming from Cloudflare
 cloudflare_exclusive_traffic: yes
 
 # configuration file paths
