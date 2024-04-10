@@ -16,7 +16,16 @@ netaddr
 
 # needed for managing databases (e.g. creating project db in infra step)
 # mysql
-PyMySQL
+# We are using a fork of PyMySQL that has SSL enabled by default
+# Ansible ansible_util does not allow setting ssl parameter without setting ca_cert at the same time
+# This could be workarounded by using config_file parameter but this only works when implementation
+# uses real mysql client and not PyMySQL
+# PyMySQL implementation also loads the config file but it does not support setting ssl parameter
+# while it makes inpossible to enable ssl without providing certificate, implementation supports such scenario
+# in later code. This is why we are using forked version of PyMySQL that enables ssl by default
+# when it's not explicitly disabled. This should be always safe, because if ssl is not enabled on server
+# implementation will fallback to non-ssl connection.
+git+https://github.com/mageops/PyMySQL.git@dev-ssl-by-default#egg=PyMySQL
 
 # needed for running docker (e.g. building aws lambda artifacts)
 docker-py
