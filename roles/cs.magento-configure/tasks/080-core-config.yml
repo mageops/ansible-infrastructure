@@ -9,12 +9,20 @@
     magento_core_config_settings: "{{ magento_core_config_settings + _extra_items }}"
   when: magento_varnish_host | default(false, true)
 
+- name: Download CA RDS
+  ansible.builtin.get_url:
+    url: https://truststore.pki.rds.amazonaws.com/eu-central-1/eu-central-1-bundle.pem
+    dest: /tmp/eu-central-1-bundle.pem
+    mode: '0666'
+
+
 - name: Ensure core config database settings' values
   community.mysql.mysql_query:
     login_db: "{{ mageops_app_mysql_db }}"
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
+    ca_cert: /tmp/eu-central-1-bundle.pem
     query: |
       INSERT INTO `core_config_data`
       SET
@@ -35,6 +43,7 @@
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
+    ca_cert: /tmp/eu-central-1-bundle.pem
     query: |
       INSERT IGNORE INTO `core_config_data`
       SET
@@ -47,12 +56,14 @@
   loop_control:
     loop_var: magento_db_setting
 
+
 - name: Ensure core config database settings are absent (defaults are used)
   community.mysql.mysql_query:
     login_db: "{{ mageops_app_mysql_db }}"
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_app_mysql_user }}"
     login_password: "{{ mageops_app_mysql_pass }}"
+    ca_cert: /tmp/eu-central-1-bundle.pem
     query: |
       DELETE FROM core_config_data
       WHERE
