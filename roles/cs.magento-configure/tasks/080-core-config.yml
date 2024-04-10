@@ -9,7 +9,9 @@
     magento_core_config_settings: "{{ magento_core_config_settings + _extra_items }}"
   when: magento_varnish_host | default(false, true)
 
-- name: Ensure core config database settings' values
+- name: Ensure core config database settings values
+  delegate_to: localhost
+  become: no
   mysql_query:
     name: "{{ mageops_app_mysql_db }}"
     table: core_config_data
@@ -29,6 +31,8 @@
     loop_var: magento_db_setting
 
 - name: Ensure core config database default values (no update if exists)
+  delegate_to: localhost
+  become: no
   mysql_query:
     name: "{{ mageops_app_mysql_db }}"
     table: core_config_data
@@ -47,6 +51,8 @@
     loop_var: magento_db_setting
 
 - name: Ensure core config database settings are absent (defaults are used)
+  delegate_to: localhost
+  become: no
   mysql_query:
     state: absent
     name: "{{ mageops_app_mysql_db }}"
