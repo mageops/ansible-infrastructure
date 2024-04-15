@@ -179,6 +179,9 @@ magento_app_etc_config_cron_consumers:
   cron_consumers_runner:
     cron_run: true
     consumers: "{{ magento_cron_consumers }}"
+  queue:
+    consumers_wait_for_messages: 0
+    only_spawn_when_message_available: 1
 
 magento_app_etc_config_extra: {}
 
