@@ -65,6 +65,13 @@
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_cookie_sign, recursive=true) }}
 
+    - name: Disable consumers
+      when: not magento_cron_consumers_enable
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_disable_consumers, recursive=true) }}
+
     - name: Set extra options
       set_fact:
         magento_app_etc_config: >-
