@@ -37,22 +37,22 @@
               container_workdir: "/workdir"
               user: "{{ magento_uid }}:{{ magento_gid }}"
 
-        magento_baler_js_bundling_core_config:
-        - name: Enable baler bundling
-          path: "dev/js/enable_baler_js_bundling"
-          value: "1"
-        - name: Disable JS merging (because baler bundling is enabled)
-          path: "dev/js/merge_files"
-          value: "0"
-        - name: Disable JS minification (because baler bundling is enabled)
-          path: "dev/js/minify_files"
-          value: "0"
-        - name: Disable JS bundling (baler bundling is enabled)
-          path: "dev/js/enable_js_bundling"
-          value: "0"
-        - name: Disable MageSuite JavaScript defer.
-          path: "deferjs/general/active"
-          value: "0"
+            magento_baler_js_bundling_core_config:
+              - name: Enable baler bundling
+                path: "dev/js/enable_baler_js_bundling"
+                value: "1"
+              - name: Disable JS merging (because baler bundling is enabled)
+                path: "dev/js/merge_files"
+                value: "0"
+              - name: Disable JS minification (because baler bundling is enabled)
+                path: "dev/js/minify_files"
+                value: "0"
+              - name: Disable JS bundling (baler bundling is enabled)
+                path: "dev/js/enable_js_bundling"
+                value: "0"
+              - name: Disable MageSuite JavaScript defer.
+                path: "deferjs/general/active"
+                value: "0"
 
     - name: Append the bundling task config to the task list
       set_fact:
