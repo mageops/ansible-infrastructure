@@ -1,4 +1,4 @@
-repo_mysql_package_name: https://dev.mysql.com/get/mysql80-community-release-el7-11.noarch.rpm
+repo_mysql_package_name: https://dev.mysql.com/get/mysql80-community-release-el9-5.noarch.rpm
 repo_mysql_name_prefix: mysql
 repo_mysql_variants:
   - -connectors-community
