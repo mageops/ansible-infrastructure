@@ -1,12 +1,20 @@
 - name: Install mysql-server
   dnf:
-    name: mysql-server
+    name: mysql-community-server
     state: present
   register: mysql_install
 
-- name: Initialize mysql
-  shell: "mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql"
-  when: mysql_install is changed
+- name: Ensure files exists with correct permissions
+  file:
+    path: "{{ item }}"
+    state: touch
+    owner: mysql
+    group: mysql
+    mode: '0640'
+  loop:
+    - /var/log/mysqld.err
+    - /var/log/mysqld.log
+    - /var/log/mysqld-slow.log
 
 - name: Execute upstream mysql role
   import_role:
