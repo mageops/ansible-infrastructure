@@ -1,6 +1,6 @@
 - name: Install mysql-server
   dnf:
-    name: mysql-community-server
+    name: mysql-server
     state: present
   register: mysql_install
 
@@ -25,8 +25,8 @@
     mysql_root_password_update: yes
     mysql_daemon: mysqld
     mysql_packages:
-      - mysql-community-server
-      - mysql-community-client
+      - mysql-server
+      - mysql
     mysql_syslog_tag: mysqld
     mysql_pid_file: /run/mysqld/mysqld.pid
     mysql_socket: /var/lib/mysql/mysql.sock
