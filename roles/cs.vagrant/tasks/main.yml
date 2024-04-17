@@ -56,7 +56,7 @@
         chdir: "{{ cs_vagrant_dir }}"
 
     - name: Ensure ssh identity exists
-      openssh_keypair:
+      community.crypto.openssh_keypair:
         path: "{{ cs_vagrant_ssh_identity_path }}"
         type: ed25519
         force: no
@@ -90,5 +90,3 @@
         path: "{{ _cs_vagrant_init_temp_dir }}"
         state: absent
   when: cs_vagrant_initialize or _cs_vagrant_status.stdout is search('default,state,not_created')
-
-
