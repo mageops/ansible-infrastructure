@@ -1,6 +1,5 @@
 - hosts: all
   roles:
-    - role: cs.switch-to-dnf
     - role: cs.firewalld
       when: firewall_enable
 
