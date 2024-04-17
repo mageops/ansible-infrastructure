@@ -4,7 +4,12 @@
     dest: "/etc/yum.repos.d/mageops.repo"
     mode: 0644
 
-- name: Install gpg cert
+- name: Install gpg cert 2023
+  rpm_key:
+    state: present
+    key: https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY-2023
+
+- name: Install gpg cert 2024
   rpm_key:
     state: present
     key: https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY
