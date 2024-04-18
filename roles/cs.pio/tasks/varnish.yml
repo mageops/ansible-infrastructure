@@ -12,7 +12,7 @@
 
 - name: Install pio-worker rpm
   dnf:
-    name: "{{ pio_package_url }}"
+    name: "{{ pio_package_url_rpm[ansible_architecture] }}"
     state: present
     disable_gpg_check: true
 
