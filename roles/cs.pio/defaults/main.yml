@@ -29,6 +29,8 @@ pio_filesystem: "{{ (magento_media_storage_strategy == 'aws-s3') | ternary('s3',
 pio_resize_strategy: Contain
 
 # Url to pio-worker rpm
-# pio_package_url:
+pio_package_url_rpm:
+  x86_64:
+  arm64:
 
 pio_worker_cpu_shares: 2
