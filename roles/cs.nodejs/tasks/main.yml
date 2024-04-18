@@ -2,7 +2,7 @@
   dnf:
     name:
       - nodejs
-      - yarn
+      - yarnpkg
     state: latest
 
 - name: Install user-global NPM packages
