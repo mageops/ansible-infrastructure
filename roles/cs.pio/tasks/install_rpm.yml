@@ -1,0 +1,21 @@
+- name: Create temporary directory
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: pio-worker-install
+  register: _temp_dir
+
+- name: Download pio-worker rpm
+  get_url:
+    url: "{{ pio_package_url_rpm[ansible_architecture] }}"
+    dest: "{{ _temp_dir.path }}/pio-worker.rpm"
+
+- name: Install pio-worker rpm
+  dnf:
+    name: "{{ _temp_dir.path }}/pio-worker.rpm"
+    state: present
+    disable_gpg_check: true
+
+- name: Delete temporary directory
+  ansible.builtin.file:
+    path: "{{ _temp_dir.path }}"
+    state: absent
