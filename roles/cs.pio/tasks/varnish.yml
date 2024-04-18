@@ -11,10 +11,7 @@
     allow_duplicates: no
 
 - name: Install pio-worker rpm
-  dnf:
-    name: "{{ pio_package_url_rpm[ansible_architecture] }}"
-    state: present
-    disable_gpg_check: true
+  include_tasks: install_rpm.yml
 
 - name: Write service config
   template:
