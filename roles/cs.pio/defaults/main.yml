@@ -31,6 +31,6 @@ pio_resize_strategy: Contain
 # Url to pio-worker rpm
 pio_package_url_rpm:
   x86_64:
-  arm64:
+  aarch64:
 
 pio_worker_cpu_shares: 2
