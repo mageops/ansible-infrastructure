@@ -1,0 +1,9 @@
+- name: Check if architecture is supported
+  fail:
+    msg: "You cannot install RabbitMQ on this architecture. Please use an x86_64 machine."
+  when: ansible_architecture not in ['x86_64']
+
+- name: Install rabbitmq repo
+  template:
+    src: rabbitmq.repo
+    dest: /etc/yum.repos.d/rabbitmq.repo
