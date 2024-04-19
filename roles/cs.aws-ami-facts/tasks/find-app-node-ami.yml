@@ -1,4 +1,4 @@
-- name: Find app node AMIs
+- name: Find app node AMIs with the same architecure
   amazon.aws.ec2_ami_info:
     region: "{{ aws_region }}"
     filters: >-
@@ -10,6 +10,17 @@
     ami_facts_app_node_tag_filters: "{{ ami_facts_app_node_tags | prefix_keys('tag:') }}"
   register: ami_app_node_facts
 
+- name: Find app node AMIs
+  amazon.aws.ec2_ami_info:
+    region: "{{ aws_region }}"
+    filters: >-
+      {{  ami_facts_app_node_base_filters | combine(
+          ami_facts_app_node_filters,
+          ami_facts_app_node_tag_filters) }}
+  vars:
+    ami_facts_app_node_tag_filters: "{{ ami_facts_app_node_tags | prefix_keys('tag:') }}"
+  register: ami_app_node_all_facts
+
 - name: Set latest app node AMI facts if found
   when: ami_app_node_facts.images | length > 0
   block:
@@ -17,7 +28,17 @@
       set_fact:
         aws_ami_app_node_info: "{{ ami_app_node_facts.images | sort(attribute='creation_date') | last }}"
 
+    - name: Set latest app node AMI info with all architecture
+      set_fact:
+        aws_ami_app_node_all_info: "{{ ami_app_node_all_facts.images | sort(attribute='creation_date') | last }}"
+
+    - name: Show if last AMI has proper architecture
+      when: ( aws_ami_app_node_info.image_id  == aws_ami_app_node_all_info.image_id )
+      debug:
+        msg: "Last AMI has proper architecture {{ aws_ami_app_node_info.image_id }} = {{ aws_ami_app_node_all_info.image_id }}"
+
     - name: Set latest app node AMI facts
+      when:  ( aws_ami_app_node_info.image_id  == aws_ami_app_node_all_info.image_id )
       set_fact:
         aws_ami_app_node_id: "{{ aws_ami_app_node_info.image_id }}"
         aws_ami_app_node_name: "{{ aws_ami_app_node_info.name }}"
@@ -26,7 +47,7 @@
         aws_ami_app_node_artifact_build_nr: "{{ aws_ami_app_node_info.tags.ArtifactBuildNr | default('null') | from_json }}"
 
 - name: Print information about newest app node AMI found
-  when: (ami_app_node_facts.images | length > 0) and ( aws_ami_app_node_info.Architecture == ami_facts_architecture )
+  when: (ami_app_node_facts.images | length > 0) and ( aws_ami_app_node_info.image_id  == aws_ami_app_node_all_info.image_id )
   debug:
     msg: |
       ===============================================================
@@ -48,6 +69,6 @@
       {{ aws_ami_app_node_info.tags | default({}) | to_nice_yaml }}
 
 - name: Print information if no images were found
-  when: ami_app_node_facts.images | length == 0
+  when: ami_app_node_facts.images | length == 0 or ( aws_ami_app_node_info.image_id  != aws_ami_app_node_all_info.image_id )
   debug:
     msg: "No previous app node AMI was found! Clean build is coming..."
