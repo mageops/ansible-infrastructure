@@ -64,7 +64,7 @@
   when: magento_scd_advanced_js_bundling and magento_scd_advanced_js_bundling_strategy == 'baler'
 
 - name: Check if database is initialized
-  command: mysql {{ mageops_mysql_require_ssl | ternary("--ssl", "") }} -N --batch -u {{ mageops_app_mysql_user|quote }} -p{{ mageops_app_mysql_pass|quote }} -h {{ mageops_mysql_host|quote }} -e "SHOW TABLES FROM `{{ mageops_app_mysql_db }}` LIKE 'admin_user';"
+  command: mysql {{ mageops_mysql_require_ssl | ternary("----ssl-mode=REQUIRED", "") }} -N --batch -u {{ mageops_app_mysql_user|quote }} -p{{ mageops_app_mysql_pass|quote }} -h {{ mageops_mysql_host|quote }} -e "SHOW TABLES FROM `{{ mageops_app_mysql_db }}` LIKE 'admin_user';"
   changed_when: false
   register: admins
 
