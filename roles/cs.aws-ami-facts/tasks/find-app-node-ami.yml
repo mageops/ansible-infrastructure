@@ -26,7 +26,7 @@
         aws_ami_app_node_artifact_build_nr: "{{ aws_ami_app_node_info.tags.ArtifactBuildNr | default('null') | from_json }}"
 
 - name: Print information about newest app node AMI found
-  when: ami_app_node_facts.images | length > 0
+  when: (ami_app_node_facts.images | length > 0) and ( aws_ami_app_node_info.Architecture == ami_facts_architecture )
   debug:
     msg: |
       ===============================================================
