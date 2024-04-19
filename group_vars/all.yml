@@ -405,8 +405,8 @@ aws_persistent_node_create: yes
 
 # EC2 Instance types
 aws_app_node_instance_type: t3a.micro
-aws_app_builder_node_instance_type: "{{ aws_app_node_instance_type }}"
-aws_extra_app_node_instance_type: "{{ aws_app_node_instance_type }}"
+aws_app_builder_node_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
+aws_extra_app_node_instance_type: "{{ aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true) }}"
 aws_persistent_node_instance_type: t3a.micro
 
 # EC2 Elastic IPs
