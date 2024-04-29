@@ -74,6 +74,8 @@
       efs_tags: "{{ aws_tags_default | combine(aws_tags_role_storage, aws_tags_role_shared_storage) }}"
       efs_mounts: "{{ magento_sftp_basic_efs_mounts + magento_sftp_efs_mounts }}"
       when: aws_use and sftp_access_enabled
+    - role: cs.repo-rabbitmq
+      when: mageops_rabbitmq_create
     - role: cs.rabbitmq
       rabbitmq_virtual_hosts: ["{{ magento_rabbitmq_virtual_host }}"]
       rabbitmq_users:

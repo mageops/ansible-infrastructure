@@ -1,9 +1,3 @@
-- name: Install RabbitMQ Erlang Package
-  dnf:
-    allow_downgrade: no
-    name: "erlang"
-  notify: Restart rabbitmq
-
 - name: Install RabbitMQ Package
   dnf:
     allow_downgrade: no
