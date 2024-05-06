@@ -1,6 +1,9 @@
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: persistent:&current:!immutable
+  pre_tasks:
+  - debug:
+      msg: "os_family: {{ ansible_facts['os_family'] }} distribution_major_version: {{ ansible_facts['distribution_major_version'] }}"
   roles:
     - role: cs.aws-node-facts
       delegate_to: localhost
