@@ -39,6 +39,9 @@ ami_facts_common_filters:
   state: "available"
   architecture: "{{ ami_facts_architecture }}"
 
+ami_facts_common_filters_no_arch:
+  state: "available"
+
 ami_facts_clean_base_filters:
   name: "{{ aws_ami_base_marketplace_name }}"
   is-public: "true"
