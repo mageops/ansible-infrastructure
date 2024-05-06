@@ -1,7 +1,8 @@
+roles:
 - src: geerlingguy.mysql
 - src: geerlingguy.composer
 - src: geerlingguy.ntp
-
+  version: 2.4.0
 - src: pinkeen.postfix
   version: v1.1
 
@@ -13,4 +14,3 @@
 
 - src: zauberpony.mysql-query
   version: v0.6.1
-
