@@ -73,6 +73,7 @@ magento_app_etc_config:
     compiled_config: 1
     media_listing: 1
     navigation: 1
+    vertex: 1
     elasticsuite: 1
 
   install:
