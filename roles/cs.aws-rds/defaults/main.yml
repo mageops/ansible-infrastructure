@@ -18,7 +18,7 @@ aws_rds_db_engine_version: "10.4"
 aws_rds_param_group_engine: "{{ aws_rds_db_engine }}{{ aws_rds_db_engine_version }}"
 
 # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.Engines.html
-aws_rds_performance_insights_unavailable_instances: [ db.t2.micro, db.t2.small, db.t3.micro, db.t3.small]
+aws_rds_performance_insights_unavailable_instances: [ db.t2.micro, db.t2.small, db.t3.micro, db.t3.small, db.t4g.micro, db.t4g.small ]
 aws_rds_performance_insights: "{{ False if aws_rds_instance_type in aws_rds_performance_insights_unavailable_instances else True }}"
 aws_rds_performance_insights_retention_period: 7
 aws_rds_slowlog_enabled: yes
