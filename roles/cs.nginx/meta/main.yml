@@ -1,3 +1,4 @@
 allow_duplicates: no
 dependencies:
   - cs.logrotate
+  - cs.repo-nginx
