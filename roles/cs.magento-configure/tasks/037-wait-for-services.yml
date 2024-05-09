@@ -8,7 +8,7 @@
   delay: 5
   register: result
   until: result.rc == 0
-  when: mageops_elasticsearch_host | default(false, true)
+  when: mageops_elasticsearch_host | default(false, true) and not mageops_skip_elasticsearch_check
 
 - name: Wait for Redis cache host
   shell: echo -ne "PING\r\n" | nc {{ mageops_redis_host }} {{ mageops_redis_port }}
