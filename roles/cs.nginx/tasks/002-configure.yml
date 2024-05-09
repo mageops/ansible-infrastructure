@@ -68,6 +68,3 @@
     name: nginx
     enabled: yes
     state: started
-
-#- name: Ensure logs are reopened to provide correct chown (https://superuser.com/a/1591135)
-#  shell: nginx -s reopen

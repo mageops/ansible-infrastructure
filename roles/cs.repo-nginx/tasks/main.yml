@@ -1,6 +1,8 @@
-- name: Ensure nginx repo release package is installed and up-to-date
-  dnf:
-    name: "{{ repo_nginx_package_name }}"
+- name: Install nginx repo
+  template:
+    src: nginx.repo
+    dest: "/etc/yum.repos.d/{{ repo_nginx_filename }}.repo"
+    mode: 0644
 
 - name: Ensure chosen nginx repo variants are enabled
   ini_file:
