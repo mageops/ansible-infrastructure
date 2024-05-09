@@ -709,6 +709,10 @@ mageops_redis_sessions_port: 6380
 mageops_elasticsearch_create: yes
 # mageops_elasticsearch_host:
 
+# Do not wait for Elasticsearch to be ready, required when aws opensearch serverless is used
+# because it required complex authentication that isn't worth implementing
+mageops_skip_elasticsearch_check: no
+
 mageops_varnish_purge_logging: yes
 mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: "{% if mageops_https_termination_enable %}8000{% else %}80{% endif %}"
