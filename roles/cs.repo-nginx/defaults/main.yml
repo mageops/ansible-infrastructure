@@ -1,4 +1,3 @@
-repo_nginx_package_name: nginx-release
 repo_nginx_name_prefix: nginx-
 repo_nginx_variants:
   - mainline
@@ -6,3 +5,5 @@ repo_nginx_variants:
 
 repo_nginx_variants_enabled:
   - stable
+
+repo_nginx_filename: nginx
