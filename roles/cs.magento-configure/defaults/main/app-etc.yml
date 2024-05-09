@@ -100,7 +100,7 @@ magento_app_etc_config_elasticsuite:
       smile_elasticsuite_core_base_settings:
         es_client:
           servers: "{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}"
-          enable_https_mode: false
+          enable_https_mode: "{{ mageops_elasticsearch_https }}"
           http_auth_user: ""
           http_auth_pwd: ""
           enable_http_auth: false
