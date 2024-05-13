@@ -378,8 +378,11 @@ aws_security_group_varnish_pio_rules:
       - "50001"
     group_name: "{{ aws_security_group_app_name }}"
 
+aws_security_group_varnish_rules_extra_rules: []
+
 aws_security_group_varnish_rules_tpl: [
-  "{{ mageops_pio_worker_enable | ternary(aws_security_group_varnish_pio_rules, []) }}"
+  "{{ mageops_pio_worker_enable | ternary(aws_security_group_varnish_pio_rules, []) }}",
+  "{{ aws_security_group_varnish_rules_extra_rules }}"
 ]
 
 aws_security_group_varnish_rules: "{{ aws_security_group_varnish_rules_tpl | flatten }}"
