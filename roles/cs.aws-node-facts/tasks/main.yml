@@ -38,17 +38,6 @@
   loop_control:
     label: "{{ item.key }}"
 
-- name: Set facts about nodes
-  set_fact:
-    aws_app_builder_node_instance: "{{ aws_nodes_info.app_builder | default(omit, true) }}"
-    aws_persistent_node_instance: "{{ aws_nodes_info.persistent | default(omit, true) }}"
-    aws_varnish_node_instance: "{{ aws_nodes_info.varnish_loadbalancer | default(omit, true) }}"
-    aws_app_builder_node_ami_id: "{{ aws_nodes_info.app_builder.image_id | default(omit, true) }}"
-    aws_persistent_node_ami_id: "{{ aws_nodes_info.persistent.image_id | default(omit, true) }}"
-    aws_varnish_node_ami_id: "{{ aws_nodes_info.varnish_loadbalancer.image_id | default(omit, true) }}"
-    # Ansible require at least one variable to be set in set_fact, this dummy set is required in case there is no instances present
-    _dummy: "_"
-
 - name: Set varnish host to varnish loadbalancer
   set_fact:
     mageops_varnish_host: "{{ aws_nodes_info.varnish_loadbalancer.private_ip_address }}"
