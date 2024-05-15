@@ -1,0 +1,13 @@
+dependencies: []
+galaxy_info:
+  author: Filip Sobalski
+  company: creativestyle
+  description: Configure postfix as relay
+  license: MIT
+  min_ansible_version: 1.9
+  galaxy_tags:
+    - postfix
+  platforms:
+    - name: EL
+      versions:
+        - all
