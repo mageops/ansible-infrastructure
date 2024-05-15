@@ -1,0 +1,43 @@
+- name: Install postfix pacakges
+  yum:
+    name:
+      - postfix
+      - cyrus-sasl-plain
+
+- name: Configure postfix relay password
+  lineinfile:
+    dest: /etc/postfix/sasl_passwd
+    regexp: "{{ postfix_relay_host }}"
+    create: yes
+    state: present
+    backup: yes
+    mode: 0600
+    line: "[{{ postfix_relay_host }}]:{{ postfix_relay_port}} {{ postfix_relay_username }}:{{ postfix_relay_password }}"
+  notify: Reload postfix
+  register: sasl_map_check
+
+- name: Encode postfix relay password file
+  shell: postmap /etc/postfix/sasl_passwd
+  when: sasl_map_check.changed
+  notify: Reload postfix
+
+- name: Configure postfix
+  lineinfile:
+    dest: /etc/postfix/main.cf
+    state: present
+    backup: yes
+    regexp: "^{{ item.name }}"
+    line: "{{ item.name }} = {{ item.value }}"
+  with_items: "{{ postfix_relay_options | combine(postfix_relay_extra_options | default({}), recursive=True) | dict2items(key_name='name') }}"
+  vars:
+    postfix_relay_options:
+      relayhost: "[{{ postfix_relay_host }}]:{{ postfix_relay_port }}"
+      smtp_sasl_password_maps: 'hash:/etc/postfix/sasl_passwd'
+      smtp_sasl_auth_enable: 'yes'
+      smtp_sasl_security_options: 'noanonymous'
+      smtp_use_tls: 'yes'
+      smtp_tls_CAfile: '/etc/ssl/certs/ca-bundle.crt'
+  notify: Reload postfix
+
+- name: Start and enable postfix
+  service: name=postfix state=started enabled=yes

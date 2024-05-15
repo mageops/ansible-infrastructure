@@ -143,11 +143,12 @@
 
     - role: pinkeen.postfix
 
-    - role: pinkeen.postfix-relay
+    - role: cs.postfix-relay
       postfix_relay_host: "{{ mageops_app_email_smtp_relay_host }}"
       postfix_relay_username: "{{ mageops_app_email_smtp_relay_user }}"
       postfix_relay_password: "{{ mageops_app_email_smtp_relay_pass }}"
       postfix_relay_port: "{{ mageops_app_email_smtp_relay_port }}"
+      postfix_relay_extra_options: "{{ mageops_app_email_smtp_relay_extra_options | default({}) }}"
 
     - role: cs.magento-postfix
 

@@ -8,9 +8,6 @@ roles:
 - src: pinkeen.postfix
   version: v1.1
 
-- src: pinkeen.postfix-relay
-  version: v1.1
-
 collections:
 - name: community.aws
   version: 5.5.1
