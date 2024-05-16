@@ -3,9 +3,7 @@
 # while official CentOS repo have 3.4.0. We need to check if
 # we're compatible with 3.4.0 before the downgrade.
 - name: Install supervisor
-  pip:
-    name: supervisor
-    state: present
+  command: python -m pip install supervisor --trusted-host pypi.python.org --trusted-host files.pythonhosted.org --trusted-host pypi.org
 
 - name: Install systemd service config
   template:
