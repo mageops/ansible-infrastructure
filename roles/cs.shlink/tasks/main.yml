@@ -1,0 +1,195 @@
+###
+# *** Installs shlink URL shortener ***
+#
+# The app is running as a rootless container as user `shlink_user`.
+# All app data is stored in these user's home directory.
+#
+# No HTTPS termination is provided - this you must provide an HTTPS-terminating
+# reverse proxy to this instance's `shlink_http_bind_port`.
+###
+
+- name: Install packages for running rootless podman containers
+  yum:
+    state: present
+    name:
+      - podman
+      - slirp4netns
+      - fuse
+      - fuse-overlayfs
+
+- name: Enable user namespaces via sysctl
+  sysctl:
+    state: present
+    reload: yes
+    name: user.max_user_namespaces
+    value: "28633"
+
+- name: Create user
+  user:
+    state: present
+    name: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+    home: "{{ shlink_home }}"
+    move_home: yes
+
+- name: Create group
+  group:
+    name: "{{ shlink_group }}"
+
+- name: Create user
+  user:
+    state: present
+    name: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+    home: "{{ shlink_home }}"
+
+- name: Create basic dirs
+  file:
+    state: directory
+    path: "{{ item }}"
+    mode: "0755"
+    owner: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+  loop:
+    - "{{ shlink_conf_volume_src }}"
+    - "{{ shlink_home }}/bin"
+
+- name: Create data dirs
+  file:
+    state: directory
+    path: "{{ shlink_data_volume_src }}/{{ item }}"
+    mode: "0750"
+    owner: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+  loop: "{{ shlink_data_mounts }}"
+
+- name: Install CLI wrapper script
+  template:
+    src: shlink.sh
+    dest: "{{ shlink_home }}/.local/bin/shlink"
+    mode: "0755"
+    owner: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+
+- name: Add user local bindir to PATH
+  lineinfile:
+    state: present
+    create: yes
+    dest: "{{ shlink_home }}/{{ item }}"
+    line: "export PATH=\"{{ shlink_home }}/.local/bin/:$PATH\""
+    mode: "0644"
+    owner: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+  loop:
+    - .profile
+    - .bash_profile
+    - .zsh_profile
+
+
+- name: Compute effective backend config
+  set_fact:
+    shlink_json_config: >-
+      {{
+          shlink_config_default
+            | combine(
+                shlink_config_custom | default({}, true)
+              )
+            | dict2items
+            | rejectattr('value', 'none') | list
+            | items2dict
+      }}
+
+- name: Print backend configuration
+  debug:
+    msg: |
+      ============================================
+      =      Effective Backend Configuration     =
+      ============================================
+
+      {{ shlink_json_config | to_nice_yaml }}
+
+- name: Configure backend app
+  copy:
+    dest: "{{ shlink_conf_volume_src }}/shlink.config.json"
+    content: "{{ shlink_json_config | to_nice_json }}"
+    owner: "{{ shlink_user }}"
+    group: "{{ shlink_group }}"
+    mode: "0640"
+  notify: Restart shlink
+
+- name: Configure backend systemd service
+  template:
+    src: shlink.service
+    dest: "/etc/systemd/system/{{ shlink_service_name }}.service"
+  register: shlink_service_configure
+  notify: Restart shlink
+
+- name: Reload systemctl daemon
+  when: shlink_service_configure is changed
+  systemd:
+    daemon_reload: yes
+    daemon_reexec: yes
+
+- name: Enable and start backend systemd service
+  systemd:
+    force: yes
+    enabled: yes
+    state: started
+    name: "{{ shlink_service_name }}.service"
+
+- meta: flush_handlers
+
+- name: Generate master API key
+  shell: >-
+    {{ shlink_home }}/.local/bin/shlink \
+      api-key:gen \
+        --no-ansi \
+        --no-interaction \
+      | grep "key:" \
+      | sed -E 's/^.*"([a-f0-9_-]+)".*$/\1/g' \
+      | tee {{ shlink_home }}/.shlink-api-key
+  args:
+    creates: "{{ shlink_home }}/.shlink-api-key"
+  register: shlink_gen_master_key
+  become: yes
+  become_user: "{{ shlink_user }}"
+
+- name: Print master API key
+  when: shlink_gen_master_key is changed
+  debug:
+    msg: |
+      ============================================
+      =   !!! Auto-generated Master API Key !!!  =
+      ============================================
+
+      This key is generated only on initial setup
+      and stored in:
+        {{ shlink_home }}/.shlink-api-key
+
+      It will not be shown again.
+
+      Key: {{ shlink_gen_master_key.stdout }}
+
+
+- name: Print installation info
+  debug:
+    msg: |
+      ============================================
+      =    Deployment Maintenance Information    =
+      ============================================
+
+      You can access the shlink CLI by logging in
+      as `{{shlink_user}}` user with `shlink` command.
+
+      You can also do this directly via SSH:
+      $ ssh {{shlink_user}}@{{ansible_host}} shlink list
+
+      You can directly access the podman container only
+      as the `{{shlink_user}}` user:
+      $ podman container logs {{shlink_container_name}}
+
+      Manage the service as `root` user via systemd:
+      $ systemctl status {{shlink_service_name}}
+
+      Tail the container logs:
+      $ journalctl -u {{shlink_service_name}} -f
