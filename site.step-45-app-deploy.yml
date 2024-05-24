@@ -140,6 +140,12 @@
           build_nr: "{{ mageops_artifact_build_nr | default(none) }}"
       delegate_to: localhost
 
+    # This speeds up ami creation and starting new instance with asg
+    # This should be last step in on builder node
+    - name: Run fstrim to reduce ami size)
+      command: fstrim -av
+      when: mageops_fstrim_enable
+
   vars:
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"
     deploy_keep_current_releases: 2
