@@ -92,7 +92,6 @@
   notify: Reload systemctl daemon
 
 - name: Enable certbot renew timer unit
-  when: https_termination_certbot_run is changed
   systemd:
     state: started
     name: certbot-renew.timer
