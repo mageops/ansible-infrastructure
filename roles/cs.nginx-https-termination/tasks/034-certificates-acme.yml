@@ -41,23 +41,23 @@
     name: nginx
     state: reloaded
 
-- name: Run certbot for vhost
-  command:
-    argv: "{{ certbot_args_default + certbot_args_vhost }}"
-  vars:
-    certbot_args_vhost: [
-      --webroot,
-      --webroot-path,   "{{ vhost.crt_acme_webroot_dir }}",
-      --domains,        "{{ ([vhost.server_name] + vhost.server_aliases | default([], true)) | join(',') }}",
-      --cert-name,      "{{ vhost.name }}",
-      --post-hook,      "/usr/bin/systemctl reload nginx"
-    ]
-  when: vhost.crt_do_acme
-  loop: "{{ https_termination_vhosts.values() | list }}"
-  loop_control:
-    label: "{{ vhost.name }} -> {{ (certbot_args_default + certbot_args_vhost) | join(' ') }}"
-    loop_var: vhost
-  register: https_termination_certbot_run
+# - name: Run certbot for vhost
+#   command:
+#     argv: "{{ certbot_args_default + certbot_args_vhost }}"
+#   vars:
+#     certbot_args_vhost: [
+#       --webroot,
+#       --webroot-path,   "{{ vhost.crt_acme_webroot_dir }}",
+#       --domains,        "{{ ([vhost.server_name] + vhost.server_aliases | default([], true)) | join(',') }}",
+#       --cert-name,      "{{ vhost.name }}",
+#       --post-hook,      "/usr/bin/systemctl reload nginx"
+#     ]
+#   when: vhost.crt_do_acme
+#   loop: "{{ https_termination_vhosts.values() | list }}"
+#   loop_control:
+#     label: "{{ vhost.name }} -> {{ (certbot_args_default + certbot_args_vhost) | join(' ') }}"
+#     loop_var: vhost
+#   register: https_termination_certbot_run
 
 - name: Symlink latest ACME certificates as live ones
   file:
