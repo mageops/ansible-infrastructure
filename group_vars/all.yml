@@ -417,9 +417,9 @@ aws_varnish_node_elastic_ip:
 aws_persistent_node_elastic_ip:
 
 # EC2 instance EBS volume sizes in GB
-aws_app_node_ebs_volume_size: 10
-aws_persistent_node_ebs_volume_size: 10
-aws_varnish_node_ebs_volume_size: 10
+aws_app_node_ebs_volume_size: 11
+aws_persistent_node_ebs_volume_size: 11
+aws_varnish_node_ebs_volume_size: 11
 aws_extra_app_node_ebs_volume_size: "{{ aws_app_node_ebs_volume_size }}"
 
 aws_app_asg_availability_zones:
