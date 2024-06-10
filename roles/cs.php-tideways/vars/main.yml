@@ -1,8 +1,7 @@
 tideways_repo_gpgkeys:
-  - https://packages.tideways.com/key.gpg 
-  - https://s3-eu-west-1.amazonaws.com/tideways/packages/EEB5E8F4.gpg
+  - https://packages.tideways.com/key.gpg
 
 tideways_packages:
-  - tideways-php 
-  - tideways-cli 
+  - tideways-php
+  - tideways-cli
   - tideways-daemon
