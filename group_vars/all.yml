@@ -495,13 +495,21 @@ aws_rds_encryption_key_name: "{{ mageops_app_name }}-db"
 
 # Default configuration tunes for MySQL
 aws_rds_param_group_params_default:
-      log_bin_trust_function_creators: 1
-      max_heap_table_size: 67108864
-      tmp_table_size: 67108864
-      explicit_defaults_for_timestamp: 1
+  log_bin_trust_function_creators: 1
+  max_heap_table_size: 67108864
+  tmp_table_size: 67108864
+  explicit_defaults_for_timestamp: 1
+
+aws_rds_param_group_params_require_ssl:
+  require_secure_transport: 1
+
+aws_rds_param_group_params_tpl:
+- "{{ aws_rds_param_group_params_default }}"
+- "{{ mageops_mysql_require_ssl | ternary(aws_rds_param_group_params_require_ssl, {}) }}"
+- "{{ aws_rds_param_group_params_extra | default({}) }}"
 
 # Parameters to tune MySQL configuration
-aws_rds_param_group_params: "{{ aws_rds_param_group_params_default | combine(aws_rds_param_group_params_extra | default({}), recursive=True) }}"
+aws_rds_param_group_params: "{{ aws_rds_param_group_params_tpl | combine }}"
 
 # Storage encryption
 aws_rds_storage_encrypt: "{{ mageops_encryption }}"
@@ -677,6 +685,7 @@ php_opcache_prewarm_dirs:
 # MySQL instance shall be provisioned? (or provide host)
 mageops_mysql_create: yes
 mageops_mysql_host:
+mageops_mysql_require_ssl: no
 
 # Root DB password, not used directly by the application, needed for managing app dbs and users
 mageops_mysql_root_user: root

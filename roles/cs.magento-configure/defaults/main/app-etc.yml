@@ -79,11 +79,20 @@ magento_app_etc_config:
   install:
     date: "Tue, 11 Nov 2016 11:11:00 +0000"
 
+magento_mysql_ssl_required:
+  db:
+    connection:
+      default:
+        # Because we need to serialize and deserialize configuration, we cannot use php constants directly
+        # Therefore we need here to use the actual value of the constant as keys
+        driver_options:
+          1014: false # \PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT
+          1009: /dev/null # \PDO::MYSQL_ATTR_SSL_CA
 
 magento_app_etc_config_http_cache:
   http_cache_hosts:
-    - host: "{{ magento_varnish_host }}"
-      port: "{{ magento_varnish_port }}"
+  - host: "{{ magento_varnish_host }}"
+    port: "{{ magento_varnish_port }}"
 
 # Optional elasticsuite config
 magento_app_etc_config_elasticsuite:
@@ -113,30 +122,30 @@ magento_app_etc_config_cache_default_redis:
 
 magento_app_etc_config_cache_default_redis_l2:
   cache:
-      frontend:
-          default:
-              backend: \Magento\Framework\Cache\Backend\RemoteSynchronizedCache
-              backend_options:
-                  remote_backend: "{{ magento_redis_cache_backend_fqcn }}"
-                  remote_backend_options:
-                      persistent: 0
-                      server: "{{ mageops_redis_host }}"
-                      database: "0"
-                      port: "{{ mageops_redis_port }}"
-                      password: ""
-                      preload_keys:
-                        - EAV_ENTITY_TYPES:hash
-                        - GLOBAL_PLUGIN_LIST:hash
-                        - DB_IS_UP_TO_DATE:hash
-                        - SYSTEM_DEFAULT:hash
-                  local_backend: Cm_Cache_Backend_File
-                  local_backend_options:
-                      cache_dir: "{{ magento_redis_cache_l2_dir }}"
-              frontend_options:
-                  write_control: false
-      type:
-          default:
-              frontend: default
+    frontend:
+      default:
+        backend: \Magento\Framework\Cache\Backend\RemoteSynchronizedCache
+        backend_options:
+          remote_backend: "{{ magento_redis_cache_backend_fqcn }}"
+          remote_backend_options:
+            persistent: 0
+            server: "{{ mageops_redis_host }}"
+            database: "0"
+            port: "{{ mageops_redis_port }}"
+            password: ""
+            preload_keys:
+            - EAV_ENTITY_TYPES:hash
+            - GLOBAL_PLUGIN_LIST:hash
+            - DB_IS_UP_TO_DATE:hash
+            - SYSTEM_DEFAULT:hash
+          local_backend: Cm_Cache_Backend_File
+          local_backend_options:
+            cache_dir: "{{ magento_redis_cache_l2_dir }}"
+        frontend_options:
+          write_control: false
+    type:
+      default:
+        frontend: default
 
 magento_app_etc_config_cache_page_redis:
   cache:
