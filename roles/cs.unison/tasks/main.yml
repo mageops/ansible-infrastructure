@@ -1,5 +1,5 @@
 - name: Fail with warning about unspported OS
-  when: ansible_distribution | lower not in ['macosx', 'centos']
+  when: ansible_distribution | lower not in ['macosx', 'rocky']
   debug:
     msg: |
 
@@ -18,5 +18,5 @@
   when: ansible_distribution | lower == 'macosx'
 
 - name: Install unison client for CentOS
-  import_tasks: install-centos.yml
-  when: ansible_distribution | lower == 'centos'
+  import_tasks: install-rocky.yml
+  when: ansible_distribution | lower == 'rocky'
