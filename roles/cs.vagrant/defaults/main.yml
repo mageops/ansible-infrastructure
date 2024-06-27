@@ -18,6 +18,9 @@ cs_vagrant_dir: "{{ playbook_dir }}/../vagrant"
 # Virtualbox VM memory
 cs_vagrant_vm_memory: 3072
 
+#Virtualbox disk size
+cs_vagrant_disk_size: 20GB
+
 # Host CPU Usage cap in percent, if falsey then disabled
 cs_vagrant_vm_cpu_cap: no
 
@@ -26,7 +29,7 @@ cs_vagrant_vm_cpus: 2
 
 # Please change the name if you upload new box, as we don't have a registry vagrant
 # will use locally cached old box version if you change only the URL!
-cs_vagrant_vm_box: "centos/7"
+cs_vagrant_vm_box: "rockylinux/9"
 
 # URL pointing to the base vagrant box
 cs_vagrant_vm_box_url: ~

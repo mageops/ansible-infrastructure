@@ -6,7 +6,7 @@ aws_rds_allow_major_version_upgrade: no
 aws_rds_storage_size: 20
 aws_rds_storage_encrypt: no
 aws_rds_dedicated_encryption_key: no
-aws_rds_db_engine: mariadb
+aws_rds_db_engine: mysql
 aws_rds_availability_zone: "{{ aws_preferred_availability_zone }}"
 aws_rds_subnet_group_name: "{{ mageops_app_name }}"
 aws_rds_subnet_group_subnets: "{{ aws_vpc_subnet_ids }}"
@@ -14,7 +14,7 @@ aws_rds_security_groups:
   - "{{ aws_security_group_rds_id }}"
 aws_rds_param_group_name: "{{ mageops_app_name }}-{{ aws_rds_param_group_engine | replace('.', '-') }}"
 aws_rds_param_group_desc: "MageOps parameter group"
-aws_rds_db_engine_version: "10.4"
+aws_rds_db_engine_version: "8.0"
 aws_rds_param_group_engine: "{{ aws_rds_db_engine }}{{ aws_rds_db_engine_version }}"
 
 # https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.Overview.Engines.html
