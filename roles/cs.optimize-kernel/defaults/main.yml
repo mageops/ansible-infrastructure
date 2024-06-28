@@ -1,2 +1,3 @@
 optimize_kernel_disable_mitigations: yes
 optimize_kernel_network_tune: yes
+optimize_kernel_reboot_system: yes
