@@ -1,0 +1,3 @@
+- name: Reboot System
+  ansible.builtin.reboot:
+  when: optimize_kernel_reboot_system

@@ -1,9 +1,17 @@
-- name: Disable mitigations
-  replace:
-    path: /etc/default/grub
-    regexp: '^GRUB_CMDLINE_LINUX=[^\n]*$'
-    replace: GRUB_CMDLINE_LINUX="console=tty0 crashkernel=auto net.ifnames=0 console=ttyS0 noibrs noibpb nopti nospectre_v2 nospectre_v1 l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off tsx=on tsx_async_abort=off mitigations=off"
+- name: Check if mitigations are already disabled
+  ansible.builtin.shell:
+    cmd: grubby --info=ALL | grep 'args.*mitigations=off'
+  register: _mitigations_check
+  changed_when: false
+  failed_when: _mitigations_check.rc > 1
   when: optimize_kernel_disable_mitigations
+
+- name: Disable mitigations
+  ansible.builtin.shell:
+    cmd: |
+      grubby --update-kernel=ALL --args="noibrs noibpb nopti nospectre_v2 nospectre_v1 l1tf=off nospec_store_bypass_disable no_stf_barrier mds=off tsx=on tsx_async_abort=off mitigations=off"
+  when: _mitigations_check.stdout == "" and optimize_kernel_disable_mitigations
+  notify: Reboot System
 
 - name: Set modern network congestion algorithm
   block:
