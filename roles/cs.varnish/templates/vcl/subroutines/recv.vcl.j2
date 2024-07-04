@@ -199,6 +199,11 @@ if (req.url ~ "\.(xml|csv)$") {
     return (pass);
 }
 
+# Cache busting
+if (req.url ~ "(\?|&)_=[0-9]+") {
+    return (pass);
+}
+
 std.collect(req.http.Cookie);
 
 if (req.url ~ "^/(media|static)/.*\.(ico|css|js|jpg|jpeg|png|gif|tiff|bmp|webp|gz|tgz|bz2|tbz|mp3|ogg|svg|swf|woff|woff2|eot|ttf|otf|mp4)(\?.*)?$") {
