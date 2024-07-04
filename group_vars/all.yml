@@ -235,6 +235,8 @@ aws_ami_force_clean_build: no
 # Whether to terminate the builder instance after AMI is created
 aws_ami_build_terminate_builder: yes
 
+mageops_fstrim_enable: yes
+
 # -------------------------------
 # --------  AWS Network  --------
 # -------------------------------
