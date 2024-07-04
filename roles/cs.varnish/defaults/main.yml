@@ -136,8 +136,8 @@ varnish_throttling_rules_always: []
 
 varnish_backend_instances_extra: []
 varnish_backend_instances_app:
-    - private_ip_address: "{{ varnish_default_backend_ip }}"
-      instance_id: default
+  - private_ip_address: "{{ varnish_default_backend_ip }}"
+    instance_id: default
 
 varnish_log_dir: /var/log/varnish
 
@@ -202,3 +202,26 @@ varnish_do_not_expose_caching: no
 # Retry this many times for 503 error from backend (no workers awailable)
 # before bailing out with error
 varnish_max_retries: 4
+
+
+# Note: this lists is overwritted globaly in the `all.yml`, content here is just for reference
+varnish_allowed_extensions:
+  - ico
+  - css
+  - js
+  - jpg
+  - jpeg
+  - png
+  - gif
+
+# Note: this lists is overwritted globaly in the `all.yml`, content here is just for reference
+varnish_gzip_bypass_extensions:
+  - jpg
+  - jpeg
+  - png
+  - gif
+  - gz
+  - tgz
+  - bz2
+  - webp
+  - tbz
