@@ -48,6 +48,7 @@
     - role: cs.selinux-disable
 
     - role: cs.optimize-kernel
+      optimize_kernel_reboot_system: no
 
     - role: cs.tuned
 
