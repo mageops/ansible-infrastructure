@@ -1696,6 +1696,56 @@ varnish_strip_params:
 
 varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
 
+varnish_allowed_extensions_default:
+  - ico
+  - css
+  - js
+  - jpg
+  - jpeg
+  - png
+  - gif
+  - tiff
+  - bmp
+  - webp
+  - gz
+  - tgz
+  - bz2
+  - tbz
+  - mp3
+  - ogg
+  - svg
+  - swf
+  - woff
+  - woff2
+  - eot
+  - ttf
+  - otf
+  - mp4
+  - mov
+  - webm
+varnish_allowed_extensions_extra: []
+varnish_allowed_extensions: "{{ varnish_allowed_extensions_default + varnish_allowed_extensions_extra }}"
+
+varnish_gzip_bypass_extensions_default:
+  - jpg
+  - jpeg
+  - png
+  - gif
+  - gz
+  - tgz
+  - bz2
+  - webp
+  - tbz
+  - mp3
+  - ogg
+  - swf
+  - flv
+  - mp4
+  - mov
+  - webm
+varnish_gzip_bypass_extensions_extra: []
+varnish_gzip_bypass_extensions: "{{ varnish_gzip_bypass_extensions_default + varnish_gzip_bypass_extensions_extra }}"
+
 # ----------------------------------------------------------
 # --------  Varnish Language Detection & Redirects  --------
 # ----------------------------------------------------------
