@@ -31,13 +31,30 @@ if ( $uri ~ "^/(static|media)" ) {
 }
 
 {%- if rule.required_geoip_country is defined %}
-if ( {{ geoip_source }} != "{{ rule.required_geoip_country }}" ) {
+{%- if rule.required_geoip_country is string %}
+{% set geoip_country = [rule.required_geoip_country] %}
+{%- else %}
+{% set geoip_country = rule.required_geoip_country %}
+{% endif %}
+
+{% set regex = geoip_country | join("|") %}
+
+if ( {{ geoip_source }} !~ "{{ regex }}" ) {
   set $match_{{loop.index}} 0;
 }
 {% endif -%}
 
+
 {%- if rule.required_accept_language is defined %}
-if ( {{ accept_language_source }} != "{{ rule.required_accept_language }}" ) {
+{%- if rule.required_accept_language is string %}
+{% set accept_languages = [rule.required_accept_language] %}
+{%- else %}
+{% set accept_languages = rule.required_accept_language %}
+{% endif %}
+
+{% set regex = accept_languages | join("|") %}
+
+if ( {{ accept_language_source }} != "{{ regex }}" ) {
   set $match_{{loop.index}} 0;
 }
 {% endif -%}
