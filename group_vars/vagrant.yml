@@ -66,7 +66,6 @@ php_http_request_max_execution_time: 600
 
 
 mysql_public_root_access: yes
-mysql_mariadb_flavor: yes
 
 nginx_app_port: 80
 
