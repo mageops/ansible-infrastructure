@@ -1,0 +1,58 @@
+- name: Fetch policy metadata to get DefaultVersionId
+  command: >
+    aws iam get-policy
+    --policy-arn {{ item }}
+  register: policy_metadata
+  loop: "{{ policy.policies }}"
+  changed_when: false
+
+- name: Cleanup temporary variables
+  set_fact:
+    policies_with_version_ids: []
+
+- name: Extract DefaultVersionId and combine with ARN
+  set_fact:
+    policies_with_version_ids: >-
+      {{ policies_with_version_ids | default([]) + [{
+        'arn': item.Policy.Arn,
+        'version_id': item.Policy.DefaultVersionId
+      }] }}
+  loop: "{{ policy_metadata.results | map(attribute='stdout') | map('from_json') | list }}"
+
+- name: Fetch policy versions using DefaultVersionId
+  command: >
+    aws iam get-policy-version
+    --policy-arn {{ item.arn }}
+    --version-id {{ item.version_id }}
+  register: fetched_policies_raw
+  loop: "{{ policies_with_version_ids }}"
+  changed_when: false
+
+- name: Extract policy documents
+  set_fact:
+    fetched_policies: "{{ fetched_policies_raw.results | map(attribute='stdout') | map('from_json') | list }}"
+
+- name: Extract versions from fetched policies
+  set_fact:
+    policy_versions: "{{ fetched_policies | map(attribute='PolicyVersion.Document.Version') | list }}"
+
+- name: Ensure all policies have the same version
+  assert:
+    that:
+      - policy_versions | unique | length == 1
+    fail_msg: "Not all policies have the same version"
+
+- name: Combine policies
+  set_fact:
+    combined_policy_document: >-
+      {
+        "Version": "{{ policy_versions[0] }}",
+        "Statement": {{ fetched_policies | map(attribute='PolicyVersion.Document.Statement') | flatten | to_json }}
+      }
+
+- name: Create provisioning policy
+  iam_managed_policy:
+    policy_name: "{{ policy.name }}"
+    policy_description: Allow automated provisioning of resources
+    policy: "{{ combined_policy_document }}"
+    state: present

@@ -1,0 +1,16 @@
+- name: Create provisioning policies
+  include_tasks: merge_policy.yml
+  loop: "{{ aws_iam_provisioning_policies }}"
+  loop_control:
+    loop_var: policy
+
+
+- name: Create provisioning role
+  iam_role:
+    assume_role_policy_document: "{{ lookup('template', 'trust_main_account_to_grant_assume_role_policy_document.json') }}"
+    name: "{{ aws_iam_role_provisioning }}"
+    state: present
+    managed_policy:
+    - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_1 }}"
+    - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_2 }}"
+    - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_3 }}"
