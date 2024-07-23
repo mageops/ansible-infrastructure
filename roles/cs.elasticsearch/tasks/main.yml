@@ -167,3 +167,16 @@
   shell: >-
     curl -XPUT -k "http://localhost:9200/_component_template/.deprecation-indexing-settings" -H 'Content-Type: application/json' -d '{"template":{"settings":{"index":{"lifecycle":{"name":".deprecation-indexing-ilm-policy"},"codec":"best_compression","hidden":"true","number_of_replicas":"0","auto_expand_replicas":"0-1","query":{"default_field":["message"]}}}},"version":1,"_meta":{"managed":true,"description":"default settings for Stack deprecation logs index template installed by x-pack"}}}'
   when: elasticsearch_version_number is version('7.0.0', '>=')
+
+- name: Install elasticsearch-hprof
+  package:
+    name: elasticsearch-hprof
+    state: latest
+  when: elasticsearch_install_crash_handler
+
+- name: Enable crash handler
+  systemd:
+    name: elasticsearch-crash-handler.path
+    enabled: yes
+    state: restarted
+  when: elasticsearch_install_crash_handler
