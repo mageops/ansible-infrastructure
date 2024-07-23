@@ -1692,6 +1692,7 @@ varnish_strip_params:
   - "dm_i"
   - "fbclid" # facebook
   - "ttclid" # ticktock
+  - "wbraid" # google
   - "{{ https_termination_redirect_source_domain_param }}"
   - "[0-9]+" # common bot cache busting pattern
 
