@@ -1693,6 +1693,10 @@ varnish_strip_params:
   - "fbclid" # facebook
   - "ttclid" # ticktock
   - "wbraid" # google
+  - "gad_source" # google
+  - "srsltid" # google
+  - "gbraid" # google
+  - "msclkid" # microsoft
   - "{{ https_termination_redirect_source_domain_param }}"
   - "[0-9]+" # common bot cache busting pattern
 
