@@ -1,12 +1,9 @@
 # Choice mode for geoip level
-# geoip - use GeoIP location data to determine location
-#   language codes are uppercase 2 letter codes
-#   eg: PL, US
 # geolite2 - use geolite2 location data to determine location
 #   language codes are uppercase 2 letter codes
 #   eg: PL, US
 # none - disable logic
-nginx_language_redirect_multilevel_geoip_mode: geoip
+nginx_language_redirect_multilevel_geoip_mode: geolite2
 
 # Choice mode for accept_language detection
 # first_language - use first accept-language header send by browser

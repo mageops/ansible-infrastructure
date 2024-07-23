@@ -13,7 +13,7 @@ nginx_confd_dir: "{{ nginx_etc_dir }}/conf.d"
 nginx_included_dir: "{{ nginx_etc_dir }}/include.d"
 nginx_serverd_dir: "{{ nginx_etc_dir }}/server.d"
 nginx_serverd_defaults_dir: "{{ nginx_etc_dir }}/server.d/defaults"
-nginx_modules_conf_dir: "{{ nginx_etc_dir }}/modules"
+nginx_modules_conf_dir: "{{ nginx_etc_dir }}/modules.d"
 
 # --- Automatic auto-loaded config file cleanup ---
 # See comment in `tasks/099-cleanup.yml` for details.
