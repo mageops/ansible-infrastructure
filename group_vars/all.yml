@@ -1690,7 +1690,8 @@ varnish_strip_params:
   - "mc_[^=&]+"
   - "trk_[^=&]+"
   - "dm_i"
-  - "fbclid"
+  - "fbclid" # facebook
+  - "ttclid" # ticktock
   - "{{ https_termination_redirect_source_domain_param }}"
   - "[0-9]+" # common bot cache busting pattern
 
