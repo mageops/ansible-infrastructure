@@ -1,7 +1,3 @@
-{%- if nginx_language_redirect_multilevel_geoip_mode == "geoip" -%}
-{%- set geoip_source = "$geoip_country_code" %}
-{%- endif -%}
-
 {%- if nginx_language_redirect_multilevel_geoip_mode == "geolite2" -%}
 {%- set geoip_source = "$geoip2_data_country_code" %}
 {%- endif -%}

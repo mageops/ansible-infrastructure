@@ -1,1 +1,16 @@
-# None for now
+- name: Check if /etc/nginx/modules is symlinked
+  stat:
+    path: /etc/nginx/modules
+  register: _stat_modules
+
+- name: Migrate from nginx-core
+  block:
+  - name: Remove recursively /etc/nginx/modules
+    file:
+      path: /etc/nginx/modules
+      state: absent
+
+  - name: Upgrade nginx
+    shell: dnf -y swap nginx-core nginx
+
+  when: _stat_modules.stat is defined and _stat_modules.stat.islnk is defined and not _stat_modules.stat.islnk
