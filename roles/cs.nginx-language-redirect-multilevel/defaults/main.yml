@@ -26,8 +26,8 @@ nginx_language_redirect_multilevel_accept_language_mode: first_language
 #   source - rewrite regex source
 #   target - tewrite target
 nginx_language_redirect_multilevel_rules: []
-# - required_geoip_country: EN
-#   required_accept_language: en
+# - required_geoip_country: EN # string or array of strings
+#   required_accept_language: en # string or array of strings
 #   required_path_regex: "^/$"
 #   required_server_name: "example.com"
 #   rewrite:
