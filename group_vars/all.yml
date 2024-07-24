@@ -556,7 +556,7 @@ efs_aws_security_group_id: "{{ aws_security_group_efs_id | default(omit, true) }
 
 # AWS Logs + slack notifications settings
 aws_logs_slack_hook_url: "{{ mageops_notifications_slack_hook_url | default(None) }}"
-aws_logs_slack_channel: "{{ mageops_notifications_slack_channel | default(none, true) }}"
+aws_logs_slack_channel: "{{ mageops_notifications_slack_channel | default(None, true) }}"
 aws_logs_slack_notifications: "{{ mageops_notifications_slack_enable }}"
 
 aws_logs_loggers_persistent_default:

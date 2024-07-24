@@ -38,6 +38,14 @@
     region: "{{ aws_region }}"
   when: _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_slack_exceptions_forwarder_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_slack_exceptions_forwarder_name].runtime != aws_lambda_slack_exceptions_forwarder_runtime
 
+- name: debug
+  debug:
+    var: aws_logs_slack_channel
+
+- name: debug
+  debug:
+    var: mageops_notifications_slack_channel
+
 - name: Create slack log forwarder lambda function
   lambda:
     name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
