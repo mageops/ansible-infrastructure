@@ -13,3 +13,4 @@ elasticsearch_syscfg_limit_nofile: 65535
 elasticsearch_syscfg_limit_nproc: 4096
 
 elasticsearch_version_file_path: /var/local/elasticsearch_version.txt
+elasticsearch_install_crash_handler: yes
