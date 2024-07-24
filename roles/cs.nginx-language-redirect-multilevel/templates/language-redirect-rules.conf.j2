@@ -14,63 +14,131 @@
 {%- set accept_language_source = "\"none\"" %}
 {%- endif -%}
 
-
-
 {%- if nginx_language_redirect_multilevel_accept_language_mode == "first_language" -%}
 set $first_language $http_accept_language;
 if ($http_accept_language ~* '^(.+?),') {
     set $first_language $1;
 }
-{%- endif %}
+
+{% endif %}
+
+{# This array will contain list of ids that need static nad media exclusion #}
+{%- set static_media =[] -%}
+
+{# All those contain dictionary where the key is value of condition that need
+   to be checked and value is array with ids of rules that need to be excluded in the body #}
+{%- set geoip = dict() -%}
+{%- set language_filters = dict() -%}
+{%- set path = dict() -%}
+{%- set server_name = dict() -%}
+
 
 {% for rule in nginx_language_redirect_multilevel_rules %}
 set $match_{{loop.index}} 1;
+{# Plan check for media #}
+{% set _ = static_media.append(loop.index) -%}
 
+{# Plan check for geoip #}
+{%- if rule.required_geoip_country is defined -%}
+  {%- if rule.required_geoip_country is string -%}
+    {%- set geoip_country = [rule.required_geoip_country] -%}
+  {%- else -%}
+    {%- set geoip_country = rule.required_geoip_country -%}
+  {%- endif -%}
+
+  {%- set regex = geoip_country | join("|") -%}
+
+  {# We need to check if this is new entry and if so we need to initialize new array #}
+  {%- if regex not in geoip -%}
+    {%- set _ = geoip.update({regex: []}) -%}
+  {%- endif -%}
+  {# At this point array must exist so we just append id there #}
+  {%- set _ = geoip[regex].append(loop.index) -%}
+{%- endif -%}
+
+{# Plan check for accept_language #}
+{%- if rule.required_accept_language is defined -%}
+  {%- if rule.required_accept_language is string -%}
+    {%- set accept_languages = [rule.required_accept_language] -%}
+  {%- else -%}
+    {%- set accept_languages = rule.required_accept_language -%}
+  {%- endif -%}
+
+  {%- set regex = accept_languages | join("|") -%}
+  {%- if regex not in language_filters -%}
+    {%- set _ = language_filters.update({regex: []}) -%}
+  {%- endif -%}
+  {%- set _ = language_filters[regex].append(loop.index) -%}
+{%- endif -%}
+
+{# Plan check for path regex #}
+{%- if rule.required_path_regex is defined -%}
+  {%- if rule.required_path_regex not in path -%}
+    {%- set _ = path.update({rule.required_path_regex: []}) -%}
+  {%- endif -%}
+  {%- set _ = path[rule.required_path_regex].append(loop.index) -%}
+{%- endif -%}
+
+{# Plan check for server name #}
+{%- if rule.required_server_name is defined -%}
+  {%- if rule.required_server_name not in server_name -%}
+    {%- set _ = server_name.update({rule.required_server_name: []}) -%}
+  {%- endif -%}
+  {%- set _ = server_name[rule.required_server_name].append(loop.index) -%}
+{%- endif -%}
+{% endfor %}
+
+{# At this point we know what condition should contain what rules, we can render all of them #}
+
+{# Render static media check #}
+{% if static_media | length > 0 %}
 if ( $uri ~ "^/(static|media)" ) {
-  set $match_{{loop.index}} 0;
+{% for id in static_media %}
+  set $match_{{id}} 0;
+{% endfor %}
 }
-
-{%- if rule.required_geoip_country is defined %}
-{%- if rule.required_geoip_country is string %}
-{% set geoip_country = [rule.required_geoip_country] %}
-{%- else %}
-{% set geoip_country = rule.required_geoip_country %}
 {% endif %}
 
-{% set regex = geoip_country | join("|") %}
-
+{# Render geoip check #}
+{% for regex, ids in geoip.items() %}
 if ( {{ geoip_source }} !~ "{{ regex }}" ) {
-  set $match_{{loop.index}} 0;
+{% for id in ids %}
+  set $match_{{id}} 0;
+{% endfor %}
 }
-{% endif -%}
+{% endfor %}
 
-
-{%- if rule.required_accept_language is defined %}
-{%- if rule.required_accept_language is string %}
-{% set accept_languages = [rule.required_accept_language] %}
-{%- else %}
-{% set accept_languages = rule.required_accept_language %}
-{% endif %}
-
-{% set regex = accept_languages | join("|") %}
-
-if ( {{ accept_language_source }} != "{{ regex }}" ) {
-  set $match_{{loop.index}} 0;
+{# Render accept_language check #}
+{% for regex, ids in language_filters.items() %}
+if ( {{ accept_language_source }} !~ "{{ regex }}" ) {
+{% for id in ids %}
+  set $match_{{id}} 0;
+{% endfor %}
 }
-{% endif -%}
+{% endfor %}
 
-{%- if rule.required_path_regex is defined %}
-if ( $uri !~ {{ rule.required_path_regex }} ) {
-  set $match_{{loop.index}} 0;
+{# Render path regex check #}
+{% for regex, ids in path.items() %}
+if ( $uri !~ {{ regex }} ) {
+{% for id in ids %}
+  set $match_{{id}} 0;
+{% endfor %}
 }
-{% endif -%}
+{% endfor %}
 
-{%- if rule.required_server_name is defined %}
-if ( $server_name != "{{ rule.required_server_name }}" ) {
-  set $match_{{loop.index}} 0;
+{# Render server name check #}
+{% for regex, ids in server_name.items() %}
+if ( $server_name != "{{ regex }}" ) {
+{% for id in ids %}
+  set $match_{{id}} 0;
+{% endfor %}
 }
-{% endif -%}
+{% endfor %}
 
+{# Here we can render final checks what rewrite should be present #}
+
+{# Render rewrite #}
+{% for rule in nginx_language_redirect_multilevel_rules %}
 if ( $match_{{loop.index}} = 1 ) {
   rewrite {{ rule.rewrite.source }} {{ rule.rewrite.target }} redirect;
 }
