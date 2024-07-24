@@ -1,9 +1,3 @@
-{% if nginx_language_redirect_detection_method == "geoip" -%}
-geoip_country /usr/share/GeoIP/GeoIP.dat;
-{%- set lang_source_var = "$geoip_country_code" %}
-{%- endif %}
-
-
 {% if nginx_language_redirect_detection_method == "geolite2" -%}
 geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
   auto_reload 15m;

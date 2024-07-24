@@ -19,9 +19,6 @@ nginx_language_redirect_domain_redirect_include_domain: no
 nginx_language_redirect_style: dir
 
 # With method use for country detection
-# geoip - use GeoIP location data to determine location
-#   language codes are uppercase 2 letter codes
-#   eg: PL, US
 # geolite2 - use geolite2 location data to determine location
 #   language codes are uppercase 2 letter codes
 #   eg: PL, US
@@ -32,7 +29,7 @@ nginx_language_redirect_style: dir
 # cloudflare - use header provided by cloudflare
 #   language codes are uppercase 2 letter codes
 #   eg: PL, US
-nginx_language_redirect_detection_method: geoip
+nginx_language_redirect_detection_method: geolite2
 
 # domain mapping used when nginx_language_redirect_style = domain
 # use detected language for key, and domain as value
