@@ -75,6 +75,7 @@ magento_app_etc_config:
     navigation: 1
     vertex: 1
     elasticsuite: 1
+    graphql_query_resolver_result: 1
 
   install:
     date: "Tue, 11 Nov 2016 11:11:00 +0000"
