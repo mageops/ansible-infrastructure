@@ -24,9 +24,9 @@
     line: >-
       {{ entry.type | default('d') }}
       {{ entry.path }}
-      {{ entry.mode | default('0755') }}
+      {{ entry.mode | default('0775') }}
       {{ entry.user | default('root') }}
-      {{ entry.group | default('root') }}
+      {{ entry.group | default('magento') }}
       {{ entry.age | default('-') }}
       {{ entry.argument | default('-') }}
     create: yes
