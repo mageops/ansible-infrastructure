@@ -1606,6 +1606,9 @@ redis_aws_elasticache_instance_type: t3a.micro
 # ------------------------------------------------
 
 mageops_https_termination_enable: "{{ mageops_https_enable }}"
+# Supported valus: 1.0, 1.1, 1.2, 1.3
+mageops_tls_min_version: "1.2"
+mageops_prevent_mime_sniffing: yes
 
 # Backwards compat fallback
 https_termination_proxy_http_port: "{{ https_termination_hide_varnish | default(true) }}"
@@ -1690,7 +1693,13 @@ varnish_strip_params:
   - "mc_[^=&]+"
   - "trk_[^=&]+"
   - "dm_i"
-  - "fbclid"
+  - "fbclid" # facebook
+  - "ttclid" # ticktock
+  - "wbraid" # google
+  - "gad_source" # google
+  - "srsltid" # google
+  - "gbraid" # google
+  - "msclkid" # microsoft
   - "{{ https_termination_redirect_source_domain_param }}"
   - "[0-9]+" # common bot cache busting pattern
 
