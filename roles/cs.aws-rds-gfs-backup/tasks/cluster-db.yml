@@ -17,7 +17,7 @@
   when: ansible_date_time.day | int == rds_gfs_monthly_snapshot_monthday_nr
 
 - name: Get current cluster snapshots
-  rds_snapshot_facts:
+  amazon.aws.rds_snapshot_info:
     snapshot_type: manual
     db_cluster_identifier: "{{ rds_gfs_cluster_id }}"
     region: "{{ aws_region }}"
