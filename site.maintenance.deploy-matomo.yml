@@ -1,0 +1,116 @@
+- import_playbook: site.common.group-current-hosts.yml
+
+- hosts: localhost
+  connection: local
+  roles:
+    - role: cs.aws-region-facts
+    - role: cs.aws-ami-facts
+      ami_facts_instance: "{{ aws_matomo_node_instance_type }}"
+    - role: cs.aws-security-group-matomo
+    - role: cs.aws-rds
+      aws_rds_instance_name: "{{ mageops_app_name }}-matomo-db"
+      aws_rds_storage_size: "{{ aws_matomo_rds_ebs_volume_size }}"
+      aws_rds_instance_type: "{{ aws_matomo_rds_instance_type  }}"
+      aws_tags_role_database:
+        Role: "matomo"
+      aws_rds_security_groups:
+        - "{{ aws_security_group_matomo_rds.group_id | default(omit) }}"
+    - role: cs.aws-node-matomo
+      aws_matomo_node_instance_name: "{{ mageops_app_name }}-matomo"
+      aws_tags_matomo:
+        Role: "matomo"
+      aws_matomo_node_root_device: "{{ aws_ami_clean_base_info[aws_matomo_node_instance_type].root_device_name }}"
+      aws_matomo_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+      aws_matomo_instance_id: "{{ aws_matomo_node_instance.instance_id | default(false) }}"
+    - role: cs.mysql-configure
+      mageops_app_mysql_db: matomo
+      mageops_app_mysql_user: matomo
+      aws_tags_role_database:
+        Role: "matomo"
+      aws_rds_facts_mysql_tags: "{{ aws_tags_base | combine(aws_tags_role_database, aws_tags_role_mysql_database) }}"
+
+- hosts: matomo
+  roles:
+    - role: cs.aws-node-facts
+      delegate_to: localhost
+      become: no
+      when: aws_use
+    - role: cs.aws-vpc-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+    - role: cs.aws-security-group-facts
+      delegate_to: localhost
+      delegate_facts: no
+      become: no
+      when: aws_use
+    - role: cs.switch-to-dnf
+    - role: cs.selinux-disable
+    - role: cs.optimize-kernel
+    - role: cs.tuned
+    - role: cs.swap
+    - role: cs.earlyoom
+      when: mageops_earlyoom_enable
+    - role: cs.systemd-oomd
+      when: mageops_oomd_enable
+    - role: cs.packages
+      packages_mirrorlist_countrycode: "{{ mageops_packages_mirrorlist_countrycode | default(false) }}"
+      packages_install: "{{ mageops_packages_common + mageops_packages_persistent + mageops_packages_persistent_extra }}"
+      packages_remove: "{{ mageops_packages_banned }}"
+      packages_full_update: no
+    - role: cs.mageops-cli-profile
+    - role: cs.mageops-cli-user
+      mageops_cli_user: root
+    - role: cs.mageops-authorize-keys
+    - role: cs.aws-cli
+      when: aws_use
+    - role: cs.cron
+    - role: geerlingguy.ntp
+    - role: cs.monitoring
+      when: mageops_monitoring_enabled
+    - role: cs.packages
+    - role: cs.pkg-mgr-cleanup
+    - role: cs.nginx-url-blacklist
+    - role: cs.nginx-https-termination
+      https_termination_hosts:
+        - name: "{{ mageops_matomo_domain }}"
+          server_name: "{{ mageops_matomo_domain }}"
+          letsencrypt: yes
+      nginx_vhost_template: "nginx.vhost_matomo.conf"
+      https_termination_upstream_port: 8080
+      mageops_pio_worker_enable: false
+      nginx_blacklist_vhost_check_include_file: false
+    - role: cs.mageops-cli-user
+      mageops_cli_user: "{{ magento_user }}"
+      mageops_cli_user_group: "{{ magento_group }}"
+      mageops_cli_user_uid: "{{ magento_uid }}"
+      mageops_cli_user_gid: "{{ magento_gid }}"
+      mageops_cli_user_bashrc_fragments:
+        - magento
+    - role: cs.php-fpm
+      tags: php
+      php_fpm_pool_user: "{{ magento_user }}"
+      php_fpm_pool_group: "{{ magento_group }}"
+      php_fpm_terminate_timeout: "{{ mageops_http_pipeline_request_timeout_override }}"
+    - role: cs.postfix-relay
+      postfix_relay_host: "{{ mageops_app_email_smtp_relay_host }}"
+      postfix_relay_username: "{{ mageops_app_email_smtp_relay_user }}"
+      postfix_relay_password: "{{ mageops_app_email_smtp_relay_pass }}"
+      postfix_relay_port: "{{ mageops_app_email_smtp_relay_port }}"
+      postfix_relay_extra_options: "{{ mageops_app_email_smtp_relay_extra_options | default({}) }}"
+  tasks:
+    - name: Change html directory owner
+      ansible.builtin.file:
+          path: /var/www/html
+          owner: "{{ magento_user }}"
+          group: "{{ magento_group }}"
+          mode: '0755'
+    - name: Unarchive a file that needs to be downloaded (added in 2.0)
+      ansible.builtin.unarchive:
+        src: https://builds.matomo.org/matomo.zip
+        dest: /var/www/html/
+        owner: "{{ magento_user }}"
+        group: "{{ magento_user }}"
+        remote_src: yes
+

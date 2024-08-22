@@ -1,6 +1,6 @@
 - name: Install vhost config
   template:
-    src: nginx.vhost.conf
+    src: "{{ nginx_vhost_template }}"
     dest: "{{ vhost.conf_path }}"
   loop: "{{ https_termination_vhosts.values() | list }}"
   loop_control:

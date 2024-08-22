@@ -1,0 +1,36 @@
+- name: Create security group for matomo app node
+  ec2_group:
+    name: "{{ mageops_app_name }}-matomo-app-sg"
+    description: "{{ mageops_app_name }} matomo app security group"
+    region: "{{ aws_region }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 80
+          - 443
+        cidr_ip: "0.0.0.0/0"
+    vpc_id: "{{ aws_vpc_id }}"
+    tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
+  vars:
+    ec2_sg_tags:
+      Name: "{{ mageops_app_name }}-matomo-app-sg"
+  register: aws_security_group_matomo_app
+- name: Create security group for RDS
+  ec2_group:
+    name: "{{ mageops_app_name }}-matomo-rds-sg"
+    description: "{{ mageops_app_name }} RDS security group"
+    region: "{{ aws_region }}"
+    rules:
+      - proto: tcp
+        ports: 3306
+        group_name: "{{ [aws_security_group_matomo_app_name] + aws_security_group_rds_access_extra_groups | default([]) }}"
+      - proto: tcp
+        ports: 3306
+        cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
+    vpc_id: "{{ aws_vpc_id }}"
+    tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
+  vars:
+    ec2_sg_tags:
+      Name: "{{ mageops_app_name }}-matomo-rds-sg"
+    aws_security_group_matomo_app_name: "{{ mageops_app_name }}-matomo-app-sg"
+  register: aws_security_group_matomo_rds

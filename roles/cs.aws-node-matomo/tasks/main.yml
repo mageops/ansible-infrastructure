@@ -16,9 +16,7 @@
     user_data: "{{ aws_ec2_instance_user_data | default(omit, true) }}"
     tags: >-
       {{
-          aws_tags_default | combine(
-            aws_tags_role_matomo
-           )
+          aws_tags_default | combine(aws_matomo_node_name_tags, aws_tags_matomo)
       }}
     volumes:
       - device_name: "{{ aws_matomo_node_root_device }}"
@@ -35,18 +33,13 @@
       assign_public_ip: yes
     security_groups: >-
       {{
-          aws_persistent_node_security_groups
-          + aws_security_group_redis_id | default(false, true) | ternary([aws_security_group_redis_id], [])
-          + aws_security_group_persistant_id | default(false, true) | ternary([aws_security_group_persistant_id], [])
-          + aws_security_group_elasticsearch_id | default(false, true) | ternary([aws_security_group_elasticsearch_id], [])
-          + varnish_is_in_autoscaling_group | ternary(
-              aws_security_group_varnish_id | default(false, true) | ternary([aws_security_group_varnish_id], []),
-              []
-          )
+          aws_matomo_node_security_groups + aws_security_group_matomo_app_id
       }}
   vars:
     aws_matomo_node_name_tags:
-      Name: "{{ aws_persistent_node_instance_name }}"
+      Name: "{{ aws_matomo_node_instance_name }}"
+    aws_security_group_matomo_app_id:
+      - "{{ aws_security_group_matomo_app.group_id | default(omit) }}"
   register: aws_matomo_ec2
 
 - name: Wait for matomo node instance to get up
@@ -57,18 +50,18 @@
   loop_control:
     label: "{{ item.public_dns_name }}"
 
-- name: Add matomo host to inventory
-  add_host:
-    hostname: "{{ item.public_ip_address }}"
-    groupname:
-      - matomo
-    loop: '{{ aws_matomo_ec2.instances }}'
-  loop_control:
-    label: "{{ item.public_ip_address }}"
-
 - name: Assign elastic IP to matomo node
   ec2_eip:
     region: "{{ aws_region }}"
     device_id: "{{ aws_matomo_ec2.instances[0].instance_id }}"
     ip: "{{ aws_matomo_node_elastic_ip }}"
   when: aws_matomo_node_elastic_ip | default(false, true)
+
+- name: Add matomo host to inventory
+  add_host:
+    hostname: "{{ item.public_ip_address }}"
+    groupname:
+      - matomo
+  loop: '{{ aws_matomo_ec2.instances }}'
+  loop_control:
+    label: "{{ item.public_ip_address }}"

@@ -6,6 +6,8 @@ https_termination_proxy_read_timeout: 90
 https_termination_conf_cookie_rewrite_path: "{{ nginx_confd_dir }}/000-global-cookie-rewrite.conf"
 https_termination_conf_cache_miss_log_path: "{{ nginx_confd_dir }}/000-global-cache-miss-log.conf"
 
+nginx_vhost_template: "nginx.vhost.conf"
+
 # Also proxy port 80 to the upstream
 https_termination_proxy_http_port: false
 
