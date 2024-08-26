@@ -153,6 +153,8 @@ varnish_vcl_recv_extra: ""
 varnish_vcl_synth_extra: ""
 varnish_vcl_backend_error_extra: ""
 
+#Send original URL to backend
+varnish_original_url: false
 varnish_strip_params: ['gclid']
 
 # To be used for advanced customizations
