@@ -93,13 +93,13 @@
       monitoring_redis_exporter_enabled: yes
       when: mageops_monitoring_enabled
     - role: cs.packages
+    - role: cs.tracer
     - role: cs.pkg-mgr-cleanup
 
   tasks:
     - set_fact:
-        mageops_extra_tasks_persistent_node: [
-          "{{ mageops_extra_tasks_persistent_node }}"
-        ]
+        mageops_extra_tasks_persistent_node:
+          ["{{ mageops_extra_tasks_persistent_node }}"]
       when: |
         mageops_extra_tasks_persistent_node is defined
         and mageops_extra_tasks_persistent_node is string
