@@ -95,13 +95,13 @@
       when: mageops_monitoring_enabled
 
     - role: cs.packages
+    - role: cs.tracer
     - role: cs.pkg-mgr-cleanup
 
   tasks:
     - set_fact:
-        mageops_extra_tasks_varnish_node: [
-          "{{ mageops_extra_tasks_varnish_node }}"
-        ]
+        mageops_extra_tasks_varnish_node:
+          ["{{ mageops_extra_tasks_varnish_node }}"]
       when: |
         mageops_extra_tasks_varnish_node is defined
         and mageops_extra_tasks_varnish_node is string
