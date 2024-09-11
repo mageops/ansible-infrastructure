@@ -1,5 +1,3 @@
-set beresp.grace = 3d;
-
 if (beresp.http.content-type ~ "text") {
     set beresp.do_esi = true;
 }
@@ -48,6 +46,7 @@ if (bereq.url ~ "^/static/.*$") {
 # validate if we need to cache it and prevent from setting cookie
 if (beresp.ttl > 0s && (bereq.method == "GET" || bereq.method == "HEAD")) {
     unset beresp.http.set-cookie;
+    set beresp.grace = 4h;
 }
 
 # If page is not cacheable then bypass varnish for 2 minutes as Hit-For-Pass
