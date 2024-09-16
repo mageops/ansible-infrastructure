@@ -32,6 +32,11 @@ location = /WARMUP {
 include "{{ nginx_blacklist_vhost_check_include_file }}";
 {% endif %}
 
+# Deny access to sensitive files
+location /.user.ini {
+    deny all;
+}
+
 {% if magento_enable_setup_url | default(False) %}
 location ~* ^/setup($|/) {
     root $MAGE_ROOT;
@@ -317,6 +322,6 @@ location {{ custom.path_pattern }} {
 }
 {% endfor %}
 
-location ~ .*\.php$ {
+location ~* (\.php$|\.phtml$|\.htaccess$|\.htpasswd$|\.git) {
     deny all;
 }
