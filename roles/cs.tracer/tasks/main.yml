@@ -1,0 +1,43 @@
+- name: Install tracer
+  dnf:
+    name: tracer
+    state: latest
+
+- name: Check if system needs to be rebooted
+  shell: tracer -va
+  register: _tracer
+  changed_when: false
+  # 1-99 is error, 100+ means reboot required
+  failed_when: _tracer.rc < 100 and _tracer.rc != 0
+
+- name: Print tracer output
+  debug:
+    var: _tracer.stdout
+
+- name: Reboot if required
+  ansible.builtin.reboot:
+  # Reboot when tracer returns 104 (system reboot required), 101 (application restart required), or 103 (session restart rqeuired)
+  # Because we do not have a way to handle other cases, let's fallback to rebbot for them
+  when: _tracer.rc == 104 or _tracer.rc == 101 or _tracer.rc == 103
+
+- block:
+    - name: Check if services need to be restarted
+      shell: tracer --daemons-only
+      register: _tracer_services
+      changed_when: false
+      # 1-99 is error, 100+ means reboot required
+      failed_when: _tracer_services.rc < 100 and _tracer_services.rc != 0
+
+    - name: Extract restart commands
+      # We need to remove first 2 lines, and then run commands from each line after trimming whitespaces
+      set_fact:
+        _services_to_restart: "{{ _services_to_restart | default([]) + [ item.strip() ] }}"
+      loop: "{{ _tracer_services.stdout_lines[2:] }}"
+      when: item != ''
+
+    - name: Restart services
+      shell: "{{ item }}"
+      loop: "{{ _services_to_restart }}"
+      when: _services_to_restart | length > 0
+  # 102 means services need to be restarted
+  when: _tracer.rc == 102

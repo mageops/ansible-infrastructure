@@ -38,7 +38,7 @@ varnish_storage_mem_rel: 0.7
 # The minimum amount of system memory that has to be reserved for other
 # services. This variable has effect only if the memory left after subtracting
 # the `varnish_sys_mem_rel` calculation is smaller than this value.
-varnish_sys_mem_reserved: 128M
+varnish_sys_mem_reserved: 512M
 
 # Since we don't write logs anywhere the default of 80M seems to be an overkill
 # https://varnish-cache.org/docs/6.0/reference/varnishd.html#vsl-space
@@ -153,6 +153,8 @@ varnish_vcl_recv_extra: ""
 varnish_vcl_synth_extra: ""
 varnish_vcl_backend_error_extra: ""
 
+#Send original URL to backend
+varnish_original_url: false
 varnish_strip_params: ['gclid']
 
 # To be used for advanced customizations

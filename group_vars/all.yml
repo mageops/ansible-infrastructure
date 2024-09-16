@@ -1682,6 +1682,9 @@ varnish_purge_logfile: "{{ varnish_log_dir }}/varnish-purge.log"
 # Error page customization
 varnish_error_page_color_primary: "#444"
 
+#Send original URL to backend
+varnish_original_url: false
+
 # Max-age (in seconds) returned in Cache-Control header for HTML pages
 # (this header is rewritted by varnish as magento sets it unappropriately)
 varnish_html_cache_control_max_age: 60

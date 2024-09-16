@@ -32,6 +32,8 @@
     create: yes
   loop:
     - path: "{{ php_fpm_log_dir_path }}"
+      mode: "775"
+      group: "magento"
     - path: "{{ php_fpm_run_dir_path }}"
   loop_control:
     loop_var: entry
