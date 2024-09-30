@@ -52,6 +52,8 @@
   uri:
     url: "http://{{ elasticsearch_network_host }}:{{ elasticsearch_http_port }}"
     return_content: yes
+    url_password: "{{ mageops_elasticsearch_username | default(omit) }}"
+    url_username: "{{ mageops_elasticsearch_password | default(omit) }}"
   register: elasticsearch_get_running_version
   failed_when: false
   changed_when: false
@@ -165,7 +167,7 @@
 
 - name: Fix deprecation indexes settings
   shell: >-
-    curl -XPUT -k "http://localhost:9200/_component_template/.deprecation-indexing-settings" -H 'Content-Type: application/json' -d '{"template":{"settings":{"index":{"lifecycle":{"name":".deprecation-indexing-ilm-policy"},"codec":"best_compression","hidden":"true","number_of_replicas":"0","auto_expand_replicas":"0-1","query":{"default_field":["message"]}}}},"version":1,"_meta":{"managed":true,"description":"default settings for Stack deprecation logs index template installed by x-pack"}}}'
+    curl -XPUT -k "http://localhost:{{elasticsearch_http_port}}/_component_template/.deprecation-indexing-settings" -H 'Content-Type: application/json' -d '{"template":{"settings":{"index":{"lifecycle":{"name":".deprecation-indexing-ilm-policy"},"codec":"best_compression","hidden":"true","number_of_replicas":"0","auto_expand_replicas":"0-1","query":{"default_field":["message"]}}}},"version":1,"_meta":{"managed":true,"description":"default settings for Stack deprecation logs index template installed by x-pack"}}}'
   when: elasticsearch_version_number is version('7.0.0', '>=')
 
 - name: Install elasticsearch-hprof

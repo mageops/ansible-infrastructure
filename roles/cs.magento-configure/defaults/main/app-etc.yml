@@ -103,9 +103,10 @@ magento_app_etc_config_elasticsuite:
         es_client:
           servers: "{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}"
           enable_https_mode: "{{ mageops_elasticsearch_https }}"
-          http_auth_user: ""
-          http_auth_pwd: ""
-          enable_http_auth: false
+          http_auth_user: "{{ mageops_elasticsearch_username | default('') }}"
+          http_auth_pwd: "{{ mageops_elasticsearch_password | default('') }}"
+          enable_http_auth: "{{ mageops_elasticsearch_http_auth | default(false) }}"
+          force_basic_auth: "{{ mageops_elasticsearch_http_auth | ternary(true, omit) }}"
         indices_settings:
           alias: "{{ magento_elasticsearch_index_alias }}"
 

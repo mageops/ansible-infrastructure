@@ -713,6 +713,7 @@ mageops_redis_sessions_port: 6380
 # Enable to provision Elasticsearch (or provide host)
 mageops_elasticsearch_create: yes
 # mageops_elasticsearch_host:
+mageops_elasticsearch_http_auth: false
 
 # Do not wait for Elasticsearch to be ready, required when aws opensearch serverless is used
 # because it required complex authentication that isn't worth implementing

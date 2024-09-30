@@ -1,7 +1,7 @@
 # TODO: This needs to be done on the final app node before setup:upgrade / cache:flush
 
 - name: Wait for Elasticsearch
-  shell: curl -sfk 'http://{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}'
+  shell: curl -u {{ mageops_elasticsearch_username | default('elastic')}}:{{mageops_elasticsearch_password | default('changeme')}} -sfk 'http://{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}'
   args:
     warn: no
   retries: 15
