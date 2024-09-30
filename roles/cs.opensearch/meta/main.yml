@@ -1,0 +1,5 @@
+dependencies:
+  - role: cs.java
+  - role: cs.repo-opensearch
+  - role: cs.repo-mageops
+    when: elasticsearch_install_crash_handler

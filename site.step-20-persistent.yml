@@ -45,9 +45,11 @@
       when: aws_use
     - role: cs.cron
     - role: geerlingguy.ntp
+    - role: cs.opensearch
+      when: mageops_elasticsearch_opensearch_flavor == "opensearch"
     - role: cs.elasticsearch
       tags: elasticsearch
-      when: mageops_elasticsearch_create
+      when: mageops_elasticsearch_opensearch_flavor == "elasticsearch"
     - role: cs.redis
       when: (redis_valkey_flavor in ['redis', 'valkey']) and not redis_aws_elasticache_use
     - role: cs.redis

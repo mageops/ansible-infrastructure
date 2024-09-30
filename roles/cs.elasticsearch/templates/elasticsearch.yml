@@ -12,7 +12,11 @@ discovery.type: single-node
 
 {% if elasticsearch_version_number is version('7.16.0', '>=') %}
 cluster.deprecation_indexing.enabled: false
+{% if mageops_elasticsearch_http_auth %}
+xpack.security.enabled: true
+{% else %}
 xpack.security.enabled: false
+{% endif %}
 {% endif %}
 
 path.data: /var/lib/elasticsearch

@@ -1,0 +1,13 @@
+- name: Workaround SHA-1 gpg key enable
+  shell: update-crypto-policies --set LEGACY
+
+- name: Install gpg cert
+  rpm_key:
+    state: present
+    key: "{{ repo_opensearch_gpg_url }}"
+
+- name: Install opensearch repo
+  template:
+    src: opensearch.repo
+    dest: "/etc/yum.repos.d/opensearch.repo"
+    mode: 0644

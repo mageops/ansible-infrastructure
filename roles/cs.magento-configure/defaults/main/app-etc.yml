@@ -103,11 +103,27 @@ magento_app_etc_config_elasticsuite:
         es_client:
           servers: "{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}"
           enable_https_mode: "{{ mageops_elasticsearch_https }}"
-          http_auth_user: ""
-          http_auth_pwd: ""
-          enable_http_auth: false
+          http_auth_user: "{{ mageops_elasticsearch_username | default('') }}"
+          http_auth_pwd: "{{ mageops_elasticsearch_password | default('') }}"
+          enable_http_auth: "{{ mageops_elasticsearch_http_auth | default(false) }}"
+          force_basic_auth: "{{ mageops_elasticsearch_http_auth | ternary(true, omit) }}"
         indices_settings:
           alias: "{{ magento_elasticsearch_index_alias }}"
+
+# Optional elasticsuite config with opensearch
+magento_app_etc_config_opensearch:
+  system:
+    default:
+      smile_elasticsuite_core_base_settings:
+        es_client:
+          servers: "{{ mageops_opensearch_host }}:{{ opensearch_http_port }}"
+          enable_https_mode: "{{ mageops_opensearch_https }}"
+          http_auth_user: "{{ mageops_opensearch_username | default('') }}"
+          http_auth_pwd: "{{ mageops_opensearch_password | default('') }}"
+          enable_http_auth: "{{ mageops_opensearch_http_auth | default(false) }}"
+          force_basic_auth: "{{ mageops_opensearch_http_auth | ternary(true, omit) }}"
+        indices_settings:
+          alias: "{{ magento_opensearch_index_alias }}"
 
 # Optional redis cache config
 magento_app_etc_config_cache_default_redis:

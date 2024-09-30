@@ -154,25 +154,25 @@
   register: aws_security_group_redis
   when: aws_security_group_redis_create
 
-- name: Create security group for Elastic
+- name: Create security group for Search
   ec2_group:
     name: "{{ aws_security_group_elasticsearch_name }}"
-    description: "{{ mageops_app_name }}  Elasticsearch security group"
+    description: "{{ mageops_app_name }} search security group"
     region: "{{ aws_region }}"
     rules:
       - proto: tcp
-        ports: "{{ elasticsearch_http_port }}"
+        ports: "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port , opensearch_http_port) }}"
         group_name: "{{ aws_security_group_app_name }}"
       - proto: tcp
-        ports: "{{ elasticsearch_http_port }}"
+        ports: "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port, opensearch_http_port) }}"
         cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_elasticsearch_name }}"
-  register: aws_security_group_elastic
-  when: aws_security_group_elasticsearch_create
+  register: aws_security_group_search
+  when: aws_security_group_elastic_create
 
 - name: Create security group for EFS
   ec2_group:

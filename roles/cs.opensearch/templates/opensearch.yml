@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+
+cluster.name: {{ opensearch_cluster_name }}
+discovery.type: single-node
+
+path.data: /var/lib/opensearch
+path.logs: /var/log/opensearch
+
+network.host: {{ opensearch_network_host }}
+http.port: {{ opensearch_http_port }}
+
+transport.port: {{ opensearch_transport_tcp_port }}
+
+node.name: {{ opensearch_node_name }}
+node.roles: ['data','master']
+
+bootstrap.memory_lock: {{ opensearch_memlock_enable | ternary('true', 'false') }}
+
+plugins.security.allow_default_init_securityindex: false
+plugins.security.disabled: true

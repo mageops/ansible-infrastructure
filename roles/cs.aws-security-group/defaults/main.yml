@@ -1,4 +1,3 @@
-
 aws_security_group_rds_create: no
 aws_security_group_redis_create: no
 aws_security_group_elasticsearch_create: no

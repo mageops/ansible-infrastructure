@@ -87,6 +87,13 @@ aws_logs_loggers_default:
         retention: 7
         multiline: yes
         enabled: no
+    opensearch-main:
+        group_name: "/opensearch/node.log"
+        filename: "/var/log/opensearch/{{ opensearch_cluster_name }}.log"
+        date_format: "[%Y-%m-%dT%H:%M:%S"
+        retention: 7
+        multiline: yes
+        enabled: no
     redis-server:
         group_name: "/redis/server.log"
         filename: "/var/log/redis/redis-server.log"

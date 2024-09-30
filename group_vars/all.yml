@@ -561,7 +561,8 @@ aws_logs_slack_notifications: "{{ mageops_notifications_slack_enable }}"
 
 aws_logs_loggers_persistent_default:
   syslog: { enabled: yes }
-  elasticsearch-main: { enabled: "{{ mageops_elasticsearch_create }}" }
+  elasticsearch-main: { enabled: "{{  mageops_elasticsearch_opensearch_flavor == 'elasticsearch' }}" }
+  opensearch-main: { enabled: "{{  mageops_elasticsearch_opensearch_flavor == 'opensearch' }}" }
   redis-server: { enabled: "{{ redis_valkey_flavor == 'redis' }}" }
   redis-sessions-server: { enabled: "{{ mageops_redis_sessions_create }}" }
   valkey-server: { enabled: "{{ redis_valkey_flavor == 'valkey' }}" }
@@ -709,9 +710,12 @@ mageops_redis_sessions_create: yes
 mageops_redis_sessions_host:
 mageops_redis_sessions_port: 6380
 
-# Enable to provision Elasticsearch (or provide host)
-mageops_elasticsearch_create: yes
+mageops_elasticsearch_opensearch_flavor: elasticsearch
 # mageops_elasticsearch_host:
+mageops_elasticsearch_http_auth: false
+
+# mageops_opensearch_host:
+mageops_opensearch_http_auth: "{{ mageops_elasticsearch_http_auth }}"
 
 # Do not wait for Elasticsearch to be ready, required when aws opensearch serverless is used
 # because it required complex authentication that isn't worth implementing
@@ -719,6 +723,9 @@ mageops_skip_elasticsearch_check: no
 
 # Use https for connecting to Elasticsearch
 mageops_elasticsearch_https: no
+
+# Use https for connecting to Elasticsearch
+mageops_opensearch_https: "{{ mageops_elasticsearch_https }}"
 
 mageops_varnish_purge_logging: yes
 mageops_varnish_host: 127.0.0.1
@@ -952,6 +959,8 @@ magento_gid: "{{ mageops_app_gid }}"
 magento_umask: "{{ mageops_app_umask }}"
 
 magento_elasticsearch_index_alias: "{{ mageops_app_name }}"
+magento_opensearch_index_alias: "{{ mageops_app_name }}"
+
 
 mageops_install_magerun: yes
 magento_consumer_workers_enable: yes
@@ -1568,7 +1577,17 @@ elasticsearch_plugins:
     - analysis-icu
     - analysis-phonetic
 
+# ---------------------------------
+# --------  Opensearch  --------
+# ---------------------------------
 
+opensearch_cluster_name: "{{ mageops_app_id }}"
+opensearch_node_name: master
+
+opensearch_http_port: "{{ elasticsearch_http_port }}"
+opensearch_transport_tcp_port: "{{ elasticsearch_transport_tcp_port }}"
+opensearch_heap_size: "{{ elasticsearch_heap_size }}"
+opensearch_plugins: "{{ elasticsearch_plugins }}"
 
 
 # -------------------------
@@ -1785,8 +1804,8 @@ firewall_internal_services:
     - mysql
 
 firewall_internal_ports:
-    - "{{ elasticsearch_http_port }}/tcp"
-    - "{{ elasticsearch_transport_tcp_port }}/tcp"
+    - "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port ~ '/tcp', opensearch_http_port ~ '/tcp') }}"
+    - "{{ search_transport_tcp_port }}/tcp"
     - "{{ mageops_redis_port }}/tcp"
 firewall_public_services:
     - http
