@@ -179,6 +179,7 @@ varnish_bypass_request_info_header_name: X-Varnish-bypass-Request-Info
 
 varnish_media_cors_enabled: yes
 varnish_media_cors_max_age: 2678400
+varnish_media_cache_enabled: no
 
 varnish_vcl_conf: /etc/varnish/default.vcl
 varnish_backends_vcl: /etc/varnish/backends.vcl
