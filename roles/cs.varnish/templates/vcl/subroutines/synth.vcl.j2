@@ -1,18 +1,3 @@
-{% macro synthetic_error_page(code='resp.status', data=none) %}
-    synthetic(
-        std.fileread("/etc/varnish/error" + {{ code }} + ".html")
-            {% if data %}
-            + "<script>window.MGS.error.data='" + data + "';</script>"
-            {% endif %}
-            + "</html>"
-    );
-
-    set resp.http.Content-Type = "text/html; charset=utf-8";
-    set resp.http.Cache-Control = "no-cache, no-store, must-revalidate";
-    set resp.http.Pragma = "no-cache";
-    set resp.http.Expires = "0";
-{% endmacro %}
-
 if ((resp.status == 301 || resp.status == 302) && req.http.location) {
     set resp.http.location = req.http.location;
     set resp.http.Set-Cookie = "vrredir=" + req.http.location + "; Secure";
