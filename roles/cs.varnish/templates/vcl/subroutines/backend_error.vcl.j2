@@ -4,6 +4,7 @@ if (beresp.status == 503) {
     set beresp.http.Cache-Control = "no-cache, no-store, must-revalidate";
     set beresp.http.Pragma = "no-cache";
     set beresp.http.Expires = "0";
+    set beresp.http.Content-Type = "text/html; charset=UTF-8";
 }
 
 if (beresp.status == 502 || beresp.status == 503 || beresp.status == 504) {
