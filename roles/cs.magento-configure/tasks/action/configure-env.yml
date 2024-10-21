@@ -14,6 +14,12 @@
         {{ magento_app_etc_config
             | combine(magento_app_etc_config_elasticsuite, recursive=true) }}
 
+  - name: Config graphql salt
+    set_fact:
+      magento_app_etc_config: >-
+        {{ magento_app_etc_config
+            | combine(magento_app_etc_config_graphql_salt, recursive=true) }}
+
   - name: Configure Redis caching
     when: magento_redis_cache
     block:
@@ -77,6 +83,20 @@
       magento_app_etc_config: >-
         {{ magento_app_etc_config
             | combine(magento_app_etc_config_extra, recursive=true) }}
+
+
+  - name: debug config
+    debug:
+      var: magento_app_etc_config
+
+  - name: save debug
+    copy:
+      content: "{{ magento_app_etc_config.stdout }}"
+      dest: "{{ magento_release_dir }}/app/etc/env-yaml.php"
+      owner: "{{ magento_user }}"
+      group: "{{ magento_group }}"
+      mode: 0640
+      force: 1
 
   - name: Export configuration as PHP code
     command:
