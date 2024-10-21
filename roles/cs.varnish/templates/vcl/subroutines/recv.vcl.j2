@@ -210,6 +210,10 @@ if (req.url ~ "^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|") }
     unset req.http.Https;
     unset req.http.X-Forwarded-Proto;
     unset req.http.Cookie;
+    {% if not varnish_media_cache_enabled %}
+        return (pass);
+    {% endif %}
+
 }
 
 {% if varnish_secure_site %}
