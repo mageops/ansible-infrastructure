@@ -78,6 +78,13 @@
         {{ magento_app_etc_config
             | combine(magento_app_etc_config_extra, recursive=true) }}
 
+  - name: Config graphql salt
+    when: magento_graphql_salt
+    set_fact:
+      magento_app_etc_config: >-
+        {{ magento_app_etc_config
+            | combine(magento_app_etc_config_graphql_salt, recursive=true) }}
+
   - name: Export configuration as PHP code
     command:
       stdin: "{{ magento_app_etc_config | to_json }}"

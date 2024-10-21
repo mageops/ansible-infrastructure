@@ -39,6 +39,7 @@
   vars:
     magento_redis_cache: no
     magento_http_cache_enable: no
+    magento_graphql_salt: no
 
 # TODO [deploy-next] These needs to be done on app node ideally, not on builder
 # - name: Import new configuration

@@ -191,3 +191,10 @@ magento_app_etc_config_extra: {}
 magento_app_etc_config_cookie_sign:
   vary_cookie_sign:
     key: "{{ magento_vary_secret }}"
+
+magento_app_etc_config_graphql_salt:
+  cache:
+    graphql:
+      id_salt: "{{ lookup('community.general.random_string', length=32, special=false) }}"
+
+magento_graphql_salt: yes
