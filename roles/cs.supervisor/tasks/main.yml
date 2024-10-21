@@ -11,11 +11,26 @@
   when: supervisor_programs | length > 0
   notify: Reload supervisord
 
-- name: Force a restart if configuration has changed
-  meta: flush_handlers
+- name: Ensure Supervisor systemd config override directory exists
+  file:
+    path: /etc/systemd/system/supervisord.service.d/
+    state: directory
 
-- name: Enable and start supervisord
-  service:
+- name: Create systemd service file for supervisord
+  template:
+    src: supervisord.overrides.conf
+    dest: /etc/systemd/system/supervisord.service.d/mageops.conf
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Enable and start the service
+  systemd:
     name: supervisord
     enabled: "{{ supervisor_service_autostart }}"
     state: "{{ supervisor_service_initial_state }}"
+
+- name: Force a restart if configuration has changed
+  meta: flush_handlers
+
+
