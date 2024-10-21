@@ -11,11 +11,35 @@
   when: supervisor_programs | length > 0
   notify: Reload supervisord
 
-- name: Force a restart if configuration has changed
-  meta: flush_handlers
+- name: Create systemd service file for supervisord
+  copy:
+    dest: /etc/systemd/system/supervisord.service.overrides.conf
+    content: |
+      [Unit]
+      Description=Process Monitoring and Control Daemon
+      After=rc-local.service
 
-- name: Enable and start supervisord
-  service:
+      [Service]
+      Type=forking
+      ExecStart=/usr/bin/supervisord -c /etc/supervisord.conf
+      RuntimeDirectory=supervisor
+      RuntimeDirectoryMode=755
+      Restart=always
+      RestartSec=5
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Enable and start the service
+  systemd:
     name: supervisord
     enabled: "{{ supervisor_service_autostart }}"
     state: "{{ supervisor_service_initial_state }}"
+
+- name: Force a restart if configuration has changed
+  meta: flush_handlers
+
+
