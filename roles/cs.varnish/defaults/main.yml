@@ -123,6 +123,7 @@ varnish_throttling: no
 # - `secret` (optional) - default no, if set it will hide headers that expose rate limiting
 # - `whitelisted` (optional) - default no, if set this route will be excluded from throtling (only for varnish_throttling_rules)
 #                              whitelist rules should be listed before any other ones
+# - `user_agent`  (optional) - regex pattern that defined affects request user agent
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.

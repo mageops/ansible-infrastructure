@@ -3,32 +3,45 @@
 # for the same reason.
 
 {% macro varnish_rate_limit_rule(rule) -%}
-        {% if rule.whitelisted | default(false, true) -%}
-        ### Whitelist {{ rule.path_pattern }} ###
-        {%- else -%}
-        ### Throttling rule - {{ rule.id }} ###
-        {%- endif %}
+    {% if rule.whitelisted | default(false, true) -%}
+    ### Whitelist {{ rule.path_pattern }} ###
+    {%- else -%}
+    ### Throttling rule - {{ rule.id }} ###
+    {%- endif %}
 
-        if ( req.url ~ "{{ rule.path_pattern }}"
-        {%- if rule.method | default(false, true) %} && req.method == "{{ rule.method | upper }}" {% endif -%}
-        ) {
-            {% if not rule.whitelisted | default(false, true) -%}
-            set req.http.X-RateLimit-Identity = req.http.x-real-ip + "{{ rule.id }}";
-            set req.http.X-RateLimit-Remaining = vsthrottle.remaining(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }});
+    {%- set conditions = [] -%}
 
-            if (vsthrottle.is_denied(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }})) {
-                {% if rule.secret | default(false, true) %}
-                unset req.http.X-RateLimit-Identity;
-                unset req.http.X-RateLimit-Remaining;
-                {% endif %}
-                return (synth(429, "{{ rule.error_message | default('Too many requests') }}"));
-            }
+    {%- if rule.path_pattern | default(false, true) -%}
+    {%- set _ = conditions.append('req.url ~ "' ~ rule.path_pattern ~ '"') -%}
+    {%- endif -%}
+    {%- if rule.user_agent | default(false, true) -%}
+    {%- set _ = conditions.append('req.http.User-Agent ~ "' ~ rule.user_agent ~ '"') -%}
+    {%- endif -%}
+    {%- if rule.method | default(false, true) -%}
+    {%- set _ = conditions.append('req.method == "' ~ rule.method | upper ~ '"') -%}
+    {%- endif -%}
+
+    {% if conditions | length > 0 %}
+
+    if ({{ conditions | join(' && ') }}) {
+        set req.http.X-RateLimit-Identity = {% if rule.ignore_ip | default(false, true) -%} req.http.x-real-ip + {%- endif %} "{{ rule.id }}";
+        {% if not rule.whitelisted | default(false, true) -%}
+        set req.http.X-RateLimit-Remaining = vsthrottle.remaining(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }});
+
+        if (vsthrottle.is_denied(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }})) {
             {% if rule.secret | default(false, true) %}
-                unset req.http.X-RateLimit-Identity;
-                unset req.http.X-RateLimit-Remaining;
+            unset req.http.X-RateLimit-Identity;
+            unset req.http.X-RateLimit-Remaining;
             {% endif %}
-            {%- endif %}
+            return (synth(429, "{{ rule.error_message | default('Too many requests') }}"));
         }
+        {% if rule.secret | default(false, true) %}
+            unset req.http.X-RateLimit-Identity;
+            unset req.http.X-RateLimit-Remaining;
+        {% endif %}
+        {%- endif %}
+    }
+    {% endif %}
 {%- endmacro %}
 
 
