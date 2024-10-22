@@ -113,8 +113,8 @@ varnish_throttling: no
 
 # Throttling rules, an array of items, each containing:
 # - `id` (required) - unqiue string used internally for hash computation
-# - `path_pattern` (required) - regex pattern that defined affects request paths
-# - `method` (optional) - match this limit only for specified http method
+# - `path_pattern` (optional*) - regex pattern that defined affects request paths
+# - `method` (optional*) - match this limit only for specified http method
 # - `error_message` (optional) - custom error string returned to client when this rule is triggered
 # - `limit` (required) - number of requests until clien tis throttled
 # - `duration` (required) - time window over which the `limit` requests may be performed
@@ -123,6 +123,9 @@ varnish_throttling: no
 # - `secret` (optional) - default no, if set it will hide headers that expose rate limiting
 # - `whitelisted` (optional) - default no, if set this route will be excluded from throtling (only for varnish_throttling_rules)
 #                              whitelist rules should be listed before any other ones
+# - `user_agent`  (optional*) - regex pattern that defined affects request user agent
+# - `ignore_ip` (optional) - rule is matched based on other criteria than IP (f.ex. user agent)
+# *At leat one of `path_pattern`, `method` or `user_agent` need to be set
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
