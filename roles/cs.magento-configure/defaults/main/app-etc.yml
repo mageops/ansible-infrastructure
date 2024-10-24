@@ -121,11 +121,6 @@ magento_app_etc_config_cache_default_redis:
           port: "{{ mageops_redis_port }}"
           persistent: "magento_redis_cache_default"
 
-magento_app_etc_config_graphql_salt:
-  cache:
-    graphql:
-      id_salt: "{{ lookup('community.general.random_string', length=32, special=false) }}"
-
 magento_app_etc_config_cache_default_redis_l2:
   cache:
     frontend:
