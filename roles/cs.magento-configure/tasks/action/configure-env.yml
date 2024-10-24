@@ -14,12 +14,6 @@
         {{ magento_app_etc_config
             | combine(magento_app_etc_config_elasticsuite, recursive=true) }}
 
-  - name: Config graphql salt
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_graphql_salt, recursive=true) }}
-
   - name: Configure Redis caching
     when: magento_redis_cache
     block:
