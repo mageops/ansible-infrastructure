@@ -24,7 +24,7 @@
 - name: Reload systemd
   command: systemctl daemon-reload
 
-- name: Enable and start the service
+- name: Enable and start supervisord
   systemd:
     name: supervisord
     enabled: "{{ supervisor_service_autostart }}"
