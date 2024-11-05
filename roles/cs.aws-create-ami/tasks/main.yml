@@ -15,7 +15,7 @@
     instance_id: "{{ ami_instance_id }}"
     name: "{{ ami_name }}"
     wait: yes
-    wait_timeout: 1800
+    wait_timeout: 3600
     tags: "{{ aws_tags_default | combine(ami_tags, ami_name_tags) }}"
     delete_snapshot: "{{ ami_delete_snapshot | default('yes') }}"
     device_mapping: >-
