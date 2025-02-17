@@ -34,3 +34,12 @@ pio_package_url_rpm:
   aarch64:
 
 pio_worker_cpu_shares: 2
+
+# List of paths mappings that should be bypassed by pio-worker
+# This list takes precedence over all other settings
+# If path is in this list, all files inside will not be processed by pio-worker
+# and will be served directly from filesystem
+# Keep in mind that filesystem_path is relative to pio_filesystem_local_dir
+# Format: url_path: filesystem_path
+pio_worker_bypass_paths: {}
+#  /media/directory: /directory
