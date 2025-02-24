@@ -13,7 +13,7 @@ collections:
 - name: community.aws
   version: 5.5.1
 - name: amazon.aws
-  version: 5.5.2
+  version: 9.1.1
 - name: community.mysql
 - name: ansible.utils
   version: 2.10.3
@@ -28,4 +28,3 @@ collections:
 - name: ansible.netcommon
   version: 5.1.2
 - community.crypto
-- ansible.posix
