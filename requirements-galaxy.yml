@@ -1,5 +1,6 @@
 roles:
 - src: geerlingguy.mysql
+  version: 4.3.5
 - src: geerlingguy.composer
 - src: geerlingguy.ntp
   version: 2.4.0
