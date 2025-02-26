@@ -16,7 +16,7 @@ collections:
   version: 9.1.1
 - name: community.mysql
 - name: ansible.utils
-  version: 5.1.2
+  version: 2.12.0
 - name: community.general
   version: 7.2.0
 - name: ansible.posix
