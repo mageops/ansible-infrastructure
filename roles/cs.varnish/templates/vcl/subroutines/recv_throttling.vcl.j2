@@ -24,7 +24,7 @@
     {% if conditions | length > 0 %}
 
     if ({{ conditions | join(' && ') }}) {
-        set req.http.X-RateLimit-Identity = {% if rule.ignore_ip | default(false, true) -%} req.http.x-real-ip + {%- endif %} "{{ rule.id }}";
+        set req.http.X-RateLimit-Identity = {% if not rule.ignore_ip | default(false, true) -%} req.http.x-real-ip + {%- endif %} "{{ rule.id }}";
         {% if not rule.whitelisted | default(false, true) -%}
         set req.http.X-RateLimit-Remaining = vsthrottle.remaining(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }});
 
