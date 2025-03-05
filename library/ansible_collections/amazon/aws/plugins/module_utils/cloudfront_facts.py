@@ -121,16 +121,12 @@ class CloudFrontFactsServiceManager:
                 raise
             self.module.fail_json_aws(e, msg=error)
 
-    def paginate_list_cloudfront_property(self, client_method, key, default_keyed, error, *args, **kwargs):
-        """
-        Monkey patched version of the paginate_list_cloudfront_property method
-        Changes: add *args to the method signature and pass it to _cloudfront_paginate_build_full_result
-        """
+    def paginate_list_cloudfront_property(self, client_method, key, default_keyed, error, **kwargs):
         fail_if_error = kwargs.pop("fail_if_error", True)
         try:
             keyed = kwargs.pop("keyed", default_keyed)
             api_kwargs = snake_dict_to_camel_dict(kwargs, capitalize_first=True)
-            result = _cloudfront_paginate_build_full_result(self.client, client_method, *args, **api_kwargs)
+            result = _cloudfront_paginate_build_full_result(self.client, client_method, **api_kwargs)
             items = result.get(key, {}).get("Items", [])
             if keyed:
                 items = cloudfront_facts_keyed_list_helper(items)
@@ -168,7 +164,7 @@ class CloudFrontFactsServiceManager:
             origin_access_identities = []
             for origin_access_identity in self.list_origin_access_identities():
                 oai_id = origin_access_identity["Id"]
-                oai_full_response = self.get_origin_access_identity(oai_id)
+                oai_full_response = self.get_origin_access_identity(id=oai_id)
                 oai_summary = {"Id": oai_id, "ETag": oai_full_response["ETag"]}
                 origin_access_identities.append(oai_summary)
             return {"origin_access_identities": origin_access_identities}
