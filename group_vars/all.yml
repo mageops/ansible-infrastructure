@@ -911,8 +911,11 @@ mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_reques
 
 mageops_trusted_cidr_blocks_global: []
 mageops_trusted_cidr_blocks_extra: []
+mageops_trusted_cidr_ipv6_blocks_global: []
+mageops_trusted_cidr_ipv6_blocks_extra: []
 
 mageops_trusted_cidr_blocks: "{{ mageops_trusted_cidr_blocks_global + mageops_trusted_cidr_blocks_extra }}"
+mageops_trusted_cidr_ipv6_blocks: "{{ mageops_trusted_cidr_ipv6_blocks_global + mageops_trusted_cidr_ipv6_blocks_extra }}"
 
 
 # -----------------------------------------------------
