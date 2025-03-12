@@ -10,10 +10,16 @@ roles:
   version: v1.1
 
 collections:
+
 - name: community.aws
+  source: git+https://github.com/Szpadel/community.aws.git
   version: 9.0.0
+  type: git
+# Workaround until https://github.com/ansible-collections/amazon.aws/pull/2542 is merged
 - name: amazon.aws
-  version: 9.1.1
+  source: git+https://github.com/Szpadel/amazon.aws.git
+  type: git
+  version: 9.3.0
 - name: community.mysql
 - name: ansible.utils
   version: 2.10.3
