@@ -725,7 +725,9 @@ mageops_varnish_purge_logging: yes
 mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: "{% if mageops_https_termination_enable %}8000{% else %}80{% endif %}"
 mageops_varnish_backend_port: "{% if varnish_is_in_autoscaling_group %}8080{% else %}80{% endif %}"
-
+mageops_varnish_trusted_ips : "{{ mageops_varnish_trusted_ips_global + mageops_varnish_trusted_ips_extra }}"
+mageops_varnish_trusted_ips_global: []
+mageops_varnish_trusted_ips_extra: []
 # The directory where application releases are stored - this is not public directory and not app root!
 mageops_app_web_dir: "{{ nginx_www_dir }}/{{ mageops_app_type }}"
 
@@ -911,12 +913,8 @@ mageops_http_pipeline_request_timeout_override: "{{ mageops_http_pipeline_reques
 
 mageops_trusted_cidr_blocks_global: []
 mageops_trusted_cidr_blocks_extra: []
-mageops_trusted_cidr_ipv6_blocks_global: []
-mageops_trusted_cidr_ipv6_blocks_extra: []
 
 mageops_trusted_cidr_blocks: "{{ mageops_trusted_cidr_blocks_global + mageops_trusted_cidr_blocks_extra }}"
-mageops_trusted_cidr_ipv6_blocks: "{{ mageops_trusted_cidr_ipv6_blocks_global + mageops_trusted_cidr_ipv6_blocks_extra }}"
-
 
 # -----------------------------------------------------
 # --------  App Transactional E-mail Settings  --------
