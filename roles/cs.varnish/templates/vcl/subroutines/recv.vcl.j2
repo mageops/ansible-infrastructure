@@ -206,7 +206,7 @@ if (req.url ~ "(\?|&)_=[0-9]+") {
 
 std.collect(req.http.Cookie);
 
-if (req.url ~ "^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|") }})(\?.*)?$") {
+if (req.url ~ "(?i)^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|") }})(\?.*)?$") {
     unset req.http.Https;
     unset req.http.X-Forwarded-Proto;
     unset req.http.Cookie;
@@ -217,7 +217,7 @@ if (req.url ~ "^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|") }
 }
 
 {% if varnish_secure_site %}
-    if (! req.url ~ "^/(media|static)/.*\.(html|json|{{ varnish_allowed_extensions | join("|") }})(\?.*)?$"
+    if (! req.url ~ "(?i)^/(media|static)/.*\.(html|json|{{ varnish_allowed_extensions | join("|") }})(\?.*)?$"
         && ! req.url ~ "^/cron.php$"
         && ! req.url ~ "^/rest/.*$"
         && ! req.http.Authorization ~ "Basic {{ varnish_secure_site_http_auth_string | b64encode }}"
