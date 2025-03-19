@@ -10,6 +10,10 @@
         src: nginx.cookie-rewrite.global.conf
         dst: "{{ https_termination_conf_cookie_rewrite_path }}"
 
+      - label: Change seconds to ms
+        src: nginx.upstream_header_time_s.conf
+        dst: "{{ https_termination_conf_upstream_header_time_path }}"
+
 
 - name: Compute primary runtime vhost configuration
   set_fact:
