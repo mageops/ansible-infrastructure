@@ -1,0 +1,4 @@
+- name: Flush cache
+  become: true
+  become_user: "{{ magento_user }}"
+  shell: "php {{ magento_release_dir }}/bin/magento cache:flush"

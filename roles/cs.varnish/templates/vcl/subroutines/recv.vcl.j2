@@ -173,8 +173,8 @@ if (req.http.X-Blackfire-Query) {
     }
 }
 
-# Bypass customer, shopping cart, checkout and search requests
-if (req.url ~ "/customer" || req.url ~ "/checkout" || req.url ~ "/catalogsearch") {
+# Bypass shopping cart, checkout and search requests
+if (req.url ~ "/checkout" || req.url ~ "/catalogsearch") {
     return (pass);
 }
 
@@ -206,18 +206,14 @@ if (req.url ~ "(\?|&)_=[0-9]+") {
 
 std.collect(req.http.Cookie);
 
-if (req.url ~ "(?i)^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|") }})(\?.*)?$") {
+if (req.url ~ "^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|") }})(\?.*)?$") {
     unset req.http.Https;
     unset req.http.X-Forwarded-Proto;
     unset req.http.Cookie;
-    {% if not varnish_media_cache_enabled %}
-        return (pass);
-    {% endif %}
-
 }
 
 {% if varnish_secure_site %}
-    if (! req.url ~ "(?i)^/(media|static)/.*\.(html|json|{{ varnish_allowed_extensions | join("|") }})(\?.*)?$"
+    if (! req.url ~ "^/(media|static)/.*\.(html|json|{{ varnish_allowed_extensions | join("|") }})(\?.*)?$"
         && ! req.url ~ "^/cron.php$"
         && ! req.url ~ "^/rest/.*$"
         && ! req.http.Authorization ~ "Basic {{ varnish_secure_site_http_auth_string | b64encode }}"
@@ -243,11 +239,6 @@ if (req.http.Accept-Encoding) {
         unset req.http.Accept-Encoding;
     }
 }
-
-{% if varnish_original_url %}
-# Copy req.url to separate header before cut
-set req.http.X-Original-URL = req.url;
-{% endif %}
 
 {% for param in varnish_strip_params %}
 # remove all forms of param: {{ param }} - The order is important!

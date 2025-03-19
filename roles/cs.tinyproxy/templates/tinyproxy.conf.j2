@@ -13,12 +13,18 @@ Allow {{ host }}
 {% endfor %}
 
 LogLevel {{ tinyproxy_log_level }}
-Syslog On
+Logfile "{{ tinyproxy_logfile }}"
+
+PidFile "{{ tinyproxy_pidfile }}"
 
 {% for upstream in tinyproxy_upstream %}
 Upstream {{ upstream }}
 {% endfor %}
 
+StartServers {{ tinyproxy_start_servers }}
+MaxRequestsPerChild {{ tinyproxy_max_requests_per_child }}
+MinSpareServers {{ tinyproxy_min_spare_servers }}
+MaxSpareServers {{ tinyproxy_max_spare_servers }}
 MaxClients {{ tinyproxy_max_clients }}
 
 {% for port in tinyproxy_connect_ports %}

@@ -38,7 +38,7 @@ varnish_storage_mem_rel: 0.7
 # The minimum amount of system memory that has to be reserved for other
 # services. This variable has effect only if the memory left after subtracting
 # the `varnish_sys_mem_rel` calculation is smaller than this value.
-varnish_sys_mem_reserved: 512M
+varnish_sys_mem_reserved: 128M
 
 # Since we don't write logs anywhere the default of 80M seems to be an overkill
 # https://varnish-cache.org/docs/6.0/reference/varnishd.html#vsl-space
@@ -113,8 +113,8 @@ varnish_throttling: no
 
 # Throttling rules, an array of items, each containing:
 # - `id` (required) - unqiue string used internally for hash computation
-# - `path_pattern` (optional*) - regex pattern that defined affects request paths
-# - `method` (optional*) - match this limit only for specified http method
+# - `path_pattern` (required) - regex pattern that defined affects request paths
+# - `method` (optional) - match this limit only for specified http method
 # - `error_message` (optional) - custom error string returned to client when this rule is triggered
 # - `limit` (required) - number of requests until clien tis throttled
 # - `duration` (required) - time window over which the `limit` requests may be performed
@@ -123,9 +123,6 @@ varnish_throttling: no
 # - `secret` (optional) - default no, if set it will hide headers that expose rate limiting
 # - `whitelisted` (optional) - default no, if set this route will be excluded from throtling (only for varnish_throttling_rules)
 #                              whitelist rules should be listed before any other ones
-# - `user_agent`  (optional*) - regex pattern that defined affects request user agent
-# - `ignore_ip` (optional) - rule is matched based on other criteria than IP (f.ex. user agent)
-# *At leat one of `path_pattern`, `method` or `user_agent` need to be set
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded
 # will stop any further evaluation. You should order the rules from most specific to the widest.
@@ -156,8 +153,6 @@ varnish_vcl_recv_extra: ""
 varnish_vcl_synth_extra: ""
 varnish_vcl_backend_error_extra: ""
 
-#Send original URL to backend
-varnish_original_url: false
 varnish_strip_params: ['gclid']
 
 # To be used for advanced customizations
@@ -182,7 +177,6 @@ varnish_bypass_request_info_header_name: X-Varnish-bypass-Request-Info
 
 varnish_media_cors_enabled: yes
 varnish_media_cors_max_age: 2678400
-varnish_media_cache_enabled: no
 
 varnish_vcl_conf: /etc/varnish/default.vcl
 varnish_backends_vcl: /etc/varnish/backends.vcl
