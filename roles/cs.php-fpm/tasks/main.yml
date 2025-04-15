@@ -20,6 +20,8 @@
   set_fact:
     php_fpm_pm_max_children_default: "{{ [ [ php_fpm_pm_max_children_by_memory | int, php_fpm_pm_max_children_by_cpu | int ] | min, 4 ] | max }}"
 
+- import_tasks: 004-logrotate.yml
+
 - name: Calculate workers
   set_fact:
     php_fpm_pm_max_children: "{{ php_fpm_pm_max_children | default(php_fpm_pm_max_children_default, true) }}"
