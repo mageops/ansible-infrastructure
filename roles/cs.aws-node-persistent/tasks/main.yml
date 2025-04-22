@@ -21,7 +21,7 @@
             aws_tags_node_persistent,
             mageops_elasticsearch_create | ternary(aws_tags_role_elasticsearch, {}),
             mageops_rabbitmq_create | ternary(aws_tags_role_rabbitmq_message_queue, {}),
-            (mageops_redis_create or mageops_redis_sessions_create) | ternary(aws_tags_role_redis_cache, {}),
+            (redis_valkey_flavor in ['redis', 'valkey']) | ternary(aws_tags_role_redis_cache, {}),
             aws_persistent_node_name_tags
           )
       }}

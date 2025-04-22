@@ -1,7 +1,12 @@
-- name: Install redis packages
+- name: Uninstall redis/valkey packages
+  package:
+    name: "{{ redis_uninstalling_flavor }}"
+    state: "absent"
+
+- name: Install redis/valkey packages
   package:
     name: "{{ redis_package }}"
     state: "latest"
   notify:
     - Reload systemctl daemon
-    - Restart {{ redis_daemon }}
+    - "Restart redis/valkey"

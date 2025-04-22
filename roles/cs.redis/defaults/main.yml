@@ -3,8 +3,13 @@
 # on the same server. Usually you'll want to separate session and cache storage, so cache does not evict sessions.
 redis_instance_name: ~
 
-redis_package: redis
-redis_daemon: "redis{% if redis_instance_name %}-{{ redis_instance_name }}{% endif %}"
+redis_valkey_flavor: redis
+redis_uninstalling_flavor: "{{ 'valkey' if redis_valkey_flavor == 'redis' else 'redis' }}"
+redis_stop_sessions_flavor: "{{ 'valkey-sessions' if redis_valkey_flavor == 'redis' else 'redis-sessions' }}"
+
+redis_package: "{{ redis_valkey_flavor }}"
+redis_daemon: "{{ redis_valkey_flavor }}{% if redis_instance_name %}-{{ redis_instance_name }}{% endif %}"
+
 
 redis_conf_path: "/etc/{{ redis_daemon }}.conf"
 redis_piddir: "/run/redis"
@@ -20,7 +25,7 @@ redis_protected_mode: no
 
 redis_syslog: no
 redis_loglevel: "notice"
-redis_logdir: /var/log/redis
+redis_logdir: "/var/log/{{ redis_valkey_flavor }}"
 redis_logfile: "{{ redis_logdir }}/{{ redis_daemon }}-server.log"
 
 redis_databases: 16

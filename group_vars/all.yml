@@ -562,8 +562,11 @@ aws_logs_slack_notifications: "{{ mageops_notifications_slack_enable }}"
 aws_logs_loggers_persistent_default:
   syslog: { enabled: yes }
   elasticsearch-main: { enabled: "{{ mageops_elasticsearch_create }}" }
-  redis-server: { enabled: "{{ mageops_redis_create }}" }
+  redis-server: { enabled: "{{ redis_valkey_flavor == 'redis' }}" }
   redis-sessions-server: { enabled: "{{ mageops_redis_sessions_create }}" }
+  valkey-server: { enabled: "{{ redis_valkey_flavor == 'valkey' }}" }
+  valkey-sessions-server: { enabled: "{{ mageops_redis_sessions_create }}" }
+
 
 aws_logs_loggers_app_default:
   syslog: { enabled: yes }
@@ -702,11 +705,10 @@ mageops_app_mysql_user: "{{ mageops_app_id_short }}"
 mageops_app_mysql_db: "{{ mageops_app_id_short }}"
 
 # Shall redis be installed/created automatically? (or provide host)
-mageops_redis_create: yes
 mageops_redis_host:
 mageops_redis_port: 6379
 
-mageops_redis_sessions_create: "{{ mageops_redis_create }}"
+mageops_redis_sessions_create: yes
 mageops_redis_sessions_host:
 mageops_redis_sessions_port: 6380
 
@@ -1584,6 +1586,8 @@ elasticsearch_plugins:
 # -------------------------
 # --------  Redis  --------
 # -------------------------
+
+redis_valkey_flavor: redis
 
 redis_databases: 4
 

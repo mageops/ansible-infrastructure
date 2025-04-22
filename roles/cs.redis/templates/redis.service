@@ -1,5 +1,5 @@
 [Unit]
-Description=Redis persistent key-value database
+Description={{redis_valkey_flavor}} persistent key-value database
 
 After=network.target
 After=network-online.target
@@ -8,13 +8,14 @@ Wants=network-online.target
 [Service]
 Type=notify
 
-ExecStart=/usr/bin/redis-server {{ redis_conf_path }} --daemonize no --supervised systemd
+ExecStart=/usr/bin/{{redis_valkey_flavor}}-server {{ redis_conf_path }} --daemonize no --supervised systemd
+{% if redis_valkey_flavor == 'redis' %}
 ExecStop=/usr/libexec/redis-shutdown {{ redis_daemon }}
+{% endif %}
+User={{redis_valkey_flavor}}
+Group={{redis_valkey_flavor}}
 
-User=redis
-Group=redis
-
-RuntimeDirectory=redis
+RuntimeDirectory={{redis_valkey_flavor}}
 RuntimeDirectoryMode=0755
 
 RestartSec=3

@@ -49,7 +49,7 @@
       tags: elasticsearch
       when: mageops_elasticsearch_create
     - role: cs.redis
-      when: mageops_redis_create and not redis_aws_elasticache_use
+      when: (redis_valkey_flavor in ['redis', 'valkey']) and not redis_aws_elasticache_use
     - role: cs.redis
       redis_instance_name: sessions
       redis_databases: 1

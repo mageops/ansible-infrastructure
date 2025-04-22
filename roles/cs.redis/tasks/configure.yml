@@ -8,8 +8,8 @@
       {{ entry.type | default('d') }}
       {{ entry.path }}
       {{ entry.mode | default('0755') }}
-      {{ entry.user | default('redis') }}
-      {{ entry.group | default('redis') }}
+      {{ entry.user | default(redis_valkey_flavor) }}
+      {{ entry.group | default(redis_valkey_flavor) }}
       {{ entry.age | default('-') }}
       {{ entry.argument | default('-') }}
   loop:
@@ -30,13 +30,13 @@
 
 - name: Install systemd service file
   template:
-    src: redis.service
+    src: "redis.service"
     dest: "/etc/systemd/system/{{ redis_daemon }}.service"
     trim_blocks: yes
     lstrip_blocks: yes
   notify:
     - Reload systemctl daemon
-    - Restart {{ redis_daemon }}
+    - "Restart redis/valkey"
 
 - name: Ensure service override direcotry exists
   file:
@@ -51,15 +51,15 @@
     lstrip_blocks: yes
   notify:
     - Reload systemctl daemon
-    - Restart {{ redis_daemon }}
+    - "Restart redis/valkey"
 
-- name: Install redis configuration
+- name: Install redis/valkey configuration
   template:
     src: redis.conf
     dest: "{{ redis_conf_path }}"
     mode: 0644
   notify:
-    - Restart {{ redis_daemon }}
+    - "Restart redis/valkey"
 
 # This avoids OOM errors when redis saves to disk!
 #
@@ -82,7 +82,7 @@
     reload: yes
     state: present
 
-- name: Ensure Redis service is enabled
+- name: Ensure  {{ redis_daemon }} service is enabled
   service:
     name: "{{ redis_daemon }}"
     enabled: yes
@@ -102,7 +102,7 @@
     - "echo never > /sys/kernel/mm/transparent_hugepage/enabled"
     - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
   register: _redis_enabled_thd
-  notify: Restart {{ redis_daemon }}
+  notify: "Restart redis/valkey"
 
 - name: Disable THP now if just added
   shell: "{{ item }}"
@@ -111,8 +111,26 @@
     - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
   when: _redis_enabled_thd.changed
 
-- name: Ensure Redis service is started
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Stop {{ redis_uninstalling_flavor }} in case of migration
+  service:
+    name: "{{ redis_uninstalling_flavor }}"
+    state: stopped
+    enabled: false
+  when: services[redis_uninstalling_flavor+'.service']['status'] | default('not-found') != 'not-found'
+
+- name: Stop {{ redis_uninstalling_flavor }} session in case of migration
+  service:
+    name: "{{ redis_uninstalling_flavor }}-sessions"
+    state: stopped
+    enabled: false
+  when: mageops_redis_sessions_create and services[redis_uninstalling_flavor+'-sessions.service']['status'] | default('not-found') != 'not-found'
+
+- name: Ensure Redis/valkey service is started
   service:
     name: "{{ redis_daemon }}"
     state: started
     enabled: yes
+
