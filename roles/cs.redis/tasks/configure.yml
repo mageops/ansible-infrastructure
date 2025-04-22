@@ -8,8 +8,8 @@
       {{ entry.type | default('d') }}
       {{ entry.path }}
       {{ entry.mode | default('0755') }}
-      {{ entry.user | default('redis') }}
-      {{ entry.group | default('redis') }}
+      {{ entry.user | default(redis_valkey_flavor) }}
+      {{ entry.group | default(redis_valkey_flavor) }}
       {{ entry.age | default('-') }}
       {{ entry.argument | default('-') }}
   loop:
@@ -30,7 +30,7 @@
 
 - name: Install systemd service file
   template:
-    src: redis.service
+    src: "{{redis_valkey_flavor}}.service"
     dest: "/etc/systemd/system/{{ redis_daemon }}.service"
     trim_blocks: yes
     lstrip_blocks: yes
@@ -52,6 +52,10 @@
   notify:
     - Reload systemctl daemon
     - Restart {{ redis_daemon }}
+
+- name: debug redis_conf_path
+  debug:
+    var: redis_conf_path
 
 - name: Install redis configuration
   template:
@@ -111,8 +115,35 @@
     - "echo never > /sys/kernel/mm/transparent_hugepage/defrag"
   when: _redis_enabled_thd.changed
 
-- name: Ensure Redis service is started
+- name: debug redis_daemon
+  debug:
+    var: redis_daemon
+
+- name: debug reverse redis_daemon
+  debug:
+    msg: >-
+      {{ redis_daemon
+         | regex_replace('^redis', 'valkey')
+         | regex_replace('^valkey', 'redis') if redis_daemon.startswith('valkey') else
+         redis_daemon | regex_replace('^redis', 'valkey') }}
+
+- name: Stop Redis/Valkey in case of migration
   service:
-    name: "{{ redis_daemon }}"
+    name: >-
+      {{ redis_daemon
+         | regex_replace('^redis', 'valkey')
+         | regex_replace('^valkey', 'redis') if redis_daemon.startswith('valkey') else
+         redis_daemon | regex_replace('^redis', 'valkey') }}
+    state: stopped
+    enabled: false
+  ignore_errors: yes
+
+- name: Ensure Redis/valkey service is started
+  service:
+    name: "{{ redis_valkey_flavor }}{% if redis_instance_name %}-{{ redis_instance_name }}{% endif %}"
     state: started
     enabled: yes
+
+- name: Debug redis_daemon
+  debug:
+    var: redis_daemon

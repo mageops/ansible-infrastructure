@@ -564,6 +564,9 @@ aws_logs_loggers_persistent_default:
   elasticsearch-main: { enabled: "{{ mageops_elasticsearch_create }}" }
   redis-server: { enabled: "{{ mageops_redis_create }}" }
   redis-sessions-server: { enabled: "{{ mageops_redis_sessions_create }}" }
+  valkey-server: { enabled: "{{ mageops_valkey_create }}" }
+  valkey-sessions-server: { enabled: "{{ mageops_valkey_sessions_create }}" }
+
 
 aws_logs_loggers_app_default:
   syslog: { enabled: yes }
@@ -1584,6 +1587,8 @@ elasticsearch_plugins:
 # -------------------------
 # --------  Redis  --------
 # -------------------------
+
+redis_valkey_flavor: redis
 
 redis_databases: 4
 

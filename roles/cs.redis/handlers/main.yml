@@ -7,3 +7,12 @@
     name: "{{ redis_daemon }}"
     state: restarted
 
+- name: Restart valkey
+  service:
+    name: "{{ redis_daemon }}"
+    state: restarted
+
+- name: Restart valkey-sessions
+  service:
+    name: "{{ redis_daemon }}"
+    state: restarted

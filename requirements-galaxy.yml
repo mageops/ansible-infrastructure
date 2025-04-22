@@ -1,6 +1,5 @@
 roles:
 - src: geerlingguy.mysql
-  version: 4.3.5
 - src: geerlingguy.composer
 - src: geerlingguy.ntp
   version: 2.4.0
@@ -11,11 +10,9 @@ roles:
 
 collections:
 - name: community.aws
-  version: 9.0.0
-# Workaround until https://github.com/ansible-collections/amazon.aws/pull/2542 is merged
-- name: https://github.com/Szpadel/amazon.aws
-  type: git
-  version: workaround
+  version: 5.5.1
+- name: amazon.aws
+  version: 5.5.2
 - name: community.mysql
 - name: ansible.utils
   version: 2.10.3
@@ -29,4 +26,3 @@ collections:
   version: 2.18.0
 - name: ansible.netcommon
   version: 5.1.2
-- community.crypto

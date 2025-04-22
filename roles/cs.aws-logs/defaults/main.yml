@@ -101,6 +101,20 @@ aws_logs_loggers_default:
         retention: 7
         multiline: no
         enabled: no
+    valkey-server:
+        group_name: "/valkey/server.log"
+        filename: "/var/log/valkey/valkey-server.log"
+        date_format: "%d %b %H:%M:%S"
+        retention: 7
+        multiline: no
+        enabled: no
+    valkey-sessions-server:
+        group_name: "/valkey/sessions-server.log"
+        filename: "/var/log/valkey/valkey-sessions-server.log"
+        date_format: "%d %b %H:%M:%S"
+        retention: 7
+        multiline: no
+        enabled: no
     warmup-crawler:
         group_name: "/magento/warmup-crawler.log"
         filename: "{{ aws_logs_project_root }}/var/log/cache_warmer_crawler.log"
