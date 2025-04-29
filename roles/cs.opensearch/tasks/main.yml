@@ -1,0 +1,130 @@
+- name: Install opensearch packages
+  package:
+    name: opensearch
+    state: latest
+  register: opensearch_packages_install
+
+- name: Ensure install_demo_configuration.log is removed
+  file:
+    path: /var/log/opensearch/install_demo_configuration.log
+    state: absent
+
+# In case `/var` or `/var/run` is a tmpfs (common thing nowadays)
+- name: Ensure var directories always exist
+  lineinfile:
+    path: /etc/tmpfiles.d/opensearch.conf
+    regexp: "\\s+{{ entry.path | regex_escape }}\\s+"
+    line: >-
+      {{ entry.type | default('d') }}
+      {{ entry.path }}
+      {{ entry.mode | default('0755') }}
+      {{ entry.user | default('opensearch') }}
+      {{ entry.group | default('opensearch') }}
+      {{ entry.age | default('-') }}
+      {{ entry.argument | default('-') }}
+    create: yes
+  loop:
+    - path: /run/opensearch/
+    - path: /var/log/opensearch/
+    - path: /var/lib/opensearch/
+    - path: /var/log/opensearch/*.log
+      mode: "0644"
+      type: z
+  loop_control:
+    loop_var: entry
+    label: "{{ entry.path }}"
+  register: tmpfiles_config
+
+- name: Ensure var directory changes are applied at once
+  command: systemd-tmpfiles --create
+  when: tmpfiles_config is changed
+
+- name: Configure opensearch
+  template:
+    src: "{{ item.key }}"
+    dest: /etc/opensearch/{{ item.value }}
+    owner: root
+    group: opensearch
+  with_dict:
+    jvm.options: jvm.options
+    opensearch.yml: opensearch.yml
+    log4j2.properties: log4j2.properties
+  notify: Restart opensearch
+
+- name: Ensure /etc/init.d/opensearch is executable
+  file:
+    path: /etc/init.d/opensearch
+    mode: '0755'
+    owner: root
+    group: root
+    state: file
+
+- name: Ensure opensearch systemd config override directory exists
+  file:
+    path: /etc/systemd/system/opensearch.service.d/
+    state: directory
+
+- name: Configure opensearch systemd service overrides
+  template:
+    src: systemd.service.overrides.conf
+    dest: /etc/systemd/system/opensearch.service.d/mageops.conf
+    trim_blocks: no
+  notify:
+    - Reload systemctl daemon
+    - Restart opensearch
+
+- name: Store opensearch version
+  set_fact:
+    opensearch_version_number: "{{ opensearch_get_installed_version.stdout | default('0.0.0', true) | trim }}"
+    opensearch_running_version_number: >-
+      {{
+          (
+            { 'version': { 'number': '0.0.0' } }
+              | combine(opensearch_get_running_version.content | default('{}', true) | from_json)
+          ).version.number | trim
+      }}
+
+- name: Force update of opensearch plugins on version change
+  block:
+    - name: Get list of installed opensearch plugins
+      command: /usr/share/opensearch/bin/opensearch-plugin list --silent
+      register: opensearch_plugin_list_command
+
+    - name: Remove current opensearch plugins so new version is installed
+      command: "/usr/share/opensearch/bin/opensearch-plugin remove {{ item }} --verbose"
+      args:
+        removes: "/usr/share/opensearch/plugins/{{ item }}"
+      loop: "{{ opensearch_plugin_list_command.stdout_lines }}"
+  when: >-
+    opensearch_version_number != opensearch_running_version_number
+
+- name: Install opensearch plugins
+  command: "/usr/share/opensearch/bin/opensearch-plugin install {{ item }}"
+  args:
+    creates: "/usr/share/opensearch/plugins/{{ item }}"
+  loop: "{{ opensearch_plugins }}"
+  notify: Restart opensearch
+
+- name: Ensure elasticsearch is stopped and disabled
+  service:
+    name: elasticsearch
+    state: stopped
+    enabled: no
+  ignore_errors: true
+
+- name: Ensure opensearch is started and enabled
+  service:
+    name: opensearch
+    state: started
+    enabled: yes
+
+- name: Make sure any configuration changes are applied
+  meta: flush_handlers
+
+- name: Ensure opensearch is up
+  wait_for:
+    host: "{{ opensearch_network_host }}"
+    port: "{{ opensearch_http_port }}"
+    delay: 6
+    timeout: 60
+

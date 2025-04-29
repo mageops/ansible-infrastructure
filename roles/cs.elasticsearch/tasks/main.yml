@@ -149,6 +149,13 @@
   loop: "{{ elasticsearch_plugins }}"
   notify: Restart elasticsearch
 
+- name: Ensure opensearch is stopped and disabled
+  service:
+    name: opensearch
+    state: stopped
+    enabled: no
+  ignore_errors: true
+
 - name: Ensure elasticsearch is started and enabled
   service:
     name: elasticsearch

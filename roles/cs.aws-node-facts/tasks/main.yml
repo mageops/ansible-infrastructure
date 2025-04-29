@@ -54,10 +54,20 @@
     mageops_varnish_host: "{{ aws_nodes_info.varnish_loadbalancer.private_ip_address }}"
   when: varnish_as_loadbalancer and aws_nodes_info.varnish_loadbalancer
 
+- name: debug aws_nodes_info
+  debug:
+    var: aws_nodes_info
+
 - name: Set elasticsearch host if not predefined
   set_fact:
     mageops_elasticsearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
   when: not mageops_elasticsearch_host | default(false, true) and aws_nodes_info.elasticsearch
+
+- name: Set opensearch host if not predefined
+  set_fact:
+    mageops_opensearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
+  when: not mageops_opensearch_host | default(false, true) and aws_nodes_info.elasticsearch
+
 
 # TODO: Find RabbitMQ through tags, right now we don't have option to separate it anyway
 - name: Set RabbitMQ host if not predefined

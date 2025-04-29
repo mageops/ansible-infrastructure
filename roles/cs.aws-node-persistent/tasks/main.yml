@@ -43,7 +43,7 @@
           aws_persistent_node_security_groups
           + aws_security_group_redis_id | default(false, true) | ternary([aws_security_group_redis_id], [])
           + aws_security_group_persistant_id | default(false, true) | ternary([aws_security_group_persistant_id], [])
-          + aws_security_group_elasticsearch_id | default(false, true) | ternary([aws_security_group_elasticsearch_id], [])
+          + aws_security_group_search_id | default(false, true) | ternary([aws_security_group_search_id], [])
           + varnish_is_in_autoscaling_group | ternary(
               aws_security_group_varnish_id | default(false, true) | ternary([aws_security_group_varnish_id], []),
               []

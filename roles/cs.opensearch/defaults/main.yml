@@ -1,0 +1,16 @@
+opensearch_memlock_enable: false
+opensearch_cluster_name: app
+opensearch_node_name: master
+opensearch_network_host: '0.0.0.0'
+opensearch_http_port: 9200
+opensearch_transport_tcp_port: 9300
+opensearch_heap_size: 1g
+opensearch_plugins:
+    - analysis-icu
+    - analysis-phonetic
+
+opensearch_syscfg_limit_nofile: 65535
+opensearch_syscfg_limit_nproc: 4096
+
+opensearch_version_file_path: /var/local/opensearch_version.txt
+opensearch_install_crash_handler: yes
