@@ -25,7 +25,6 @@
         - include_tasks: 080-core-config.yml
         - include_tasks: 110-deploy-static-content.yml
           when: not magento_scd_skip
-        - include_tasks: action/flush-cache.yml
       when: deploy_install_new_release
   become: yes
   become_user: "{{ magento_user }}"

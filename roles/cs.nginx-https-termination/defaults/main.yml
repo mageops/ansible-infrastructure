@@ -5,6 +5,7 @@ https_termination_upstream_host: 127.0.0.1
 https_termination_proxy_read_timeout: 90
 https_termination_conf_cookie_rewrite_path: "{{ nginx_confd_dir }}/000-global-cookie-rewrite.conf"
 https_termination_conf_cache_miss_log_path: "{{ nginx_confd_dir }}/000-global-cache-miss-log.conf"
+https_termination_conf_upstream_header_time_path: "{{ nginx_confd_dir }}/000-upstream_header_time.conf"
 
 # Also proxy port 80 to the upstream
 https_termination_proxy_http_port: false
@@ -129,4 +130,3 @@ https_termination_redirect_source_domain_param: _redirect_from
 
 # Include header with upstream ttfb in response headers
 https_termination_nginx_include_upstream_response_time_header: yes
-https_termination_nginx_include_upstream_response_time_name: X-Upstream-Response-Time

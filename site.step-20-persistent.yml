@@ -59,7 +59,7 @@
       redis_maxmemory_policy: "{{ redis_sessions_maxmemory_policy }}"
       redis_maxmemory: "{{ redis_sessions_maxmemory }}"
       redis_persistence_enable: "{{ redis_sessions_persistence_enable }}"
-      when: mageops_redis_sessions_create
+      when: mageops_redis_sessions_create and mageops_redis_create
     - role: cs.varnish-purge-proxy
       varnish_pp_listen_port: "{{ varnish_port }}"
       when: varnish_is_in_autoscaling_group

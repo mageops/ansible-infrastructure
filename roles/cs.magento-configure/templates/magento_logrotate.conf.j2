@@ -1,8 +1,13 @@
 {{ magento_live_release_dir }}/var/log/*.log {{ magento_live_release_dir }}/var/log/*/*.log {
-    size 20M
     rotate 2
     create 0664 {{ magento_user }} {{ magento_group }}
     su {{ magento_user }} {{ magento_group }}
-    missingok
     notifempty
+    compress
+    compresscmd /usr/bin/zstd
+    uncompresscmd /usr/bin/unzstd
+    compressext .zstd
+    compressoptions -19
+    size 128M
+    missingok
 }

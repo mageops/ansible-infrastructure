@@ -39,6 +39,16 @@
                 ]
             ),
 {% endif %}
-        ]
+        ],
+{% if pio_worker_bypass_paths %}
+        pass_through_directories: [
+        {%- for path, fs_path in pio_worker_bypass_paths.items() %}
+        (
+            url: "{{ path }}",
+            target: "{{ fs_path }}"
+        ),
+        {% endfor -%}
+        ],
+{% endif %}
     )
 )

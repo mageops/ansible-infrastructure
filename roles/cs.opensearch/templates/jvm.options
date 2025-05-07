@@ -20,8 +20,8 @@
 # Xms represents the initial size of total heap space
 # Xmx represents the maximum size of total heap space
 
--Xms{{ elasticsearch_heap_size }}
--Xmx{{ elasticsearch_heap_size }}
+-Xms{{ opensearch_heap_size }}
+-Xmx{{ opensearch_heap_size }}
 
 ################################################################
 ## Expert settings

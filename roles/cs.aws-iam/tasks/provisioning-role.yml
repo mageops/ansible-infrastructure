@@ -14,3 +14,4 @@
     - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_1 }}"
     - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_2 }}"
     - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_3 }}"
+    - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_4 }}"

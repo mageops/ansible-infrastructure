@@ -565,6 +565,9 @@ aws_logs_loggers_persistent_default:
   opensearch-main: { enabled: "{{ mageops_opensearch_create }}" }
   redis-server: { enabled: "{{ mageops_redis_create }}" }
   redis-sessions-server: { enabled: "{{ mageops_redis_sessions_create }}" }
+  valkey-server: { enabled: "{{ mageops_valkey_create }}" }
+  valkey-sessions-server: { enabled: "{{ mageops_valkey_sessions_create }}" }
+
 
 aws_logs_loggers_app_default:
   syslog: { enabled: yes }
@@ -704,10 +707,12 @@ mageops_app_mysql_db: "{{ mageops_app_id_short }}"
 
 # Shall redis be installed/created automatically? (or provide host)
 mageops_redis_create: yes
+mageops_valkey_create: yes
 mageops_redis_host:
 mageops_redis_port: 6379
 
 mageops_redis_sessions_create: "{{ mageops_redis_create }}"
+mageops_valkey_sessions_create: "{{ mageops_redis_create }}"
 mageops_redis_sessions_host:
 mageops_redis_sessions_port: 6380
 
@@ -737,7 +742,9 @@ mageops_varnish_purge_logging: yes
 mageops_varnish_host: 127.0.0.1
 mageops_varnish_port: "{% if mageops_https_termination_enable %}8000{% else %}80{% endif %}"
 mageops_varnish_backend_port: "{% if varnish_is_in_autoscaling_group %}8080{% else %}80{% endif %}"
-
+mageops_varnish_trusted_ips : "{{ mageops_varnish_trusted_ips_global + mageops_varnish_trusted_ips_extra }}"
+mageops_varnish_trusted_ips_global: []
+mageops_varnish_trusted_ips_extra: []
 # The directory where application releases are stored - this is not public directory and not app root!
 mageops_app_web_dir: "{{ nginx_www_dir }}/{{ mageops_app_type }}"
 
@@ -925,7 +932,6 @@ mageops_trusted_cidr_blocks_global: []
 mageops_trusted_cidr_blocks_extra: []
 
 mageops_trusted_cidr_blocks: "{{ mageops_trusted_cidr_blocks_global + mageops_trusted_cidr_blocks_extra }}"
-
 
 # -----------------------------------------------------
 # --------  App Transactional E-mail Settings  --------
@@ -1168,25 +1174,25 @@ magento_core_config_settings_default:
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
 
   - name: Set secure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
 
   - name: Set unsecure media url to cloudfront domain
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
 
   - name: Set unsecure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain | default(false) is string }}"
+    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
 
 
 # Extra core config settings to be set at deploy,
@@ -1610,6 +1616,8 @@ opensearch_plugins:
 # --------  Redis  --------
 # -------------------------
 
+redis_valkey_flavor: redis
+
 redis_databases: 4
 
 # These are default redis settings, used for the base cache instance
@@ -1975,6 +1983,7 @@ mageops_packages_ops:
   - lsof
   - ncdu
   - net-tools
+  - patch
 
 # Handy packages installed on all nodes by default
 mageops_packages_common: "{{ mageops_packages_base + mageops_packages_tools + mageops_packages_ops }}"

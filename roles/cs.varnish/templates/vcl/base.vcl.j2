@@ -1,3 +1,18 @@
+{% macro synthetic_error_page(code='resp.status', resp='resp', data=none) %}
+    synthetic(
+        std.fileread("/etc/varnish/error" + {{ code }} + ".html")
+            {% if data %}
+            + "<script>window.MGS.error.data='" + data + "';</script>"
+            {% endif %}
+            + "</html>"
+    );
+
+    set {{ resp }}.http.Content-Type = "text/html; charset=utf-8";
+    set {{ resp }}.http.Cache-Control = "no-cache, no-store, must-revalidate";
+    set {{ resp }}.http.Pragma = "no-cache";
+    set {{ resp }}.http.Expires = "0";
+{% endmacro -%}
+
 vcl 4.0;
 
 import directors;

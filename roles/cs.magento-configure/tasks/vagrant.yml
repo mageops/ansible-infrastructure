@@ -18,7 +18,6 @@
         magento_code_directory: "{{ magento_release_dir }}"
     - include_tasks: 050-install-sample-data.yml
       when: magento_install_sample_data
-    - include_tasks: action/flush-cache.yml
     - include_tasks: 070-setup-modules.yml
     - include_tasks: 080-core-config.yml
     - include_tasks: 090-setup-upgrade.yml
