@@ -52,6 +52,10 @@ sub vcl_hash {
     {% block vcl_hash %}{% endblock %}
 }
 
+sub process_graphql_headers {
+    {% block process_graphql_headers %}{% endblock %}
+}
+
 sub vcl_backend_fetch {
     {% block vcl_backend_fetch %}{% endblock %}
 }

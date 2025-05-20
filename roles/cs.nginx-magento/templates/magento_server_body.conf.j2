@@ -105,7 +105,7 @@ location /rest/ {
 }
 
 location /pub/ {
-    location ~ ^/pub/media/(downloadable|customer|import|theme_customization/.*\.xml) {
+    location ~ ^/pub/media/(downloadable|customer|import|custom_options|theme_customization/.*\.xml) {
         deny all;
     }
 
@@ -150,7 +150,7 @@ location /static/ {
     }
     {% endif %}
 
-    location ~* \.(html|ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2|json)$ {
+    location ~* \.(ico|jpg|jpeg|png|gif|svg|svgz|webp|avif|avifs|js|css|eot|ttf|otf|woff|woff2|html|json|webmanifest|swf)$ {
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' '*';
             add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
@@ -209,7 +209,7 @@ location /media/ {
         deny all;
     }
 
-    location ~* \.(ico|jpg|jpeg|png|gif|svg|js|css|swf|eot|ttf|otf|woff|woff2|mp4)$ {
+    location ~* \.(ico|jpg|jpeg|png|gif|svg|svgz|webp|avif|avifs|js|css|eot|ttf|otf|woff|woff2|swf|mp4)$ {
         add_header Cache-Control "public";
         add_header X-Frame-Options "SAMEORIGIN";
         expires {{ nginx_static_files_expires }};
@@ -238,8 +238,17 @@ location /media/import/ {
     deny all;
 }
 
+  location /media/custom_options/ {
+      deny all;
+  }
+  
+  location /errors/ {
+      location ~* \.xml$ {
+          deny all;
+      }
+  }
 # PHP entry point for main application
-location ~ (resize|index|get|static|report|404|503)\.php$ {
+location ~ ^/(resize|index|get|static|errors/report|errors/404|errors/503|health_check)\.php$ {
     try_files $uri =404;
 
     if ($request_uri ~ ^/rest/.*$) {
@@ -317,6 +326,6 @@ location {{ custom.path_pattern }} {
 }
 {% endfor %}
 
-location ~ .*\.php$ {
+location ~* (\.php$|\.phtml$|\.htaccess$|\.htpasswd$|\.git) {
     deny all;
 }

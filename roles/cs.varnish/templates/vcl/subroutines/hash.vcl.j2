@@ -1,4 +1,4 @@
-if (req.http.cookie ~ "X-Magento-Vary=") {
+if ((req.url !~ "/graphql" || !req.http.X-Magento-Cache-Id) && req.http.cookie ~ "X-Magento-Vary=") {
     hash_data(regsub(req.http.cookie, "^.*?X-Magento-Vary=([^;]+);*.*$", "\1"));
 }
 
@@ -12,4 +12,8 @@ if (req.http.host) {
 # To make sure http users don't see ssl warning
 if (req.http.X-Forwarded-Proto) {
     hash_data(req.http.X-Forwarded-Proto);
+}
+
+if (req.url ~ "/graphql") {
+        call process_graphql_headers;
 }

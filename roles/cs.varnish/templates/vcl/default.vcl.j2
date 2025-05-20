@@ -26,6 +26,14 @@
 
 {% endblock %}
 
+{% block process_graphql_headers %}
+
+    {% filter indent(width=4) -%}
+    {% include "vcl/process_graphql_headers.vcl.j2" %}
+    {% endfilter %}
+
+{% endblock %}
+
 {% block vcl_backend_fetch %}
 
     {% filter indent(width=4) -%}

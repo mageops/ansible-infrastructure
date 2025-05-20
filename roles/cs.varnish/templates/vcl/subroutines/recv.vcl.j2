@@ -277,4 +277,10 @@ if (req.http.cookie ~ "X-Magento-Vary=") {
  # therefore this function mainly as workaround to this limitation. #}
 {% endif %}
 
+
+# Bypass authenticated GraphQL requests without a X-Magento-Cache-Id
+if (req.url ~ "/graphql" && !req.http.X-Magento-Cache-Id && req.http.Authorization ~ "^Bearer") {
+    return (pass);
+}
+
 return (hash);
