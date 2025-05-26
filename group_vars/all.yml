@@ -664,9 +664,6 @@ mageops_app_id: "{{ mageops_project }}_{{ mageops_environment }}"
 # Shorter version guaranteed to be at most 16 chars long (e.g. suitable for MySQL 5.6 username)
 mageops_app_id_short: "{{ mageops_project | truncate(10, true, '') }}_{{ mageops_environment | truncate(5, true, '') }}"
 
-# Enables special features that work with MageSuite only
-mageops_app_is_magesuite: yes
-
 mageops_app_user: "{{ mageops_app_type }}"
 mageops_app_user_home: "/home/{{ mageops_app_user }}"
 php_opcache_user_home: "{{ mageops_app_user_home }}"
@@ -894,7 +891,7 @@ mageops_http_pipeline_request_timeout_list:
   - "{{ php_http_request_max_execution_time|int }}"
   - "{{ magento_api_request_php_max_execution_time|int }}"
   - "{{ magento_admin_request_php_max_execution_time|int }}"
-  - "{{ magento_cron_request_php_max_execution_time|int }}"
+
 
 # Use this variable to override all timeouts present across
 # the whole HTTP pipeline/stack. The common use-case is that
@@ -992,9 +989,6 @@ magento_scd_advanced_js_bundling_strategy: baler
 # --------------------------------
 # --------  Magento Cron  --------
 # --------------------------------
-
-magento_cron_user: "{{ mageops_app_id }}"
-# magento_cron_password:
 
 magento_cron_disabled: no
 magento_cron_http: "{{ not aws_use }}"
@@ -1203,11 +1197,6 @@ magento_api_request_php_max_execution_time: "{{ php_http_request_max_execution_t
 # Separate limits for admin URLs
 magento_admin_request_php_memory_limit: "{{ php_http_request_memory_limit }}"
 magento_admin_request_php_max_execution_time: 300
-
-# You can adjust the parameters for cron request
-# Warning - this does not affect separate cron processes
-magento_cron_request_php_memory_limit: "{{ php_http_request_memory_limit }}"
-magento_cron_request_php_max_execution_time: "{{ php_http_request_max_execution_time }}"
 
 # Directory where Magento CLI file opcache is stored
 magento_php_opcache_file_cache_dir: "{{ magento_user_home }}/{{ php_opcache_file_cache_user_dirname }}"
@@ -1516,7 +1505,6 @@ nginx_confd_dir: "{{ nginx_etc_dir }}/conf.d"
 nginx_error_log: "{{ nginx_log_dir }}/error.log warn"
 nginx_access_log: "{{ nginx_log_dir }}/access.log main buffer=16k"
 
-nginx_cron_htpasswd_file: "{{ nginx_etc_dir }}/htpasswd"
 nginx_site_htpasswd_file: "{{ nginx_etc_dir }}/sitepasswd"
 
 nginx_app_port: "{{ mageops_varnish_backend_port }}"

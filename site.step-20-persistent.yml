@@ -81,8 +81,6 @@
           username: "{{ magento_rabbitmq_username }}"
           password: "{% if magento_rabbitmq_queue %}{{ magento_rabbitmq_password | mandatory }}{% endif %}"
       when: mageops_rabbitmq_create
-    - role: cs.magento-cron-http-trigger
-      when: mageops_app_is_magesuite
     - role: cs.ssh-proxy-user
       when: mageops_ssh_proxy_persistant
     - role: cs.tinyproxy

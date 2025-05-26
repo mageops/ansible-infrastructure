@@ -94,8 +94,6 @@
     - role: cs.nginx-url-blacklist
 
     - role: cs.nginx-magento
-      nginx_secure_cron_user: "{{ magento_cron_user }}"
-      nginx_secure_cron_password: "{{ magento_cron_password }}"
       nginx_secure_site: "{{ mageops_secure_site and not varnish_standalone }}"
       nginx_secure_site_user: "{{ mageops_secure_site_user }}"
       nginx_secure_site_password: "{{ mageops_secure_site_password }}"

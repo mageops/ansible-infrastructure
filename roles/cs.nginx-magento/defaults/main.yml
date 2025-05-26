@@ -1,8 +1,5 @@
 nginx_app_port: 8080
 
-nginx_cron_htpasswd_file: "{{ nginx_etc_dir }}/htpasswd"
-nginx_site_htpasswd_file: "{{ nginx_etc_dir }}/sitepasswd"
-
 nginx_magento_mode: "{{ magento_mode | default('production') }}"
 
 nginx_fcgi_upstream_conf_file: "{{ nginx_confd_dir }}/000-php-fpm-upstream.conf"

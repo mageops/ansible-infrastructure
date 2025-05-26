@@ -280,19 +280,6 @@ location ~ ^/(resize|index|get|static|errors/report|errors/404|errors/503|health
     include {{ nginx_magento_fastcgi_pass_include_path}};
 }
 
-location ~ cron\.php {
-    try_files $uri =404;
-
-    auth_basic "Cron Authentication";
-    auth_basic_user_file /etc/nginx/htpasswd;
-
-    set $PHP_MEMORY_LIMIT {{ magento_cron_request_php_memory_limit }};
-    set $PHP_MAX_EXECUTION_TIME {{ magento_cron_request_php_max_execution_time }};
-
-    fastcgi_index cron.php;
-    include {{ nginx_magento_fastcgi_pass_include_path}};
-}
-
 {% if mageops_php_file_cache_web %}
 location {{ php_opcache_precompile_path }} {
     allow   127.0.0.1;
