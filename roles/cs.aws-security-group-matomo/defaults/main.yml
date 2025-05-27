@@ -1,0 +1,9 @@
+
+aws_security_group_rds_create: no
+aws_security_group_redis_create: no
+aws_security_group_elasticsearch_create: no
+aws_security_group_name_prefix: mageops
+aws_security_group_persistant_extra_rules: []
+
+# Extra groups to allow access to RDS
+aws_security_group_rds_access_extra_groups: []

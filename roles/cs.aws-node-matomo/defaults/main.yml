@@ -1,0 +1,16 @@
+aws_matomo_node_ami_id: "{{ aws_ami_clean_base_info[aws_matomo_node_instance_type].image_id }}"
+aws_matomo_node_instance_type: t4g.small
+aws_matomo_node_ebs_volume_size: 20
+aws_matomo_node_inventory_group: matomo
+aws_matomo_node_instance_name: "{{ mageops_app_name }}-matomo"
+
+aws_matomo_node_launch_script_extra: ''
+aws_matomo_instance_id: false
+aws_matomo_node_security_groups:
+  - "{{ aws_security_group_ssh_id }}"
+
+# See `aws_ec2_ebs_gp3_*` vars in `group_vars/all.yml`
+aws_matomo_node_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', true) }}"
+aws_matomo_node_ebs_gp3_convert: "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
+aws_matomo_node_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
+aws_matomo_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"
