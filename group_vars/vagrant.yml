@@ -36,8 +36,8 @@ firewall_guarded_ports:
     - 446/tcp
     - 9200-9300/tcp
     - 2049/tcp
-    - "{{ elasticsearch_http_port }}/tcp"
-    - "{{ elasticsearch_transport_tcp_port }}/tcp"
+    - "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port ~ '/tcp', opensearch_http_port ~ '/tcp') }}"
+    - "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_transport_tcp_port ~ '/tcp', opensearch_transport_tcp_port ~ '/tcp') }}"
     - "{{ mageops_redis_port }}/tcp"
     - "{{ mageops_redis_sessions_port }}/tcp"
     - "{{ mageops_redis_port }}/tcp"

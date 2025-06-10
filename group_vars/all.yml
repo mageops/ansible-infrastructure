@@ -1805,7 +1805,7 @@ firewall_internal_services:
 
 firewall_internal_ports:
     - "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port ~ '/tcp', opensearch_http_port ~ '/tcp') }}"
-    - "{{ search_transport_tcp_port }}/tcp"
+    - "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_transport_tcp_port ~ '/tcp', opensearch_transport_tcp_port ~ '/tcp') }}"
     - "{{ mageops_redis_port }}/tcp"
 firewall_public_services:
     - http
