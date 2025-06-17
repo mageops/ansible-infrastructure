@@ -20,33 +20,32 @@
   vars:
     aws_ec2_user_launch_script: "{{ autoscaling_instance_start_script }}"
 
-- name: Create AutoScaling Group
-  ec2_asg:
-    state: present
+- name: Create AutoScaling Group using mixed_instances_policy with spot and m5 instances
+  amazon.aws.autoscaling_group:
     name: "{{ autoscaling_asg_name }}"
     region: "{{ aws_region }}"
-    availability_zones: "{{ aws_app_asg_availability_zones | join(',') }}"
-    launch_template:
-      launch_template_name: "{{ autoscaling_launch_template_name }}"
-    load_balancers: "{{ autoscaling_loadbalancers | default(omit, true) }}"
     min_size: "{{ autoscaling_asg_min_size }}"
     max_size: "{{ autoscaling_asg_max_size }}"
     desired_capacity: "{{ autoscaling_asg_desired_capacity }}"
     vpc_zone_identifier: "{{ aws_vpc_subnet_id }}"
     default_cooldown: "{{ autoscaling_asg_cooldown }}"
-    # Grace period for Healthcheck  tatus when new nodes are going up.
-    # The 300s default we had is waaaay too long for our setup and makes the
-    # deploy much, much longer (at least 300s long).
     health_check_period: "{{ autoscaling_healthcheck_grace_period }}"
     termination_policies: "{{ autoscaling_asg_termination_policies }}"
-    tags: "{{ aws_tags_default | combine(asg_name_tags, aws_tags_trait_immutable, autoscaling_instance_tags) | dict_to_tag_list }}"
-    # This ansible module does not handle instance replacement properly
-    # so we just update the ASG configuration here and will perform the
-    # replacement via AWS API in the next steps.
-    replace_instances: []
-  vars:
-    asg_name_tags:
-      - Name: "{{ autoscaling_asg_name }}"
+    launch_template:
+      launch_template_name: "{{ autoscaling_launch_template_name }}"
+    mixed_instances_policy:
+      instance_types:
+        - m5.large
+        - m5.xlarge
+        - m5a.large
+      instances_distribution:
+        on_demand_base_capacity: 1
+        on_demand_percentage_above_base_capacity: 0
+        spot_allocation_strategy: price-capacity-optimized
+    tags:
+      - key: Name
+        value: "{{ autoscaling_asg_name }}"
+        propagate_at_launch: true
   register: _aws_asg
 
 - name: Perform Rolling Instance Refresh
