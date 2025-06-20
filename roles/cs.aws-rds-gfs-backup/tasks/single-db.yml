@@ -1,16 +1,12 @@
 - name: Create daily snapshot
   shell: "aws rds create-db-snapshot --db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --db-instance-identifier '{{ rds_gfs_instance_id }}' --tags '{{ rds_gfs_daily_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
 
-- name: Wait until daily snapshot is created
-  shell: "aws rds wait db-snapshot-completed --db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --region '{{ aws_region }}'"
-
-- name: Create weekly snapshot from the daily one
-  shell: "aws rds copy-db-snapshot --target-db-snapshot-identifier '{{ rds_gfs_weekly_snapshot_id }}' --source-db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --tags '{{ rds_gfs_weekly_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
-  when: ansible_date_time.weekday_number | int == rds_gfs_weekly_snapshot_weekday_nr
-
-- name: Create monthly snapshot from the daily one
-  shell: "aws rds copy-db-snapshot --target-db-snapshot-identifier '{{ rds_gfs_monthly_snapshot_id }}' --source-db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --tags '{{ rds_gfs_monthly_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
-  when: ansible_date_time.day | int == rds_gfs_monthly_snapshot_monthday_nr
+- name: Wait until daily cluster snapshot is created
+  shell: "aws rds describe-db-snapshots --snapshot-type manual --db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --region '{{ aws_region }}'"
+  register: rds_gfs_daily_snapshot_status
+  until: (rds_gfs_daily_snapshot_status.stdout | default({})|from_json).DBSnapshots[0].Status == "available"
+  retries: 80
+  delay: 15
 
 - name: Get current snapshots
   amazon.aws.rds_snapshot_info:
@@ -20,6 +16,31 @@
   register: _rds_gfs_snapshots
 
 - debug: var=_rds_gfs_snapshots
+
+- name: Create weekly snapshot from the daily one
+  when: ansible_date_time.weekday_number | int == rds_gfs_weekly_snapshot_weekday_nr
+  block:
+    - name: Copy snapshow
+      shell: "aws rds copy-db-snapshot --target-db-snapshot-identifier '{{ rds_gfs_weekly_snapshot_id }}' --source-db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --tags '{{ rds_gfs_weekly_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
+    - name: Wait until weekly snapshot is created
+      shell: "aws rds describe-db-snapshots --db-snapshot-identifier '{{ rds_gfs_weekly_snapshot_id }}' --region '{{ aws_region }}'"
+      register: rds_gfs_weekly_snapshot_status
+      until: (rds_gfs_weekly_snapshot_status.stdout | default({})|from_json).DBSnapshots[0].Status == "available"
+      retries: 60
+      delay: 15
+
+- name: Create monthly snapshot from the daily one
+  when: ansible_date_time.day | int == rds_gfs_monthly_snapshot_monthday_nr
+  block:
+    - name: Copy snapshot
+      shell: "aws rds copy-db-snapshot --target-db-snapshot-identifier '{{ rds_gfs_monthly_snapshot_id }}' --source-db-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --tags '{{ rds_gfs_monthly_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
+    - name: Wait until monthly snapshot is created
+      shell: "aws rds describe-db-snapshots --db-snapshot-identifier '{{ rds_gfs_monthly_snapshot_id }}' --region '{{ aws_region }}'"
+      register: rds_gfs_monthly_snapshot_status
+      until: (rds_gfs_monthly_snapshot_status.stdout | default({})|from_json).DBSnapshots[0].Status == "available"
+      retries: 40
+      delay: 15
+
 
 - name: Get snapshots to be deleted
   set_fact:
