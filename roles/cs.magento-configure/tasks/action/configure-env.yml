@@ -8,7 +8,7 @@
             | combine(magento_app_etc_config_http_cache, recursive=true) }}
 
   - name: Enable ElasticSuite configuration
-    when: elasticsuite_version | default(false) and (mageops_elasticsearch_opensearch_flavor == "elasticsearch")
+    when: elasticsuite_version | default(false) and (mageops_elasticsearch_opensearch_flavor == "elasticsearch" or mageops_elasticsearch_opensearch_flavor == "external")
     set_fact:
       magento_app_etc_config: >-
         {{ magento_app_etc_config
