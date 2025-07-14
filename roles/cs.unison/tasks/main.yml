@@ -7,7 +7,7 @@
       =              WARNING! Unison will not be installed!              =
       ====================================================================
 
-      Automated installation is supported only on macOS and CentOS and your
+      Automated installation is supported only on macOS and Rocky and your
       system has been identified as: {{ ansible_distribution }}
 
       You will have to install unison and fsmonitor manually yourself
@@ -17,6 +17,6 @@
   import_tasks: install-macos.yml
   when: ansible_distribution | lower == 'macosx'
 
-- name: Install unison client for CentOS
+- name: Install unison client for Rocky
   import_tasks: install-rocky.yml
   when: ansible_distribution | lower == 'rocky'

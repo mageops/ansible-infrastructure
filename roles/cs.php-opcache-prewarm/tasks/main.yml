@@ -20,7 +20,7 @@
     done
 
 - name: Install vmtouch
-  yum:
+  dnf:
     name: vmtouch
     state: present
 

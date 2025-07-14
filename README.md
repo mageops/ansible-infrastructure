@@ -10,10 +10,10 @@
 
 ## CI/CD Automation
 
-**This code handles infrastucture provisioning, maintenance and deployment only**. 
+**This code handles infrastucture provisioning, maintenance and deployment only**.
 This repository does not contain any CI/CD automation for building, testing or
 running the provisioning itself. We do that internally with reusable Jenkins
-pipelines (as libraries) - as this setup is very specific to our workflow we are 
+pipelines (as libraries) - as this setup is very specific to our workflow we are
 not planning to open-source it in the near future.
 
 ## MageSuite ecosystem
@@ -23,12 +23,8 @@ some features are only avaialble (and tailored for) [MageSuite](https://magesuit
 
 ## Cloud infrastructre
 
-Currently the full feature set is only available when using AWS as the cloud platform, however, 
-it's possible (and tested) to use this code to provision any CentOS 7 VM including local development environment. 
-
-_PS There's also an [experimental docker container](https://github.com/mageops/docker-centos-systemd) which can 
-be fully provisioned by this code and run a full CentOS installation like a VM. This is intended to be used 
-only for local development though and not yet supported_.
+Currently the full feature set is only available when using AWS as the cloud platform, however,
+it's possible (and tested) to use this code to provision any Rocky 9 VM including local development environment.
 
 ## Feature highlights
 
@@ -38,8 +34,8 @@ only for local development though and not yet supported_.
     to the varnish load-balancer to avoid cache generation penalty after traffic hit
 - Varnish caching tailored for Magento with multiple configurable custom features
 - Built-in support for elasticsearch / [ElasticSuite](https://github.com/Smile-SA/elasticsuite)
-- Redis Magento cache backend with 
-  - Separate redis instance for session storage 
+- Redis Magento cache backend with
+  - Separate redis instance for session storage
 - Customizable multi-website / multi-shop deployments
 - Letsencrypt certificates support
 - Cloudfront CDN
@@ -48,7 +44,7 @@ only for local development though and not yet supported_.
 - Support for arbitrary file sharing across nodes via AWS EFS
 - Per path pattern customizable PHP limits
 - Customizable request throttling (rate-limiting)
-- On-demand import instance 
+- On-demand import instance
   - EC2 instance started for scheduled imports automatically and terminated
     once the import is finished
   - Allows to use a different instance type for heavy scheduled imports
@@ -58,7 +54,7 @@ only for local development though and not yet supported_.
   - Useful for processing heavy workloads without disrupting shop performance (e.g. ERP Magento API integrations)
 - Magento queue consumers support with RabbitMQ and supervisord
 - Logs pushed to CloudWatch with slack notifications for critical errors
-- VPC and SG-based network communication rules allowing internal service communication 
+- VPC and SG-based network communication rules allowing internal service communication
   strictly on a need-to basis
 - Language and country-based redirects
 - On-demand PHP debugging on production without affecting the shop's performance or configuration
@@ -76,18 +72,18 @@ The previous internal repository had **2000+ commits**, **300+ merge requests** 
 10+ contributors across **3+ years of development**.
 
 The current state is a result of hundreds of hours of meetings, debugging, brainstorms
-investigations and combined expertise of all our developers, PMs and clients. 
+investigations and combined expertise of all our developers, PMs and clients.
 
 A lot of the solutions are tailored for solving real-world problems and use-cases that came
 up when hosting and maintaining highly-customized Magento-based shops. The value of such
-experience-based solutions cannot be overestimated. It wouldn't be possible to come up and 
+experience-based solutions cannot be overestimated. It wouldn't be possible to come up and
 design all of these tiny details form scratch without having went through the all of problems first-hand.
 
 ## Documentation
 
-At the time of open source release most of the documentation was scattered 
-across internal creativestyle services thus any leftovers have been removed 
-to avoid confusion. New documentation will start appearing shortly as part 
+At the time of open source release most of the documentation was scattered
+across internal creativestyle services thus any leftovers have been removed
+to avoid confusion. New documentation will start appearing shortly as part
 of this repository succesively.
 
 ## Utilities

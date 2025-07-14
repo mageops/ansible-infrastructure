@@ -87,7 +87,6 @@
       become: no
       when: aws_use
 
-    - role: cs.switch-to-dnf
     - role: cs.deploy
       deploy_install_actions:
         - name: Configure Magento
@@ -121,7 +120,6 @@
         pio_tasks: app
       when: mageops_pio_worker_enable
 
-    - role: cs.pkg-mgr-cleanup
   tasks:
     - name: Execute custom post deploy tasks
       include_tasks: "{{ mageops_extra_tasks_deploy }}"

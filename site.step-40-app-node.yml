@@ -22,8 +22,6 @@
       become: no
       when: aws_use
 
-    - role: cs.switch-to-dnf
-
     - role: cs.mageops-cli-user
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:

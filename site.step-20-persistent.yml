@@ -16,7 +16,6 @@
       delegate_facts: no
       become: no
       when: aws_use
-    - role: cs.switch-to-dnf
     - role: cs.versionlock
       node_name: persistent
       versionlock_packages: "{{ versionlock_persistent_packages + versionlock_persistent_packages_base + versionlock_persistent_packages_extra }}"
@@ -94,7 +93,6 @@
       when: mageops_monitoring_enabled
     - role: cs.packages
     - role: cs.tracer
-    - role: cs.pkg-mgr-cleanup
 
   tasks:
     - set_fact:

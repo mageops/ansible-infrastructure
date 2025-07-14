@@ -1,5 +1,5 @@
 - name: Install postfix pacakges
-  yum:
+  dnf:
     name:
       - postfix
       - cyrus-sasl-plain

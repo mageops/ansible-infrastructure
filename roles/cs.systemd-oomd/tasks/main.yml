@@ -1,6 +1,6 @@
 ---
 - name: Install systemd-oomd
-  ansible.builtin.yum:
+  dnf:
     name: systemd-oomd
     state: present
 

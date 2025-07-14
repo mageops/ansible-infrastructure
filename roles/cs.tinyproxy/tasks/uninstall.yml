@@ -1,4 +1,4 @@
 - name: uninstall tinyproxy
-  yum:
+  dnf:
     name: tinyproxy
     state: absent
