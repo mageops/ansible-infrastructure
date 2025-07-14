@@ -6,7 +6,6 @@
       delegate_to: localhost
       become: no
       when: aws_use
-    - role: cs.switch-to-dnf
     - role: cs.versionlock
       node_name: varnish
       versionlock_packages: "{{ versionlock_varnish_packages + versionlock_varnish_packages_base + versionlock_varnish_packages_extra }}"
@@ -96,7 +95,6 @@
 
     - role: cs.packages
     - role: cs.tracer
-    - role: cs.pkg-mgr-cleanup
 
   tasks:
     - set_fact:

@@ -1,8 +1,0 @@
-- name: Enable Szpadel's Centos Extras Repository
-  yum_repository:
-    name: szpadel-centos-extras
-    description: Szpadel's Centos Extras Repository
-    baseurl: https://copr-be.cloud.fedoraproject.org/results/szpadel/centos-extras/epel-7-$basearch/
-    gpgkey: https://copr-be.cloud.fedoraproject.org/results/szpadel/centos-extras/pubkey.gpg
-    # Cache results every 30 min to make sure that we can push updates quickly
-    metadata_expire: "1800"

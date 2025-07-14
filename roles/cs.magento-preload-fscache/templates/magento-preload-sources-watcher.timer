@@ -6,8 +6,8 @@ Unit=magento-preload-sources-watcher.service
 OnUnitActiveSec={{ magento_fscache_preload_config.update_interval }}
 Persistent=no
 
-# Not supported in CentOS 7 workaround by deactivating timer from service
-# RemainAfterElapse=no
+[Service]
+RemainAfterElapse=no
 
 [Install]
 WantedBy=multi-user.target

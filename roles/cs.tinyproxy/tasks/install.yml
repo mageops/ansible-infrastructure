@@ -1,6 +1,6 @@
 ---
 - name: install tinyproxy
-  yum:
+  dnf:
     name: tinyproxy
     state: latest
 
