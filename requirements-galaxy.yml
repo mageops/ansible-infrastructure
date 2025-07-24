@@ -27,5 +27,6 @@ collections:
   version: 2.18.0
 - name: ansible.netcommon
   version: 5.1.2
+- containers.podman
 - community.crypto
 - ansible.posix
