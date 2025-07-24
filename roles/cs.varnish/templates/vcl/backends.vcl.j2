@@ -26,10 +26,27 @@ backend {{ instance.instance_id | replace('-','') }} {
 }
 {% endfor %}
 
+{% for instance in (varnish_backend_instances_app + varnish_backend_instances_extra) %}
+backend pwa_{{ instance.instance_id | replace('-','') }} {
+    .host = "{{ instance.private_ip_address }}";
+    .port = "8080";
+	.max_connections = {{ varnish_backend_max_conns }};
+	.first_byte_timeout     = {{ varnish_backend_first_byte_timeout }};    # How long to wait before we receive a first byte from our backend?
+	.connect_timeout        = 5s;      # How long to wait for a backend connection?
+	.between_bytes_timeout  = 60s;     # How long to wait between bytes received from our backend?
+}
+{% endfor %}
+
+
 sub backends_init {
 	new app_director = directors.round_robin();
 {% for instance in varnish_backend_instances_app %}
 	app_director.add_backend({{ instance.instance_id | replace('-','') }});
+{% endfor %}
+
+	new pwa_director = directors.round_robin();
+{% for instance in varnish_backend_instances_app %}
+	pwa_director.add_backend(pwa_{{ instance.instance_id | replace('-','') }});
 {% endfor %}
 
 	new extra_director = directors.round_robin();

@@ -21,7 +21,14 @@
 
 {% if varnish_standalone %}
     {# This has to be first line, remember this is not declarative config, we always need the director! #}
-    set req.backend_hint = app_director.backend();
+
+
+    if (req.http.Host == "{{ mageops_admin_domain }}" ) {
+            set req.backend_hint = app_director.backend();
+        }
+    else {
+        set req.backend_hint = pwa_director.backend();
+    }
 
     if (req.http.X-Use-Extra-Instance
         {% if aws_extra_app_asg_passthrough_uagent_pattern %}
@@ -227,6 +234,11 @@ if (req.url ~ "(?i)^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|
     ) {
         return (synth(401, "Restricted"));
     }
+    if (req.http.Authorization ~ "^Basic ") {
+      unset req.http.Authorization;
+      unset req.http.Proxy-Authorization;
+    }
+
 {% endif %}
 
 # Compression filter. See https://www.varnish-cache.org/trac/wiki/FAQ/Compression
