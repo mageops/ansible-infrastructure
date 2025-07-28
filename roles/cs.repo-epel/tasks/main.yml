@@ -7,6 +7,11 @@
 
 - name: Ensure EPEL is enabled
   command: yum-config-manager --enable epel-testing
+  when: repo_epel_testing | bool
+
+- name: Ensure EPEL is disabled
+  command: yum-config-manager --disable epel-testing
+  when: not repo_epel_testing | bool
 
 - name: Ensure crb is enabled
   command: yum-config-manager --enable crb

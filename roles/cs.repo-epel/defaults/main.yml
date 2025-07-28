@@ -1,3 +1,4 @@
 repo_epel_package_name: epel-release
 repo_epel_name: epel
+repo_epel_testing: yes
 repo_epel_enabled: yes
