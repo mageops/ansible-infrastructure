@@ -1,0 +1,55 @@
+[Unit]
+Description=shlink URL shortener {% if shlink_instance | default(false, true) %} at {{ shlink_instance }}{% endif %}
+After=syslog.target network.target
+Wants=network-online.target
+
+[Service]
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=shlink
+
+User={{ shlink_user }}
+Group={{ shlink_group }}
+WorkingDirectory={{ shlink_home }}
+
+Type=simple
+
+# Try to update image, pulls can fail due to docker.io rate-limits when not logged in
+ExecStartPre=-/usr/bin/podman \
+                pull \
+                    --quiet \
+                        {{ shlink_container_image }}
+
+# Work around podman bug which sometimes thinks exited container is still running
+ExecStartPre=-/usr/bin/podman \
+                rm \
+                    --force \
+                        {{ shlink_container_name }}
+
+ExecStart=/usr/bin/podman \
+                run \
+                    --rm \
+                    --pull missing \
+                    --volume {{ shlink_conf_volume_src }}:{{ shlink_conf_mountpoint }} \
+                    {% for mount in shlink_data_mounts -%}
+                    --volume {{ shlink_data_volume_src }}/{{ mount }}:{{ shlink_data_mountpoint_base }}/{{ mount }} \
+                    {% endfor -%}
+                    --publish {{ shlink_http_bind_host }}:{{ shlink_http_bind_port }}:{{ shlink_http_container_port }} \
+                    --name {{ shlink_container_name }} \
+                        {{ shlink_container_image }}
+
+# Clean-up any old image versions
+ExecStartPost=-/usr/bin/podman \
+                image prune
+
+ExecStop=/usr/bin/podman \
+                stop \
+                    --timeout 15 \
+                        {{ shlink_container_name }}
+
+Restart=on-failure
+RestartSec=30
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

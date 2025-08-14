@@ -116,7 +116,7 @@
   register: aws_security_group_persistant
 
 - name: Create security group for RDS
-  ec2_group:
+  amazon.aws.ec2_group:
     name: "{{ aws_security_group_rds_name }}"
     description: "{{ mageops_app_name }} RDS security group"
     region: "{{ aws_region }}"

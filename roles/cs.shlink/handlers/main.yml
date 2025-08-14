@@ -1,0 +1,9 @@
+- name: Reload systemctl daemon
+  systemd:
+    daemon_reload: yes
+    daemon_reexec: yes
+
+- name: Restart shlink
+  service:
+    name: "{{ shlink_service_name }}.service"
+    state: restarted
