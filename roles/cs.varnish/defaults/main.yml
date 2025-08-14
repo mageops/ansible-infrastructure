@@ -231,3 +231,5 @@ varnish_gzip_bypass_extensions:
   - bz2
   - webp
   - tbz
+
+varnish_auth_bypass_urls: []
