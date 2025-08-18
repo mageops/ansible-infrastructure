@@ -15,7 +15,8 @@
     loop_var: target
     label: "{{ target.arn }} -> {{ normalized_arn }}"
   vars:
-    normalized_arn: "{{ target.arn | regex_replace('^(.*lambda:.*:function:.*):[0-9]+$', '\\1') }}"
+    # When lambda is created ansible returns function arn containing $LATEST, while when it's already present it's returned without it
+    normalized_arn: "{{ target.arn | regex_replace('^(.*lambda:.*:function:.*):[0-9]+$', '\\1') | regex_replace(':\\$LATEST$', '') }}"
 
 - name: Setup autoscaling event trigger
   cloudwatchevent_rule:
