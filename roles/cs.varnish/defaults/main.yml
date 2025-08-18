@@ -232,4 +232,7 @@ varnish_gzip_bypass_extensions:
   - webp
   - tbz
 
+# List of url prefixes that will not be protected by basic auth, when `varnish_secure_site` is enabled
+# Urls are interpreted as varnish regular expressions
+# Each url should start with `/`
 varnish_auth_bypass_urls: []
