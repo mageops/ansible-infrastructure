@@ -1704,17 +1704,21 @@ varnish_strip_params:
   - "gclid"
   - "utm_[^=&]+"
   - "gdftrk"
-  - "_ga"
+  - "_ga" # google analytics
+  - "_gl" # google analytics
   - "mc_[^=&]+"
   - "trk_[^=&]+"
   - "dm_i"
   - "fbclid" # facebook
-  - "ttclid" # ticktock
+  - "ttclid" # tiktok
   - "wbraid" # google
-  - "gad_source" # google
+  - "gad_[^=&]+" # google ads
+  - "adposition" # google ads
   - "srsltid" # google
   - "gbraid" # google
   - "msclkid" # microsoft
+  - "sc_[^=&]+" # emarsys
+  - "tduid" # tradedoubler
   - "{{ https_termination_redirect_source_domain_param }}"
   - "[0-9]+" # common bot cache busting pattern
 
