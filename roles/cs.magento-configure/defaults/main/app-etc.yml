@@ -45,7 +45,6 @@ magento_app_etc_config:
         password: "{{ mageops_app_mysql_pass }}"
         model: mysql4
         engine: innodb
-        initStatements: "SET NAMES utf8;"
         active: "1"
 
   resource:
