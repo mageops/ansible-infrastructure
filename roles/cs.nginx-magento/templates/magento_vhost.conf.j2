@@ -1,3 +1,10 @@
+{% if nginx_custom_redirects %}
+   map $http_x_forwarded_proto $redirect_scheme {
+    default $scheme;
+    https   https;
+}
+{% endif %}
+
 {% if nginx_magento_run_type in ('store', 'website') %}
 map $host $MAGE_RUN_CODE {
 {% if nginx_mage_default_run_code %}
@@ -36,7 +43,7 @@ server {
 
 {% if nginx_custom_redirects %}
     if ($perm_redirect_uri) {
-        return 301 $scheme://$host$perm_redirect_uri;
+        return 301 $redirect_scheme://$host$perm_redirect_uri;
     }
 {% endif %}
 
@@ -100,7 +107,7 @@ server {
 
 {% if nginx_custom_redirects %}
     if ($perm_redirect_uri) {
-        return 301 $scheme://$host$perm_redirect_uri;
+        return 301 $redirect_scheme://$host$perm_redirect_uri;
     }
 {% endif %}
 
