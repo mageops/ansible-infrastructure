@@ -140,6 +140,6 @@ if ( $server_name != "{{ regex }}" ) {
 {# Render rewrite #}
 {% for rule in nginx_language_redirect_multilevel_rules %}
 if ( $match_{{loop.index}} = 1 ) {
-  rewrite {{ rule.rewrite.source }} {{ rule.rewrite.target }} redirect;
+  rewrite {{ rule.rewrite.source }} {{ rule.rewrite.target }} {{ rule.rewrite.rewrite_type | default('redirect') }};
 }
 {% endfor %}

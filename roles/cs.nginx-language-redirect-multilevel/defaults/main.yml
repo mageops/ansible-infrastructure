@@ -33,9 +33,7 @@ nginx_language_redirect_multilevel_rules: []
 #   rewrite:
 #     source: "^/(.*)$"
 #     target: "/en/$1"
-
-
-
+#     rewrite_type: "permanent" # optional, default is "redirect"
 
 # configuration file paths
 nginx_language_redirect_multilevel_conf_filename: "30-language-redirect.conf"
