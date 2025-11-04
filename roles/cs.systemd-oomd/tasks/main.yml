@@ -10,15 +10,16 @@
     enabled: yes
     state: started
 
-- name: Check if psi=1 is already in kernel parameters
-  ansible.builtin.shell:
-    cmd: grubby --info=ALL | grep 'args.*psi=1'
+- name: Check if any kernel is missing psi=1
+  ansible.builtin.shell: |
+    set -o pipefail
+    grubby --info=ALL | grep args | grep -v "psi=1"
   register: _psi_check
   changed_when: false
   failed_when: _psi_check.rc > 1
 
 - name: Add psi=1 to kernel parameters using grubby
-  ansible.builtin.shell:
-    cmd: grubby --update-kernel=ALL --args=psi=1
-  when: _psi_check.stdout == ""
+  ansible.builtin.shell: |
+    grubby --update-kernel=ALL --args=psi=1
+  when: _psi_check.stdout != ""
   notify: Reboot System
