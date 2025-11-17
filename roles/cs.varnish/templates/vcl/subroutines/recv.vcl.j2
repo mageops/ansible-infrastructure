@@ -14,6 +14,12 @@
     }
 {% endif %}
 
+{% if varnish_user_agent_blacklist | length > 0 %}
+    if (req.http.User-Agent && req.http.User-Agent ~ "(?i){{ varnish_user_agent_blacklist | join('|') }}") {
+        return (synth(401, "Restricted"));
+}
+{% endif %}
+
 {% if varnish_throttling_enabled %}
 {# Throttling shall be evaluated first after any redirects because if we throtthle then nothing else is done anyway #}
 {% include "vcl/subroutines/recv_throttling.vcl.j2" %}

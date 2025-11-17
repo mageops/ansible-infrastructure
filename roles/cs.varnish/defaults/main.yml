@@ -137,6 +137,8 @@ varnish_throttling_rules: []
 # This can be used to add for example generic POST limit
 varnish_throttling_rules_always: []
 
+varnish_user_agent_blacklist: []
+
 varnish_backend_instances_extra: []
 varnish_backend_instances_app:
   - private_ip_address: "{{ varnish_default_backend_ip }}"
