@@ -1,12 +1,24 @@
 - name: Ensure EPEL repo release package is installed and up-to-date
   dnf:
     name: "{{ repo_epel_package_name }}"
+  register: ensure_epel_repo_release_package_is_installed_and_up_to_date_result
+  retries: 30
+  until: ensure_epel_repo_release_package_is_installed_and_up_to_date_result is succeeded
 
 - name: Ensure EPEL is enabled
   command: yum-config-manager --enable epel
+  register: ensure_epel_is_enabled_result
+  retries: 30
+  until: ensure_epel_is_enabled_result is succeeded
 
 - name: Ensure EPEL is enabled
   command: yum-config-manager --enable epel-testing
+  register: ensure_epel_testing_is_enabled_result
+  retries: 30
+  until: ensure_epel_testing_is_enabled_result is succeeded
 
 - name: Ensure crb is enabled
   command: yum-config-manager --enable crb
+  register: ensure_crb_is_enabled_result
+  retries: 30
+  until: ensure_crb_is_enabled_result is succeeded

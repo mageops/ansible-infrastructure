@@ -17,6 +17,9 @@
   dnf:
     name: goaccess
     state: present
+  register: ensure_goaccess_is_installed_result
+  retries: 30
+  until: ensure_goaccess_is_installed_result is succeeded
 
 - name: Install goaccess prerotate script
   template:

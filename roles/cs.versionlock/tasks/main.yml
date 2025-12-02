@@ -4,6 +4,9 @@
       - yum-plugin-versionlock
       - dnf-plugin-versionlock
     state: latest
+  register: install_versionlock_plugin_result
+  retries: 30
+  until: install_versionlock_plugin_result is succeeded
 
 - name: Install yum versionlock
   blockinfile:

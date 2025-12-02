@@ -40,11 +40,14 @@
 
 - name: Install AWS EFS utils
   dnf:
-    name:
-        - stunnel
-        - nfs-utils
-        - "{{ efs_utils_package }}"
-    state: present
+      name:
+          - stunnel
+          - nfs-utils
+          - "{{ efs_utils_package }}"
+      state: present
+  register: install_aws_efs_utils_result
+  retries: 30
+  until: install_aws_efs_utils_result is succeeded
 
 - name: Make sure root mount points exists
   file:

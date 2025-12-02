@@ -11,3 +11,6 @@
   dnf:
     name: "{{ containerized_tasks_packages }}"
     state: absent
+  register: clean_packages_result
+  retries: 30
+  until: clean_packages_result is succeeded

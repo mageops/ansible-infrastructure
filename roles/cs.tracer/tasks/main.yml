@@ -2,6 +2,9 @@
   dnf:
     name: tracer
     state: latest
+  register: install_tracer_result
+  retries: 30
+  until: install_tracer_result is succeeded
 
 - name: Check if system needs to be rebooted
   shell: tracer -va

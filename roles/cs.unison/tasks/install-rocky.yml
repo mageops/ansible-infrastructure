@@ -11,9 +11,15 @@
       - unison-static
       - unison-ocaml406
     state: absent
+  register: rocky_make_sure_conflicting_packages_are_absent_result
+  retries: 30
+  until: rocky_make_sure_conflicting_packages_are_absent_result is succeeded
 
 - name: <Rocky> Install latest unison version from MageOps RPM repo
   dnf:
     name: unison
     state: latest
     enablerepo: mageops
+  register: rocky_install_latest_unison_version_from_mageops_rpm_repo_result
+  retries: 30
+  until: rocky_install_latest_unison_version_from_mageops_rpm_repo_result is succeeded

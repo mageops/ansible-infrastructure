@@ -2,6 +2,9 @@
   package:
     name: "{{ redis_uninstalling_flavor }}"
     state: "absent"
+  register: uninstall_redis_valkey_packages_result
+  retries: 30
+  until: uninstall_redis_valkey_packages_result is succeeded
 
 - name: Install redis/valkey packages
   package:
@@ -10,3 +13,6 @@
   notify:
     - Reload systemctl daemon
     - "Restart redis/valkey"
+  register: install_redis_valkey_packages_result
+  retries: 30
+  until: install_redis_valkey_packages_result is succeeded

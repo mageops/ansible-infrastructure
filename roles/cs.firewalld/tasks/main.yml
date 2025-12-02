@@ -1,6 +1,9 @@
 - name: Install firewalld
   dnf:
     name: firewalld
+  register: install_firewalld_result
+  retries: 30
+  until: install_firewalld_result is succeeded
 
 - name: Start & enable firewalld
   service:

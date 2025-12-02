@@ -2,3 +2,6 @@
   yum:
     name: tinyproxy
     state: absent
+  register: uninstall_tinyproxy_result
+  retries: 30
+  until: uninstall_tinyproxy_result is succeeded

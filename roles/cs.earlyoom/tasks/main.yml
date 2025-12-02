@@ -2,6 +2,9 @@
   dnf:
     name: earlyoom
     state: present
+  register: install_earlyoom_packages_result
+  retries: 30
+  until: install_earlyoom_packages_result is succeeded
 
 - name: Configure earlyoom
   template:

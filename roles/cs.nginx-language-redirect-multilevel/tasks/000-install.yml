@@ -3,6 +3,9 @@
   dnf:
     name: "{{ packages }}"
     state: "{{ (nginx_language_redirect_multilevel_geoip_mode == 'geolite2') | ternary('latest', 'absent') }}"
+  register: install_latest_nginx_geoip_module_dependencies_result
+  retries: 30
+  until: install_latest_nginx_geoip_module_dependencies_result is succeeded
   vars:
     packages:
       - nginx-module-geoip2

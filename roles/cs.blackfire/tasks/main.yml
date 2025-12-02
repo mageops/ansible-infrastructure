@@ -4,6 +4,9 @@
       dnf:
         name: gpgme
         state: present
+      register: install_blackfire_when_configured_result
+      retries: 30
+      until: install_blackfire_when_configured_result is succeeded
 
     - name: Add Blackfire repository
       template:
@@ -14,11 +17,17 @@
       dnf:
         name: "{{ blackfire_deprecated_packages }}"
         state: absent
+      register: ensure_blackfire_deprecated_packages_are_gone_result
+      retries: 30
+      until: ensure_blackfire_deprecated_packages_are_gone_result is succeeded
 
     - name: Ensure Blackfire packages are installed.
       dnf:
         name: "{{ blackfire_packages }}"
         state: present
+      register: ensure_blackfire_packages_are_installed_result
+      retries: 30
+      until: ensure_blackfire_packages_are_installed_result is succeeded
 
     - name: Create agent config
       template:

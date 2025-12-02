@@ -7,6 +7,9 @@
   dnf:
     name: awscli
     state: latest
+  register: install_awscli_result
+  retries: 30
+  until: install_awscli_result is succeeded
 
 - name: Ensure default AWS Region is set
   ini_file:

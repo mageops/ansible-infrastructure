@@ -2,6 +2,9 @@
   dnf:
     name: python3-cryptography
     state: present
+  register: install_ansible_runtime_deps_result
+  retries: 30
+  until: install_ansible_runtime_deps_result is succeeded
 
 - name: Generate vhost private key
   openssl_privatekey:

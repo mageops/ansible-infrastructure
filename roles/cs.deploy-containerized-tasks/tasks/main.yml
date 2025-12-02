@@ -9,6 +9,9 @@
           notify:
             - Clean docker data
             - Clean packages
+          register: containerized_tasks_packages_result
+          retries: 30
+          until: containerized_tasks_packages_result is succeeded
 
         - name: Reload systemd
           systemd:

@@ -4,6 +4,9 @@
       - nodejs
       - yarnpkg
     state: latest
+  register: install_nodejs_and_yarn_result
+  retries: 30
+  until: install_nodejs_and_yarn_result is succeeded
 
 - name: Install user-global NPM packages
   npm:

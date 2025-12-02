@@ -12,6 +12,9 @@
           ) | unique
       }}
     state: present
+  register: install_php_and_dependency_packages_result
+  retries: 30
+  until: install_php_and_dependency_packages_result is succeeded
 
 - name: Add root as required PHP user
   set_fact:

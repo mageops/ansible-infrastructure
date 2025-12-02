@@ -1,6 +1,9 @@
 - name: Ensure MariaDB repo release package is installed and up-to-date
   dnf:
     name: "{{ repo_mariadb_package_name }}"
+  register: ensure_mariadb_repo_release_package_is_installed_and_up_to_date_result
+  retries: 30
+  until: ensure_mariadb_repo_release_package_is_installed_and_up_to_date_result is succeeded
 
 - name: Ensure chosen mariadb repo variants are enabled
   ini_file:

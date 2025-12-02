@@ -3,6 +3,9 @@
   ansible.builtin.yum:
     name: systemd-oomd
     state: present
+  register: install_systemd_oomd_result
+  retries: 30
+  until: install_systemd_oomd_result is succeeded
 
 - name: Enable and start systemd-oomd
   service:

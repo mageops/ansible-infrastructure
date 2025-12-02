@@ -2,3 +2,6 @@
   dnf:
     name: "{{ aws_cloudwatch_agent_package }}"
     state: latest
+  register: install_aws_cloudwatch_agent_result
+  retries: 30
+  until: install_aws_cloudwatch_agent_result is succeeded

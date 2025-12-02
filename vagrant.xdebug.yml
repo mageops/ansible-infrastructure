@@ -5,6 +5,9 @@
       dnf:
         state: present
         name: php-pecl-xdebug3
+      register: install_xdebug_extension_result
+      retries: 30
+      until: install_xdebug_extension_result is succeeded
       when: xdebug_enable | bool
     - name: Reconfigure xdebug
       lineinfile:
@@ -23,6 +26,9 @@
       dnf:
         state: absent
         name: php-pecl-xdebug3
+      register: remove_xdebug_extension_result
+      retries: 30
+      until: remove_xdebug_extension_result is succeeded
       when: not xdebug_enable | bool
     - name: Restart php-fpm
       service:

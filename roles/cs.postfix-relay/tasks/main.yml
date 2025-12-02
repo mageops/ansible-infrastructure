@@ -3,6 +3,9 @@
     name:
       - postfix
       - cyrus-sasl-plain
+  register: install_postfix_pacakges_result
+  retries: 30
+  until: install_postfix_pacakges_result is succeeded
 
 - name: Configure postfix relay password
   lineinfile:

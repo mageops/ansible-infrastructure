@@ -25,6 +25,9 @@
         state: present
         name: "{{ tideways_packages }}"
       notify: PHP Configuration Changed
+      register: enable_tideways_result
+      retries: 30
+      until: enable_tideways_result is succeeded
 
     - name: Configure tideways daemon
       copy:
@@ -46,6 +49,9 @@
       dnf:
         name: "{{ tideways_packages }}"
         state: absent
+      register: disable_tideways_result
+      retries: 30
+      until: disable_tideways_result is succeeded
 
     - name: Uninstall tideways config
       file:

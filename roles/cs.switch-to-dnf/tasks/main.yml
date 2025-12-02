@@ -5,6 +5,9 @@
       - python3-dnf-plugins-core
       - python3-dnf-plugin-cow
     state: present
+  register: install_dnf_for_speedup_when_installing_packages_result
+  retries: 30
+  until: install_dnf_for_speedup_when_installing_packages_result is succeeded
 
 - name: Set dnf configuration
   copy:

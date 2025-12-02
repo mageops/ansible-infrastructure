@@ -1,6 +1,9 @@
 - name: Install sudo package
   dnf:
     name: sudo
+  register: install_sudo_package_result
+  retries: 30
+  until: install_sudo_package_result is succeeded
 
 - name: Add superuser group
   group:

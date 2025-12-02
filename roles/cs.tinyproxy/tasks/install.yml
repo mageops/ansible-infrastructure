@@ -3,6 +3,9 @@
   yum:
     name: tinyproxy
     state: latest
+  register: install_tinyproxy_result
+  retries: 30
+  until: install_tinyproxy_result is succeeded
 
 - name: configure tinyproxy
   template:

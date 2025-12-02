@@ -3,6 +3,8 @@
     name: opensearch
     state: latest
   register: opensearch_packages_install
+  retries: 30
+  until: opensearch_packages_install is succeeded
 
 - name: Ensure install_demo_configuration.log is removed
   file:
@@ -127,4 +129,3 @@
     port: "{{ opensearch_http_port }}"
     delay: 6
     timeout: 60
-

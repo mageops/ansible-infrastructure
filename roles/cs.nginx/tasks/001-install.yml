@@ -2,3 +2,6 @@
   dnf:
     name: "{{ [nginx_package] + nginx_packages_extra }}"
     state: present
+  register: install_nginx_packages_result
+  retries: 30
+  until: install_nginx_packages_result is succeeded

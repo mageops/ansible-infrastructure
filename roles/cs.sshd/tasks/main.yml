@@ -3,6 +3,9 @@
     name: openssh-server
     state: present
   notify: Reload SSH Daemon
+  register: install_ssh_daemon_packages_result
+  retries: 30
+  until: install_ssh_daemon_packages_result is succeeded
 
 - name: Resolve SSH Daemon global configuration
   set_fact:

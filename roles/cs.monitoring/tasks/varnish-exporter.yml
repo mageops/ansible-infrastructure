@@ -2,6 +2,9 @@
   dnf:
     name: varnish-exporter
     state: latest
+  register: install_varnish_exporter_result
+  retries: 30
+  until: install_varnish_exporter_result is succeeded
 
 - name: Enable varnish-exporter service
   service:

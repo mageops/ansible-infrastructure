@@ -1,4 +1,7 @@
 - name: Regenerate yum cache for MageOps repo
   command: yum --disablerepo="*" --enablerepo="mageops" makecache
+  register: regenerate_yum_cache_for_mageops_repo_result
+  retries: 30
+  until: regenerate_yum_cache_for_mageops_repo_result is succeeded
   args:
     warn: no

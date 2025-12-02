@@ -2,6 +2,9 @@
   dnf:
     name: node-exporter
     state: latest
+  register: install_node_exporter_result
+  retries: 30
+  until: install_node_exporter_result is succeeded
 
 - name: Enable node-exporter service
   service:

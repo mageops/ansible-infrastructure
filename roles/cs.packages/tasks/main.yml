@@ -13,6 +13,9 @@
         name: "{{ packages_remove | default([]) }}"
         state: absent
       when: packages_remove is defined and packages_remove | length
+      register: perform_one_time_package_maintenance_result
+      retries: 30
+      until: perform_one_time_package_maintenance_result is succeeded
 
     - name: Store information that package maintenance was done
       copy:
@@ -33,7 +36,7 @@
     name: "{{ packages_install }}"
     state: present
   register: packages_install_command
-  retries: 10
+  retries: 30
   delay: 30
   until: not packages_install_command is failed
 
@@ -44,6 +47,6 @@
     exclude: "{{ packages_full_update_exclude }}"
   when: packages_full_update
   register: packages_update_command
-  retries: 10
+  retries: 30
   delay: 30
   until: not packages_update_command is failed

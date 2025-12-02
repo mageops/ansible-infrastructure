@@ -10,6 +10,9 @@
       dnf:
         name: python3-libselinux
         state: present
+      register: disable_selinux_if_installed_result
+      retries: 30
+      until: disable_selinux_if_installed_result is succeeded
 
     - name: Make selinux permissive
       ansible.posix.selinux:
@@ -23,3 +26,6 @@
       dnf:
         name: setroubleshoot-server
         state: absent
+      register: remove_setroubleshoot_server_result
+      retries: 30
+      until: remove_setroubleshoot_server_result is succeeded

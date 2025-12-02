@@ -14,6 +14,9 @@
     name: "{{ _temp_dir.path }}/pio-worker.rpm"
     state: present
     disable_gpg_check: true
+  register: install_pio_worker_rpm_result
+  retries: 30
+  until: install_pio_worker_rpm_result is succeeded
 
 - name: Delete temporary directory
   ansible.builtin.file:

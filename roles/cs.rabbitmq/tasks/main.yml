@@ -3,12 +3,18 @@
     allow_downgrade: no
     name: "erlang"
   notify: Restart rabbitmq
+  register: install_rabbitmq_erlang_package_result
+  retries: 30
+  until: install_rabbitmq_erlang_package_result is succeeded
 
 - name: Install RabbitMQ Package
   dnf:
     allow_downgrade: no
     name: "rabbitmq-server"
   notify: Restart rabbitmq
+  register: install_rabbitmq_package_result
+  retries: 30
+  until: install_rabbitmq_package_result is succeeded
 
 - name: Install rabbitmq configuration file
   template:

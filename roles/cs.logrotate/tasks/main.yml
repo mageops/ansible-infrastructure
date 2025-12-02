@@ -4,6 +4,9 @@
     name:
       - logrotate
       - zstd
+  register: install_logrotate_and_zstd_result
+  retries: 30
+  until: install_logrotate_and_zstd_result is succeeded
 
 - name: Ensure directory exists
   file:

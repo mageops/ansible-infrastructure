@@ -2,6 +2,9 @@
   dnf:
     name: pushprox-client
     state: latest
+  register: install_pushprox_result
+  retries: 30
+  until: install_pushprox_result is succeeded
 
 - name: Configure proxy
   template:

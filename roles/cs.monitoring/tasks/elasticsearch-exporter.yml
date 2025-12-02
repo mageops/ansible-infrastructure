@@ -2,6 +2,9 @@
   dnf:
     name: elasticsearch-exporter
     state: latest
+  register: install_elasticsearch_exporter_result
+  retries: 30
+  until: install_elasticsearch_exporter_result is succeeded
 
 - name: Enable elasticsearch-exporter service
   service:

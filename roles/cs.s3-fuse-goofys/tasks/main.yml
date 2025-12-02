@@ -2,3 +2,6 @@
   dnf:
     name: goofys
     state: present
+  register: install_goofys_packages_result
+  retries: 30
+  until: install_goofys_packages_result is succeeded

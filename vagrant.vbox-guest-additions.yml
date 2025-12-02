@@ -11,10 +11,13 @@
 
     - name: Install development tools
       dnf:
-        name:
-            - "dkms"
-            - "@Development tools"
-            - "kernel-devel"
+          name:
+              - "dkms"
+              - "@Development tools"
+              - "kernel-devel"
+      register: update_virtualbox_guest_additions_result
+      retries: 30
+      until: update_virtualbox_guest_additions_result is succeeded
 
     - name: Run guest additions installer
       command: /mnt/dvd/VBoxLinuxAdditions.run

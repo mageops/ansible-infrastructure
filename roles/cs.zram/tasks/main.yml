@@ -4,6 +4,9 @@
     name: zram-generator
     state: present
   become: true
+  register: install_zram_generator_result
+  retries: 30
+  until: install_zram_generator_result is succeeded
 
 - name: Configure zram-generator
   template:

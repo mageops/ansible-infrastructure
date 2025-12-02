@@ -3,11 +3,17 @@
     name: "{{ new_relic_repo_url }}"
     state: present
     disable_gpg_check: true
+  register: install_new_relic_repo_result
+  retries: 30
+  until: install_new_relic_repo_result is succeeded
 
 - name: Install new relic packages
   dnf:
     name: "{{ new_relic_packages }}"
     state: latest
+  register: install_new_relic_packages_result
+  retries: 30
+  until: install_new_relic_packages_result is succeeded
 
 - name: Initialize new relic
   shell: "NR_INSTALL_SILENT=1 newrelic-install install"

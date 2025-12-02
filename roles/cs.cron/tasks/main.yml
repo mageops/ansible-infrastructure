@@ -3,6 +3,9 @@
     name: cronie
     state: latest
   become: true
+  register: install_cron_deamon_result
+  retries: 30
+  until: install_cron_deamon_result is succeeded
 
 - name: Configure cron (disable email delivery)
   lineinfile:

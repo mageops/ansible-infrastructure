@@ -2,9 +2,15 @@
   dnf:
     name: "{{ [varnish_package_name] + varnish_extra_packages }}"
     state: present
+  register: install_varnish_packages_result
+  retries: 30
+  until: install_varnish_packages_result is succeeded
 
 - name: Install blobdigest module
   dnf:
     name: "varnish-module-blobdigest"
     state: present
   when: varnish_magento_vary_sign
+  register: install_blobdigest_module_result
+  retries: 30
+  until: install_blobdigest_module_result is succeeded

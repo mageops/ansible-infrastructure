@@ -1,6 +1,9 @@
 - name: Install geolite2 pakcages
   dnf:
     name: "{{ packages }}"
+  register: install_geolite2_pakcages_result
+  retries: 30
+  until: install_geolite2_pakcages_result is succeeded
   vars:
     packages:
     - geoipupdate

@@ -1,6 +1,9 @@
 - name: Install AWS Exception Forwarder package
   dnf:
     name: "{{ aws_cloudwatch_exception_forwarder_package }}"
+  register: install_aws_exception_forwarder_package_result
+  retries: 30
+  until: install_aws_exception_forwarder_package_result is succeeded
 
 - name: Set up magento exception report pushing cronjob
   cron:

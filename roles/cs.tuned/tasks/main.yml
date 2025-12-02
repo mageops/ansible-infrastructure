@@ -2,6 +2,9 @@
   dnf:
     name: tuned
     state: present
+  register: install_tuned_result
+  retries: 30
+  until: install_tuned_result is succeeded
 
 - name: Set tuned profile
   shell: "tuned-adm profile {{ tuned_profile }}"

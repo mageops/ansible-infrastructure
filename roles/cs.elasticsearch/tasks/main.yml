@@ -3,6 +3,8 @@
     name: elasticsearch
     state: latest
   register: elasticsearch_packages_install
+  retries: 30
+  until: elasticsearch_packages_install is succeeded
 
 # In case `/var` or `/var/run` is a tmpfs (common thing nowadays)
 - name: Ensure var directories always exist
@@ -182,6 +184,9 @@
     name: elasticsearch-hprof
     state: latest
   when: elasticsearch_install_crash_handler
+  register: install_elasticsearch_hprof_result
+  retries: 30
+  until: install_elasticsearch_hprof_result is succeeded
 
 - name: Enable crash handler
   systemd:

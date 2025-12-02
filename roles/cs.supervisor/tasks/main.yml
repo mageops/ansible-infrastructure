@@ -2,6 +2,9 @@
   dnf:
     name: supervisor
     state: present
+  register: install_supervisor_result
+  retries: 30
+  until: install_supervisor_result is succeeded
 
 - name: Ensure custom taks configuration exists
   template:
@@ -32,5 +35,4 @@
 
 - name: Force a restart if configuration has changed
   meta: flush_handlers
-
 

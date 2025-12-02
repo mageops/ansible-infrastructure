@@ -2,6 +2,9 @@
   dnf:
     state: present
     name: certbot
+  register: install_certbot_result
+  retries: 30
+  until: install_certbot_result is succeeded
 
 - name: Compute certbot runtime facts
   set_fact:

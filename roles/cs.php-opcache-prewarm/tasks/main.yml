@@ -23,6 +23,9 @@
   yum:
     name: vmtouch
     state: present
+  register: install_vmtouch_result
+  retries: 30
+  until: install_vmtouch_result is succeeded
 
 - name: Install systemd scripts
   template:

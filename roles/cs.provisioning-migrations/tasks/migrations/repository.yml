@@ -7,8 +7,10 @@
 
 - name: Rebuild yum cache if any old repos were removed
   command: yum -y makecache
+  register: rebuild_yum_cache_result
+  retries: 30
+  until: rebuild_yum_cache_result is succeeded
   args:
     warn: no
   when: _mageops_old_yum_repos_remove is changed
-
 

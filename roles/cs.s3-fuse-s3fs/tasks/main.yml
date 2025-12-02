@@ -2,6 +2,9 @@
   dnf:
     name: s3fs-fuse
     state: present
+  register: install_s3fs_from_rpm_result
+  retries: 30
+  until: install_s3fs_from_rpm_result is succeeded
 
 - name: Add read permission to other users
   file:

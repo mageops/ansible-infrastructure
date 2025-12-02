@@ -16,6 +16,9 @@
   dnf:
     name: vmtouch
     state: latest
+  register: install_vmtouch_for_preloading_fs_cache_result
+  retries: 30
+  until: install_vmtouch_for_preloading_fs_cache_result is succeeded
 
 - name: Install magento source fs cache preloader systemd unit files
   template:

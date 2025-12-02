@@ -3,6 +3,8 @@
     name: mysql-server
     state: present
   register: mysql_install
+  retries: 30
+  until: mysql_install is succeeded
 
 - name: Execute upstream mysql role
   import_role:
