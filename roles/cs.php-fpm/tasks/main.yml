@@ -14,11 +14,19 @@
           ) | int
       }}
 
-    php_fpm_pm_max_children_by_cpu: "{{ ansible_processor_vcpus * 4 | int }}"
+    php_fpm_pm_max_children_by_cpu: "{{ ansible_processor_vcpus * 8 | int }}"
 
 - name: Calculate default workers
   set_fact:
-    php_fpm_pm_max_children_default: "{{ [ [ php_fpm_pm_max_children_by_memory | int, php_fpm_pm_max_children_by_cpu | int ] | min, 4 ] | max }}"
+    # At least 4 workers, but limit by memory and CPU capacity
+    php_fpm_pm_max_children_default: "{{
+      [
+        [
+          php_fpm_pm_max_children_by_memory | int,
+          php_fpm_pm_max_children_by_cpu | int
+        ] | min,
+        4
+      ] | max }}"
 
 - name: Calculate workers
   set_fact:
