@@ -129,6 +129,7 @@ magento_app_etc_config_cache_default_redis:
   cache:
     frontend:
       default:
+        id_prefix: '061_'
         backend: "{{ magento_redis_cache_backend_fqcn }}"
         backend_options:
           server: "{{ mageops_redis_host }}"
@@ -136,10 +137,10 @@ magento_app_etc_config_cache_default_redis:
           port: "{{ mageops_redis_port }}"
           persistent: "magento_redis_cache_default"
           preload_keys:
-            - EAV_ENTITY_TYPES
-            - GLOBAL_PLUGIN_LIST
-            - DB_IS_UP_TO_DATE
-            - SYSTEM_DEFAULT
+            - 061_EAV_ENTITY_TYPES
+            - 061_GLOBAL_PLUGIN_LIST
+            - 061_DB_IS_UP_TO_DATE
+            - 061_SYSTEM_DEFAULT
 
 magento_app_etc_config_cache_default_redis_l2:
   cache:
