@@ -209,6 +209,12 @@ location /media/ {
         deny all;
     }
 
+    {% if nginx_media_extra_locations %}
+    {% for block in nginx_media_extra_locations | default([]) %}
+    {{ block | indent(4, true) }}
+    {% endfor %}
+    {% endif %}
+
     location ~* \.(ico|jpg|jpeg|png|gif|svg|svgz|webp|avif|avifs|js|css|eot|ttf|otf|woff|woff2|swf|mp4)$ {
         add_header Cache-Control "public";
         add_header X-Frame-Options "SAMEORIGIN";
@@ -241,7 +247,7 @@ location /media/import/ {
   location /media/custom_options/ {
       deny all;
   }
-  
+
   location /errors/ {
       location ~* \.xml$ {
           deny all;

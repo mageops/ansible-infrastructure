@@ -109,3 +109,13 @@ nginx_magento_custom_location: []
 # - path_pattern: '~ ^/custom_location'
 #   nginx_config: |-
 #    try_files /custom_path/$uri;
+
+nginx_media_extra_locations: []
+# example:
+# - |
+#   location /media/charts/ {
+#        add_header Cache-Control "public";
+#        add_header X-Frame-Options "SAMEORIGIN";
+#        expires 30s;
+#        try_files $uri $uri/ /get.php$is_args$args;
+#    }
