@@ -177,6 +177,7 @@ magento_app_etc_config_cache_default_redis_l2:
           local_backend: Cm_Cache_Backend_File
           local_backend_options:
             cache_dir: "{{ magento_redis_cache_l2_dir }}"
+          use_stale_cache: true
         frontend_options:
           write_control: false
     type:
