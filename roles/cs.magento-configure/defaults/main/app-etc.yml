@@ -129,12 +129,17 @@ magento_app_etc_config_cache_default_redis:
   cache:
     frontend:
       default:
-        backend: Cm_Cache_Backend_Redis
+        backend: "{{ magento_redis_cache_backend_fqcn }}"
         backend_options:
           server: "{{ mageops_redis_host }}"
           database: "0"
           port: "{{ mageops_redis_port }}"
           persistent: "magento_redis_cache_default"
+          preload_keys:
+            - EAV_ENTITY_TYPES
+            - GLOBAL_PLUGIN_LIST
+            - DB_IS_UP_TO_DATE
+            - SYSTEM_DEFAULT
 
 magento_app_etc_config_cache_default_redis_l2:
   cache:
@@ -159,9 +164,38 @@ magento_app_etc_config_cache_default_redis_l2:
             cache_dir: "{{ magento_redis_cache_l2_dir }}"
         frontend_options:
           write_control: false
+      stale_cache_enabled:
+        backend: \Magento\Framework\Cache\Backend\RemoteSynchronizedCache
+        backend_options:
+          remote_backend: "{{ magento_redis_cache_backend_fqcn }}"
+          remote_backend_options:
+            persistent: 0
+            server: "{{ mageops_redis_host }}"
+            database: "0"
+            port: "{{ mageops_redis_port }}"
+            password: ""
+          local_backend: Cm_Cache_Backend_File
+          local_backend_options:
+            cache_dir: "{{ magento_redis_cache_l2_dir }}"
+        frontend_options:
+          write_control: false
     type:
       default:
         frontend: default
+      layout:
+        frontend: stale_cache_enabled
+      block_html:
+        frontend: stale_cache_enabled
+      reflection:
+        frontend: stale_cache_enabled
+      config_integration:
+        frontend: stale_cache_enabled
+      config_integration_api:
+        frontend: stale_cache_enabled
+      full_page:
+        frontend: stale_cache_enabled
+      translate:
+        frontend: stale_cache_enabled
 
 magento_app_etc_config_cache_page_redis:
   cache:
