@@ -6,3 +6,14 @@
 - name: Ensure Remi's repo release package is installed and up-to-date
   dnf:
     name: "{{ php_repo_remi_package_name }}"
+
+- name: Replace $releasever_major with 9 in all remi repo files
+  replace:
+    path: "{{ item }}"
+    regexp: '\$releasever_major'
+    replace: '9'
+  loop: "{{ lookup('fileglob', '/etc/yum.repos.d/remi*.repo', wantlist=True) }}"
+
+- name: Clean DNF cache
+  command: dnf clean all
+  changed_when: false

@@ -163,3 +163,6 @@ php_repo_remi_variants:
   modular-test:
     name: remi-modular-test
     filename: remi-modular
+
+remi_repo_dir: /etc/yum.repos.d
+remi_repo_glob: "remi*.repo"
