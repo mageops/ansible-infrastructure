@@ -70,6 +70,10 @@
     force: yes
   notify: Reload varnish
 
+- name: debug varnish_backend_instances_app
+  debug:
+    var: varnish_backend_instances_app
+
 - name: Ensure Varnish service is started and enabled
   service:
     name: varnish
