@@ -120,6 +120,9 @@
         pio_tasks: app
       when: mageops_pio_worker_enable
 
+    - role: cs.gtm
+      when: gtm_enabled
+
   tasks:
     - name: Execute custom post deploy tasks
       include_tasks: "{{ mageops_extra_tasks_deploy }}"
@@ -166,7 +169,7 @@
         state: stopped
         restart_policy: always
         publish:
-          - "8080:8080"
+          - "8083:8080"
         generate_systemd:
           path: /etc/systemd/system
           restart_policy: always

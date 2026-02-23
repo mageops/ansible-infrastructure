@@ -1,3 +1,8 @@
+- name: Import New Relic GPG key
+  ansible.builtin.rpm_key:
+    key: https://download.newrelic.com/php_agent/NEWRELIC_RPM_BD2E199C.public
+    state: present
+
 - name: Install new relic repo
   dnf:
     name: "{{ new_relic_repo_url }}"

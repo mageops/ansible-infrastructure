@@ -5,6 +5,7 @@
       varnish_backend_probe_endpoint: "{{ varnish_backend_probe_endpoint }}"
       varnish_backend_max_conns: "{{ varnish_backend_max_conns }}"
       varnish_backend_first_byte_timeout: "{{ varnish_backend_first_byte_timeout }}"
+      gtm_enabled: "{{ gtm_enabled | default(false) }}"
 
 - name: Check if lambda function exists
   community.aws.lambda_info:

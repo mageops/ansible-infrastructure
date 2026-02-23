@@ -77,7 +77,7 @@
     name: "{{ aws_security_group_app_name }}"
     description: "{{ mageops_app_name }} Webnodes security group"
     region: "{{ aws_region }}"
-    rules: "{{ aws_security_group_app_rules_base + aws_security_group_app_rules + aws_security_group_app_extra_rules }}"
+    rules: "{{ aws_security_group_app_rules_base + aws_security_group_app_rules + aws_security_group_app_extra_rules + aws_security_group_app_gtm_rules }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
@@ -88,7 +88,13 @@
         ports:
           - "{{ mageops_varnish_backend_port }}"
         group_name: "{{ aws_security_group_varnish_name }}"
-
+    aws_security_group_app_gtm_rules:
+      - proto: tcp
+        ports:
+          - 8080
+          - 8081
+          - 8083
+        group_name: "{{ aws_security_group_varnish_name }}"
   register: aws_security_group_app
 
 - name: Create security group for persistant node
