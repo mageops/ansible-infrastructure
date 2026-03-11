@@ -1,0 +1,6 @@
+varnish_watchdog_timeout: 2
+varnish_watchdog_restart_cmd: "/bin/systemctl restart varnish"
+varnish_watchdog_script_path: "/usr/local/bin/varnish-watchdog.sh"
+varnish_watchdog_service_name: "varnish-watchdog.service"
+varnish_watchdog_timer_name: "varnish-watchdog.timer"
+varnish_watchdog_interval: "*:0/1"
