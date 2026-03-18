@@ -38,7 +38,7 @@
           register: start_asg_facts
 
         - name: Scale up ASG
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present
@@ -60,7 +60,7 @@
           register: start_asg_facts
 
         - name: Scale up ASG
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present

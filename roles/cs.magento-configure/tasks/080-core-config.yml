@@ -7,7 +7,7 @@
       value: "{% if magento_varnish_host %}http://{{ magento_varnish_host }}:{{ magento_varnish_port }}{% endif %}"
   set_fact:
     magento_core_config_settings: "{{ magento_core_config_settings + _extra_items }}"
-  when: magento_varnish_host | default(false, true)
+  when: (magento_varnish_host | default('', true) | string | length) > 0
 
 - name: Ensure core config database settings values
   delegate_to: localhost

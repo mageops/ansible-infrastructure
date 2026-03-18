@@ -1,14 +1,19 @@
-ansible>=6,<7
+ansible>=13,<14
 
 # some tasks call aws command on localhost
 # make sure this is BEFORE boto3 and boto
-awscli
+awscli>=1,<2
 
 # needed for inventory and aws modules
-boto3
+boto3>=1.34.0
 
 # required by ansible ec2 module
-boto
+botocore>=1.34.0
+
+# boto3/botocore imports can break in mixed Homebrew + user-site environments
+# when these transitive dependencies are missing from the controller interpreter.
+python-dateutil>=2.8.2
+six>=1.16.0
 
 # needed for python `ipaddr` filter
 ipaddress
@@ -28,22 +33,24 @@ netaddr
 git+https://github.com/mageops/PyMySQL.git@dev-ssl-by-default#egg=PyMySQL
 
 # needed for running docker (e.g. building aws lambda artifacts)
-docker-py
+docker
 
 # required for awscli
-PyYAML<5.3
+#PyYAML<5.3
 
 # required for `cs.ansible-plugins` role
 jq
 
-# required if host running ansible have selinux installed
-selinux
+# Do not install the PyPI `selinux` package in the controller venv.
+# With Python 3.12 it expects matching system SELinux bindings for the same
+# interpreter version and can break Ansible startup on Jenkins before any
+# playbook code runs. Target hosts install `python3-libselinux` when needed.
 
 # distro 1.7.0 breaks fact discovery in ansible for some nodes
 # distro introduced breaking change that changed package
 # from using single file to directory module, this isn't compatible with
 # import used by our ansible version
 # We are pinning this to previous version until we upgrade to never ansible
-distro<1.7.0
+#distro<1.7.0
 
 # Dummy comment to force reinstallation of dependencies _1

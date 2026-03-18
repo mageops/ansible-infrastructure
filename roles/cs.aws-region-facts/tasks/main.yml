@@ -1,7 +1,9 @@
 - name: Get AWS region
-  community.aws.aws_region_info:
+  amazon.aws.aws_region_info:
     region: "{{ aws_region }}"
   register: region_facts
+  delegate_to: localhost
+  become: no
 
 - name: Set region facts
   set_fact:
@@ -14,6 +16,8 @@
   amazon.aws.aws_az_info:
     region: "{{ aws_region }}"
   register: az_facts
+  delegate_to: localhost
+  become: no
 
 - name: Set region AZ facts
   set_fact:
@@ -26,7 +30,7 @@
   set_fact:
     aws_preferred_availability_zone: "{{ aws_availability_zone_names | first }}"
   register: aws_selected_preferred_az
-  when: not aws_preferred_availability_zone | default(false, true)
+  when: (aws_preferred_availability_zone | default('', true) | string | length) == 0
 
 - name: Print the chosen availability zone
   debug:

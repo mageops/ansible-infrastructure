@@ -30,5 +30,9 @@
       - "{{ nginx_magento_vhost_conf_path }}"
       - "{{ nginx_magento_fcgi_upstream_conf_path }}"
 
+- name: Remove deprecated nginx configs
+  include_role:
+    name: cs.nginx
+    tasks_from: 099-cleanup.yml
 
 

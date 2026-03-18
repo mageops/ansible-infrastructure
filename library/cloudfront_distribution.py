@@ -1097,7 +1097,7 @@ web_acl_id:
   sample: abcd1234-1234-abcd-abcd-abcd12345678
 '''
 
-from ansible.module_utils._text import to_text, to_native
+from ansible.module_utils.common.text.converters import to_text, to_native
 from ansible.module_utils.aws.core import AnsibleAWSModule
 from ansible.module_utils.aws.cloudfront_facts import CloudFrontFactsServiceManager
 from ansible.module_utils.ec2 import get_aws_connection_info

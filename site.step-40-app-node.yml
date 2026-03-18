@@ -3,10 +3,34 @@
 - hosts: app:&current:!immutable
   gather_facts: no
   pre_tasks:
-    - name: Wait for builder's SSH to become available
-      wait_for_connection: ~
+    - name: Wait for builder node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
 
-    - name: Gather facts for first time
+    - name: Detect usable Python interpreter on app node
+      raw: >-
+        for p in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11
+        /usr/bin/python3.10 /usr/bin/python3.9 /usr/bin/python3.8
+        /usr/bin/python3.7 /usr/bin/python3 /usr/bin/python; do
+          if test -x "$p"; then
+            echo "$p"
+            break
+          fi
+        done
+      register: app_python_interpreter
+      changed_when: false
+      failed_when: (app_python_interpreter.stdout | default('', true) | trim | length) == 0
+
+    - name: Set Python interpreter for app node
+      set_fact:
+        ansible_python_interpreter: "{{ app_python_interpreter.stdout | trim }}"
+
+    - name: Gather facts for app node
       setup: ~
 
   roles:
@@ -81,6 +105,7 @@
     - role: cs.cron
 
     - role: geerlingguy.ntp
+      services: "{{ ansible_facts.services | default({}) }}"
 
     - role: cs.supervisor
       supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"

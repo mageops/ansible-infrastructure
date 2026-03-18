@@ -1,7 +1,7 @@
 - name: Create S3 mount remote source dirs
   become: no
-  local_action:
-    module: aws_s3
+  delegate_to: localhost
+  aws_s3:
     bucket: "{{ s3_mount_bucket.bucket.split(':')[0] }}"
     object: "{{ s3_mount_bucket.bucket.split(':')[1] }}"
     mode: create

@@ -9,6 +9,6 @@
     - include_tasks: 003-setup-watchdog.yml
       when: s3_mount_backend == 's3fs'
     - include_tasks: 004-restore-premount-backups.yml
-      when: s3fs_premount_bind_mounts | length
+      when: (s3fs_premount_bind_mounts | length) > 0
   always:
     - include_tasks: 005-cleanup.yml
