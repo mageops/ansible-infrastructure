@@ -19,68 +19,51 @@
   set_fact:
     https_termination_vhosts: "{{ https_termination_vhosts | default({}) | combine({ vhost_derived.name: vhost_derived }) }}"
   vars:
-    crt_install_search_paths: >-
-      {{
-        https_termination_crt_install_search_paths
-        if https_termination_crt_install_search_paths is not string
-        else [https_termination_crt_install_search_paths]
-      }}
+    host_server_name_raw: "{{ host.server_name | default('*') }}"
     host_server_name_resolved: >-
-      {{
-        (
-          host.server_name is string
-          and host.server_name is match('^\\s*\\{\\{\\s*[A-Za-z_][A-Za-z0-9_]*\\s*\\}\\}\\s*$')
-        )
-        | ternary(
-            lookup(
-              'vars',
-              host.server_name | regex_replace('^\\s*\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}\\s*$', '\\1'),
-              default=host.server_name
-            ),
-            host.server_name | default('*')
-          )
-      }}
+      {%- set ns = namespace(value=host_server_name_raw) -%}
+      {%- if ns.value is string -%}
+      {%- for _ in range(5) -%}
+      {%- for var_name in ns.value | regex_findall('\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}') -%}
+      {%- set replacement = ((hostvars[inventory_hostname] | default({})).get(var_name, lookup('vars', var_name, default='{{ ' ~ var_name ~ ' }}')) | string) -%}
+      {%- set ns.value = ns.value | regex_replace('\\{\\{\\s*' ~ var_name ~ '\\s*\\}\\}', replacement) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- endif -%}
+      {{ ns.value }}
     host_aliases_resolved: >-
       {%- set aliases = [] -%}
       {%- for alias in host.aliases | default([]) -%}
-      {%- set resolved_alias = (
-        (
-          alias is string
-          and alias is match('^\\s*\\{\\{\\s*[A-Za-z_][A-Za-z0-9_]*\\s*\\}\\}\\s*$')
-        )
-        | ternary(
-            lookup(
-              'vars',
-              alias | regex_replace('^\\s*\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}\\s*$', '\\1'),
-              default=alias
-            ),
-            alias
-          )
-      ) -%}
-      {%- set _ = aliases.append(resolved_alias) -%}
+      {%- set ns = namespace(value=alias) -%}
+      {%- if ns.value is string -%}
+      {%- for _ in range(5) -%}
+      {%- for var_name in ns.value | regex_findall('\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}') -%}
+      {%- set replacement = ((hostvars[inventory_hostname] | default({})).get(var_name, lookup('vars', var_name, default='{{ ' ~ var_name ~ ' }}')) | string) -%}
+      {%- set ns.value = ns.value | regex_replace('\\{\\{\\s*' ~ var_name ~ '\\s*\\}\\}', replacement) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- endif -%}
+      {%- set _ = aliases.append(ns.value) -%}
       {%- endfor -%}
       {{ aliases }}
+    host_name_raw: "{{ host.name | default(host_server_name_resolved) }}"
     host_name_resolved: >-
-      {{
-        (
-          host.name is string
-          and host.name is match('^\\s*\\{\\{\\s*[A-Za-z_][A-Za-z0-9_]*\\s*\\}\\}\\s*$')
-        )
-        | ternary(
-            lookup(
-              'vars',
-              host.name | regex_replace('^\\s*\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}\\s*$', '\\1'),
-              default=host_server_name_resolved
-            ),
-            host.name | default(host_server_name_resolved)
-          )
-      }}
+      {%- set ns = namespace(value=host_name_raw) -%}
+      {%- if ns.value is string -%}
+      {%- for _ in range(5) -%}
+      {%- for var_name in ns.value | regex_findall('\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}') -%}
+      {%- set replacement = ((hostvars[inventory_hostname] | default({})).get(var_name, lookup('vars', var_name, default='{{ ' ~ var_name ~ ' }}')) | string) -%}
+      {%- set ns.value = ns.value | regex_replace('\\{\\{\\s*' ~ var_name ~ '\\s*\\}\\}', replacement) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- endif -%}
+      {{ ns.value }}
     vhost_derived:
       params:       "{{ host }}"
       label:        "{{ host_name_resolved }}"
       name:         "{{ host_name_resolved | trim | lower | regex_replace('[^a-z0-9.-]+', '_') }}"
 
-      conf_path:          "{{ nginx_confd_dir }}/050-vhost-{{ host.name }}.conf"
+      conf_path:          "{{ nginx_confd_dir }}/050-vhost-{{ host_name_resolved }}.conf"
       conf_custom_block:  "{{ host.extra_config | default(false, true) }}"
 
       upstream_uri:         "{{ host.upstream | default(https_termination_default_upstream_uri, true) }}"
@@ -100,9 +83,9 @@
       redirect_to_style:          "{{ host.redirect_to_style | default('deep') }}"
       redirect_to_include_domain: "{{ host.redirect_to_include_domain | default(false) }}"
 
-      crt_install_cert_src:   "{{ lookup('first_found', { 'files': host.cert_path       | default([], true), 'paths': crt_install_search_paths }, errors='ignore') | default(false, true) }}"
-      crt_install_key_src:    "{{ lookup('first_found', { 'files': host.cert_key_path   | default([], true), 'paths': crt_install_search_paths }, errors='ignore') | default(false, true) }}"
-      crt_install_chain_src:  "{{ lookup('first_found', { 'files': host.cert_chain_path | default([], true), 'paths': crt_install_search_paths }, errors='ignore') | default(false, true) }}"
+      crt_install_cert_src:   "{{ lookup('first_found', { 'files': host.cert_path       | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
+      crt_install_key_src:    "{{ lookup('first_found', { 'files': host.cert_key_path   | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
+      crt_install_chain_src:  "{{ lookup('first_found', { 'files': host.cert_chain_path | default([], true), 'paths': https_termination_crt_install_search_paths }, errors='ignore') | default(false, true) }}"
 
   loop: "{{ https_termination_hosts }}"
   loop_control:
@@ -180,7 +163,7 @@
         '127.0.0.1',
         '::1',
         'localhost',
-        ansible_facts['hostname'],
+        ansible_facts['hostname'] | default(''),
         inventory_hostname
       ]
   loop: "{{ https_termination_vhosts.values() | list }}"

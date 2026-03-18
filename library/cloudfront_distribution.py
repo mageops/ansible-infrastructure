@@ -1099,7 +1099,6 @@ web_acl_id:
 
 from ansible.module_utils.common.text.converters import to_text, to_native
 from ansible.module_utils.aws.core import AnsibleAWSModule
-from ansible.module_utils.aws.cloudfront_facts import CloudFrontFactsServiceManager
 from ansible.module_utils.ec2 import get_aws_connection_info
 from ansible.module_utils.ec2 import ec2_argument_spec, boto3_conn, compare_aws_tags
 from ansible.module_utils.ec2 import camel_dict_to_snake_dict, ansible_dict_to_boto3_tag_list
@@ -1118,6 +1117,17 @@ try:
     import botocore
 except ImportError:
     pass
+
+
+def get_aws_connection_info_compat(module):
+    # Compatibility for amazon.aws module_utils versions where get_aws_connection_info
+    # does or does not accept the legacy boto3 keyword argument.
+    try:
+        return get_aws_connection_info(module, boto3=True)
+    except TypeError as exc:
+        if "boto3" not in to_text(exc):
+            raise
+        return get_aws_connection_info(module)
 
 
 def change_dict_key_name(dictionary, old_key, new_key):
@@ -1236,13 +1246,50 @@ def update_tags(client, module, existing_tags, valid_tags, purge_tags, arn):
     return changed
 
 
+class CloudFrontFactsServiceManagerCompat(object):
+    """
+    Local CloudFront facts manager used to avoid collection module_utils incompatibilities.
+    """
+
+    def __init__(self, module, client):
+        self.module = module
+        self.client = client
+
+    def get_distribution(self, distribution_id):
+        try:
+            return self.client.get_distribution(Id=distribution_id)
+        except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as e:
+            self.module.fail_json_aws(e, msg="Error describing distribution")
+
+    def list_distributions(self, keyed=True):
+        try:
+            paginator = self.client.get_paginator('list_distributions')
+            result = paginator.paginate().build_full_result()
+            distribution_list = result.get('DistributionList', {}).get('Items', [])
+            if not keyed:
+                return distribution_list
+            return self.keyed_list_helper(distribution_list)
+        except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as e:
+            self.module.fail_json_aws(e, msg="Error listing distributions")
+
+    def keyed_list_helper(self, list_to_key):
+        keyed_list = dict()
+        for item in list_to_key:
+            distribution_id = item.get('Id')
+            aliases = item.get('Aliases', {}).get('Items', [])
+            for alias in aliases:
+                keyed_list.update({alias: item})
+            keyed_list.update({distribution_id: item})
+        return keyed_list
+
+
 class CloudFrontValidationManager(object):
     """
     Manages Cloudfront validations
     """
 
-    def __init__(self, module):
-        self.__cloudfront_facts_mgr = CloudFrontFactsServiceManager(module)
+    def __init__(self, module, client):
+        self.__cloudfront_facts_mgr = CloudFrontFactsServiceManagerCompat(module, client)
         self.module = module
         self.__default_distribution_enabled = True
         self.__default_http_port = 80
@@ -1885,10 +1932,10 @@ def main():
         ]
     )
 
-    region, ec2_url, aws_connect_kwargs = get_aws_connection_info(module, boto3=True)
+    region, ec2_url, aws_connect_kwargs = get_aws_connection_info_compat(module)
     client = boto3_conn(module, conn_type='client', resource='cloudfront', region=region, endpoint=ec2_url, **aws_connect_kwargs)
 
-    validation_mgr = CloudFrontValidationManager(module)
+    validation_mgr = CloudFrontValidationManager(module, client)
 
     state = module.params.get('state')
     caller_reference = module.params.get('caller_reference')

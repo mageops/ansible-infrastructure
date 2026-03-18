@@ -50,6 +50,23 @@
     name: nginx
     state: reloaded
 
+- name: Validate certbot domains for vhost
+  ansible.builtin.assert:
+    that:
+      - (_vhost_domains | string | length) > 0
+      - (_vhost_domains | regex_search('\\{\\{')) is none
+      - (_vhost_domains | regex_search('\\}\\}')) is none
+    fail_msg: >-
+      Vhost `{{ vhost.name }}` has unresolved domain template(s): `{{ _vhost_domains }}`.
+      Ensure referenced variables are defined and resolved before ACME run.
+  vars:
+    _vhost_domains: "{{ ([vhost.server_name] + (vhost.server_aliases | default([], true))) | join(',') }}"
+  when: vhost.crt_do_acme
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }} -> {{ _vhost_domains }}"
+    loop_var: vhost
+
 - name: Run certbot for vhost
   command:
     argv: "{{ certbot_args_default + certbot_args_vhost }}"

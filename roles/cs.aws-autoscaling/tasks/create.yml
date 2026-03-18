@@ -43,7 +43,6 @@
     # This ansible module does not handle instance replacement properly
     # so we just update the ASG configuration here and will perform the
     # replacement via AWS API in the next steps.
-    replace_instances: []
   vars:
     asg_name_tags:
       - Name: "{{ autoscaling_asg_name }}"

@@ -1,39 +1,162 @@
-# Note: This is a legacy way of doing things. When this was developed
-# ansible did not have a cloudfront distribution module at all.
-# EFS: This is kept for now not to break things for the S3 media setup (and to save work)
-# and should be rewritten ten same way EFS setup is done now.
-- name: Create temporary distribution config build directory
-  tempfile:
-    state: directory
-    suffix: build
-  register: aws_cloudfront_distribution_temp_dir
+- name: Set up cloudfront distribution
+  cloudfront_distribution:
+    state: present
+    enabled: true
 
-- name: Build cloudfront distribution config
-  template:
-    src: s3-media-distribution-config.json
-    dest: "{{ aws_cloudfront_distribution_temp_dir.path }}/config.json"
+    distribution_id: "{{ aws_cloudfront_distribution_id | default(omit, true) }}"
+    caller_reference: "{{ aws_cloudfront_distribution_id | default(false, true) | ternary(omit, aws_cloudfront_distribution_caller_id) }}"
 
-- name: Create cloudfront distribution
-  shell: "aws cloudfront create-distribution --distribution-config=file://{{ aws_cloudfront_distribution_temp_dir.path }}/config.json"
-  when: aws_cloudfront_distribution is not defined
-  register: aws_cloudfront_create_distribution_cmd
+    comment: "{{ mageops_project }}-{{ mageops_environment }}-media"
+    tags: "{{ aws_cloudfront_ditribution_tags }}"
 
-- name: Update cloudfront distribution
-  shell: "aws cloudfront update-distribution --distribution-config=file://{{ aws_cloudfront_distribution_temp_dir.path }}/config.json --id={{ aws_cloudfront_distribution.Id }} --if-match={{ aws_cloudfront_distribution.ETag }}"
-  when:
-    - aws_cloudfront_distribution is defined
-    - aws_cloudfront_distribution.Id is defined
-    - aws_cloudfront_distribution.ETag is defined
-  register: aws_cloudfront_update_distribution_cmd
+    # Purge everything as there is no manual modification permitted
+    purge_tags: yes
+    purge_cache_behaviors: yes
+    purge_custom_error_responses: yes
+    purge_aliases: yes
+    purge_origins: yes
+
+    # Do not slow the deploy
+    wait: no
+
+    # Our nginx ingress supports HTTP2
+    http_version: http2
+
+    price_class: PriceClass_100
+    ipv6_enabled: no
+
+    aliases: "{{ aws_cloudfront_domain_aliases | default(omit, true) }}"
+
+    viewer_certificate: >-
+      {{
+        aws_cloudfront_custom_certificate_arn | default(false, true) | ternary(
+          {
+            "acm_certificate_arn": aws_cloudfront_custom_certificate_arn
+          },
+          omit
+        )
+      }}
+
+    # Disable 5xx response caching (at least try to)
+    custom_error_responses:
+      - error_code: 502
+        error_caching_min_ttl: 1
+        response_page_path: ""
+        response_code: ""
+
+      - error_code: 503
+        error_caching_min_ttl: 1
+        response_page_path: ""
+        response_code: ""
+
+      - error_code: 504
+        error_caching_min_ttl: 1
+        response_page_path: ""
+        response_code: ""
+
+    origins:
+      - id: "S3Media"
+        domain_name: "{{ aws_cloudfront_website_endpoint }}"
+        custom_origin_config:
+          origin_protocol_policy: http-only
+          origin_ssl_protocols:
+            - TLSv1
+            - TLSv1.1
+            - TLSv1.2
+          origin_read_timeout: 30
+          http_port: 80
+          https_port: 443
+          origin_keepalive_timeout: 5
+
+      - id: "Website"
+        domain_name: "{{ magento_hostname }}"
+        custom_origin_config:
+          origin_protocol_policy: http-only
+          origin_ssl_protocols:
+            - TLSv1
+            - TLSv1.1
+            - TLSv1.2
+          origin_read_timeout: 30
+          http_port: 80
+          https_port: 443
+          origin_keepalive_timeout: 5
+
+    # To maintain backwards compatibility with the previous setup
+    # all CDN requests go by default to the S3 media origin.
+    default_cache_behavior: >-
+      {{
+        cloudfront_distribution_cache_behaviour_defaults | combine({
+          "target_origin_id": "S3Media",
+          "forwarded_values": {
+            "query_string": false,
+            "cookies": {"forward": "none"},
+            "headers": ["Origin"]
+          }
+        }, recursive=True)
+      }}
+
+    cache_behaviors:
+      # Requests to Magento static cache should go to website root
+      # to maintain the original URL.
+      - >-
+        {{
+          cloudfront_distribution_cache_behaviour_defaults | combine({
+            "target_origin_id": "Website",
+            "path_pattern": "static/*",
+            "forwarded_values": {
+              "query_string": false,
+              "cookies": {"forward": "none"},
+              "headers": []
+            }
+          }, recursive=True)
+        }}
+  vars:
+    cloudfront_distribution_cache_behaviour_defaults:
+      default_ttl: 86400
+
+      min_ttl: 0
+      max_ttl: 31536000
+
+      viewer_protocol_policy: allow-all
+      field_level_encryption_id: ""
+
+      allowed_methods:
+        items:
+          - HEAD
+          - GET
+          - OPTIONS
+        cached_methods:
+          - HEAD
+          - GET
+          - OPTIONS
+
+      forwarded_values:
+        query_string: false
+        cookies:
+          forward: "none"
+        headers: []
+
+      smooth_streaming: false
+      compress: false
+  register: aws_cloudfront_distribution_result
 
 - name: Set cloudfront distribution id fact
-  set_fact:
-    aws_cloudfront_distribution_id: "{{ (aws_cloudfront_create_distribution_cmd.stdout | from_json).Distribution.Id }}"
-  when: aws_cloudfront_create_distribution_cmd is changed
+  ansible.builtin.set_fact:
+    aws_cloudfront_distribution_id: "{{ aws_cloudfront_distribution_result.id }}"
+  when:
+    - aws_cloudfront_distribution_result is defined
+    - aws_cloudfront_distribution_result.id is defined
 
-- name: Ensure distribution is tagged
-  community.aws.cloudfront_distribution:
-    state: present
-    distribution_id: "{{ aws_cloudfront_distribution_id }}"
-    tags: "{{ aws_cloudfront_ditribution_tags }}"
-  when: aws_cloudfront_distribution_id is defined
+- name: Set cloudfront distribution arn fact
+  ansible.builtin.set_fact:
+    aws_cloudfront_distribution_arn: "{{ aws_cloudfront_distribution_result.arn }}"
+  when:
+    - aws_cloudfront_distribution_result is defined
+    - aws_cloudfront_distribution_result.arn is defined
+
+- name: Set cloudfront distribution domain fact
+  ansible.builtin.set_fact:
+    aws_cloudfront_distribution_domain: "{{ aws_cloudfront_distribution_result.domain_name }}"
+  when:
+    - aws_cloudfront_distribution_result is defined
+    - aws_cloudfront_distribution_result.domain_name is defined

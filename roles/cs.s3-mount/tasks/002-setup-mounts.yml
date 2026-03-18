@@ -42,26 +42,47 @@
     s3fs_current_mountpoints: "{{ s3_mount_current_entries | map(attribute='mountpoint') | list }}"
     s3fs_target_mountpoints: "{{ s3_mount_buckets_resolved | map(attribute='mountpoint') | map('realpath') | list }}"
 
-- name: Remove S3 mounts that should not be present
-  mount:
-    path: "{{ s3fs_mountpoint.rstrip('/') ~ '/' }}"
-    state: absent
+- name: Unmount obsolete S3 mounts
+  ansible.posix.mount:
+    path: "{{ s3fs_mountpoint }}"
+    state: unmounted
   when: s3fs_mountpoint not in s3fs_target_mountpoints
   loop: "{{ s3fs_current_mountpoints }}"
-  register: s3fs_mount_removal
-  retries: 30
-  delay: 1
-  until: s3fs_mount_removal is not failed
   loop_control:
     loop_var: s3fs_mountpoint
     label: "{{ s3fs_mountpoint }}"
 
-- name: Create S3 mount
-  mount:
+- name: Remove obsolete S3 mount definitions from fstab
+  ansible.posix.mount:
+    path: "{{ s3fs_mountpoint }}"
+    state: absent_from_fstab
+  when: s3fs_mountpoint not in s3fs_target_mountpoints
+  loop: "{{ s3fs_current_mountpoints }}"
+  loop_control:
+    loop_var: s3fs_mountpoint
+    label: "{{ s3fs_mountpoint }}"
+
+- name: Ensure target S3 mountpoint directories exist
+  ansible.builtin.file:
     path: "{{ s3_mount_bucket.mountpoint }}"
+    state: directory
+  loop: "{{ s3_mount_buckets_resolved }}"
+  loop_control:
+    loop_var: s3_mount_bucket
+
+- name: Create S3 mounts
+  ansible.posix.mount:
     src: "{{ s3_mount_bucket.mount_src }}"
+    path: "{{ s3_mount_bucket.mountpoint }}"
     fstype: "{{ s3_mount_fstype }}"
-    opts: "_netdev,allow_other,auto,{{ s3_mount_opts | join(',') }}"
+    opts: >-
+      _netdev,allow_other,auto
+      {%- if s3_mount_opts is defined and (s3_mount_opts | string | length > 0) -%}
+      ,{{
+        (s3_mount_opts is string)
+        | ternary(s3_mount_opts, (s3_mount_opts | join(',')))
+      }}
+      {%- endif -%}
     state: mounted
   loop: "{{ s3_mount_buckets_resolved }}"
   loop_control:

@@ -15,26 +15,15 @@
     name: "{{ aws_security_group_ssh_name }}"
     description: "{{ mageops_app_name }} SSH access security group"
     region: "{{ aws_region }}"
-    rules: "{{ aws_security_group_ssh_rules }}"
+    rules:
+      - proto: tcp
+        ports: 22
+        cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_ssh_name }}"
-    aws_security_group_ssh_rules: >-
-      {{
-        (mageops_trusted_cidr_blocks | default([]) | length > 0)
-        | ternary(
-            [
-              {
-                'proto': 'tcp',
-                'ports': 22,
-                'cidr_ip': mageops_trusted_cidr_blocks
-              }
-            ],
-            []
-          )
-      }}
   register: aws_security_group_ssh
 
 - name: Create security group for load balancer
@@ -42,35 +31,20 @@
     name: "{{ aws_security_group_lb_name }}"
     description: "{{ mageops_app_name }} Load balancer security group"
     region: "{{ aws_region }}"
-    rules: "{{ aws_security_group_lb_rules }}"
+    rules:
+      - proto: tcp
+        ports:
+          - 80
+          - 443
+        cidr_ip: "0.0.0.0/0"
+      - proto: tcp
+        ports: ["{{ goaccess_vhost_port }}"]
+        cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_lb_name }}"
-    aws_security_group_lb_rules: >-
-      {{
-        [
-          {
-            'proto': 'tcp',
-            'ports': [80, 443],
-            'cidr_ip': '0.0.0.0/0'
-          }
-        ]
-        + (
-          (mageops_trusted_cidr_blocks | default([]) | length > 0)
-          | ternary(
-              [
-                {
-                  'proto': 'tcp',
-                  'ports': [goaccess_vhost_port],
-                  'cidr_ip': mageops_trusted_cidr_blocks
-                }
-              ],
-              []
-            )
-        )
-      }}
   register: aws_security_group_lb
 
 - name: Create security group for Varnish
@@ -159,24 +133,6 @@
   register: aws_security_group_rds
   when: aws_security_group_rds_create
 
-- name: Build extra RDS source groups list
-  ansible.builtin.set_fact:
-    aws_security_group_rds_extra_source_groups: >-
-      {{
-        (
-          aws_security_group_rds_access_extra_groups
-          if aws_security_group_rds_access_extra_groups is sequence and aws_security_group_rds_access_extra_groups is not string
-          else [aws_security_group_rds_access_extra_groups]
-        )
-        | reject('equalto', '')
-        | reject('equalto', none)
-        | reject('equalto', aws_security_group_rds_name)
-        | reject('equalto', aws_security_group_app_name)
-        | unique
-        | list
-      }}
-  when: aws_security_group_rds_create
-
 - name: Allow app security group to access RDS
   amazon.aws.ec2_security_group:
     name: "{{ aws_security_group_rds_name }}"
@@ -211,7 +167,7 @@
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_rds_name }}"
-  loop: "{{ aws_security_group_rds_extra_source_groups | default([]) }}"
+  loop: "{{ aws_security_group_rds_access_extra_groups | default([]) }}"
   loop_control:
     label: "{{ item }}"
   when: aws_security_group_rds_create
@@ -260,35 +216,18 @@
     name: "{{ aws_security_group_elasticsearch_name }}"
     description: "{{ mageops_app_name }} search security group"
     region: "{{ aws_region }}"
-    rules: "{{ aws_security_group_search_rules }}"
+    rules:
+      - proto: tcp
+        ports: "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port, opensearch_http_port) }}"
+        group_name: "{{ aws_security_group_app_name }}"
+      - proto: tcp
+        ports: "{{ (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port, opensearch_http_port) }}"
+        cidr_ip: "{{ mageops_trusted_cidr_blocks }}"
     vpc_id: "{{ aws_vpc_id }}"
     tags: "{{ aws_tags_default | combine(ec2_sg_tags) }}"
   vars:
     ec2_sg_tags:
       Name: "{{ aws_security_group_elasticsearch_name }}"
-    aws_security_group_search_rules: >-
-      {{
-        [
-          {
-            'proto': 'tcp',
-            'ports': (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port, opensearch_http_port),
-            'group_name': aws_security_group_app_name
-          }
-        ]
-        + (
-          (mageops_trusted_cidr_blocks | default([]) | length > 0)
-          | ternary(
-              [
-                {
-                  'proto': 'tcp',
-                  'ports': (mageops_elasticsearch_opensearch_flavor == 'elasticsearch') | ternary(elasticsearch_http_port, opensearch_http_port),
-                  'cidr_ip': mageops_trusted_cidr_blocks
-                }
-              ],
-              []
-            )
-        )
-      }}
   register: aws_security_group_search
   when: aws_security_group_elastic_create
 

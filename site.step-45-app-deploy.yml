@@ -12,24 +12,6 @@
       delegate_to: localhost
       become: no
 
-    - name: Detect usable Python interpreter on app node
-      raw: >-
-        for p in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11
-        /usr/bin/python3.10 /usr/bin/python3.9 /usr/bin/python3.8
-        /usr/bin/python3.7 /usr/bin/python3 /usr/bin/python; do
-          if test -x "$p"; then
-            echo "$p"
-            break
-          fi
-        done
-      register: app_python_interpreter
-      changed_when: false
-      failed_when: (app_python_interpreter.stdout | default('', true) | trim | length) == 0
-
-    - name: Set Python interpreter for app node
-      set_fact:
-        ansible_python_interpreter: "{{ app_python_interpreter.stdout | trim }}"
-
     - name: Gather facts for app node
       setup: ~
 
@@ -179,6 +161,7 @@
       when: mageops_fstrim_enable
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3.9
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"
     deploy_keep_current_releases: 2
     deploy_copy_previous_release: yes

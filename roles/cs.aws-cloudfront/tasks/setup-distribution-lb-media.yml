@@ -1,16 +1,19 @@
 - name: Get current cloudfront distribution config
-  ansible.builtin.command:
-    argv:
-      - aws
-      - cloudfront
-      - get-distribution
-      - --id
-      - "{{ aws_cloudfront_distribution_id }}"
-      - --output
-      - json
-  register: cloudfront_current_distribution_cmd
-  changed_when: false
+  cloudfront_distribution_info_compat:
+    region: "{{ aws_region }}"
+    distribution: true
+    distribution_id: "{{ aws_cloudfront_distribution_id }}"
+  register: cloudfront_current_distribution_info
   when: aws_cloudfront_distribution_id is defined
+
+- name: Set current cloudfront origin list
+  ansible.builtin.set_fact:
+    cloudfront_current_origins: "{{ cloudfront_current_distribution_info.cloudfront.result.Distribution.DistributionConfig.Origins.Items | default([]) }}"
+  when: aws_cloudfront_distribution_id is defined
+
+- name: Initialize current cloudfront origin list
+  ansible.builtin.set_fact:
+    cloudfront_current_origins: "{{ cloudfront_current_origins | default([]) }}"
 
 - name: Resolve cloudfront origin domain name
   ansible.builtin.set_fact:
@@ -22,114 +25,155 @@
         | ternary(
             lb_domain,
             (
-              aws_cloudfront_distribution_id is defined
-            )
-            | ternary(
-                (
+              cloudfront_current_origins
+              | selectattr('OriginPath', 'equalto', '/media')
+              | map(attribute='DomainName')
+              | first
+              | default(
                   (
-                    cloudfront_current_distribution_cmd.stdout | default('{}') | from_json
-                  ).Distribution.DistributionConfig.Origins.Items
-                  | default([])
-                  | selectattr('OriginPath', 'equalto', '/media')
-                  | map(attribute='DomainName')
-                  | first
-                  | default(
-                      (
-                        (
-                          cloudfront_current_distribution_cmd.stdout | default('{}') | from_json
-                        ).Distribution.DistributionConfig.Origins.Items
-                        | default([])
-                        | map(attribute='DomainName')
-                        | first
-                      ),
-                      true
-                    )
-                  | default(magento_hostname, true)
-                ),
-                magento_hostname
-              )
+                    cloudfront_current_origins
+                    | map(attribute='DomainName')
+                    | first
+                  ),
+                  true
+                )
+              | default(magento_hostname, true)
+            )
           )
       }}
 
-- name: Create temporary distribution config build directory
-  ansible.builtin.tempfile:
-    state: directory
-    suffix: build
-  register: aws_cloudfront_distribution_temp_dir
+- name: Set up cloudfront distribution
+  cloudfront_distribution:
+    state: present
+    enabled: true
 
-- name: Build cloudfront distribution config
-  ansible.builtin.template:
-    src: lb-media-distribution-config.json
-    dest: "{{ aws_cloudfront_distribution_temp_dir.path }}/config.json"
-    mode: "0600"
+    distribution_id: "{{ aws_cloudfront_distribution_id | default(omit, true) }}"
+    caller_reference: "{{ aws_cloudfront_distribution_id | default(false, true) | ternary(omit, aws_cloudfront_distribution_caller_id) }}"
 
-- name: Build cloudfront tag config
-  ansible.builtin.template:
-    src: cloudfront-tags.json
-    dest: "{{ aws_cloudfront_distribution_temp_dir.path }}/tags.json"
-    mode: "0600"
+    comment: "{{ mageops_project }}-{{ mageops_environment }}-media"
+    tags: "{{ aws_cloudfront_ditribution_tags }}"
 
-- name: Create cloudfront distribution
-  ansible.builtin.command:
-    argv:
-      - aws
-      - cloudfront
-      - create-distribution
-      - --distribution-config=file://{{ aws_cloudfront_distribution_temp_dir.path }}/config.json
-  when: aws_cloudfront_distribution is not defined
-  register: aws_cloudfront_create_distribution_cmd
-  changed_when: true
+    # Purge everything as there is no manual modification permitted
+    purge_tags: yes
+    purge_cache_behaviors: yes
+    purge_custom_error_responses: yes
+    purge_aliases: yes
+    purge_origins: yes
 
-- name: Update cloudfront distribution
-  ansible.builtin.command:
-    argv:
-      - aws
-      - cloudfront
-      - update-distribution
-      - --distribution-config=file://{{ aws_cloudfront_distribution_temp_dir.path }}/config.json
-      - --id={{ aws_cloudfront_distribution.Id }}
-      - --if-match={{ aws_cloudfront_distribution.ETag }}
-  when:
-    - aws_cloudfront_distribution is defined
-    - aws_cloudfront_distribution.Id is defined
-    - aws_cloudfront_distribution.ETag is defined
-  register: aws_cloudfront_update_distribution_cmd
-  changed_when: true
+    # Do not slow the deploy
+    wait: no
 
-- name: Set cloudfront distribution facts from create result
+    # Our nginx ingress supports HTTP2
+    http_version: http2
+
+    aliases: "{{ aws_cloudfront_domain_aliases | default(omit, true) }}"
+
+    viewer_certificate: >-
+      {{
+        aws_cloudfront_custom_certificate_arn | default(false, true) | ternary(
+          {
+            "acm_certificate_arn": aws_cloudfront_custom_certificate_arn
+          },
+          omit
+        )
+      }}
+
+    # Disable 5xx response caching (at least try to)
+    custom_error_responses:
+      - error_code: 502
+        error_caching_min_ttl: 1
+        response_page_path: ""
+        response_code: ""
+
+      - error_code: 503
+        error_caching_min_ttl: 1
+        response_page_path: ""
+        response_code: ""
+
+      - error_code: 504
+        error_caching_min_ttl: 1
+        response_page_path: ""
+        response_code: ""
+
+    origins:
+      - id: "WebsiteRoot"
+        domain_name: "{{ cloudfront_origin_domain_name }}"
+        custom_headers:
+          - header_name: X-MageOps-Cloudfront-Origin
+            header_value: WebsiteMedia
+
+      - id: "WebsiteMedia"
+        domain_name: "{{ cloudfront_origin_domain_name }}"
+        origin_path: "/media"
+        custom_headers:
+          - header_name: X-MageOps-Cloudfront-Origin
+            header_value: WebsiteMedia
+
+    # To maintain backwards compatibility with the previous setup
+    # all CDN requests go by default to "/media" website path.
+    default_cache_behavior: >-
+      {{
+        cloudfront_distribution_cache_behaviour_defaults | combine({
+          "target_origin_id": "WebsiteMedia"
+        })
+      }}
+
+    cache_behaviors:
+      # Requests to Magento Static Cache should go to website root
+      # to maintain the original URL
+      - >-
+        {{
+          cloudfront_distribution_cache_behaviour_defaults | combine({
+            "target_origin_id": "WebsiteRoot",
+            "path_pattern": "static/*"
+          })
+        }}
+  vars:
+    cloudfront_distribution_cache_behaviour_defaults:
+      default_ttl: 86400
+
+      min_ttl: 0
+      max_ttl: 31536000
+
+      viewer_protocol_policy: allow-all
+      field_level_encryption_id: ""
+
+      allowed_methods:
+        items:
+          - HEAD
+          - GET
+          - OPTIONS
+        cached_methods:
+          - HEAD
+          - GET
+
+      forwarded_values:
+        query_string: false
+        cookies:
+          forward: "none"
+        headers: "{{ aws_cloudfront_forward_headers }}"
+
+      smooth_streaming: false
+      compress: false
+  register: aws_cloudfront_distribution_result
+
+- name: Set cloudfront distribution id fact
   ansible.builtin.set_fact:
-    aws_cloudfront_distribution_id: "{{ (aws_cloudfront_create_distribution_cmd.stdout | from_json).Distribution.Id }}"
-    aws_cloudfront_distribution_arn: "{{ (aws_cloudfront_create_distribution_cmd.stdout | from_json).Distribution.ARN }}"
+    aws_cloudfront_distribution_id: "{{ aws_cloudfront_distribution_result.id }}"
   when:
-    - aws_cloudfront_create_distribution_cmd is defined
-    - "'rc' in aws_cloudfront_create_distribution_cmd"
-    - aws_cloudfront_create_distribution_cmd.rc == 0
+    - aws_cloudfront_distribution_result is defined
+    - aws_cloudfront_distribution_result.id is defined
 
-- name: Set cloudfront distribution arn from update result
+- name: Set cloudfront distribution arn fact
   ansible.builtin.set_fact:
-    aws_cloudfront_distribution_arn: "{{ (aws_cloudfront_update_distribution_cmd.stdout | from_json).Distribution.ARN }}"
+    aws_cloudfront_distribution_arn: "{{ aws_cloudfront_distribution_result.arn }}"
   when:
-    - aws_cloudfront_update_distribution_cmd is defined
-    - "'rc' in aws_cloudfront_update_distribution_cmd"
-    - aws_cloudfront_update_distribution_cmd.rc == 0
+    - aws_cloudfront_distribution_result is defined
+    - aws_cloudfront_distribution_result.arn is defined
 
-- name: Ensure distribution arn fact exists
+- name: Set cloudfront distribution domain fact
   ansible.builtin.set_fact:
-    aws_cloudfront_distribution_arn: "{{ aws_cloudfront_distribution.ARN }}"
+    aws_cloudfront_distribution_domain: "{{ aws_cloudfront_distribution_result.domain_name }}"
   when:
-    - aws_cloudfront_distribution_arn is not defined
-    - aws_cloudfront_distribution is defined
-    - aws_cloudfront_distribution.ARN is defined
-
-- name: Ensure distribution is tagged
-  ansible.builtin.command:
-    argv:
-      - aws
-      - cloudfront
-      - tag-resource
-      - --resource
-      - "{{ aws_cloudfront_distribution_arn }}"
-      - --tags
-      - file://{{ aws_cloudfront_distribution_temp_dir.path }}/tags.json
-  when: aws_cloudfront_distribution_arn is defined
-  changed_when: true
+    - aws_cloudfront_distribution_result is defined
+    - aws_cloudfront_distribution_result.domain_name is defined

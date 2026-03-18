@@ -1507,7 +1507,7 @@ nginx_version: "1.10.3"
 nginx_user: "nginx"
 nginx_group: "nginx"
 
-nginx_worker_processes: "{{ ansible_processor_vcpus|default(ansible_processor_count + 1) }}"
+nginx_worker_processes: "{{ (ansible_facts | default({})).get('processor_vcpus', (((ansible_facts | default({})).get('processor_count', 0) | int) + 1)) }}"
 nginx_worker_connections: "1024"
 
 nginx_multi_accept: "off"

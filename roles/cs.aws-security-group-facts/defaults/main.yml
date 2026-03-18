@@ -1,2 +1,14 @@
 aws_sg_facts_filters: {}
 aws_sg_facts_tags: "{{ aws_tags_base }}"
+aws_sg_facts_group_name_by_fact:
+  aws_security_group_efs: "{{ aws_security_group_efs_name }}"
+  aws_security_group_elasticsearch: "{{ aws_security_group_elasticsearch_name }}"
+  aws_security_group_redis: "{{ aws_security_group_redis_name }}"
+  aws_security_group_rds: "{{ aws_security_group_rds_name }}"
+  aws_security_group_app: "{{ aws_security_group_app_name }}"
+  aws_security_group_varnish: "{{ aws_security_group_varnish_name }}"
+  aws_security_group_lb: "{{ aws_security_group_lb_name }}"
+  aws_security_group_ssh: "{{ aws_security_group_ssh_name }}"
+  aws_security_group_lambda_ssh: "{{ aws_security_group_lambda_ssh_name }}"
+  aws_security_group_persistant: "{{ aws_security_group_persistant_name }}"
+aws_sg_facts_group_names: "{{ aws_sg_facts_group_name_by_fact | dict2items | map(attribute='value') | list }}"

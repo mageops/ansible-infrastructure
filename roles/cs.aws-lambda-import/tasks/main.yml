@@ -1,15 +1,25 @@
+- name: Resolve import scaling desired state
+  ansible.builtin.set_fact:
+    _import_scaling_enabled: "{{ magento_aws_ondemand_import_instance_enable | default(false) | bool }}"
+
 - name: Download lambda deploy packages
   get_url:
     url: "{{ aws_lambda_import_scaling_deploy_package_url }}"
     dest: "{{ aws_lambda_import_scaling_deploy_package_path }}"
     mode: "0644"
-  when: magento_aws_ondemand_import_instance_enable
+  when: _import_scaling_enabled
 
 - name: Check if lambda function exists
   amazon.aws.lambda_info:
     region: "{{ aws_region }}"
   register: _lambda_facts
-  when: magento_aws_ondemand_import_instance_enable
+
+- name: Resolve lambda existence/runtime facts
+  ansible.builtin.set_fact:
+    _import_scaling_lambda_exists: "{{ _import_scaling_lambda is not none }}"
+    _import_scaling_lambda_runtime: "{{ _import_scaling_lambda.runtime | default('') }}"
+  vars:
+    _import_scaling_lambda: "{{ (_lambda_facts.ansible_facts.lambda_facts.function | default({})).get(aws_lambda_handle_import_scaling_name) }}"
 
 - name: Delete lambda function if it exists with different runtime
   amazon.aws.lambda:
@@ -17,9 +27,9 @@
     state: absent
     region: "{{ aws_region }}"
   when:
-    - magento_aws_ondemand_import_instance_enable
-    - _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_import_scaling_name] is defined
-    - _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_import_scaling_name].runtime != aws_lambda_handle_import_scaling_runtime
+    - _import_scaling_enabled
+    - _import_scaling_lambda_exists
+    - _import_scaling_lambda_runtime != aws_lambda_handle_import_scaling_runtime
 
 - name: Register import scaling handler lambda
   amazon.aws.lambda:
@@ -35,7 +45,7 @@
       ASG_NAME: "{{ mageops_app_name }}-extra-app"
       CHECK_ENDPOINT: "{{ magento_base_url }}rest/V1/importer/is_runner_needed"
   register: handle_import_scaling_lambda
-  when: magento_aws_ondemand_import_instance_enable
+  when: _import_scaling_enabled
 
 - name: Define eventrule target
   set_fact:
@@ -43,7 +53,7 @@
       - id: "{{ aws_lambda_handle_import_scaling_name }}-schedule-target"
         # We need to remove the last part - version - because it doesn't work with it
         arn: "{{ handle_import_scaling_lambda.configuration.function_arn }}"
-  when: magento_aws_ondemand_import_instance_enable
+  when: _import_scaling_enabled
 
 - name: Setup schedule event trigger
   cloudwatchevent_rule:
@@ -53,7 +63,14 @@
     schedule_expression: "{{ aws_import_scaling_lambda_schedule }}"
     targets: "{{ handle_import_scaling_lambda_eventrule_targets }}"
   register: import_scaling_schedule_event
-  when: magento_aws_ondemand_import_instance_enable
+  when: _import_scaling_enabled
+
+- name: Remove schedule event trigger when import scaling is disabled
+  cloudwatchevent_rule:
+    name: "handle-import-instance-scaling-{{ mageops_app_name }}"
+    region: "{{ aws_region }}"
+    state: absent
+  when: not _import_scaling_enabled
 
 - name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
   amazon.aws.lambda_policy:
@@ -64,4 +81,23 @@
     principal: "events.amazonaws.com"
     statement_id: "AWSEvents-importScalingHandler-{{ mageops_app_name }}"
     source_arn: "{{ import_scaling_schedule_event.rule.arn }}"
-  when: magento_aws_ondemand_import_instance_enable
+  when: _import_scaling_enabled
+
+- name: Remove autoscaling event handler lambda policy when import scaling is disabled
+  amazon.aws.lambda_policy:
+    state: absent
+    region: "{{ aws_region }}"
+    function_name: "{{ aws_lambda_handle_import_scaling_name }}"
+    action: "lambda:InvokeFunction"
+    principal: "events.amazonaws.com"
+    statement_id: "AWSEvents-importScalingHandler-{{ mageops_app_name }}"
+  when:
+    - not _import_scaling_enabled
+    - _import_scaling_lambda_exists
+
+- name: Remove import scaling handler lambda when import scaling is disabled
+  amazon.aws.lambda:
+    name: "{{ aws_lambda_handle_import_scaling_name }}"
+    state: absent
+    region: "{{ aws_region }}"
+  when: not _import_scaling_enabled

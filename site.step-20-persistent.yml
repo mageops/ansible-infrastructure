@@ -12,24 +12,6 @@
       delegate_to: localhost
       become: no
 
-    - name: Detect usable Python interpreter on persistent node
-      raw: >-
-        for p in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11
-        /usr/bin/python3.10 /usr/bin/python3.9 /usr/bin/python3.8
-        /usr/bin/python3.7 /usr/bin/python3 /usr/bin/python; do
-          if test -x "$p"; then
-            echo "$p"
-            break
-          fi
-        done
-      register: persistent_python_interpreter
-      changed_when: false
-      failed_when: (persistent_python_interpreter.stdout | default('', true) | trim | length) == 0
-
-    - name: Set Python interpreter for persistent node
-      set_fact:
-        ansible_python_interpreter: "{{ persistent_python_interpreter.stdout | trim }}"
-
     - name: Gather facts for persistent node
       setup: ~
   roles:
@@ -138,5 +120,6 @@
       when: mageops_extra_tasks_persistent_node is defined
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3.9
     mageops_node_role: persistent
     magento_facts_detect_from_artifacts: yes

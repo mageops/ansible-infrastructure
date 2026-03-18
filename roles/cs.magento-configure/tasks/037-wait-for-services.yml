@@ -8,7 +8,7 @@
   until: "'rc' in result and result.rc == 0"
   when:
     - (mageops_elasticsearch_host | default('', true) | string | length) > 0
-    - not mageops_skip_elasticsearch_check
+    - not (mageops_skip_elasticsearch_check | bool)
     - mageops_elasticsearch_opensearch_flavor == "elasticsearch"
 
 - name: Wait for Opensearch
@@ -18,7 +18,7 @@
   register: result
   until: "'rc' in result and result.rc == 0"
   when:
-    - (mageops_openearch_host | default('', true) | string | length) > 0
+    - (mageops_opensearch_host | default('', true) | string | length) > 0
     - mageops_elasticsearch_opensearch_flavor == "opensearch"
 
 - name: Wait for Redis cache host
@@ -27,7 +27,9 @@
   delay: 5
   register: result
   until: "'rc' in result and result.rc == 0"
-  when: magento_redis_cache
+  when:
+    - magento_redis_cache | bool
+    - (mageops_redis_host | default('', true) | string | length) > 0
 
 - name: Wait for Redis session host
   shell: echo -ne "PING\r\n" | nc {{ mageops_redis_sessions_host }} {{ mageops_redis_sessions_port }}
@@ -35,3 +37,4 @@
   delay: 5
   register: result
   until: "'rc' in result and result.rc == 0"
+  when: (mageops_redis_sessions_host | default('', true) | string | length) > 0
