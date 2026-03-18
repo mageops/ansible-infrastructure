@@ -6,7 +6,7 @@
 
 - name: Download pio-worker rpm
   get_url:
-    url: "{{ pio_package_url_rpm[ansible_architecture] }}"
+    url: "{{ pio_package_url_rpm[ansible_facts['architecture']] }}"
     dest: "{{ _temp_dir.path }}/pio-worker.rpm"
 
 - name: Install pio-worker rpm

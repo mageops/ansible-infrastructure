@@ -41,9 +41,8 @@ DOCUMENTATION = '''
 
 import os
 import re
-from ansible import constants as C
 from ansible.errors import AnsibleParserError
-from ansible.module_utils._text import to_bytes, to_native, to_text
+from ansible.module_utils.common.text.converters import to_bytes, to_native, to_text
 from ansible.plugins.vars import BaseVarsPlugin
 from ansible.inventory.host import Host
 from ansible.inventory.group import Group
@@ -53,6 +52,7 @@ CONFIG_GROUPS = ['all']
 CONFIG_SUBDIR = 'vars'
 CONFIG_TYPES = ['global', 'project']
 CONFIG_TYPE_FILES_CACHE = {}
+YAML_EXTENSIONS = ('.yml', '.yaml')
 
 def get_entity_name(entity):
     if isinstance(entity, Host):
@@ -62,6 +62,41 @@ def get_entity_name(entity):
         return "group: %s" % (entity.get_name())
 
     return "unknown: %s" % (str(entity))
+
+
+def should_skip_path(path):
+    return (
+        re.search(r'/(tasks|certs|certificates|files|templates|resources|roles|playbooks)/', path)
+        or re.search(r'/(?:\.[^/]+|[^/]+~)(?:/|$)', path)
+    )
+
+
+def list_config_type_files(config_dir_path, config_type):
+    config_type_path = os.path.join(config_dir_path, config_type)
+
+    if not os.path.exists(config_type_path) or should_skip_path(config_type_path):
+        return []
+
+    if os.path.isfile(config_type_path):
+        return [config_type_path] if config_type_path.endswith(YAML_EXTENSIONS) else []
+
+    found_files = []
+
+    for root, dirnames, filenames in os.walk(config_type_path):
+        dirnames[:] = [
+            dirname for dirname in sorted(dirnames)
+            if not should_skip_path(os.path.join(root, dirname))
+        ]
+
+        for filename in sorted(filenames):
+            found = os.path.join(root, filename)
+
+            if should_skip_path(found) or not found.endswith(YAML_EXTENSIONS):
+                continue
+
+            found_files.append(found)
+
+    return found_files
 
 class VarsModule(BaseVarsPlugin):
     REQUIRES_WHITELIST = False
@@ -79,15 +114,24 @@ class VarsModule(BaseVarsPlugin):
         if self._basedir is None or self._basedir == 'None':
             return {}
 
-        processable_entities = [entity for entity in entities if isinstance(entity, Group) and entity.get_name() in CONFIG_GROUPS]
+        processable_entities = [
+            entity for entity in entities
+            if (
+                isinstance(entity, Host)
+                or (isinstance(entity, Group) and entity.get_name() in CONFIG_GROUPS)
+            )
+        ]
 
-        # We want to load vars only for the 'all' group
+        # We want to load vars only for regular inventory entities.
         if len(processable_entities) == 0:
             return {}
 
         # Skipping tasks templates and vars
         config_dir_path = to_text(os.path.realpath(to_bytes(os.path.join(self._basedir, CONFIG_SUBDIR))))
-        data = {}
+        data = {
+            'mageops_vars_plugin_loaded': True,
+            'mageops_project_vars_loaded': False,
+        }
 
         try:
             if os.path.isdir(config_dir_path):
@@ -102,18 +146,19 @@ class VarsModule(BaseVarsPlugin):
                     if cache and config_type in CONFIG_TYPE_FILES_CACHE:
                         found_files = CONFIG_TYPE_FILES_CACHE[config_type]
                     else:
-                        found_files = loader.find_vars_files(config_dir_path, config_type, allow_dir=True)
+                        found_files = list_config_type_files(config_dir_path, config_type)
+                        if cache:
+                            CONFIG_TYPE_FILES_CACHE[config_type] = found_files
 
                     for found in found_files:
-                        if re.search(r'/(tasks|certs|certificates|files|templates|resources|roles|playbooks)/', found):
-                            continue
-
                         self._display.vv("Loading MageOps configuration file: %s" % (found))
 
                         new_data = loader.load_from_file(found, cache=True, unsafe=True)
 
                         if new_data:
                             data = combine_vars(data, new_data)
+                            if config_type == 'project':
+                                data['mageops_project_vars_loaded'] = True
             else:
                 self._display.v("Skipping non-existent MageOps configuration dir: %s" % (config_dir_path))
 

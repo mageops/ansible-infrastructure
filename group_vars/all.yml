@@ -653,6 +653,8 @@ mageops_project: magesuite
 
 # The environment type / tier, indicates the purpose (stage), usually `dev` or `prod`
 mageops_environment: dev
+mageops_vars_plugin_loaded: false
+mageops_project_vars_loaded: false
 
 # Currently just used for naming things
 mageops_app_type: "magento"

@@ -1,11 +1,11 @@
 - name: Create Launch Template Configuration
-  ec2_launch_template:
+  amazon.aws.ec2_launch_template:
     state: present
     name: "{{ autoscaling_launch_template_name }}"
     region: "{{ aws_region }}"
     image_id: "{{ autoscaling_instance_ami_id }}"
     instance_type: "{{ autoscaling_instance_type }}"
-    iam_instance_profile : "{{ autoscaling_instance_iam_role }}"
+    iam_instance_profile: "{{ autoscaling_instance_iam_role }}"
     key_name: "{{ aws_ec2_ssh_key_name }}"
     network_interfaces:
       - groups: "{{ autoscaling_instance_security_groups }}"
@@ -21,7 +21,7 @@
     aws_ec2_user_launch_script: "{{ autoscaling_instance_start_script }}"
 
 - name: Create AutoScaling Group
-  ec2_asg:
+  amazon.aws.autoscaling_group:
     state: present
     name: "{{ autoscaling_asg_name }}"
     region: "{{ aws_region }}"
@@ -56,7 +56,7 @@
       and autoscaling_asg_desired_capacity > 0
 
 - name: Create ASG Termination Lifecycle Hook
-  ec2_asg_lifecycle_hook:
+  community.aws.autoscaling_lifecycle_hook:
     state: present
     region: "{{ aws_region }}"
     autoscaling_group_name: "{{ autoscaling_asg_name }}"

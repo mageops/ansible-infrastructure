@@ -1,7 +1,44 @@
+- import_playbook: site.common.assert-mageops-vars.yml
+
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: app:&current:!immutable
+  gather_facts: no
   pre_tasks:
+    - name: Load MageOps vars
+      ansible.builtin.include_role:
+        name: cs.mageops-vars
+
+    - name: Wait for app node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
+
+    - name: Detect usable Python interpreter on app node
+      raw: >-
+        for p in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11
+        /usr/bin/python3.10 /usr/bin/python3.9 /usr/bin/python3.8
+        /usr/bin/python3.7 /usr/bin/python3 /usr/bin/python; do
+          if test -x "$p"; then
+            echo "$p"
+            break
+          fi
+        done
+      register: app_python_interpreter
+      changed_when: false
+      failed_when: (app_python_interpreter.stdout | default('', true) | trim | length) == 0
+
+    - name: Set Python interpreter for app node
+      set_fact:
+        ansible_python_interpreter: "{{ app_python_interpreter.stdout | trim }}"
+
+    - name: Gather facts for app node
+      setup: ~
+
     - name: Release artifact sanity check failed
       fail:
         msg: |
@@ -36,7 +73,7 @@
           ---------------------------------------------
 
     - name: Set artifact build number fact if available
-      when: deploy_artifact_build_json_data.nr | default(false, true)
+      when: (deploy_artifact_build_json_data.nr | default('', true) | string | length) > 0
       set_fact:
         mageops_artifact_build_nr: "{{ deploy_artifact_build_json_data.nr }}"
 
@@ -129,7 +166,7 @@
       when: mageops_extra_tasks_deploy is defined and mageops_extra_tasks_deploy
 
     - name: Save deploy release information to file
-      when: deploy_release_save_info_file_path | default(false, true)
+      when: (deploy_release_save_info_file_path | default('', true) | string | length) > 0
       copy:
         dest: "{{ deploy_release_save_info_file_path }}"
         content: "{{ deploy_release_info | to_nice_json }}"

@@ -1,11 +1,12 @@
-- name: Create VPC network
-  ec2_vpc_net:
-    state: present
-    region: "{{ aws_region }}"
-    cidr_block: "{{ aws_vpc_subnet_prefix }}.0.0/16"
+- name: Ensure VPC exists
+  amazon.aws.ec2_vpc_net:
     name: "{{ aws_vpc_name }}"
+    cidr_block: "{{ aws_vpc_subnet_prefix }}.0.0/16"
+    region: "{{ aws_region }}"
     tags: "{{ aws_tags_default }}"
+    state: present
   register: vpc_net
+  when: aws_vpc_create | bool
 
 - name: Create internet gateway in VPC
   ec2_vpc_igw:
@@ -16,6 +17,7 @@
   vars:
     vpc_igw_tags:
       Name: "{{ mageops_app_name }}"
+  when: aws_vpc_create | bool
 
 - name: Create public subnets in VPC
   ec2_vpc_subnet:
@@ -33,6 +35,7 @@
     loop_var: az_name
     index_var: az_index
   register: vpc_subnet
+  when: aws_vpc_create | bool
 
 - name: Create route table
   ec2_vpc_route_table:
@@ -45,5 +48,8 @@
   vars:
     vpc_route_table_tags:
       Name: "{{ aws_vpc_name }}-routes"
+  when: aws_vpc_create | bool
 
-
+- name: Resolve existing VPC facts
+  ansible.builtin.include_role:
+    name: cs.aws-vpc-facts

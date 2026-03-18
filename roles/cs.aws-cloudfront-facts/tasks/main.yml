@@ -1,35 +1,118 @@
 - name: Get list of cloudfront distributions
-  community.aws.cloudfront_distribution_info:
-    region: "{{ aws_region }}"
-    summary: yes
-  register: cloudfront_distributions_info
+  ansible.builtin.command:
+    argv:
+      - aws
+      - cloudfront
+      - list-distributions
+      - --output
+      - json
+  register: cloudfront_distributions_cmd
+  changed_when: false
 
-- name: Set list of cloudfront distributions
-  set_fact:
-    aws_cloudfront_distributions: "{{ cloudfront_distributions_info.cloudfront.summary.distributions }}"
+- name: Set raw list of cloudfront distributions
+  ansible.builtin.set_fact:
+    aws_cloudfront_distributions_raw: >-
+      {{
+        (cloudfront_distributions_cmd.stdout | from_json).DistributionList.Items
+        | default([])
+      }}
+
+- name: Initialize list of cloudfront distributions
+  ansible.builtin.set_fact:
+    aws_cloudfront_distributions: []
+
+- name: Get cloudfront distribution metadata
+  ansible.builtin.command:
+    argv:
+      - aws
+      - cloudfront
+      - get-distribution
+      - --id
+      - "{{ cloudfront_distribution.Id }}"
+      - --output
+      - json
+  register: cloudfront_distribution_details_cmd
+  changed_when: false
+  loop: "{{ aws_cloudfront_distributions_raw }}"
+  loop_control:
+    loop_var: cloudfront_distribution
+    label: "{{ cloudfront_distribution.Id }}"
+
+- name: Get cloudfront distribution tags
+  ansible.builtin.command:
+    argv:
+      - aws
+      - cloudfront
+      - list-tags-for-resource
+      - --resource
+      - "{{ cloudfront_distribution.ARN }}"
+      - --output
+      - json
+  register: cloudfront_distribution_tags_cmd
+  changed_when: false
+  loop: "{{ aws_cloudfront_distributions_raw }}"
+  loop_control:
+    loop_var: cloudfront_distribution
+    label: "{{ cloudfront_distribution.Id }}"
+
+- name: Build list of cloudfront distributions
+  ansible.builtin.set_fact:
+    aws_cloudfront_distributions: "{{ aws_cloudfront_distributions + [cloudfront_distribution_item] }}"
+  vars:
+    cloudfront_distribution_data: >-
+      {{
+        cloudfront_distribution_details_cmd.results[cloudfront_distribution_index].stdout
+        | from_json
+      }}
+    cloudfront_distribution_tags_data: >-
+      {{
+        cloudfront_distribution_tags_cmd.results[cloudfront_distribution_index].stdout
+        | from_json
+      }}
+    cloudfront_distribution_item: >-
+      {{
+        aws_cloudfront_distributions_raw[cloudfront_distribution_index]
+        | combine(
+            {
+              'ETag': cloudfront_distribution_data.ETag,
+              'Aliases': aws_cloudfront_distributions_raw[cloudfront_distribution_index].Aliases.Items | default([]),
+              'Tags': (
+                cloudfront_distribution_tags_data.Tags.Items | default([])
+                | items2dict(key_name='Key', value_name='Value')
+              )
+            },
+            recursive=True
+          )
+      }}
+  loop: "{{ range(0, aws_cloudfront_distributions_raw | length) | list }}"
+  loop_control:
+    loop_var: cloudfront_distribution_index
 
 - name: Filter cloudfront distribution list by tags
-  set_fact:
+  ansible.builtin.set_fact:
     aws_cloudfront_distributions: "{{ aws_cloudfront_distributions | json_query(distributions_tag_filter_query) }}"
   vars:
-    distributions_tag_filter_query: "[?{% for k, v in aws_cloudfront_distribution_tags.items() -%}Tags.{{ k }} == '{{ v }}'{% if not loop.last %} && {% endif %}{% endfor %}]"
+    distributions_tag_filter_query: >-
+      [?{% for k, v in aws_cloudfront_distribution_tags.items() -%}
+      Tags.{{ k }} == '{{ v }}'{% if not loop.last %} && {% endif %}
+      {% endfor %}]
 
 - name: Warn when more than one distribution has been found
-  debug:
+  ansible.builtin.debug:
     msg: |
       Warning! More than one matching cloudfront distribution found, using first one.
       Found: {{ aws_cloudfront_distributions | map(attribute='Comment') | join(', ') }}
   when: aws_cloudfront_distributions | length > 1
 
 - name: Set facts about project's cloudfront distribution
-  set_fact:
+  ansible.builtin.set_fact:
     aws_cloudfront_distribution: "{{ aws_cloudfront_distributions | first }}"
     aws_cloudfront_distribution_id: "{{ (aws_cloudfront_distributions | first).Id }}"
     aws_cloudfront_distribution_domain: "{{ (aws_cloudfront_distributions | first).DomainName }}"
   when: aws_cloudfront_distributions | length > 0
 
 - name: Show gathered cloudfront info
-  debug:
+  ansible.builtin.debug:
     msg: |
       Using Cloudfront Distribution: {{ aws_cloudfront_distribution_id }} with domain {{ aws_cloudfront_distribution_domain }}
   when: aws_cloudfront_distributions | length > 0

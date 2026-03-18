@@ -36,17 +36,17 @@
 
 - name: Keep all default versions
   set_fact:
-    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(query) }}"
+    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(launch_template_version_query) }}"
   vars:
-    query: "[?DefaultVersion]"
+    launch_template_version_query: "[?DefaultVersion]"
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
   when: aws_ec2_cleanup_lt_to_keep > 0
 
 - name: Keep last N versions
   set_fact:
-    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(query) }}"
+    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(launch_template_version_query) }}"
   vars:
-    query: "[:{{aws_ec2_cleanup_lt_to_keep}}]"
+    launch_template_version_query: "[:{{aws_ec2_cleanup_lt_to_keep}}]"
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
   when: aws_ec2_cleanup_lt_to_keep > 0
 
@@ -125,15 +125,15 @@
   when: aws_ec2_cleanup_lt_to_keep > 0
 
 - name: Delete whole LT
-  ec2_launch_template:
-    name: "{{item.name | quote }}"
+  amazon.aws.ec2_launch_template:
+    name: "{{ item.name | quote }}"
     state: absent
     region: "{{ aws_region }}"
   loop: "{{ _remove_template_version }}"
   when: aws_ec2_cleanup_lt_to_keep == 0
 
-- name : Remove obsoled AMIs
-  ec2_ami:
+- name: Remove obsoled AMIs
+  amazon.aws.ec2_ami:
     image_id: "{{ item }}"
     state: absent
     delete_snapshot: True

@@ -12,10 +12,10 @@ acl client_ip_whitelist {
 acl purge {
     "127.0.0.1";
     {% for ip in varnish_purge_trusted_ips %}
-    {% if ip | ipaddr('network') %}
-    "{{ ip | ipaddr('network') }}"/{{ ip | ipaddr('prefix') }};
+    {% if '/' in (ip | string) %}
+    "{{ (ip | string).split('/')[0] }}"/{{ (ip | string).split('/')[1] }};
     {% else %}
-    "{{ ip | ipaddr('address') }}";
+    "{{ ip }}";
     {% endif %}
     {% endfor %}
 }
@@ -23,10 +23,10 @@ acl purge {
 {% if varnish_do_not_expose_caching or varnish_secure_site %}
 acl trusted {
     {% for ip in varnish_trusted_ips %}
-    {% if ip | ipaddr('network') %}
-    "{{ ip | ipaddr('network') }}"/{{ ip | ipaddr('prefix') }};
+    {% if '/' in (ip | string) %}
+    "{{ (ip | string).split('/')[0] }}"/{{ (ip | string).split('/')[1] }};
     {% else %}
-    "{{ ip | ipaddr('address') }}";
+    "{{ ip }}";
     {% endif %}
     {% endfor %}
 }

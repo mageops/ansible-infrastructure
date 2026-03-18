@@ -2,5 +2,6 @@
   connection: local
   gather_facts: false
   roles:
+    - role: cs.mageops-vars
     - role: cs.aws-iam
     - role: cs.aws-iam-employee-access

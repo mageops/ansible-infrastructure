@@ -16,8 +16,7 @@
       register: _aws_sns_complaints
 
 - name: Add e-mail to SES
-  #community.aws.aws_ses_identity:
-  aws_ses_identity:
+  community.aws.ses_identity:
     identity: "{{ ses_email }}"
     region: "{{ aws_region }}"
     state: present
@@ -31,8 +30,7 @@
   when: ses_email | default(false, true)
 
 - name: Add domain to SES
-  #community.aws.aws_ses_identity:
-  aws_ses_identity:
+  community.aws.ses_identity:
     identity: "{{ ses_domain }}"
     region: "{{ aws_region }}"
     state: present

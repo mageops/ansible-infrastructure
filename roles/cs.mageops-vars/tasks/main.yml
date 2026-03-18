@@ -1,0 +1,71 @@
+- name: Check for global vars directory
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/vars/global"
+  register: mageops_global_vars_dir
+  delegate_to: localhost
+  become: no
+
+- name: Find global vars files
+  ansible.builtin.find:
+    paths: "{{ playbook_dir }}/vars/global"
+    recurse: true
+    file_type: file
+    patterns:
+      - "*.yml"
+      - "*.yaml"
+  register: mageops_global_vars_files
+  when: mageops_global_vars_dir.stat.exists
+  delegate_to: localhost
+  become: no
+
+- name: Load global vars files
+  ansible.builtin.include_vars:
+    file: "{{ item.path }}"
+  loop: >-
+    {{
+      mageops_global_vars_files.files
+      | rejectattr('path', 'search', '/(tasks|certs|certificates|files|templates|resources|roles|playbooks)/')
+      | rejectattr('path', 'search', '/(?:\\.[^/]+|[^/]+~)(?:/|$)')
+      | sort(attribute='path')
+    }}
+  loop_control:
+    label: "{{ item.path }}"
+  when: mageops_global_vars_dir.stat.exists
+  delegate_to: localhost
+  become: no
+
+- name: Check for project vars directory
+  ansible.builtin.stat:
+    path: "{{ playbook_dir }}/vars/project"
+  register: mageops_project_vars_dir
+  delegate_to: localhost
+  become: no
+
+- name: Find project vars files
+  ansible.builtin.find:
+    paths: "{{ playbook_dir }}/vars/project"
+    recurse: true
+    file_type: file
+    patterns:
+      - "*.yml"
+      - "*.yaml"
+  register: mageops_project_vars_files
+  when: mageops_project_vars_dir.stat.exists
+  delegate_to: localhost
+  become: no
+
+- name: Load project vars files
+  ansible.builtin.include_vars:
+    file: "{{ item.path }}"
+  loop: >-
+    {{
+      mageops_project_vars_files.files
+      | rejectattr('path', 'search', '/(tasks|certs|certificates|files|templates|resources|roles|playbooks)/')
+      | rejectattr('path', 'search', '/(?:\\.[^/]+|[^/]+~)(?:/|$)')
+      | sort(attribute='path')
+    }}
+  loop_control:
+    label: "{{ item.path }}"
+  when: mageops_project_vars_dir.stat.exists
+  delegate_to: localhost
+  become: no

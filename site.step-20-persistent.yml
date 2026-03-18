@@ -1,7 +1,41 @@
+- import_playbook: site.common.assert-mageops-vars.yml
+
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: persistent:&current:!immutable
+  gather_facts: no
+  pre_tasks:
+    - name: Wait for persistent node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
+
+    - name: Detect usable Python interpreter on persistent node
+      raw: >-
+        for p in /usr/bin/python3.13 /usr/bin/python3.12 /usr/bin/python3.11
+        /usr/bin/python3.10 /usr/bin/python3.9 /usr/bin/python3.8
+        /usr/bin/python3.7 /usr/bin/python3 /usr/bin/python; do
+          if test -x "$p"; then
+            echo "$p"
+            break
+          fi
+        done
+      register: persistent_python_interpreter
+      changed_when: false
+      failed_when: (persistent_python_interpreter.stdout | default('', true) | trim | length) == 0
+
+    - name: Set Python interpreter for persistent node
+      set_fact:
+        ansible_python_interpreter: "{{ persistent_python_interpreter.stdout | trim }}"
+
+    - name: Gather facts for persistent node
+      setup: ~
   roles:
+    - role: cs.mageops-vars
     - role: cs.aws-node-facts
       delegate_to: localhost
       become: no
@@ -44,6 +78,7 @@
       when: aws_use
     - role: cs.cron
     - role: geerlingguy.ntp
+      services: "{{ ansible_facts.services | default({}) }}"
     - role: cs.opensearch
       when: mageops_elasticsearch_opensearch_flavor == "opensearch"
     - role: cs.elasticsearch

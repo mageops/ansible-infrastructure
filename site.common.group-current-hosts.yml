@@ -2,6 +2,10 @@
   connection: local
   gather_facts: no
   tags: always
+  pre_tasks:
+    - name: Load MageOps vars
+      ansible.builtin.include_role:
+        name: cs.mageops-vars
   tasks:
     - name: Fail if project host group is not found
       when: not mageops_app_host_group in groups.keys()

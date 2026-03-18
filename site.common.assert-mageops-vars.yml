@@ -1,0 +1,14 @@
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Fail if MageOps vars plugin did not load project vars
+      ansible.builtin.assert:
+        that:
+          - mageops_vars_plugin_loaded | default(false) | bool
+          - mageops_project_vars_loaded | default(false) | bool
+        fail_msg: >-
+          MageOps project vars were not loaded. Refusing to continue because this
+          would fall back to defaults from group_vars/all.yml, including a wrong
+          mageops_environment. Verify ansible.cfg uses ./vars_plugins and that
+          vars/project/*.yml is present in the workspace.

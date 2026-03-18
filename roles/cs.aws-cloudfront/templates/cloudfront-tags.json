@@ -1,0 +1,10 @@
+{
+    "Items": [
+        {% for key, value in aws_cloudfront_ditribution_tags.items() %}
+        {
+            "Key": "{{ key }}",
+            "Value": "{{ value }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ]
+}

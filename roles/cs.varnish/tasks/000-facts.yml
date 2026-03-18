@@ -9,8 +9,8 @@
 
       ---
 
-      Total target system vCPUs: {{ ansible_processor_vcpus }}
-      Total target system memory: {{ ( ansible_memtotal_mb ~ 'MB' ) | human_to_bytes | human_readable }}
+      Total target system vCPUs: {{ ansible_facts['processor_vcpus'] }}
+      Total target system memory: {{ ( ansible_facts['memtotal_mb'] ~ 'MB' ) | human_to_bytes | human_readable }}
 
       ---
 
@@ -72,8 +72,10 @@
         varnish_media_cors_allowed_origins: |
           {{
             varnish_media_cors_allowed_origins +
-            [ aws_cloudfront_distribution_domain ] +
-            aws_cloudfront_domain_aliases | default([])
+            [aws_cloudfront_distribution_domain] +
+            (aws_cloudfront_domain_aliases | default([]))
           }}
-      when: aws_cloudfront_distribution_create | default(false) and aws_cloudfront_distribution_domain | default(false, true)
+      when:
+        - aws_cloudfront_distribution_create | default(false) | bool
+        - (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
   when: varnish_generate_allowed_origins
