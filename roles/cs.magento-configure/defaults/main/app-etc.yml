@@ -80,6 +80,10 @@ magento_app_etc_config:
   install:
     date: "Tue, 11 Nov 2016 11:11:00 +0000"
 
+magento_app_etc_config_lazy_resize:
+  lazy_resize:
+    secret : "{{ lazy_resize_secret }}"
+
 magento_mysql_ssl_required:
   db:
     connection:

@@ -7,6 +7,13 @@
         {{ magento_app_etc_config
             | combine(magento_app_etc_config_http_cache, recursive=true) }}
 
+  - name: Enable lazy resize configuration
+    when: lazy_resize_secret
+    set_fact:
+      magento_app_etc_config: >-
+        {{ magento_app_etc_config
+            | combine(magento_app_etc_config_lazy_resize, recursive=true) }}
+
   - name: Enable ElasticSuite configuration
     when: elasticsuite_version | default(false) and (mageops_elasticsearch_opensearch_flavor == "elasticsearch")
     set_fact:
