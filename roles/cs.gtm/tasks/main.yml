@@ -19,6 +19,7 @@
     image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
     state: started
     restart_policy: always
+    healthcheck_failure_action: kill
     publish:
       - "8080:8080"
     env:
@@ -36,6 +37,7 @@
     image: gcr.io/cloud-tagging-10302018/gtm-cloud-image:stable
     state: started
     restart_policy: always
+    healthcheck_failure_action: kill
     publish:
       - "8081:8080"
     env:

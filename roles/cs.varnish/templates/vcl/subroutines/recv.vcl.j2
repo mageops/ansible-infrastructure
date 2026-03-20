@@ -192,8 +192,8 @@ if (req.http.X-Blackfire-Query) {
     }
 }
 
-# Bypass customer, shopping cart, checkout and search requests
-if (req.url ~ "/customer" || req.url ~ "/checkout" || req.url ~ "/catalogsearch") {
+# Bypass customer, shopping cart, checkout
+if (req.url ~ "/customer" || req.url ~ "/checkout") {
     return (pass);
 }
 
