@@ -30,7 +30,7 @@ probe gtm_probe {
 
 
 {% for instance in (varnish_backend_instances_app + varnish_backend_instances_extra) %}
-backend {{ instance.instance_id | replace('-','') }} {
+backend app{{ instance.private_ip_address | replace('.','') }} {
     .host = "{{ instance.private_ip_address }}";
     .port = "{{ varnish_backend_port }}";
 	.max_connections = {{ varnish_backend_max_conns }};
@@ -43,7 +43,7 @@ backend {{ instance.instance_id | replace('-','') }} {
 
 {% if (gtm_enabled | default(false)) %}
 {% for instance in (varnish_backend_instances_app + varnish_backend_instances_extra) %}
-backend gtm_{{ instance.instance_id | replace('-','') }} {
+backend gtm_{{ instance.private_ip_address | replace('.','') }} {
     .host = "{{ instance.private_ip_address }}";
     .port = "8080";
 	.max_connections = {{ varnish_backend_max_conns }};
@@ -57,7 +57,7 @@ backend gtm_{{ instance.instance_id | replace('-','') }} {
 
 {% if (gtm_enabled | default(false)) %}
 {% for instance in (varnish_backend_instances_app + varnish_backend_instances_extra) %}
-backend gtm_preview{{ instance.instance_id | replace('-','') }} {
+backend gtm_preview{{ instance.private_ip_address | replace('.','') }} {
     .host = "{{ instance.private_ip_address }}";
     .port = "8081";
 	.probe = gtm_probe;
@@ -72,18 +72,18 @@ backend gtm_preview{{ instance.instance_id | replace('-','') }} {
 sub backends_init {
 	new app_director = directors.round_robin();
 {% for instance in varnish_backend_instances_app %}
-	app_director.add_backend({{ instance.instance_id | replace('-','') }});
+	app_director.add_backend(app{{ instance.private_ip_address | replace('.','') }});
 {% endfor %}
 
 {% if (gtm_enabled | default(false)) %}
 	new gtm_director = directors.round_robin();
 {% for instance in varnish_backend_instances_app %}
-	gtm_director.add_backend(gtm_{{ instance.instance_id | replace('-','') }});
+	gtm_director.add_backend(gtm_{{ instance.private_ip_address | replace('.','') }});
 {% endfor %}
 
 	new gtm_preview_director = directors.round_robin();
 {% for instance in varnish_backend_instances_app %}
-	gtm_preview_director.add_backend(gtm_preview{{ instance.instance_id | replace('-','') }});
+	gtm_preview_director.add_backend(gtm_preview{{ instance.private_ip_address | replace('.','') }});
 {% endfor %}
 {% endif %}
 
@@ -91,6 +91,6 @@ sub backends_init {
 
 	new extra_director = directors.round_robin();
 {% for instance in varnish_backend_instances_extra %}
-	extra_director.add_backend({{ instance.instance_id | replace('-','') }});
+	extra_director.add_backend(app{{ instance.private_ip_address | replace('.','') }});
 {% endfor %}
 }
