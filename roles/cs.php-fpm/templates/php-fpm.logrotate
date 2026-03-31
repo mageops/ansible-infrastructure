@@ -1,0 +1,14 @@
+{{ php_fpm_log_dir_path }}/*.log {
+    rotate 8
+    size 128M
+    missingok
+    notifempty
+    compress
+    compresscmd /usr/bin/zstd
+    uncompresscmd /usr/bin/unzstd
+    compressext .zstd
+    compressoptions -19
+    copytruncate
+    create 0660 root root
+    su root root
+}
