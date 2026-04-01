@@ -125,6 +125,9 @@ varnish_throttling: no
 #                              whitelist rules should be listed before any other ones
 # - `user_agent`  (optional*) - regex pattern that defined affects request user agent
 # - `ignore_ip` (optional) - rule is matched based on other criteria than IP (f.ex. user agent)
+#                            defaults to `yes` for user-agent based rules so IPv4 and IPv6
+#                            for the same client count together; set explicitly to `no`
+#                            to keep per-IP buckets
 # *At leat one of `path_pattern`, `method` or `user_agent` need to be set
 #
 # Note: The rules are evaluated in the order they are defined. First limit that is exceeded

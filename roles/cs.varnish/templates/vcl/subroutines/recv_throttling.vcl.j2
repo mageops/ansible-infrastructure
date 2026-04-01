@@ -1,6 +1,7 @@
 # Throttling shall work only for requests which come from the user-facing nginx
-# so they will have the X-Real-Ip header. We cannot use client.identity or client.ip
-# for the same reason.
+# so they will have a client IP header. We cannot use client.identity or client.ip
+# for the same reason. Prefer Cloudflare-provided headers because they preserve
+# the real client IPv6 address even when the origin itself is IPv4-only.
 
 {% macro varnish_rate_limit_rule(rule) -%}
     {% if rule.whitelisted | default(false, true) -%}
@@ -10,6 +11,7 @@
     {%- endif %}
 
     {%- set conditions = [] -%}
+    {%- set include_ip_in_identity = not rule.ignore_ip | default(rule.user_agent | default(false, true), true) -%}
 
     {%- if rule.path_pattern | default(false, true) -%}
     {%- set _ = conditions.append('req.url ~ "' ~ rule.path_pattern ~ '"') -%}
@@ -24,7 +26,13 @@
     {% if conditions | length > 0 %}
 
     if ({{ conditions | join(' && ') }}) {
-        set req.http.X-RateLimit-Identity = {% if not rule.ignore_ip | default(false, true) -%} req.http.x-real-ip + {%- endif %} "{{ rule.id }}";
+        set req.http.X-RateLimit-Identity = "{{ rule.id }}";
+        {% if include_ip_in_identity -%}
+        set req.http.X-RateLimit-Identity = req.http.X-RateLimit-Client-IP + "|" + req.http.X-RateLimit-Identity;
+        {% endif -%}
+        {% if rule.user_agent | default(false, true) -%}
+        set req.http.X-RateLimit-Identity = req.http.X-RateLimit-Identity + "|" + req.http.User-Agent;
+        {% endif -%}
         {% if not rule.whitelisted | default(false, true) -%}
         set req.http.X-RateLimit-Remaining = vsthrottle.remaining(req.http.X-RateLimit-Identity, {{ rule.limit }}, {{ rule.duration }}, {{ rule.block | default('0s') }});
 
@@ -45,7 +53,21 @@
 {%- endmacro %}
 
 
+{% if cloudflare_enabled | default(false, true) and cloudflare_exclusive_traffic | default(false, true) %}
+if (req.http.CF-Connecting-IPv6) {
+    set req.http.X-RateLimit-Client-IP = req.http.CF-Connecting-IPv6;
+} else if (req.http.CF-Connecting-IP) {
+    set req.http.X-RateLimit-Client-IP = req.http.CF-Connecting-IP;
+} else if (req.http.X-Real-Ip) {
+    set req.http.X-RateLimit-Client-IP = req.http.X-Real-Ip;
+}
+{% else %}
 if (req.http.X-Real-Ip) {
+    set req.http.X-RateLimit-Client-IP = req.http.X-Real-Ip;
+}
+{% endif %}
+
+if (req.http.X-RateLimit-Client-IP) {
     {% for rule in varnish_throttling_rules %}
         {{ varnish_rate_limit_rule(rule) }}
         {%- if not loop.last -%}

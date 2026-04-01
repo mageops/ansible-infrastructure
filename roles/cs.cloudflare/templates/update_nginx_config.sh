@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -eou pipefail
 
-IPLIST_URL=https://www.cloudflare.com/ips-v4
 NGINX_CONFIG_LOCATION="{{ cloudflare_nginx_config }}"
 
 generate_nginx_config() {
@@ -13,12 +12,14 @@ generate_nginx_config() {
 }
 
 update_nginx_config() {
-    local iplist;
+    local iplist_v4;
+    local iplist_v6;
     local config_content;
     local current_config;
 
-    iplist="$(curl -sfL "${IPLIST_URL}")"
-    config_content="$(generate_nginx_config "${iplist}")"
+    iplist_v4="$(curl -sfL "https://www.cloudflare.com/ips-v4")"
+    iplist_v6="$(curl -sfL "https://www.cloudflare.com/ips-v6")"
+    config_content="$(generate_nginx_config "${iplist_v4}"$'\n'"${iplist_v6}")"
     if [ -f "$NGINX_CONFIG_LOCATION" ];then
         current_config="$(cat ${NGINX_CONFIG_LOCATION})"
         if [ "${current_config}" = "${config_content}" ];then
