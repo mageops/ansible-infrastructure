@@ -1,9 +1,0 @@
-# Enable pushprox proxy
-monitoring_pushprox_enabled: no
-monitoring_node_exporter_enabled: no
-monitoring_varnish_exporter_enabled: no
-monitoring_php_fpm_exporter_enabled: no
-monitoring_elasticsearch_exporter_enabled: no
-monitoring_redis_exporter_enabled: no
-# Url for pushprox endpoint
-# monitoring_pushprox_proxy_url:

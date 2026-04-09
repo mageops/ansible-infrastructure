@@ -1,3 +1,0 @@
-dependencies:
-  - role: cs.unison
-    when: not unison_project_skip_install | default(False)

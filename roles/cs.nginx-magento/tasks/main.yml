@@ -1,3 +1,0 @@
-- import_tasks: 000-facts.yml
-- import_tasks: 001-vhost.yml
-- import_tasks: 002-htpasswd.yml

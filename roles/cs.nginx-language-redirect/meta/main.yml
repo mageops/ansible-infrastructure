@@ -1,8 +1,0 @@
-dependencies:
-  - role: cs.nginx
-  - role: cs.repo-mageops
-    when: nginx_language_redirect_detection_method == 'geolite2'
-  - role: cs.geolite2
-    when: nginx_language_redirect_detection_method == 'geolite2'
-  - role: cs.cloudflare
-    when: nginx_language_redirect_detection_method == 'cloudflare'

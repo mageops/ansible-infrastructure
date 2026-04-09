@@ -1,6 +1,0 @@
-- name: Get VPC network info
-  include_tasks: network.yml
-  when: aws_vpc_id is not defined
-
-- name: Get VPC subnets info
-  include_tasks: subnets.yml

@@ -1,3 +1,0 @@
-[Timer]
-OnCalendar=hourly
-AccuracySec=15m

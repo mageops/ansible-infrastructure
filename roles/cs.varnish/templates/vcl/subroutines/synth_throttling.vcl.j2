@@ -1,7 +1,0 @@
-if (resp.status == 429) {
-    {{ synthetic_error_page() }}
-
-    set resp.http.Retry-After = "10";
-
-    return (deliver);
-}

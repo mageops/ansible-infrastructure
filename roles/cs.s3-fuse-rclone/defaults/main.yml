@@ -1,2 +1,0 @@
-s3_mount_rclone_remote_name: mageops-s3
-s3_mount_rclone_config_path: /etc/rclone.conf

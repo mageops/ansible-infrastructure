@@ -1,4 +1,0 @@
-- name: uninstall tinyproxy
-  dnf:
-    name: tinyproxy
-    state: absent

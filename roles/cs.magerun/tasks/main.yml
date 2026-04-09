@@ -1,6 +1,0 @@
-- name: Install magerun release
-  get_url:
-    dest: /usr/local/bin/magerun
-    url: https://files.magerun.net/n98-magerun2-{{ magerun_version }}.phar
-    checksum: "{{ magerun_checksum }}"
-    mode: "u=rwx,g=rx,o=rx"

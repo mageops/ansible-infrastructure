@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-export PHP_IDE_CONFIG=serverName={{ mageops_project }}
-exec php -c "{{ php_cli_debug_ini_path }}" "$@"

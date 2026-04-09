@@ -1,1 +1,0 @@
-aws_rds_facts_mysql_tags: "{{ aws_tags_base | combine(aws_tags_role_database, aws_tags_role_mysql_database) }}"

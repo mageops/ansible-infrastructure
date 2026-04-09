@@ -1,3 +1,0 @@
-- name: Reboot System
-  ansible.builtin.reboot:
-  when: systemd_oomd_reboot_system

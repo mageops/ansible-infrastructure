@@ -1,7 +1,0 @@
-file_path: "{{ item.filename }}"
-log_group_name: "/{{ mageops_project }}/{{ mageops_environment }}{{ item.group_name }}"
-log_stream_name: "{{ aws_logs_stream_name }}"
-timestamp_format: "{{ item.date_format }}"
-{% if item.multiline %}
-multi_line_start_pattern: "{timestamp_format}"
-{% endif %}

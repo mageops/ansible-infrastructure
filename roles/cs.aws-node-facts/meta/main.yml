@@ -1,3 +1,0 @@
-allow_duplicates: yes
-dependencies:
-  - role: cs.ansible-plugins

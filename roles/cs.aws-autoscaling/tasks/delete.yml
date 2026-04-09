@@ -1,5 +1,0 @@
-- name: Remove AutoScaling Group
-  amazon.aws.autoscaling_group:
-    state: absent
-    name: "{{ autoscaling_asg_name }}"
-    region: "{{ aws_region }}"

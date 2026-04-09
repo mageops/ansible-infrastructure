@@ -1,64 +1,87 @@
-- import_playbook: site.common.assert-mageops-vars.yml
-
-- hosts: localhost
+---
+- name: Validate MageOps vars loading for Jenkins
+  hosts: localhost
   connection: local
   gather_facts: false
-  pre_tasks:
-    - name: Collect minimum facts (we need date time stuff)
-      setup:
-        gather_subset: min
-  roles:
-    - role: cs.mageops-vars
-    - role: cs.aws-vpc
-    - role: cs.aws-security-group
-      aws_security_group_rds_create: "{{ aws_rds_create }}"
-      aws_security_group_redis_create: "{{ redis_valkey_flavor in ['redis', 'valkey'] }}"
-      aws_security_group_rabbitmq_create: "{{ mageops_rabbitmq_create and magento_rabbitmq_queue }}"
-      aws_security_group_elastic_create: "{{ mageops_elasticsearch_opensearch_flavor in ['elasticsearch','opensearch'] }}"
-    - role: cs.aws-s3
-    - role: cs.aws-cloudfront
-      when: aws_cloudfront_distribution_create | bool
-    - role: cs.aws-ses
-      ses_email: "{{ mageops_email_ses_address | default(none, true) }}"
-      ses_domain: "{{ mageops_email_ses_domain | default(none, true) }}"
-      when: mageops_email_use_ses
-    - role: cs.aws-rds
-      when: aws_rds_create
-    - role: cs.aws-loadbalancer
-      lb_ssl_cert: "{{ aws_elb_https_certificate_arn }}"
-      lb_s3_logs_bucket: "{{ aws_s3_secret_bucket }}"
-      lb_http_port: "{{ mageops_varnish_port }}"
-      when: aws_elb_create
-    - role: cs.aws-ami-facts
-      ami_facts_instance: "{{ aws_varnish_node_instance_type }}"
-    - role: cs.aws-ami-facts
-      ami_facts_instance: "{{ aws_persistent_node_instance_type }}"
-    - role: cs.aws-node-facts
-    - role: cs.aws-node-varnish
-      aws_varnish_node_root_device: "{{ aws_ami_clean_base_info[aws_varnish_node_instance_type].root_device_name }}"
-      aws_varnish_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
-      aws_varnish_instance_id: "{{ aws_varnish_node_instance.instance_id | default(false) }}"
-      when: varnish_standalone
-    - role: cs.aws-node-persistent
-      aws_persistent_node_root_device: "{{ aws_ami_clean_base_info[aws_persistent_node_instance_type].root_device_name }}"
-      aws_persistent_node_vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
-      aws_persistent_instance_id: "{{ aws_persistent_node_instance.instance_id | default(false) }}"
-      when: aws_persistent_node_create
-    - role: cs.mysql-configure
-      mysql_user_localhost_access: "{{ not aws_rds_create }}"
-      when: aws_rds_create or mageops_mysql_host is not none
-    - role: cs.aws-lambda-varnish
-      when: varnish_standalone
-    - role: cs.aws-lambda-node-coordinator
-      when: aws_magento_cron_enabled
-    - role: cs.aws-lambda-import
+  vars:
+    mageops_debug_watch_var: >-
+      {{
+        (
+          lookup('ansible.builtin.env', 'ANSIBLE_MAGEOPS_VARS_DEBUG_WATCH')
+          | default('', true)
+          | regex_replace(',', ' ')
+          | split()
+          | first
+          | default('', true)
+        )
+        or 'aws_vpc_subnet_prefix'
+      }}
 
-    - role: cs.pio
-      vars:
-        pio_tasks: aws_infrastructure
-      when: mageops_pio_worker_enable
-
-    - role: cs.finalize
   tasks:
-    - name: Refresh inventory to get info about newly created nodes
-      meta: refresh_inventory
+    - name: Assert MageOps vars plugin loaded project vars
+      ansible.builtin.assert:
+        that:
+          - mageops_vars_plugin_loaded | default(false) | bool
+          - mageops_project_vars_loaded | default(false) | bool
+        fail_msg: >-
+          MageOps project vars were not loaded. Verify ansible.cfg uses ./vars_plugins
+          and vars/project/*.yml is present in the Jenkins workspace.
+
+    - name: Show MageOps project context
+      ansible.builtin.debug:
+        msg:
+          mageops_project: "{{ mageops_project | default('<undefined>') }}"
+          mageops_environment: "{{ mageops_environment | default('<undefined>') }}"
+          mageops_project_vars_loaded: "{{ mageops_project_vars_loaded | default(false) }}"
+
+    - name: Detect if vars debug report is available
+      ansible.builtin.set_fact:
+        mageops_debug_report_available: >-
+          {{
+            mageops_vars_debug_report is defined
+            and mageops_debug_watch_var in mageops_vars_debug_report
+          }}
+
+    - name: Assert watched variable was loaded by MageOps vars plugin (debug report mode)
+      ansible.builtin.assert:
+        that:
+          - mageops_vars_debug_report[mageops_debug_watch_var].loaded | bool
+        fail_msg: >-
+          Variable {{ mageops_debug_watch_var }} was not loaded by mageops vars plugin.
+          Source trace is available only when Jenkins runs with
+          ANSIBLE_MAGEOPS_VARS_DEBUG_WATCH={{ mageops_debug_watch_var }}
+      when: mageops_debug_report_available
+
+    - name: Assert watched variable exists at runtime (fallback mode)
+      ansible.builtin.assert:
+        that:
+          - hostvars[inventory_hostname][mageops_debug_watch_var] is defined
+        fail_msg: >-
+          Could not verify {{ mageops_debug_watch_var }}.
+          The plugin debug report was not available and the runtime variable is undefined.
+          Set ANSIBLE_MAGEOPS_VARS_DEBUG_WATCH={{ mageops_debug_watch_var }} in Jenkins
+          to get direct plugin source tracing.
+      when: not mageops_debug_report_available
+
+    - name: Show watched variable load details (debug report mode)
+      ansible.builtin.debug:
+        msg:
+          verification_mode: vars_plugin_debug_report
+          watched_var: "{{ mageops_debug_watch_var }}"
+          loaded: "{{ mageops_vars_debug_report[mageops_debug_watch_var].loaded }}"
+          files: "{{ mageops_vars_debug_report[mageops_debug_watch_var].files }}"
+          value: "{{ hostvars[inventory_hostname][mageops_debug_watch_var] | default('<undefined>') }}"
+      when: mageops_debug_report_available
+
+    - name: Show watched variable load details (fallback mode)
+      ansible.builtin.debug:
+        msg:
+          verification_mode: fallback_file_compare
+          watched_var: "{{ mageops_debug_watch_var }}"
+          loaded: "{{ hostvars[inventory_hostname][mageops_debug_watch_var] is defined }}"
+          files: []
+          value: "{{ hostvars[inventory_hostname][mageops_debug_watch_var] | default('<undefined>') }}"
+          note: >-
+            Set ANSIBLE_MAGEOPS_VARS_DEBUG_WATCH={{ mageops_debug_watch_var }}
+            in Jenkins for direct plugin source tracing.
+      when: not mageops_debug_report_available

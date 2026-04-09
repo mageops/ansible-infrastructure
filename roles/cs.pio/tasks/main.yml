@@ -1,9 +1,0 @@
-- name: Provision aws infrastructure
-  include_tasks: aws_infrastructure.yml
-  when: pio_tasks == 'aws_infrastructure'
-- name: Provision app node
-  include_tasks: app.yml
-  when: pio_tasks == 'app'
-- name: Provision varnish node
-  include_tasks: varnish.yml
-  when: pio_tasks == 'varnish'

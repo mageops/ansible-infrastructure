@@ -1,7 +1,0 @@
-dependencies:
-  - role: cs.s3-fuse-s3fs
-    when: s3_mount_backend == 's3fs'
-  - role: cs.s3-fuse-goofys
-    when: s3_mount_backend == 'goofys'
-  - role: cs.s3-fuse-rclone
-    when: s3_mount_backend == 'rclone'

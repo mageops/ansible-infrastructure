@@ -1,3 +1,0 @@
-dependencies:
-  - role: cs.ansible-plugins
-  - role: cs.repo-epel

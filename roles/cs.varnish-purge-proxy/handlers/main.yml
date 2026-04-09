@@ -1,2 +1,0 @@
-- name: restart varnish-purge-proxy
-  service: "name=varnish-purge-proxy state=restarted sleep=2"

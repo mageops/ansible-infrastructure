@@ -1,2 +1,0 @@
-- name: Configure nano editor
-  import_tasks: tools/nano.yml

@@ -1,6 +1,0 @@
-- name: Enable cloudflare support
-  import_tasks: "enable.yml"
-  when: cloudflare_enabled
-- name: Disable cloudflare support
-  import_tasks: "disable.yml"
-  when: not cloudflare_enabled

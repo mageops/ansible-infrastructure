@@ -1,7 +1,0 @@
-tideways_repo_gpgkeys:
-  - https://packages.tideways.com/key.gpg
-
-tideways_packages:
-  - tideways-php
-  - tideways-cli
-  - tideways-daemon

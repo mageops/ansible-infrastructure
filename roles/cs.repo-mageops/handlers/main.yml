@@ -1,5 +1,0 @@
-- name: Regenerate dnf cache for MageOps repo
-  command: dnf --disablerepo="*" --enablerepo="mageops" makecache
-  args:
-    warn: no
-  changed_when: false

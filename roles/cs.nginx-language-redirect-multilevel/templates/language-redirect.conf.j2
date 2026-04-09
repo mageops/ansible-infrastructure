@@ -1,6 +1,0 @@
-{% if nginx_language_redirect_multilevel_geoip_mode == "geolite2" -%}
-geoip2 /usr/share/GeoIP/GeoLite2-Country.mmdb {
-  auto_reload 15m;
-  $geoip2_data_country_code source=$remote_addr country iso_code;
-}
-{%- endif %}

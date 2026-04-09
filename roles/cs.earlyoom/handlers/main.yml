@@ -1,4 +1,0 @@
-- name: Restart earlyoom service
-  service:
-    name: earlyoom
-    state: restarted

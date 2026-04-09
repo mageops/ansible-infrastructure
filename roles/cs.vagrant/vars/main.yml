@@ -1,3 +1,0 @@
-# Path to the final Vagrantfile, do not allow changes
-# because the name has to always be fixed as `Vagrantfile`
-cs_vagrantfile_path: "{{ cs_vagrant_dir }}/Vagrantfile"

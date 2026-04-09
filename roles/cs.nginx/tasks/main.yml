@@ -1,5 +1,0 @@
-- import_tasks: 000-facts.yml
-- import_tasks: 000-migrations.yml
-- import_tasks: 001-install.yml
-- import_tasks: 002-configure.yml
-- import_tasks: 003-logrotate.yml

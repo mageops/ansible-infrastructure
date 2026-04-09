@@ -1,5 +1,0 @@
-goaccess_data_dir: /var/lib/goaccess
-goaccess_report_dir: /var/www/goaccess
-goaccess_prerotate_path: /usr/local/bin/goaccess-prerotate
-# nginx vhost will be create if defined
-# goaccess_vhost_port: 6162

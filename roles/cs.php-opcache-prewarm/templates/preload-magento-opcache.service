@@ -1,8 +1,0 @@
-[Unit]
-Description=Magento Opcache preload
-
-[Service]
-Type=oneshot
-RemainAfterExit=no
-ExecStart=/usr/bin/vmtouch -t "{{ php_opcache_user_home }}/{{ php_opcache_file_cache_user_dirname }}"
-ExecStart=/usr/bin/find "{{ mageops_app_web_dir }}/releases/{{ magento_release_id }}" -printf ''

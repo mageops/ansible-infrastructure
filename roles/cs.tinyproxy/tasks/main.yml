@@ -1,7 +1,0 @@
-- name: install tinyproxy
-  include_tasks: install.yml
-  when: tinyproxy_enabled
-
-- name: uninstall tinyproxy
-  include_tasks: uninstall.yml
-  when: not tinyproxy_enabled

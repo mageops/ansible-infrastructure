@@ -1,6 +1,0 @@
-- name: Install MySQL
-  import_tasks: 001-install.yml
-
-- name: Ensure MySQL public root access
-  import_tasks: 002-public-root-access.yml
-  when: mysql_public_root_access
