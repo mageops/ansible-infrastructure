@@ -89,6 +89,7 @@ sshd_config_default:
     SyslogFacility: AUTHPRIV
     TCPKeepAlive: "yes"
     UsePAM: "yes"
+    KexAlgorithms: "+sntrup761x25519-sha512@openssh.com"
 
 # Configuration applied to trusted networks
 # Note: None/null (`~`) means that the runtime config value or base config
