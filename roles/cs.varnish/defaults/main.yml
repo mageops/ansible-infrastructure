@@ -161,6 +161,7 @@ varnish_vcl_backend_error_extra: ""
 #Send original URL to backend
 varnish_original_url: false
 varnish_strip_params: ['gclid']
+varnish_strip_params_extra: []
 
 # To be used for advanced customizations
 varnish_url_replace: []

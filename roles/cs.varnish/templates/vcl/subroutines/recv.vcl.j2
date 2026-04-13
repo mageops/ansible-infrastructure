@@ -279,7 +279,7 @@ if (req.http.Accept-Encoding) {
 set req.http.X-Original-URL = req.url;
 {% endif %}
 
-{% for param in varnish_strip_params %}
+{% for param in (varnish_strip_params | default([])) + (varnish_strip_params_extra | default([])) %}
 # remove all forms of param: {{ param }} - The order is important!
 set req.url = regsuball(req.url,"&{{ param }}=[^&]+","");    # strips when QS = "?foo=bar&param=AAA" or QS = "?foo=bar&param=AAA&bar=baz"
 set req.url = regsuball(req.url,"\?{{ param }}=[^&]+&","?"); # strips when QS = "?param=AAA&foo=bar"
