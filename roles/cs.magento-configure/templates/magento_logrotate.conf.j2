@@ -1,7 +1,7 @@
 {{ magento_live_release_dir }}/var/log/*.log {{ magento_live_release_dir }}/var/log/*/*.log {
     rotate 2
-    create 0664 root root
-    su root root
+    create 0664 {{ magento_user }} {{ magento_group }}
+    su {{ magento_user }} {{ magento_group }}
     notifempty
     compress
     compresscmd /usr/bin/zstd
