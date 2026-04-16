@@ -50,9 +50,11 @@
 
 - name: Set information about Magento SCD
   set_fact:
+    magento_scd_rc: "{{ magento_scd.rc }}"
     magento_scd_duration: "{{ magento_scd.delta }}"
     magento_scd_command: "{{ magento_scd.cmd | join(' ') }}"
     magento_scd_output: "{{ magento_scd.stdout }}"
+    magento_scd_error_output: "{{ magento_scd.stderr }}"
 
 - name: Show static content deployment logs
   debug:
@@ -73,7 +75,35 @@
 
       {{ magento_scd_output }}
 
+      Return code:
+      {{ magento_scd_rc }}
+
+      -----------  Error output (stderr)  --------
+
+      {{ magento_scd_error_output | default('(no stderr output)', true) }}
+
       ============================================
+
+- name: Fail deploy when static content deployment reports errors
+  fail:
+    msg: |
+      Magento SCD reported errors. Deployment is aborted.
+
+      Command:
+      {{ magento_scd_command }}
+
+      Return code:
+      {{ magento_scd_rc }}
+
+      Output:
+      {{ magento_scd_output | default('(no stdout output)', true) }}
+
+      Error output (stderr):
+      {{ magento_scd_error_output | default('(no stderr output)', true) }}
+  when:
+    - (magento_scd_rc | int) != 0
+      or (magento_scd_output | default('') is search('(?i)(error|exception|fatal)'))
+      or (magento_scd_error_output | default('') is search('(?i)(error|exception|fatal)'))
 
 - name: Execute post static-content deploy containerized tasks
   block:
