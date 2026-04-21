@@ -113,7 +113,7 @@ function handleData(data) {
 }
 
 exports.handler = (event, context, done) => {
-    let payload = new Buffer(event.awslogs.data, 'base64');
+    let payload = Buffer.from(event.awslogs.data, 'base64');
 
     zlib.gunzip(payload, (e, result) => {
         handleData(JSON.parse(result.toString('utf-8')), done).then(() => {
