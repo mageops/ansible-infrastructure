@@ -1,6 +1,6 @@
 - name: Install Magento (fresh)
   block:
-    - name: Install Magento
+    - name: Install Magento (fresh)
       shell: >
         php {{ magento_release_dir }}/bin/magento setup:install \
           '--backend-frontname={{ magento_admin_path }}' \

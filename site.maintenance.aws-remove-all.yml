@@ -1,5 +1,16 @@
 - hosts: localhost
   connection: local
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    remove_asg: yes
+    remove_ec2: yes
+    remove_rds: yes
+    remove_efs: yes
+    remove_lambda: yes
+    remove_sg: yes
+    remove_vol: yes
+    remove_s3: no
+    dry_run_mode : no
   pre_tasks:
     - name: Get VPC data
       block:
@@ -189,14 +200,3 @@
     - role: cs.aws-ec2-cleanup
       aws_ec2_cleanup_lt_to_keep: 0
       when: remove_asg and not dry_run_mode
-
-  vars:
-    remove_asg: yes
-    remove_ec2: yes
-    remove_rds: yes
-    remove_efs: yes
-    remove_lambda: yes
-    remove_sg: yes
-    remove_vol: yes
-    remove_s3: no
-    dry_run_mode : no

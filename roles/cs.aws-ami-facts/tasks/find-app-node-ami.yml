@@ -7,6 +7,7 @@
           ami_facts_app_node_filters,
           ami_facts_app_node_tag_filters) }}
   vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
     ami_facts_app_node_tag_filters: "{{ ami_facts_app_node_tags | prefix_keys('tag:') }}"
   register: ami_app_node_facts
 

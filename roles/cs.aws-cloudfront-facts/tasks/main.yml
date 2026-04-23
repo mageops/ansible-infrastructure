@@ -2,6 +2,8 @@
   cloudfront_distribution_info_compat:
     region: "{{ aws_region }}"
     summary: yes
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: cloudfront_distributions_info
 
 - name: Set list of cloudfront distributions from module result

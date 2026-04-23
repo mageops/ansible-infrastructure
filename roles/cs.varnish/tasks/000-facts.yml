@@ -34,9 +34,11 @@
     - name: Get VPC IP addresses of backend app instances
       delegate_to: localhost
       become: no
-      ec2_instance_info:
+      amazon.aws.ec2_instance_info:
         region: "{{ aws_region }}"
         filters: "{{ varnish_backend_instances_filter_base | combine(varnish_backend_instances_aws_tags | prefix_keys('tag:')) }}"
+      vars:
+        ansible_python_interpreter: "{{ ansible_playbook_python }}"
       register: _varnish_backends_ec2_instance_info
 
     - name: Set Varnish backend instances if any are running (AWS)
@@ -66,7 +68,7 @@
               https_termination_hosts | default([])|selectattr('server_name', 'defined')|map(attribute='server_name')|list +
               https_termination_hosts | default([])|selectattr('aliases', 'defined')|map(attribute='aliases')|list | flatten
           }}
-      when: mageops_https_termination_enable | default(false)
+      when: mageops_https_termination_enable | default(false) | bool
     - name: Add Cloudfront domnains
       set_fact:
         varnish_media_cors_allowed_origins: |

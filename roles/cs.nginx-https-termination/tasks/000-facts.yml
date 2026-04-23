@@ -176,7 +176,7 @@
 
 
 - name: Handle missing ACME gracefully
-  when: not (https_termination_crt_acme_email | default(false, true))
+  when: (https_termination_crt_acme_email | default('', true) | string | length) == 0
   block:
     - name: Set ACME e-mail to a dummy fallback value
       set_fact:

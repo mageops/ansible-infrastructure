@@ -6,6 +6,8 @@
     object: "{{ s3_mount_bucket.bucket.split(':')[1] }}"
     mode: create
     region: "{{ aws_region }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   when: s3_mount_bucket.bucket is search(':/')
   loop: "{{ s3_mount_buckets_resolved }}"
   loop_control:
@@ -14,6 +16,7 @@
 # `findmnt` returns 1 if there are not mounts yet
 - name: Get current S3 mounts
   shell: >-
+    set -o pipefail &&
     findmnt -l -n -o TARGET,SOURCE,FSTYPE |
     awk '$2 ~ /^(s3fs|goofys)#/ || $2 ~ /^{{ s3_mount_rclone_remote_name }}:/ { print $1 "\t" $2 "\t" $3 }'
   register: s3fs_current_mounts_check
@@ -40,6 +43,13 @@
 - name: Set current S3 mountpoints
   set_fact:
     s3fs_current_mountpoints: "{{ s3_mount_current_entries | map(attribute='mountpoint') | list }}"
+    s3fs_current_mount_sources_by_mountpoint: >-
+      {{
+        dict(
+          s3_mount_current_entries | map(attribute='mountpoint')
+          | zip(s3_mount_current_entries | map(attribute='source'))
+        )
+      }}
     s3fs_target_mountpoints: "{{ s3_mount_buckets_resolved | map(attribute='mountpoint') | map('realpath') | list }}"
 
 - name: Unmount obsolete S3 mounts
@@ -66,6 +76,18 @@
   ansible.builtin.file:
     path: "{{ s3_mount_bucket.mountpoint }}"
     state: directory
+    mode: "0755"
+  loop: "{{ s3_mount_buckets_resolved }}"
+  loop_control:
+    loop_var: s3_mount_bucket
+
+- name: Unmount target S3 mountpoints with stale sources
+  ansible.posix.mount:
+    path: "{{ s3_mount_bucket.mountpoint }}"
+    state: unmounted
+  when: >-
+    (s3fs_current_mount_sources_by_mountpoint.get(s3_mount_bucket.mountpoint | realpath, ''))
+    != s3_mount_bucket.mount_src
   loop: "{{ s3_mount_buckets_resolved }}"
   loop_control:
     loop_var: s3_mount_bucket
@@ -84,6 +106,9 @@
       }}
       {%- endif -%}
     state: mounted
+  when: >-
+    (s3fs_current_mount_sources_by_mountpoint.get(s3_mount_bucket.mountpoint | realpath, ''))
+    != s3_mount_bucket.mount_src
   loop: "{{ s3_mount_buckets_resolved }}"
   loop_control:
     loop_var: s3_mount_bucket

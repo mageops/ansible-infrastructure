@@ -19,9 +19,11 @@
     label: "{{ node.name }}"
 
 - name: Get EC2 instance information for nodes
-  ec2_instance_info:
+  amazon.aws.ec2_instance_info:
     region: "{{ aws_region }}"
     filters: "{{ aws_node_facts_base_filters | combine(aws_node_facts_base_tags | combine(node.node_tags) | prefix_keys('tag:')) }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   loop:
     - name: app_builder
       node_tags: "{{ aws_tags_role_app_builder }}"
@@ -107,7 +109,7 @@
   set_fact:
     mageops_elasticsearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
   when:
-    - not mageops_elasticsearch_host | default(false, true)
+    - (mageops_elasticsearch_host | default('', true) | string | length) == 0
     - aws_nodes_info.elasticsearch is defined
     - aws_nodes_info.elasticsearch is not sameas false
 
@@ -115,7 +117,7 @@
   set_fact:
     mageops_opensearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
   when:
-    - not mageops_opensearch_host | default(false, true)
+    - (mageops_opensearch_host | default('', true) | string | length) == 0
     - aws_nodes_info.elasticsearch is defined
     - aws_nodes_info.elasticsearch is not sameas false
 
@@ -125,7 +127,7 @@
   set_fact:
     mageops_rabbitmq_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
   when:
-    - not mageops_rabbitmq_host | default(false, true)
+    - (mageops_rabbitmq_host | default('', true) | string | length) == 0
     - aws_nodes_info.elasticsearch is defined
     - aws_nodes_info.elasticsearch is not sameas false
 
@@ -133,7 +135,7 @@
   set_fact:
     mageops_redis_host: "{{ aws_nodes_info.redis.private_ip_address }}"
   when:
-    - not mageops_redis_host | default(false, true)
+    - (mageops_redis_host | default('', true) | string | length) == 0
     - aws_nodes_info.redis is defined
     - aws_nodes_info.redis is not sameas false
 
@@ -141,6 +143,6 @@
   set_fact:
     mageops_redis_sessions_host: "{{ aws_nodes_info.redis.private_ip_address }}"
   when:
-    - not mageops_redis_sessions_host | default(false, true)
+    - (mageops_redis_sessions_host | default('', true) | string | length) == 0
     - aws_nodes_info.redis is defined
     - aws_nodes_info.redis is not sameas false

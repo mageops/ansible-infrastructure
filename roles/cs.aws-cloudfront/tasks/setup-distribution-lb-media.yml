@@ -3,6 +3,8 @@
     region: "{{ aws_region }}"
     distribution: true
     distribution_id: "{{ aws_cloudfront_distribution_id }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: cloudfront_current_distribution_info
   when: aws_cloudfront_distribution_id is defined
 
@@ -155,6 +157,7 @@
 
       smooth_streaming: false
       compress: false
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: aws_cloudfront_distribution_result
 
 - name: Set cloudfront distribution id fact

@@ -1,8 +1,29 @@
 - name: Transform instance filters to format used in Lambda
   set_fact:
-    varnish_instances_filter_lambda: "{{ varnish_instances_aws_tags | prefix_keys('tag:') | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
-    varnish_backend_instances_filter_lambda: "{{ varnish_backend_instances_aws_tags | prefix_keys('tag:')  | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
-    varnish_extra_instances_filter_lambda: "{{ varnish_extra_instances_aws_tags | prefix_keys('tag:') | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
+    varnish_instances_filter_lambda: >-
+      {{
+        varnish_instances_aws_tags
+        | prefix_keys('tag:')
+        | dict2items
+        | map('json_query', _jq_map_ec2_instance_filter)
+        | list
+      }}
+    varnish_backend_instances_filter_lambda: >-
+      {{
+        varnish_backend_instances_aws_tags
+        | prefix_keys('tag:')
+        | dict2items
+        | map('json_query', _jq_map_ec2_instance_filter)
+        | list
+      }}
+    varnish_extra_instances_filter_lambda: >-
+      {{
+        varnish_extra_instances_aws_tags
+        | prefix_keys('tag:')
+        | dict2items
+        | map('json_query', _jq_map_ec2_instance_filter)
+        | list
+      }}
   vars:
     _jq_map_ec2_instance_filter: '{Name: key, Values: [value]}'
 
@@ -16,7 +37,11 @@
     name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
     state: absent
     region: "{{ aws_region }}"
-  when: _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name].runtime != aws_lambda_varnish_runtime
+  when:
+    - _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name] is defined
+    - >-
+      _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name].runtime
+      != aws_lambda_varnish_runtime
 
 - name: Register lambda handler for autoscaling event
   amazon.aws.lambda:
@@ -29,15 +54,15 @@
     region: "{{ aws_region }}"
     timeout: 120
     environment_variables:
-        VARNISH_INSTANCE_FILTER: "{{ varnish_instances_filter_lambda | to_json }}"
-        BACKEND_INSTANCE_FILTER: "{{ varnish_backend_instances_filter_lambda | to_json }}"
-        EXTRA_INSTANCE_FILTER: "{{ varnish_extra_instances_filter_lambda | to_json }}"
-        KEY_BUCKET: "{{ aws_lambda_update_varnish_vcl_function_s3_bucket_name }}"
-        KEY_NAME: "{{ aws_lambda_update_varnish_vcl_function_ssh_key_name }}"
-        SSH_USERNAME: "{{ varnish_manager_user }}"
-        ASG_PREFIX: "{{ mageops_app_name }}"
-        TERMINATE_HOOK: "{{ aws_app_node_webnodedown_hook_name }}"
-        UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
+      VARNISH_INSTANCE_FILTER: "{{ varnish_instances_filter_lambda | to_json }}"
+      BACKEND_INSTANCE_FILTER: "{{ varnish_backend_instances_filter_lambda | to_json }}"
+      EXTRA_INSTANCE_FILTER: "{{ varnish_extra_instances_filter_lambda | to_json }}"
+      KEY_BUCKET: "{{ aws_lambda_update_varnish_vcl_function_s3_bucket_name }}"
+      KEY_NAME: "{{ aws_lambda_update_varnish_vcl_function_ssh_key_name }}"
+      SSH_USERNAME: "{{ varnish_manager_user }}"
+      ASG_PREFIX: "{{ mageops_app_name }}"
+      TERMINATE_HOOK: "{{ aws_app_node_webnodedown_hook_name }}"
+      UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
   register: handle_autoscaling_event_lambda
 
 - name: Register autoscaling trigger

@@ -1161,25 +1161,41 @@ magento_core_config_settings_default:
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set secure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set unsecure media url to cloudfront domain
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set unsecure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
 
 # Extra core config settings to be set at deploy,

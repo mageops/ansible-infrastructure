@@ -1,6 +1,8 @@
 - name: Get AWS region
   amazon.aws.aws_region_info:
     region: "{{ aws_region }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: region_facts
   delegate_to: localhost
   become: no
@@ -15,6 +17,8 @@
 - name: Get availaibility zones for region
   amazon.aws.aws_az_info:
     region: "{{ aws_region }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: az_facts
   delegate_to: localhost
   become: no
