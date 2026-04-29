@@ -63,7 +63,7 @@ deploy_artifact_temp_dir: /tmp/ansible-deploy-artifacts-temp
 
 # Force ssh key that will be authorized as deploy user and used for rsync.
 # If set at the default `no` then ad-hoc key will be generated.
-deploy_ssh_key_path: "{{ playbook_dir }}/.tmp.ansible.ssh-deploy-key.{{ deploy_release_id }}.{{ deploy_app_user }}"
+deploy_ssh_key_path: ".tmp.ansible.ssh-deploy-key.{{ deploy_release_id }}.{{ deploy_app_user }}"
 deploy_ssh_key_path_pub: "{{ deploy_ssh_key_path }}.pub"
 
 # Options to use for SSH during artifact rsync

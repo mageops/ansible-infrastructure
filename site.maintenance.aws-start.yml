@@ -1,6 +1,12 @@
 
 - hosts: localhost
   connection: local
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    start: yes
+    start_ec2: "{{ start }}"
+    start_asg: "{{ start }}"
+    start_rds: "{{ start }}"
   roles:
     - role: cs.aws-region-facts
     - role: cs.aws-rds-facts
@@ -32,13 +38,13 @@
       when: start_asg
       block:
         - name: Get Auto Scaling Groups for App
-          community.aws.ec2_asg_info:
+          amazon.aws.autoscaling_group_info:
             region: "{{ aws_region }}"
             tags: "{{ aws_tags_base | combine(aws_tags_node_app) }}"
           register: start_asg_facts
 
         - name: Scale up ASG
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present
@@ -54,13 +60,13 @@
       when: start_asg and (aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable)
       block:
         - name: Get Auto Scaling Groups for Extra App
-          community.aws.ec2_asg_info:
+          amazon.aws.autoscaling_group_info:
             region: "{{ aws_region }}"
             tags: "{{ aws_tags_base | combine(aws_tags_node_extra_app) }}"
           register: start_asg_facts
 
         - name: Scale up ASG
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present
@@ -78,9 +84,3 @@
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
       when: start_rds and aws_rds_instance is defined
-
-  vars:
-    start: yes
-    start_ec2: "{{ start }}"
-    start_asg: "{{ start }}"
-    start_rds: "{{ start }}"

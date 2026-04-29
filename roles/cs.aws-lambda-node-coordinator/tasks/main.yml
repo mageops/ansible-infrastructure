@@ -3,20 +3,37 @@
     url: "{{ aws_lambda_node_coordinator_package_url }}"
     dest: "{{ aws_lambda_node_coordinator_package_path }}"
 
-- name: Check if lambda function exists
-  community.aws.lambda_info:
-    region: "{{ aws_region }}"
+- name: Check if node coordinator lambda function exists
+  ansible.builtin.command:
+    argv:
+      - aws
+      - lambda
+      - get-function-configuration
+      - --region
+      - "{{ aws_region }}"
+      - --function-name
+      - "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}"
   register: _lambda_facts
+  changed_when: false
+  failed_when: false
+
+- name: Select node coordinator lambda facts
+  set_fact:
+    _node_coordinator_lambda_fact: >-
+      {{
+        (_lambda_facts.stdout | default('') | length > 0)
+        | ternary((_lambda_facts.stdout | from_json), {})
+      }}
 
 - name: Delete lambda function if it exists with different runtime
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}"
     state: absent
     region: "{{ aws_region }}"
-  when: _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_node_coordinator_autoscaling_event_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_node_coordinator_autoscaling_event_name].runtime != aws_lambda_node_coordinator_runtime
+  when: _node_coordinator_lambda_fact | length > 0 and _node_coordinator_lambda_fact.Runtime != aws_lambda_node_coordinator_runtime
 
 - name: Register lambda handler for coordinating nodes
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_handle_node_coordinator_autoscaling_event_name }}"
     state: present
     zip_file: "{{ aws_lambda_node_coordinator_package_path }}"

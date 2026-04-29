@@ -16,8 +16,7 @@
       register: _aws_sns_complaints
 
 - name: Add e-mail to SES
-  #community.aws.aws_ses_identity:
-  aws_ses_identity:
+  community.aws.ses_identity:
     identity: "{{ ses_email }}"
     region: "{{ aws_region }}"
     state: present
@@ -28,11 +27,10 @@
       topic: "{{ _aws_sns_bounce.sns_arn }}"
       include_headers: False
     feedback_forwarding: False
-  when: ses_email | default(false, true)
+  when: (ses_email | default('', true) | string | length) > 0
 
 - name: Add domain to SES
-  #community.aws.aws_ses_identity:
-  aws_ses_identity:
+  community.aws.ses_identity:
     identity: "{{ ses_domain }}"
     region: "{{ aws_region }}"
     state: present
@@ -43,7 +41,7 @@
       topic: "{{ _aws_sns_bounce.sns_arn }}"
       include_headers: no
     feedback_forwarding: False
-  when: ses_domain | default(false, true)
+  when: (ses_domain | default('', true) | string | length) > 0
 
   # Could be falled back with
   # "{{ ses_domain | default(ses_email.split('@')[1]) }}"

@@ -19,6 +19,14 @@
     mode: "{{ deploy_directory_permissions }}"
   with_items: "{{ deploy_shared_dirs }}"
 
+- name: Ensure Ansible remote tmp directory exists for deploy user
+  file:
+    state: directory
+    path: "/tmp/.ansible-{{ deploy_app_user }}/tmp"
+    owner: "{{ deploy_app_user }}"
+    group: "{{ deploy_app_group }}"
+    mode: "0700"
+
 - name: Ensure deploy ssh key exists
   command: ssh-keygen -b 2048 -t rsa -f "{{ deploy_ssh_key_path }}" -q -N "" -C "ansible-deploy-key.{{ deploy_release_id }}.{{ deploy_app_user }}@{{ ansible_host }}"
   args:

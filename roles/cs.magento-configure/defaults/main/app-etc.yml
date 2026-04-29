@@ -140,6 +140,7 @@ magento_app_etc_config_cache_default_redis:
           server: "{{ mageops_redis_host }}"
           database: "0"
           port: "{{ mageops_redis_port }}"
+          compress_data: "1"
           persistent: "magento_redis_cache_default"
           preload_keys:
             - 061_EAV_ENTITY_TYPES
@@ -161,6 +162,7 @@ magento_app_etc_config_cache_default_redis_l2:
             database: "0"
             port: "{{ mageops_redis_port }}"
             password: ""
+            compress_data: "1"
             preload_keys:
               - 061_EAV_ENTITY_TYPES:hash
               - 061_GLOBAL_PLUGIN_LIST:hash
@@ -182,6 +184,7 @@ magento_app_etc_config_cache_default_redis_l2:
             database: "0"
             port: "{{ mageops_redis_port }}"
             password: ""
+            compress_data: "1"
           local_backend: Cm_Cache_Backend_File
           local_backend_options:
             cache_dir: "{{ magento_redis_cache_l2_dir }}"
@@ -205,6 +208,13 @@ magento_app_etc_config_cache_default_redis_l2:
         frontend: stale_cache_enabled
       translate:
         frontend: stale_cache_enabled
+      elasticsuite:
+        frontend: stale_cache_enabled
+      navigation:
+        frontend: stale_cache_enabled
+      search_ajax_suggest:
+        frontend: stale_cache_enabled
+
 
 magento_app_etc_config_cache_page_redis:
   cache:

@@ -51,4 +51,7 @@
       shell: "mageopscli set_feature_flag blackfire_apm {{ blackfire_enable_apm | ternary('yes', 'no') }}"
       when: aws_use
 
-  when: blackfire_install and blackfire_server_id and blackfire_server_token
+  when:
+    - blackfire_install | bool
+    - (blackfire_server_id | default('', true) | string | length) > 0
+    - (blackfire_server_token | default('', true) | string | length) > 0

@@ -119,18 +119,17 @@
     name: "{{ redis_uninstalling_flavor }}"
     state: stopped
     enabled: false
-  when: services[redis_uninstalling_flavor+'.service']['status'] | default('not-found') != 'not-found'
+  when: ansible_facts['services'].get(redis_uninstalling_flavor + '.service', {}).get('status', 'not-found') != 'not-found'
 
 - name: Stop {{ redis_uninstalling_flavor }} session in case of migration
   service:
     name: "{{ redis_uninstalling_flavor }}-sessions"
     state: stopped
     enabled: false
-  when: mageops_redis_sessions_create and services[redis_uninstalling_flavor+'-sessions.service']['status'] | default('not-found') != 'not-found'
+  when: mageops_redis_sessions_create and ansible_facts['services'].get(redis_uninstalling_flavor + '-sessions.service', {}).get('status', 'not-found') != 'not-found'
 
 - name: Ensure Redis/valkey service is started
   service:
     name: "{{ redis_daemon }}"
     state: started
     enabled: yes
-

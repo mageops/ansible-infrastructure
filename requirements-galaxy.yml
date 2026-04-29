@@ -1,32 +1,32 @@
 roles:
-- src: geerlingguy.mysql
-  version: 4.3.5
-- src: geerlingguy.composer
-- src: geerlingguy.ntp
-  version: 2.4.0
-- src: zauberpony.mysql-query
-
-- src: pinkeen.postfix
-  version: v1.1
+  - src: geerlingguy.mysql
+    version: 6.3.1
+  - src: geerlingguy.composer
+  - src: geerlingguy.ntp
+    version: 4.0.0
+  - src: zauberpony.mysql-query
+    version: v0.6.1
+  - src: pinkeen.postfix
+    version: v1.1
 
 collections:
-- name: community.aws
-  version: 5.5.1
-- name: amazon.aws
-  version: 5.5.2
-- name: community.mysql
-- name: ansible.utils
-  version: 2.10.3
-- name: community.general
-  version: 7.2.0
-- name: ansible.posix
-  version: 1.5.4
-- name: community.rabbitmq
-  version: 1.2.3
-- name: community.crypto
-  version: 2.18.0
-- name: ansible.netcommon
-  version: 5.1.2
-- community.crypto
-- ansible.posix
-- containers.podman
+  - name: community.aws
+    version: 10.1.0
+  - name: amazon.aws
+    version: 10.1.2
+  - name: community.mysql
+    version: 4.1.0
+  - name: ansible.utils
+    version: 6.0.1
+  - name: community.general
+    version: 12.4.0
+  - name: ansible.posix
+    version: 2.1.0
+  - name: community.rabbitmq
+    version: 1.6.0
+  - name: community.crypto
+    version: 3.1.1
+  - name: ansible.netcommon
+    version: 8.4.0
+  - name: containers.podman
+    version: 1.19.0

@@ -4,10 +4,26 @@
     suffix: pio-worker-install
   register: _temp_dir
 
+- name: Resolve pio-worker package version
+  ansible.builtin.set_fact:
+    _pio_package_version: "{{ pio_package_version | default(pio_package_verison | default(''), true) }}"
+
+- name: Resolve pio-worker package URL
+  ansible.builtin.set_fact:
+    _pio_worker_rpm_url: >-
+      {{
+        pio_package_url_rpm[ansible_facts['architecture']]
+        | replace('{{ pio_package_version }}', _pio_package_version)
+        | replace('{{pio_package_version}}', _pio_package_version)
+        | replace('{{ pio_package_verison }}', _pio_package_version)
+        | replace('{{pio_package_verison}}', _pio_package_version)
+      }}
+
 - name: Download pio-worker rpm
   get_url:
-    url: "{{ pio_package_url_rpm[ansible_architecture] }}"
+    url: "{{ _pio_worker_rpm_url }}"
     dest: "{{ _temp_dir.path }}/pio-worker.rpm"
+    mode: "0644"
 
 - name: Install pio-worker rpm
   dnf:

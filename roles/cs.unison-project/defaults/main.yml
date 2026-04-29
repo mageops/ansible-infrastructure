@@ -7,7 +7,7 @@ unison_server_address: "{{ hostvars[groups['vagrant'][0]]['ansible_host'] }}"
 # Skip installation, just set up the project configuration
 unison_project_skip_install: no
 
-unison_project_local_path: "{{ playbook_dir }}/../projects/{{ unison_project_name }}"
+unison_project_local_path: "../projects/{{ unison_project_name }}"
 unison_project_remote_path: "/{{ unison_project_name }}"
 
 unison_project_config_dir: ~/.unison

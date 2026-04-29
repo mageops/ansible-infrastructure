@@ -11,7 +11,7 @@ varnish_backend_instances_filter_base:
 varnish_storage: "malloc"
 
 # Total system memory in bytes
-varnish_total_sys_mem: "{{ ansible_memtotal_mb * 1024 * 1024 }}"
+varnish_total_sys_mem: "{{ ansible_facts['memtotal_mb'] * 1024 * 1024 }}"
 
 # Base amount of system memory dedicated to varnish used for calculating derived dynamic param defaults
 varnish_base_mem_quota: >-

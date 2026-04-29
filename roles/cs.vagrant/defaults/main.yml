@@ -13,7 +13,7 @@ cs_vagrant_vm_name: "cs_vagrant_raccoon"
 cs_vagrantfile_template: "Vagrantfile.rb.j2"
 
 # Directory for vagrant configuration
-cs_vagrant_dir: "{{ playbook_dir }}/../vagrant"
+cs_vagrant_dir: "vagrant"
 
 # Virtualbox VM memory
 cs_vagrant_vm_memory: 3072

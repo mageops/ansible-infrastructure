@@ -58,4 +58,4 @@
     efs_mount_watchdog_cron_enable: "{{ magento_media_storage_strategy == 'aws-s3' }}"
 
 - name: Clean up shared Magento asset cache
-  include: cleanup-static-cache-releases.yml
+  include_tasks: cleanup-static-cache-releases.yml

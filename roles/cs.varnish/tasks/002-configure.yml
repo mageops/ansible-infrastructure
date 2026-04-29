@@ -1,14 +1,55 @@
 # Prevents unneeded shmlog disk I/O
 - name: Mount VSL under tmpfs
-  mount:
-    path: /var/lib/varnish
-    src: none
-    fstype: tmpfs
-    opts: rw,auto,noatime
-    state: mounted
-  notify:
-    - Restart varnish
-    - Restart varnish-exporter
+  block:
+    - name: Ensure VSL tmpfs entry exists in fstab
+      ansible.builtin.lineinfile:
+        path: /etc/fstab
+        regexp: '^\s*none\s+/var/lib/varnish\s+tmpfs\s+'
+        line: 'none /var/lib/varnish tmpfs rw,auto,noatime 0 0'
+      notify:
+        - Restart varnish
+        - Restart varnish-exporter
+
+    - name: Read current VSL mount state
+      ansible.builtin.command: findmnt -n -o FSTYPE,OPTIONS /var/lib/varnish
+      register: _varnish_vsl_mount_state
+      changed_when: false
+      failed_when: false
+
+    - name: Set VSL mount state facts
+      ansible.builtin.set_fact:
+        _varnish_vsl_is_tmpfs: >-
+          {{ (_varnish_vsl_mount_state.rc | default(1)) == 0
+             and ((_varnish_vsl_mount_state.stdout | default('') | trim).split(' ') | first) == 'tmpfs' }}
+        _varnish_vsl_has_noatime: >-
+          {{ (_varnish_vsl_mount_state.rc | default(1)) == 0
+             and (_varnish_vsl_mount_state.stdout | default('') | regex_search('(^|,)noatime(,|$)')) is not none }}
+
+    - name: Ensure VSL mount path is not occupied by non-tmpfs mount
+      ansible.builtin.assert:
+        that:
+          - (_varnish_vsl_mount_state.rc | default(1)) != 0 or (_varnish_vsl_is_tmpfs | bool)
+        fail_msg: >-
+          /var/lib/varnish is already mounted with non-tmpfs filesystem.
+          Existing mount details: `{{ _varnish_vsl_mount_state.stdout | default('') | trim }}`.
+
+    - name: Mount VSL tmpfs from fstab
+      ansible.builtin.command: mount /var/lib/varnish
+      when: (_varnish_vsl_mount_state.rc | default(1)) != 0
+      changed_when: true
+      notify:
+        - Restart varnish
+        - Restart varnish-exporter
+
+    - name: Remount VSL tmpfs with noatime
+      ansible.builtin.command: mount -o remount,rw,noatime /var/lib/varnish
+      when:
+        - _varnish_vsl_is_tmpfs | bool
+        - not (_varnish_vsl_has_noatime | bool)
+      changed_when: true
+      notify:
+        - Restart varnish
+        - Restart varnish-exporter
 
 - name: Ensure varnish var directories always exist
   lineinfile:

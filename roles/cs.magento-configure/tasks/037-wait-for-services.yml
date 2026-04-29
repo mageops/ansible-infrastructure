@@ -2,35 +2,39 @@
 
 - name: Wait for Elasticsearch
   shell: curl -u {{ mageops_elasticsearch_username | default('elastic')}}:{{mageops_elasticsearch_password | default('changeme')}} -sfk 'http://{{ mageops_elasticsearch_host }}:{{ elasticsearch_http_port }}'
-  args:
-    warn: no
   retries: 15
   delay: 5
   register: result
-  until: result.rc == 0
-  when: mageops_elasticsearch_host | default(false, true) and not mageops_skip_elasticsearch_check and mageops_elasticsearch_opensearch_flavor == "elasticsearch"
+  until: "'rc' in result and result.rc == 0"
+  when:
+    - (mageops_elasticsearch_host | default('', true) | string | length) > 0
+    - not (mageops_skip_elasticsearch_check | bool)
+    - mageops_elasticsearch_opensearch_flavor == "elasticsearch"
 
 - name: Wait for Opensearch
   shell: curl -u {{ mageops_opensearch_username | default('elastic')}}:{{mageops_elasticsearch_password | default('changeme')}} -sfk 'http://{{ mageops_opensearch_host }}:{{ opensearch_http_port }}'
-  args:
-    warn: no
   retries: 15
   delay: 5
   register: result
-  until: result.rc == 0
-  when: mageops_openearch_host | default(false, true) and mageops_elasticsearch_opensearch_flavor == "opensearch"
+  until: "'rc' in result and result.rc == 0"
+  when:
+    - (mageops_opensearch_host | default('', true) | string | length) > 0
+    - mageops_elasticsearch_opensearch_flavor == "opensearch"
 
 - name: Wait for Redis cache host
   shell: echo -ne "PING\r\n" | nc {{ mageops_redis_host }} {{ mageops_redis_port }}
   retries: 15
   delay: 5
   register: result
-  until: result.rc == 0
-  when: magento_redis_cache
+  until: "'rc' in result and result.rc == 0"
+  when:
+    - magento_redis_cache | bool
+    - (mageops_redis_host | default('', true) | string | length) > 0
 
 - name: Wait for Redis session host
   shell: echo -ne "PING\r\n" | nc {{ mageops_redis_sessions_host }} {{ mageops_redis_sessions_port }}
   retries: 15
   delay: 5
   register: result
-  until: result.rc == 0
+  until: "'rc' in result and result.rc == 0"
+  when: (mageops_redis_sessions_host | default('', true) | string | length) > 0

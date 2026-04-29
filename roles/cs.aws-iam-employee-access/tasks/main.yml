@@ -39,4 +39,4 @@
         state: present
         managed_policy:
           - arn:aws:iam::aws:policy/AdministratorAccess
-  when: aws_iam_master_account_id | default(false, true)
+  when: aws_iam_master_account_id is defined and (aws_iam_master_account_id | string | length > 0)
