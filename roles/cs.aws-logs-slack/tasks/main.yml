@@ -27,19 +27,19 @@
     format: zip
 
 - name: Check if lambda function exists
-  community.aws.lambda_info:
+  amazon.aws.lambda_info:
     region: "{{ aws_region }}"
   register: _lambda_facts
 
 - name: Delete lambda function if it exists with different runtime
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
     state: absent
     region: "{{ aws_region }}"
   when: _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_slack_exceptions_forwarder_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_slack_exceptions_forwarder_name].runtime != aws_lambda_slack_exceptions_forwarder_runtime
 
 - name: Create slack log forwarder lambda function
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
     state: present
     runtime: "{{ aws_lambda_slack_exceptions_forwarder_runtime }}"
@@ -53,7 +53,7 @@
       SLACK_CHANNEL: "{{ aws_logs_slack_channel }}"
 
 - name: Allow slack log forwarder lambda function to be invoked by CloudWatch Logs
-  lambda_policy:
+  amazon.aws.lambda_policy:
     state: present
     region: "{{ aws_region }}"
     function_name: "{{ aws_lambda_slack_exceptions_forwarder_name }}"
@@ -66,8 +66,19 @@
 
 # Function ARN has to be constructed manually, because the one from register contains version and prohibits the call from working
 - name: Attach function to exception report group
-  local_action:
-    module: "shell aws logs put-subscription-filter --region {{ aws_region }} --log-group-name /{{ mageops_project }}/{{ mageops_environment }}/{{ item.group }} --filter-name send_to_slack --filter-pattern {{ item.filter | default('')|quote }} --destination-arn arn:aws:lambda:{{ aws_region }}:{{ aws_account_id }}:function:{{ aws_lambda_slack_exceptions_forwarder_name }}"
+  delegate_to: localhost
+  become: no
+  shell: >-
+    aws logs put-subscription-filter
+    --region {{ aws_region }}
+    --log-group-name /{{ mageops_project }}/{{ mageops_environment }}/{{ item.group }}
+    --filter-name send_to_slack
+    --filter-pattern {{ item.filter | default('') | quote }}
+    --destination-arn arn:aws:lambda:{{ aws_region }}:{{ aws_account_id }}:function:{{ aws_lambda_slack_exceptions_forwarder_name }}
+  register: aws_logs_slack_subscription_filter
+  retries: 12
+  delay: 5
+  until: "'rc' in aws_logs_slack_subscription_filter and aws_logs_slack_subscription_filter.rc == 0"
   with_items: "{{ aws_logs_slack_log_groups }}"
 
 - name: Fetch existing log groups

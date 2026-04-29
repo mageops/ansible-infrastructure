@@ -1,134 +1,160 @@
 - name: Configure Magento environment (env.php)
   block:
-  - name: Enable HTTP cache
-    when: magento_http_cache_enable
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_http_cache, recursive=true) }}
-
-  - name: Enable lazy resize configuration
-    when: lazy_resize_secret
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_lazy_resize, recursive=true) }}
-
-  - name: Enable ElasticSuite configuration
-    when: elasticsuite_version | default(false) and (mageops_elasticsearch_opensearch_flavor == "elasticsearch")
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_elasticsuite, recursive=true) }}
-
-  - name: Enable ElasticSuite configuration with Opensearch
-    when: elasticsuite_version | default(false) and (mageops_elasticsearch_opensearch_flavor == "opensearch")
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_opensearch, recursive=true) }}
-
-  - name: Configure Redis caching
-    when: magento_redis_cache
-    block:
-    - name: Enable default Redis cache
-      when: not magento_redis_cache_l2
+    - name: Enable HTTP cache
+      when: magento_http_cache_enable | bool
       set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
-              | combine(magento_app_etc_config_cache_default_redis, recursive=true) }}
+              | combine(magento_app_etc_config_http_cache, recursive=true) }}
 
-    - name: Enable 2-level default Redis cache
-      when: magento_redis_cache_l2
+    - name: Enable lazy resize configuration
+      when: (lazy_resize_secret | default('', true) | string | length) > 0
       set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
-              | combine(magento_app_etc_config_cache_default_redis_l2, recursive=true) }}
+              | combine(magento_app_etc_config_lazy_resize, recursive=true) }}
 
-    - name: Configure Redis page cache
+    - name: Enable ElasticSuite configuration
+      when:
+        - (elasticsuite_version | default('', true) | string | length) > 0
+        - mageops_elasticsearch_opensearch_flavor == "elasticsearch"
       set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
-              | combine(magento_app_etc_config_cache_page_redis, recursive=true) }}
+              | combine(magento_app_etc_config_elasticsuite, recursive=true) }}
 
-  - name: Enable RabbitMQ queue configuration
-    when: magento_rabbitmq_queue
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_queue_rabbitmq, recursive=true) }}
+    - name: Enable ElasticSuite configuration with Opensearch
+      when:
+        - (elasticsuite_version | default('', true) | string | length) > 0
+        - mageops_elasticsearch_opensearch_flavor == "opensearch"
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_opensearch, recursive=true) }}
 
-  - name: Adjust configuration for consumer workers
-    when: magento_consumer_workers_enable
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_consumer_workers, recursive=true) }}
+    - name: Configure Redis caching
+      when: magento_redis_cache | bool
+      block:
+        - name: Enable default Redis cache
+          when: not (magento_redis_cache_l2 | bool)
+          set_fact:
+            magento_app_etc_config: >-
+              {{ magento_app_etc_config
+                  | combine(magento_app_etc_config_cache_default_redis, recursive=true) }}
 
-  - name: Adjust configuration for cron consumers
-    when: magento_cron_consumers_enable
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_cron_consumers, recursive=true) }}
+        - name: Enable 2-level default Redis cache
+          when: magento_redis_cache_l2 | bool
+          set_fact:
+            magento_app_etc_config: >-
+              {{ magento_app_etc_config
+                  | combine(magento_app_etc_config_cache_default_redis_l2, recursive=true) }}
 
-  - name: Configure X-Magento-Vary cookie signing
-    when: magento_vary_sign
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_cookie_sign, recursive=true) }}
+        - name: Configure Redis page cache
+          set_fact:
+            magento_app_etc_config: >-
+              {{ magento_app_etc_config
+                  | combine(magento_app_etc_config_cache_page_redis, recursive=true) }}
 
-  - name: Enable mysql ssl requirement
-    when: mageops_mysql_require_ssl
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_mysql_ssl_required, recursive=true) }}
+    - name: Enable RabbitMQ queue configuration
+      when: magento_rabbitmq_queue | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_queue_rabbitmq, recursive=true) }}
 
-  - name: Set extra options
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_extra, recursive=true) }}
+    - name: Adjust configuration for consumer workers
+      when: magento_consumer_workers_enable | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_consumer_workers, recursive=true) }}
 
-  - name: Config graphql salt
-    when: magento_graphql_salt
-    set_fact:
-      magento_app_etc_config: >-
-        {{ magento_app_etc_config
-            | combine(magento_app_etc_config_graphql_salt, recursive=true) }}
+    - name: Adjust configuration for cron consumers
+      when: magento_cron_consumers_enable | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_cron_consumers, recursive=true) }}
 
-  - name: Export configuration as PHP code
-    command:
-      stdin: "{{ magento_app_etc_config | to_json }}"
-      argv:
-      - php
-      - -r
-      - >-
-        echo "<?php \n\n"; echo "return ";
+    - name: Configure X-Magento-Vary cookie signing
+      when: magento_vary_sign | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_cookie_sign, recursive=true) }}
 
-        $data = json_decode(
-          file_get_contents("php://stdin"),
-          true
-        );
+    - name: Enable mysql ssl requirement
+      when: mageops_mysql_require_ssl | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_mysql_ssl_required, recursive=true) }}
 
-        if (false === $data) {
-          fwrite(STDOUT, json_last_error_msg());
-          exit(json_last_error());
-        }
+    - name: Set extra options
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_extra, recursive=true) }}
 
-        var_export($data);
+    - name: Normalize Magento DB connection values
+      set_fact:
+        magento_app_etc_config: >-
+          {{
+            magento_app_etc_config
+            | combine(
+                {
+                  'db': {
+                    'connection': {
+                      'default': {
+                        'host': mageops_mysql_host,
+                        'dbname': mageops_app_mysql_db,
+                        'username': mageops_app_mysql_user,
+                        'password': mageops_app_mysql_pass,
+                      }
+                    }
+                  }
+                },
+                recursive=true
+              )
+          }}
 
-        echo "; \n\n";
-    changed_when: false
-    register: magento_app_enc_config_export
+    - name: Config graphql salt
+      when: magento_graphql_salt | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_graphql_salt, recursive=true) }}
 
-  - name: Install configuration file
-    copy:
-      content: "{{ magento_app_enc_config_export.stdout }}"
-      dest: "{{ magento_release_dir }}/app/etc/env.php"
-      owner: "{{ magento_user }}"
-      group: "{{ magento_group }}"
-      mode: 0640
-      force: 1
+    - name: Export configuration as PHP code
+      command:
+        stdin: "{{ magento_app_etc_config | to_json }}"
+        argv:
+          - php
+          - -r
+          - >-
+            echo "<?php \n\n"; echo "return ";
+
+            $data = json_decode(
+              file_get_contents("php://stdin"),
+              true
+            );
+
+            if (false === $data) {
+              fwrite(STDOUT, json_last_error_msg());
+              exit(json_last_error());
+            }
+
+            var_export($data);
+
+            echo "; \n\n";
+      changed_when: false
+      register: magento_app_enc_config_export
+
+    - name: Install configuration file
+      copy:
+        content: "{{ magento_app_enc_config_export.stdout }}"
+        dest: "{{ magento_release_dir }}/app/etc/env.php"
+        owner: "{{ magento_user }}"
+        group: "{{ magento_group }}"
+        mode: "0640"
+        force: 1

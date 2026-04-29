@@ -2,6 +2,8 @@ plugin: aws_ec2
 
 strict: False
 
+hostvars_prefix: aws_
+
 regions: eu-central-1
 
 filters:
@@ -11,58 +13,58 @@ filters:
     - pending
 
 keyed_groups:
-  - key: tags.Name
+  - key: aws_tags.Name
     prefix: "node"
     separator: "_"
 
-  - key: tags.AppName
+  - key: aws_tags.AppName
     prefix: "app"
     separator: "_"
 
-  - key: tags.AppId
+  - key: aws_tags.AppId
     prefix: "app"
     separator: "_"
 
-  - key: tags.Role
+  - key: aws_tags.Role
     prefix: ""
     separator: ""
 
-  - key: tags.RoleBuilder
+  - key: aws_tags.RoleBuilder
     prefix: "builder"
     separator: "_"
 
-  - key: tags.RoleExtra
+  - key: aws_tags.RoleExtra
     prefix: "extra"
     separator: "_"
 
-  - key: tags.RoleSearch
+  - key: aws_tags.RoleSearch
     prefix: ""
     separator: ""
 
-  - key: tags.RoleCache
+  - key: aws_tags.RoleCache
     prefix: ""
     separator: ""
 
-  - key: tags.RoleHttpCache
+  - key: aws_tags.RoleHttpCache
     prefix: ""
     separator: ""
 
-  - key: tags.RoleLoadBalancer
+  - key: aws_tags.RoleLoadBalancer
     prefix: ""
     separator: ""
 
-  - key: tags.RoleDatabase
+  - key: aws_tags.RoleDatabase
     prefix: ""
     separator: ""
 
-  - key: tags.RoleStorage
+  - key: aws_tags.RoleStorage
     prefix: ""
     separator: ""
 
-  - key: tags.RoleMessageQueue
+  - key: aws_tags.RoleMessageQueue
     prefix: ""
     separator: ""
 
-  - key: tags.TraitImmutable
+  - key: aws_tags.TraitImmutable
     prefix: ""
     separator: ""

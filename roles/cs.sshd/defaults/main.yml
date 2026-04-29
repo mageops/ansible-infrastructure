@@ -23,7 +23,7 @@ sshd_max_auth_tries: "{{ sshd_password_auth | ternary(1, 20) }}"
 # We could allow everything (sshd default) since user has shell anyway so
 # he can forward any port using other means, however, lets stick only to
 # the local network.
-sshd_permit_open: "127.0.0.1:* {{ ansible_default_ipv4.network | default('0.0.0.0') }}:*"
+sshd_permit_open: "127.0.0.1:* {{ ansible_facts['default_ipv4']['network'] | default('0.0.0.0') }}:*"
 
 # PITA: There is no `PermitListen` directive in OpenSSH 7.4 (latest on CentOS 7)
 # This option should be present since OpenSSH 7.8, so maybe in CentOS 8...
@@ -89,6 +89,7 @@ sshd_config_default:
     SyslogFacility: AUTHPRIV
     TCPKeepAlive: "yes"
     UsePAM: "yes"
+    KexAlgorithms: "+sntrup761x25519-sha512@openssh.com"
 
 # Configuration applied to trusted networks
 # Note: None/null (`~`) means that the runtime config value or base config

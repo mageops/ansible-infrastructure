@@ -1,5 +1,7 @@
 - hosts: localhost
   connection: local
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   roles:
     - role: cs.aws-region-facts
     - role: cs.aws-logs-slack

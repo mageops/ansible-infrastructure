@@ -8,7 +8,7 @@
   register: ami_builder_instance
 
 - name: Create AMI
-  ec2_ami:
+  amazon.aws.ec2_ami:
     region: "{{ aws_region }}"
     state: present
     description: "{{ ami_description }}"
@@ -60,7 +60,7 @@
       release_id: "{{ aws_ami_release_info.release_id | default(none) }}"
 
 - name: Save built AMI info into a file
-  when: aws_ami_build_save_info_file_path | default(false, true)
+  when: (aws_ami_build_save_info_file_path | default('', true) | string | length) > 0
   copy:
     dest: "{{ aws_ami_build_save_info_file_path }}"
     content: "{{ aws_create_ami_info | to_nice_json }}"

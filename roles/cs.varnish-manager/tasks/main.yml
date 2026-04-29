@@ -37,6 +37,8 @@
     object: "{{ varnish_manager_ssh_key_filename }}"
     mode: put
     retries: 3
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
 
 - name: Ensure sudoers configuration for Varnish Manager exists
   template:

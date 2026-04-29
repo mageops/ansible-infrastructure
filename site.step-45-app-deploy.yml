@@ -1,7 +1,20 @@
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: app:&current:!immutable
+  gather_facts: no
   pre_tasks:
+    - name: Wait for app node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
+
+    - name: Gather facts for app node
+      setup: ~
+
     - name: Release artifact sanity check failed
       fail:
         msg: |
@@ -36,7 +49,7 @@
           ---------------------------------------------
 
     - name: Set artifact build number fact if available
-      when: deploy_artifact_build_json_data.nr | default(false, true)
+      when: (deploy_artifact_build_json_data.nr | default('', true) | string | length) > 0
       set_fact:
         mageops_artifact_build_nr: "{{ deploy_artifact_build_json_data.nr }}"
 
@@ -52,8 +65,8 @@
 
     - name: Gather deployment run facts
       set_fact:
-        deploy_release_id: "{{ ansible_date_time.iso8601_basic_short }}"
-        deploy_keep_current_release: "{{ deploy_skip_installation | default(false) and deploy_previous_release_exists }}"
+        deploy_release_id: "{{ ansible_facts['date_time']['iso8601_basic_short'] }}"
+        deploy_keep_current_release: "{{ (deploy_skip_installation | default(false) | bool) and (deploy_previous_release_exists | bool) }}"
         deploy_previous_release_id: "{{ deploy_previous_release_exists | ternary((_current_release_check.stat.lnk_target | default('')).rstrip('/').split('/') | last, false) }}"
 
     - name: "Skipping installation: reusing previous release"
@@ -129,7 +142,7 @@
       when: mageops_extra_tasks_deploy is defined and mageops_extra_tasks_deploy
 
     - name: Save deploy release information to file
-      when: deploy_release_save_info_file_path | default(false, true)
+      when: (deploy_release_save_info_file_path | default('', true) | string | length) > 0
       copy:
         dest: "{{ deploy_release_save_info_file_path }}"
         content: "{{ deploy_release_info | to_nice_json }}"
@@ -148,6 +161,7 @@
       when: mageops_fstrim_enable
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3.9
     deploy_install_new_release: "{{ not deploy_keep_current_release }}"
     deploy_keep_current_releases: 2
     deploy_copy_previous_release: yes

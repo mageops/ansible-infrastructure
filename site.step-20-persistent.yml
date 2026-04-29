@@ -1,6 +1,19 @@
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: persistent:&current:!immutable
+  gather_facts: no
+  pre_tasks:
+    - name: Wait for persistent node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
+
+    - name: Gather facts for persistent node
+      setup: ~
   roles:
     - role: cs.aws-node-facts
       delegate_to: localhost
@@ -44,6 +57,7 @@
       when: aws_use
     - role: cs.cron
     - role: geerlingguy.ntp
+      services: "{{ ansible_facts.services | default({}) }}"
     - role: cs.opensearch
       when: mageops_elasticsearch_opensearch_flavor == "opensearch"
     - role: cs.elasticsearch
@@ -106,5 +120,6 @@
       when: mageops_extra_tasks_persistent_node is defined
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3.9
     mageops_node_role: persistent
     magento_facts_detect_from_artifacts: yes

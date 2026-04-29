@@ -11,7 +11,7 @@
     - block:
         - name: Enable Magento maintenance mode (if AMI release has DB migrations)
           command: "bin/magento maintenance:enable"
-          when: aws_ami_app_node_needs_db_migrations | default(true)
+          when: aws_ami_app_node_needs_db_migrations | default(true) | bool
           args:
             chdir: "{{ item.dir | default(magento_live_release_dir) }}"
           run_once: true
@@ -35,11 +35,12 @@
 - hosts: localhost
   connection: local
   vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
     # Disable rolling updates when enabling maintenance mode to speed
     # the refresh up...
     autoscaling_rolling_instance_refresh_min_healthy_percent: >-
       {{
-        aws_ami_app_node_needs_db_migrations | default(true) | ternary(
+        (aws_ami_app_node_needs_db_migrations | default(true) | bool) | ternary(
           0,
           aws_autoscaling_rolling_instance_refresh_min_healthy_percent
         )

@@ -1,3 +1,119 @@
+- name: Read effective Magento database config from env.php
+  become: yes
+  become_user: "{{ magento_user }}"
+  command:
+    argv:
+      - php
+      - -r
+      - |
+        $env = include $argv[1];
+        $db = $env['db']['connection']['default'] ?? [];
+        $prefix = $env['db']['table_prefix'] ?? '';
+        echo json_encode([
+          'host' => (string) ($db['host'] ?? ''),
+          'name' => (string) ($db['dbname'] ?? ''),
+          'user' => (string) ($db['username'] ?? ''),
+          'password' => (string) ($db['password'] ?? ''),
+          'table_prefix' => (string) $prefix,
+        ]);
+      - "{{ magento_release_dir }}/app/etc/env.php"
+  changed_when: false
+  register: _magento_env_db_raw
+
+- name: Parse effective Magento database config from env.php
+  ansible.builtin.set_fact:
+    _magento_effective_db: "{{ _magento_env_db_raw.stdout | from_json }}"
+
+- name: Validate effective Magento database config from env.php
+  ansible.builtin.assert:
+    that:
+      - (_magento_effective_db.host | default('') | trim | length) > 0
+      - (_magento_effective_db.user | default('') | trim | length) > 0
+      - (_magento_effective_db.name | default('') | trim | length) > 0
+      - (_magento_effective_db.host | regex_search('\\{\\{')) is none
+      - (_magento_effective_db.user | regex_search('\\{\\{')) is none
+      - (_magento_effective_db.name | regex_search('\\{\\{')) is none
+      - (_magento_effective_db.table_prefix | default('') | regex_search('\\{\\{')) is none
+    fail_msg: >-
+      Invalid or unresolved Magento DB config in env.php.
+      host=`{{ _magento_effective_db.host | default('') }}`,
+      user=`{{ _magento_effective_db.user | default('') }}`,
+      db=`{{ _magento_effective_db.name | default('') }}`,
+      table_prefix=`{{ _magento_effective_db.table_prefix | default('') }}`.
+
+- name: Check Magento default website count before DI compile
+  command: >
+    mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+    -N --batch
+    -u {{ _magento_effective_db.user | quote }}
+    -p{{ _magento_effective_db.password | quote }}
+    -h {{ _magento_effective_db.host | quote }}
+    -e "SELECT COUNT(*) FROM `{{ _magento_effective_db.name }}`.`{{ _magento_effective_db.table_prefix | default('') }}store_website` WHERE is_default = 1;"
+  changed_when: false
+  failed_when: false
+  register: _magento_default_website_count_before_compile
+
+- name: Restore default website marker when missing before DI compile
+  block:
+    - name: Select first website id for default marker recovery
+      command: >
+        mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+        -N --batch
+        -u {{ _magento_effective_db.user | quote }}
+        -p{{ _magento_effective_db.password | quote }}
+        -h {{ _magento_effective_db.host | quote }}
+        -e "SELECT website_id FROM `{{ _magento_effective_db.name }}`.`{{ _magento_effective_db.table_prefix | default('') }}store_website` ORDER BY website_id ASC LIMIT 1;"
+      changed_when: false
+      failed_when: false
+      register: _magento_first_website_id
+
+    - name: Ensure Magento website exists for default marker recovery
+      ansible.builtin.assert:
+        that:
+          - (_magento_first_website_id.rc | default(1)) == 0
+          - (_magento_first_website_id.stdout | default('') | trim | length) > 0
+        fail_msg: >-
+          Magento database has no website rows; cannot set default website before DI compile.
+          mysql rc={{ _magento_first_website_id.rc | default('n/a') }},
+          stdout=`{{ _magento_first_website_id.stdout | default('') | trim }}`,
+          stderr=`{{ _magento_first_website_id.stderr | default('') | trim }}`.
+
+    - name: Set first website as default before DI compile
+      command: >
+        mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+        -N --batch
+        -u {{ _magento_effective_db.user | quote }}
+        -p{{ _magento_effective_db.password | quote }}
+        -h {{ _magento_effective_db.host | quote }}
+        -e "UPDATE `{{ _magento_effective_db.name }}`.`{{ _magento_effective_db.table_prefix | default('') }}store_website` SET is_default = 0; UPDATE `{{ _magento_effective_db.name }}`.`{{ _magento_effective_db.table_prefix | default('') }}store_website` SET is_default = 1 WHERE website_id = {{ _magento_first_website_id.stdout | trim | int }};"
+      changed_when: true
+  when:
+    - (_magento_default_website_count_before_compile.rc | default(1)) == 0
+    - (_magento_default_website_count_before_compile.stdout | default('0') | trim | int) == 0
+
+- name: Re-check Magento default website count before DI compile
+  command: >
+    mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+    -N --batch
+    -u {{ _magento_effective_db.user | quote }}
+    -p{{ _magento_effective_db.password | quote }}
+    -h {{ _magento_effective_db.host | quote }}
+    -e "SELECT COUNT(*) FROM `{{ _magento_effective_db.name }}`.`{{ _magento_effective_db.table_prefix | default('') }}store_website` WHERE is_default = 1;"
+  changed_when: false
+  failed_when: false
+  register: _magento_default_website_count_after_recovery
+
+- name: Validate default website state before DI compile
+  ansible.builtin.assert:
+    that:
+      - (_magento_default_website_count_after_recovery.rc | default(1)) == 0
+      - (_magento_default_website_count_after_recovery.stdout | default('0') | trim | int) > 0
+    fail_msg: >-
+      Magento database has no default website before DI compile.
+      mysql rc={{ _magento_default_website_count_after_recovery.rc | default('n/a') }},
+      stdout=`{{ _magento_default_website_count_after_recovery.stdout | default('') | trim }}`,
+      stderr=`{{ _magento_default_website_count_after_recovery.stderr | default('') | trim }}`.
+
 - name: Compile Magento DI
   become: yes
   become_user: "{{ magento_user }}"

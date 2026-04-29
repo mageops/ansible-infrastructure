@@ -2,12 +2,12 @@
 - name: Add varnish configuration for core_config if needed
   vars:
     _extra_items:
-    - name: Set varnish URI for warmup crawler
-      path: "cache_warmer_crawler/general/varnish_uri"
-      value: "{% if magento_varnish_host %}http://{{ magento_varnish_host }}:{{ magento_varnish_port }}{% endif %}"
+      - name: Set varnish URI for warmup crawler
+        path: "cache_warmer_crawler/general/varnish_uri"
+        value: "{% if magento_varnish_host %}http://{{ magento_varnish_host }}:{{ magento_varnish_port }}{% endif %}"
   set_fact:
     magento_core_config_settings: "{{ magento_core_config_settings + _extra_items }}"
-  when: magento_varnish_host | default(false, true)
+  when: (magento_varnish_host | default('', true) | string | length) > 0
 
 - name: Ensure core config database settings values
   delegate_to: localhost
@@ -26,7 +26,12 @@
         scope = "default"
       ON DUPLICATE KEY UPDATE
         value = "{{ magento_db_setting.value | quote }}"
-  when: not magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  when:
+    - not (magento_db_setting.default | default(false) | bool)
+    - magento_db_setting.value | default(false) is string
+    - magento_db_setting.enabled | default(true) | bool
   loop: "{{ magento_core_config_settings }}"
   loop_control:
     loop_var: magento_db_setting
@@ -46,7 +51,12 @@
         value = "{{ magento_db_setting.value | quote }}",
         scope_id = 0,
         scope = "default"
-  when: magento_db_setting.default | default(false) and magento_db_setting.value | default(false) is string and magento_db_setting.enabled | default(true)
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  when:
+    - magento_db_setting.default | default(false) | bool
+    - magento_db_setting.value | default(false) is string
+    - magento_db_setting.enabled | default(true) | bool
   loop: "{{ magento_core_config_settings }}"
   loop_control:
     loop_var: magento_db_setting
@@ -63,6 +73,8 @@
       DELETE FROM core_config_data
       WHERE
         path = "{{ magento_db_setting_path | quote }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   loop: "{{ magento_core_config_settings_to_remove }}"
   loop_control:
     loop_var: magento_db_setting_path

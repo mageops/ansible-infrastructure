@@ -1,6 +1,12 @@
 
 - hosts: localhost
   connection: local
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    start: yes
+    start_ec2: "{{ start }}"
+    start_asg: "{{ start }}"
+    start_rds: "{{ start }}"
   roles:
     - role: cs.aws-region-facts
     - role: cs.aws-rds-facts
@@ -38,7 +44,7 @@
           register: start_asg_facts
 
         - name: Scale up ASG
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present
@@ -60,7 +66,7 @@
           register: start_asg_facts
 
         - name: Scale up ASG
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present
@@ -78,9 +84,3 @@
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
       when: start_rds and aws_rds_instance is defined
-
-  vars:
-    start: yes
-    start_ec2: "{{ start }}"
-    start_asg: "{{ start }}"
-    start_rds: "{{ start }}"

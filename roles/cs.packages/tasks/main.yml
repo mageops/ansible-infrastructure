@@ -12,16 +12,18 @@
       dnf:
         name: "{{ packages_remove | default([]) }}"
         state: absent
-      when: packages_remove is defined and packages_remove | length
+      when:
+        - packages_remove is defined
+        - (packages_remove | length) > 0
 
     - name: Store information that package maintenance was done
       copy:
-        content: "{{ ansible_date_time.epoch }}"
+        content: "{{ ansible_facts['date_time']['epoch'] }}"
         dest: "{{ packages_maintenance_marker_path }}"
   when: >-
     packages_maintenance_last_timestamp.content is not defined or (
       (
-        packages_maintenance_last_timestamp.content | int - ansible_date_time.epoch | int
+        packages_maintenance_last_timestamp.content | int - ansible_facts['date_time']['epoch'] | int
       ) > packages_maintenance_interval | int
     )
 

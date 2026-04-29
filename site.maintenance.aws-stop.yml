@@ -1,6 +1,12 @@
 
 - hosts: localhost
   connection: local
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    stop: yes
+    stop_ec2: "{{ stop }}"
+    stop_asg: "{{ stop }}"
+    stop_rds: "{{ stop }}"
   roles:
     - role: cs.aws-region-facts
     - role: cs.aws-rds-facts
@@ -18,7 +24,7 @@
           register: stop_asg_facts
 
         - name: Scale down ASG to zero
-          ec2_asg:
+          amazon.aws.autoscaling_group:
             name: "{{ item.name }}"
             region: "{{ aws_region }}"
             state: present
@@ -42,7 +48,7 @@
 
     - name: Scale down all App Node ASGs
       when: stop_asg
-      ec2_asg:
+      amazon.aws.autoscaling_group:
         name: "{{ item.auto_scaling_group_name }}"
         region: "{{ aws_region }}"
         state: present
@@ -59,9 +65,3 @@
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
       when: stop_rds and aws_rds_instance is defined
-
-  vars:
-    stop: yes
-    stop_ec2: "{{ stop }}"
-    stop_asg: "{{ stop }}"
-    stop_rds: "{{ stop }}"

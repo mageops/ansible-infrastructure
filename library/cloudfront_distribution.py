@@ -1097,10 +1097,8 @@ web_acl_id:
   sample: abcd1234-1234-abcd-abcd-abcd12345678
 '''
 
-from ansible.module_utils._text import to_text, to_native
+from ansible.module_utils.common.text.converters import to_text, to_native
 from ansible.module_utils.aws.core import AnsibleAWSModule
-from ansible.module_utils.aws.cloudfront_facts import CloudFrontFactsServiceManager
-from ansible.module_utils.ec2 import get_aws_connection_info
 from ansible.module_utils.ec2 import ec2_argument_spec, boto3_conn, compare_aws_tags
 from ansible.module_utils.ec2 import camel_dict_to_snake_dict, ansible_dict_to_boto3_tag_list
 from ansible.module_utils.ec2 import snake_dict_to_camel_dict, boto3_tag_list_to_ansible_dict
@@ -1118,7 +1116,6 @@ try:
     import botocore
 except ImportError:
     pass
-
 
 def change_dict_key_name(dictionary, old_key, new_key):
     if old_key in dictionary:
@@ -1236,13 +1233,52 @@ def update_tags(client, module, existing_tags, valid_tags, purge_tags, arn):
     return changed
 
 
+class CloudFrontFactsServiceManager(object):
+    """
+    Local CloudFront facts manager used by this patched module.
+    Keep this implementation here instead of importing collection helpers whose
+    location and return shape changed across amazon.aws releases.
+    """
+
+    def __init__(self, module, client):
+        self.module = module
+        self.client = client
+
+    def get_distribution(self, distribution_id):
+        try:
+            return self.client.get_distribution(Id=distribution_id)
+        except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as e:
+            self.module.fail_json_aws(e, msg="Error describing distribution")
+
+    def list_distributions(self, keyed=True):
+        try:
+            paginator = self.client.get_paginator('list_distributions')
+            result = paginator.paginate().build_full_result()
+            distribution_list = result.get('DistributionList', {}).get('Items', [])
+            if not keyed:
+                return distribution_list
+            return self.keyed_list_helper(distribution_list)
+        except (botocore.exceptions.ClientError, botocore.exceptions.BotoCoreError) as e:
+            self.module.fail_json_aws(e, msg="Error listing distributions")
+
+    def keyed_list_helper(self, list_to_key):
+        keyed_list = dict()
+        for item in list_to_key:
+            distribution_id = item.get('Id')
+            aliases = item.get('Aliases', {}).get('Items', [])
+            for alias in aliases:
+                keyed_list.update({alias: item})
+            keyed_list.update({distribution_id: item})
+        return keyed_list
+
+
 class CloudFrontValidationManager(object):
     """
     Manages Cloudfront validations
     """
 
-    def __init__(self, module):
-        self.__cloudfront_facts_mgr = CloudFrontFactsServiceManager(module)
+    def __init__(self, module, client):
+        self.__cloudfront_facts_mgr = CloudFrontFactsServiceManager(module, client)
         self.module = module
         self.__default_distribution_enabled = True
         self.__default_http_port = 80
@@ -1885,10 +1921,88 @@ def main():
         ]
     )
 
-    region, ec2_url, aws_connect_kwargs = get_aws_connection_info(module, boto3=True)
-    client = boto3_conn(module, conn_type='client', resource='cloudfront', region=region, endpoint=ec2_url, **aws_connect_kwargs)
+    # Newer amazon.aws releases changed where and how AWS connection helpers are
+    # exposed. Instead of depending on whichever helper signature happens to be
+    # installed on the controller, keep the connection extraction here so this
+    # patched local module stays close to upstream behavior across versions.
+    params = module.params
 
-    validation_mgr = CloudFrontValidationManager(module)
+    endpoint_url = params.get('endpoint_url')
+    if endpoint_url is None:
+        endpoint_url = params.get('aws_endpoint_url')
+    if endpoint_url is None:
+        endpoint_url = params.get('ec2_url')
+
+    access_key = params.get('access_key')
+    if access_key is None:
+        access_key = params.get('aws_access_key')
+    if access_key is None:
+        access_key = params.get('aws_access_key_id')
+
+    secret_key = params.get('secret_key')
+    if secret_key is None:
+        secret_key = params.get('aws_secret_key')
+    if secret_key is None:
+        secret_key = params.get('aws_secret_access_key')
+
+    session_token = params.get('session_token')
+    if session_token is None:
+        session_token = params.get('aws_session_token')
+    if session_token is None:
+        session_token = params.get('security_token')
+
+    region = params.get('region')
+    profile_name = params.get('profile')
+    validate_certs = params.get('validate_certs')
+    ca_bundle = params.get('aws_ca_bundle')
+    aws_config = params.get('aws_config')
+
+    if profile_name and (access_key or secret_key or session_token):
+        module.fail_json(msg='Passing both a profile and access tokens is not supported.')
+
+    if not access_key:
+        access_key = None
+    if not secret_key:
+        secret_key = None
+    if not session_token:
+        session_token = None
+
+    if profile_name:
+        aws_connect_kwargs = dict(
+            aws_access_key_id=None,
+            aws_secret_access_key=None,
+            aws_session_token=None,
+            profile_name=profile_name,
+        )
+    else:
+        aws_connect_kwargs = dict(
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            aws_session_token=session_token,
+        )
+
+    if validate_certs and ca_bundle:
+        aws_connect_kwargs['verify'] = ca_bundle
+    else:
+        aws_connect_kwargs['verify'] = validate_certs
+
+    if aws_config is not None:
+        aws_connect_kwargs['aws_config'] = botocore.config.Config(**aws_config)
+
+    for key, value in list(aws_connect_kwargs.items()):
+        if isinstance(value, bytes):
+            aws_connect_kwargs[key] = str(value, 'utf-8', 'strict')
+
+    client = boto3_conn(
+        module,
+        conn_type='client',
+        resource='cloudfront',
+        region=region,
+        endpoint=endpoint_url,
+        **aws_connect_kwargs
+    )
+
+    validation_mgr = CloudFrontValidationManager(module, client)
 
     state = module.params.get('state')
     caller_reference = module.params.get('caller_reference')

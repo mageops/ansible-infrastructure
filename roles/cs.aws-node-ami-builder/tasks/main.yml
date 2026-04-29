@@ -33,8 +33,8 @@
     wait_timeout: "{{ builder_create_instance_timeout }}"
     # This has zero costs on current-gen instances
     ebs_optimized: yes
-    network:
-      assign_public_ip: yes
+    network_interfaces:
+      - assign_public_ip: true
     security_groups: "{{ builder_instance_security_groups }}"
   vars:
     builder_instance_name_tags:

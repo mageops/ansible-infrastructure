@@ -1161,25 +1161,41 @@ magento_core_config_settings_default:
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set secure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set unsecure media url to cloudfront domain
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set unsecure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
 
 # Extra core config settings to be set at deploy,
@@ -1507,7 +1523,7 @@ nginx_version: "1.10.3"
 nginx_user: "nginx"
 nginx_group: "nginx"
 
-nginx_worker_processes: "{{ ansible_processor_vcpus|default(ansible_processor_count + 1) }}"
+nginx_worker_processes: "{{ (ansible_facts | default({})).get('processor_vcpus', (((ansible_facts | default({})).get('processor_count', 0) | int) + 1)) }}"
 nginx_worker_connections: "1024"
 
 nginx_multi_accept: "off"
@@ -1712,21 +1728,33 @@ varnish_strip_params:
   - "gdftrk"
   - "_ga" # google analytics
   - "_gl" # google analytics
-  - "mc_[^=&]+"
+  - "mc_[^=&]+" # mailchimp
   - "trk_[^=&]+"
   - "dm_i"
   - "fbclid" # facebook
+  - "igshid" # instagram
   - "ttclid" # tiktok
+  - "twclid" # twitter
+  - "li_fat_id" # linkedin
+  - "epik" # pinterest
+  - "si" # spotify
   - "wbraid" # google
   - "gad_[^=&]+" # google ads
   - "adposition" # google ads
   - "srsltid" # google
   - "gbraid" # google
+  - "dclid" # google display & video 360
   - "msclkid" # microsoft
   - "sc_[^=&]+" # emarsys
   - "tduid" # tradedoubler
+  - "_ke" # klaviyo
+  - "ml_[^=&]+" # mailerlite
+  - "hsa_[^=&]+" # hubspot
+  - "__hs[^=&]+" # hubspot
+  - "hsCtaTracking" # hubspot
   - "{{ https_termination_redirect_source_domain_param }}"
   - "[0-9]+" # common bot cache busting pattern
+
 
 varnish_debug_request_info_header_name: "{{ mageops_debug_http_header_prefix }}-Info-Varnish"
 

@@ -28,7 +28,7 @@
   register: aws_autoscaling_event
 
 - name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
-  lambda_policy:
+  amazon.aws.lambda_policy:
     state: present
     region: "{{ aws_region }}"
     function_name: "{{ function_name }}"
