@@ -8,15 +8,25 @@
     aws_autoscaling_trigger_targets: >-
       {{
         aws_autoscaling_trigger_targets | default([])
-          + [ target | combine({'arn': normalized_arn}) ]
+          + [ target | combine({'arn': normalized_arn, 'id': normalized_target_id}) ]
       }}
   loop: "{{ aws_autoscaling_triggers_list }}"
   loop_control:
     loop_var: target
-    label: "{{ target.arn }} -> {{ normalized_arn }}"
+    label: "{{ target.id }} -> {{ normalized_target_id }}"
   vars:
     # When lambda is created ansible returns function arn containing $LATEST, while when it's already present it's returned without it
     normalized_arn: "{{ target.arn | regex_replace('^(.*lambda:.*:function:.*):[0-9]+$', '\\1') | regex_replace(':\\$LATEST$', '') }}"
+    normalized_target_id: >-
+      {{
+        (
+          target.id | length <= 64
+        )
+        | ternary(
+            target.id,
+            ((target.id | regex_replace('-target$', ''))[:54] ~ '-' ~ ((target.id | hash('sha1'))[:8]))
+          )
+      }}
 
 - name: Setup autoscaling event trigger
   cloudwatchevent_rule:
@@ -28,7 +38,7 @@
   register: aws_autoscaling_event
 
 - name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
-  lambda_policy:
+  amazon.aws.lambda_policy:
     state: present
     region: "{{ aws_region }}"
     function_name: "{{ function_name }}"

@@ -3,10 +3,16 @@
 - hosts: app:&current:!immutable
   gather_facts: no
   pre_tasks:
-    - name: Wait for builder's SSH to become available
-      wait_for_connection: ~
+    - name: Wait for builder node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
 
-    - name: Gather facts for first time
+    - name: Gather facts for app node
       setup: ~
 
   roles:
@@ -80,7 +86,7 @@
 
     - role: cs.cron
 
-    - role: geerlingguy.ntp
+    - role: cs.ntp
 
     - role: cs.supervisor
       supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"
@@ -190,6 +196,7 @@
       when: mageops_extra_tasks_app_node is defined
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3.9
     mageops_node_role: app
     mageops_app_node_nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
     mageops_app_node_https_termination_enable: "{{ mageops_https_termination_enable and not varnish_standalone }}"

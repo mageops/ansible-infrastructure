@@ -1,16 +1,22 @@
-- name: Find nanorc hilight configs
-  find:
-    paths: /usr/share/nano/
-    recurse: yes
+- name: Check nano syntax directory
+  ansible.builtin.stat:
+    path: /usr/share/nano
+  register: _nano_syntax_dir
+
+- name: Find nanorc highlight configs
+  ansible.builtin.find:
+    paths: /usr/share/nano
+    recurse: true
     patterns: '*.nanorc'
   register: _nanorcs
+  when: _nano_syntax_dir.stat.isdir | default(false)
 
-- name: Enable nano hilights
-  lineinfile:
+- name: Enable nano highlights
+  ansible.builtin.lineinfile:
     path: /etc/nanorc
     regexp: '{{ _nanorc_file.path }}'
     line: 'include "{{ _nanorc_file.path }}"'
-  loop: "{{ _nanorcs.files }}"
+  loop: "{{ _nanorcs.files | default([]) }}"
   loop_control:
     loop_var: _nanorc_file
     label: "{{ _nanorc_file.path }}"

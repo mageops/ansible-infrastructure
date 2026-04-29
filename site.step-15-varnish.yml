@@ -1,6 +1,19 @@
 - import_playbook: site.common.group-current-hosts.yml
 
 - hosts: varnish:&current:!immutable
+  gather_facts: no
+  pre_tasks:
+    - name: Wait for varnish node SSH to become available
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host | default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 900
+      delegate_to: localhost
+      become: no
+
+    - name: Gather facts for varnish node
+      setup: ~
   roles:
     - role: cs.aws-node-facts
       delegate_to: localhost
@@ -42,7 +55,7 @@
     - role: cs.aws-cli
       when: aws_use
     - role: cs.cron
-    - role: geerlingguy.ntp
+    - role: cs.ntp
     - role: cs.nginx
     - role: cs.nginx-url-blacklist
       nginx_blacklist_urls: "{{ nginx_blacklist_urls_default + nginx_blacklist_urls_project | default([]) }}"
@@ -108,5 +121,6 @@
       when: mageops_extra_tasks_varnish_node is defined
 
   vars:
+    ansible_python_interpreter: /usr/bin/python3.9
     mageops_node_role: varnish
     magento_facts_detect_from_artifacts: yes

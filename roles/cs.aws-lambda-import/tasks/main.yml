@@ -1,36 +1,58 @@
-
 - name: Download lambda deploy packages
   get_url:
     url: "{{ aws_lambda_import_scaling_deploy_package_url }}"
     dest: "{{ aws_lambda_import_scaling_deploy_package_path }}"
   when: magento_aws_ondemand_import_instance_enable
 
-- name: Check if lambda function exists
-  community.aws.lambda_info:
-    region: "{{ aws_region }}"
+- name: Check if import scaling lambda function exists
+  ansible.builtin.command:
+    argv:
+      - aws
+      - lambda
+      - get-function-configuration
+      - --region
+      - "{{ aws_region }}"
+      - --function-name
+      - "{{ aws_lambda_handle_import_scaling_name }}"
   register: _lambda_facts
+  changed_when: false
+  failed_when: false
+  when: magento_aws_ondemand_import_instance_enable
+
+- name: Select import scaling lambda facts
+  set_fact:
+    _import_scaling_lambda_fact: >-
+      {{
+        (_lambda_facts.stdout | default('') | length > 0)
+        | ternary((_lambda_facts.stdout | from_json), {})
+      }}
   when: magento_aws_ondemand_import_instance_enable
 
 - name: Delete lambda function if it exists with different runtime
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_handle_import_scaling_name }}"
     state: absent
     region: "{{ aws_region }}"
-  when: magento_aws_ondemand_import_instance_enable and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_import_scaling_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_import_scaling_name].runtime != aws_lambda_handle_import_scaling_runtime
+  when: magento_aws_ondemand_import_instance_enable and _import_scaling_lambda_fact | length > 0 and _import_scaling_lambda_fact.Runtime != aws_lambda_handle_import_scaling_runtime
 
 - name: Register import scaling handler lambda
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_handle_import_scaling_name }}"
-    state: "{% if magento_aws_ondemand_import_instance_enable %}present{% else %}absent{% endif %}"
-    zip_file: "{% if magento_aws_ondemand_import_instance_enable %}{{ aws_lambda_import_scaling_deploy_package_path }}{% else %}omit{% endif %}"
+    state: "{{ 'present' if magento_aws_ondemand_import_instance_enable else 'absent' }}"
+    zip_file: >-
+      {{
+        aws_lambda_import_scaling_deploy_package_path
+        if magento_aws_ondemand_import_instance_enable
+        else omit
+      }}
     runtime: "{{ aws_lambda_handle_import_scaling_runtime }}"
     role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_import_scaling_lambda_execution }}"
     handler: import_scaling_handler.handle
     region: "{{ aws_region }}"
     timeout: 120
     environment_variables:
-        ASG_NAME: "{{ mageops_app_name }}-extra-app"
-        CHECK_ENDPOINT: "{{ magento_base_url }}rest/V1/importer/is_runner_needed"
+      ASG_NAME: "{{ mageops_app_name }}-extra-app"
+      CHECK_ENDPOINT: "{{ magento_base_url }}rest/V1/importer/is_runner_needed"
   register: handle_import_scaling_lambda
 
 - name: Define eventrule target
@@ -45,17 +67,22 @@
   cloudwatchevent_rule:
     name: "handle-import-instance-scaling-{{ mageops_app_name }}"
     region: "{{ aws_region }}"
-    state: "{% if magento_aws_ondemand_import_instance_enable %}present{% else %}absent{% endif %}"
+    state: "{{ 'present' if magento_aws_ondemand_import_instance_enable else 'absent' }}"
     schedule_expression: "{{ aws_import_scaling_lambda_schedule }}"
-    targets: "{% if magento_aws_ondemand_import_instance_enable %}{{ handle_import_scaling_lambda_eventrule_targets }}{% else %}[]{% endif %}"
+    targets: "{{ handle_import_scaling_lambda_eventrule_targets if magento_aws_ondemand_import_instance_enable else [] }}"
   register: import_scaling_schedule_event
 
 - name: Allow autoscaling event handler lambda to be executed by CloudWatch Events
-  lambda_policy:
-    state: "{% if magento_aws_ondemand_import_instance_enable %}present{% else %}absent{% endif %}"
+  amazon.aws.lambda_policy:
+    state: "{{ 'present' if magento_aws_ondemand_import_instance_enable else 'absent' }}"
     region: "{{ aws_region }}"
     function_name: "{{ aws_lambda_handle_import_scaling_name }}"
     action: "lambda:InvokeFunction"
     principal: "events.amazonaws.com"
     statement_id: "AWSEvents-importScalingHandler-{{ mageops_app_name }}"
-    source_arn: "{% if magento_aws_ondemand_import_instance_enable %}{{ import_scaling_schedule_event.rule.arn }}{% else %}omit{% endif %}"
+    source_arn: >-
+      {{
+        import_scaling_schedule_event.rule.arn
+        if magento_aws_ondemand_import_instance_enable
+        else omit
+      }}

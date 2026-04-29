@@ -1,18 +1,40 @@
-- name: Get EC2 instance information for nodes
-  ec2_instance_info:
-    region: "{{ aws_region }}"
-    filters: "{{ aws_node_facts_base_filters | combine(aws_node_facts_base_tags | combine(node.tags) | prefix_keys('tag:')) }}"
+- name: Print EC2 instance lookup filters for nodes
+  debug:
+    msg:
+      node: "{{ node.name }}"
+      filters: "{{ aws_node_facts_base_filters | combine(aws_node_facts_base_tags | combine(node.node_tags) | prefix_keys('tag:')) }}"
   loop:
     - name: app_builder
-      tags: "{{ aws_tags_role_app_builder }}"
+      node_tags: "{{ aws_tags_role_app_builder }}"
     - name: persistent
-      tags: "{{ aws_tags_role_persistent }}"
+      node_tags: "{{ aws_tags_role_persistent }}"
     - name: varnish_loadbalancer
-      tags: "{{ aws_tags_role_loadbalancer | combine(aws_tags_role_varnish_http_cache) }}"
+      node_tags: "{{ aws_tags_role_loadbalancer | combine(aws_tags_role_varnish_http_cache) }}"
     - name: elasticsearch
-      tags: "{{ aws_tags_role_elasticsearch }}"
+      node_tags: "{{ aws_tags_role_elasticsearch }}"
     - name: redis
-      tags: "{{ aws_tags_role_redis_cache }}"
+      node_tags: "{{ aws_tags_role_redis_cache }}"
+  loop_control:
+    loop_var: node
+    label: "{{ node.name }}"
+
+- name: Get EC2 instance information for nodes
+  amazon.aws.ec2_instance_info:
+    region: "{{ aws_region }}"
+    filters: "{{ aws_node_facts_base_filters | combine(aws_node_facts_base_tags | combine(node.node_tags) | prefix_keys('tag:')) }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  loop:
+    - name: app_builder
+      node_tags: "{{ aws_tags_role_app_builder }}"
+    - name: persistent
+      node_tags: "{{ aws_tags_role_persistent }}"
+    - name: varnish_loadbalancer
+      node_tags: "{{ aws_tags_role_loadbalancer | combine(aws_tags_role_varnish_http_cache) }}"
+    - name: elasticsearch
+      node_tags: "{{ aws_tags_role_elasticsearch }}"
+    - name: redis
+      node_tags: "{{ aws_tags_role_redis_cache }}"
   loop_control:
     loop_var: node
     label: "{{ node.name }}"
@@ -23,7 +45,25 @@
     aws_nodes_info: >-
       {{
           aws_nodes_info | default({}) | combine({
-              result.node.name: result.instances | first | default(false)
+              result.node.name: (
+                (
+                  result.instances
+                  | selectattr('state.name', 'equalto', 'running')
+                  | sort(attribute='launch_time')
+                  | list
+                )
+                | last
+                | default(
+                    (
+                      result.instances
+                      | sort(attribute='launch_time')
+                      | list
+                    )
+                    | last
+                    | default(false),
+                    true
+                  )
+              )
           })
       }}
   loop: "{{ aws_node_instance_facts.results | default([]) }}"
@@ -33,7 +73,15 @@
 
 - name: Print info about running nodes
   debug:
-    msg: "{{ item.key }} instance: {% if item.value %}{{ item.value.instance_id }} ({{ item.value.private_ip_address }} / {{ item.value.public_ip_address | default('N/A') }}){% else %}not found{% endif %}"
+    msg: >-
+      {{ item.key }} instance:
+      {% if item.value %}
+      {{ item.value.instance_id | default('unknown') }}
+      ({{ item.value.private_ip_address | default('N/A') }} /
+      {{ item.value.public_ip_address | default('N/A') }})
+      {% else %}
+      not found
+      {% endif %}
   loop: "{{ aws_nodes_info | default({}) | dict2items }}"
   loop_control:
     label: "{{ item.key }}"
@@ -52,31 +100,49 @@
 - name: Set varnish host to varnish loadbalancer
   set_fact:
     mageops_varnish_host: "{{ aws_nodes_info.varnish_loadbalancer.private_ip_address }}"
-  when: varnish_as_loadbalancer and aws_nodes_info.varnish_loadbalancer
+  when:
+    - varnish_as_loadbalancer
+    - aws_nodes_info.varnish_loadbalancer is defined
+    - aws_nodes_info.varnish_loadbalancer is not sameas false
 
 - name: Set elasticsearch host if not predefined
   set_fact:
     mageops_elasticsearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
-  when: not mageops_elasticsearch_host | default(false, true) and aws_nodes_info.elasticsearch
+  when:
+    - (mageops_elasticsearch_host | default('', true) | string | length) == 0
+    - aws_nodes_info.elasticsearch is defined
+    - aws_nodes_info.elasticsearch is not sameas false
 
 - name: Set opensearch host if not predefined
   set_fact:
     mageops_opensearch_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
-  when: not mageops_opensearch_host | default(false, true) and aws_nodes_info.elasticsearch
+  when:
+    - (mageops_opensearch_host | default('', true) | string | length) == 0
+    - aws_nodes_info.elasticsearch is defined
+    - aws_nodes_info.elasticsearch is not sameas false
 
 
 # TODO: Find RabbitMQ through tags, right now we don't have option to separate it anyway
 - name: Set RabbitMQ host if not predefined
   set_fact:
     mageops_rabbitmq_host: "{{ aws_nodes_info.elasticsearch.private_ip_address }}"
-  when: not mageops_rabbitmq_host | default(false, true) and aws_nodes_info.elasticsearch
+  when:
+    - (mageops_rabbitmq_host | default('', true) | string | length) == 0
+    - aws_nodes_info.elasticsearch is defined
+    - aws_nodes_info.elasticsearch is not sameas false
 
 - name: Set redis host if not predefined
   set_fact:
     mageops_redis_host: "{{ aws_nodes_info.redis.private_ip_address }}"
-  when: not mageops_redis_host | default(false, true) and aws_nodes_info.redis
+  when:
+    - (mageops_redis_host | default('', true) | string | length) == 0
+    - aws_nodes_info.redis is defined
+    - aws_nodes_info.redis is not sameas false
 
 - name: Set redis sessions host if not predefined
   set_fact:
     mageops_redis_sessions_host: "{{ aws_nodes_info.redis.private_ip_address }}"
-  when: not mageops_redis_sessions_host | default(false, true) and aws_nodes_info.redis
+  when:
+    - (mageops_redis_sessions_host | default('', true) | string | length) == 0
+    - aws_nodes_info.redis is defined
+    - aws_nodes_info.redis is not sameas false

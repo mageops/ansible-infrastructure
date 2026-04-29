@@ -1,18 +1,18 @@
 - name: Set upgrade parameters
-  set_fact:
+  ansible.builtin.set_fact:
     _aws_rds_upgrade_parameter_group: "{{ mageops_app_name }}-{{ item | replace('.', '-') }}-upgrade"
 
 - name: Schedule removal of temporary parameters
-  set_fact:
-    aws_rds_temporary_parameter_groups: "{{ aws_rds_temporary_parameter_groups + [ _aws_rds_upgrade_parameter_group ] }}"
+  ansible.builtin.set_fact:
+    aws_rds_temporary_parameter_groups: "{{ aws_rds_temporary_parameter_groups + [_aws_rds_upgrade_parameter_group] }}"
 
 - name: Show step info
-  debug:
+  ansible.builtin.debug:
     msg: |
       Upgrading to {{ aws_rds_db_engine }} {{ item }}
 
 - name: Create temporary RDS parameter group
-  rds_param_group:
+  amazon.aws.rds_instance_param_group:
     state: present
     region: "{{ aws_region }}"
     name: "{{ _aws_rds_upgrade_parameter_group }}"
@@ -22,7 +22,7 @@
     params: "{{ aws_rds_param_group_params | default(omit) }}"
 
 - name: Upgrade RDS
-  rds_instance:
+  amazon.aws.rds_instance:
     region: "{{ aws_region }}"
     publicly_accessible: "{{ aws_rds_publicly_accessible }}"
     db_instance_identifier: "{{ aws_rds_instance_name }}"
@@ -38,28 +38,45 @@
     backup_retention_period: "{{ aws_rds_backup_retention }}"
     preferred_backup_window: "{{ aws_rds_backup_window }}"
     preferred_maintenance_window: "{{ aws_rds_maintenance_window }}"
-    auto_minor_version_upgrade: yes
-    allow_major_version_upgrade: yes
+    auto_minor_version_upgrade: true
+    allow_major_version_upgrade: true
     tags: "{{ aws_tags_default | combine(aws_tags_role_database, aws_tags_role_mysql_database, aws_tags_node_mysql) }}"
     availability_zone: "{{ aws_rds_availability_zone }}"
     storage_encrypted: "{{ aws_rds_storage_encrypt }}"
-    kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
+    kms_key_id: >-
+      {{
+        aws_rds_encryption_key_name
+        if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key
+        else omit
+      }}
     enable_performance_insights: "{{ aws_rds_performance_insights }}"
-    performance_insights_retention_period: "{{ aws_rds_performance_insights_retention_period if aws_rds_performance_insights else omit }}"
-    performance_insights_kms_key_id: "{{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key else omit }}"
+    performance_insights_retention_period: >-
+      {{
+        aws_rds_performance_insights_retention_period
+        if aws_rds_performance_insights
+        else omit
+      }}
+    performance_insights_kms_key_id: >-
+      {{
+        aws_rds_encryption_key_name
+        if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key
+        else omit
+      }}
     enable_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports }}"
-    apply_immediately: yes
-    wait: yes
+    apply_immediately: true
+    wait: true
 
-- name: Wait for AWS to acknowledge that rds upgrade is happening (workaround)
-  pause:
+- name: Wait for AWS to acknowledge that RDS upgrade is happening (workaround)
+  ansible.builtin.pause:
     minutes: 1
 
-- name: Wait for active rds modifications to finish
-  rds_instance_info:
+- name: Wait for active RDS modifications to finish
+  amazon.aws.rds_instance_info:
     region: "{{ aws_region }}"
     db_instance_identifier: "{{ aws_rds_instance_name }}"
   register: aws_rds_current
   retries: 600
   delay: 5
-  until: (aws_rds_current.instances|length) == 0 or aws_rds_current.instances[0].db_instance_status == "available"
+  until: >-
+    (aws_rds_current.instances | length) == 0
+    or aws_rds_current.instances[0].db_instance_status == "available"
