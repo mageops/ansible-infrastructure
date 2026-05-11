@@ -44,6 +44,15 @@
     db_instance_identifier: "{{ aws_rds_instance_name }}"
   register: aws_rds_current
 
+- name: Store primary RDS configuration snapshot
+  set_fact:
+    aws_rds_primary_current: "{{ aws_rds_current }}"
+
+- name: Collect read replicas attached to primary RDS instance
+  set_fact:
+    aws_rds_read_replica_instance_identifiers: "{{ aws_rds_current.instances[0].read_replica_db_instance_identifiers | default([]) }}"
+  when: aws_rds_current.instances | length > 0
+
 - name: Update RDS instance class before applying full configuration (workaround)
   block:
     - name: Update RDS instance class before applying full configuration (workaround)
@@ -73,43 +82,16 @@
   when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].db_instance_class != aws_rds_instance_type
 
 
-# When we have known upgrade path:
-# we create temporary parameter group for specific db version
-# we upgrade database to next engine version
-# then we procees with usual rds provisioning - this will switch to normal parameter group
-# we remowe all created temporary parameter groups
-- name: Set upgrade plan
-  set_fact:
-    aws_rds_upgrade_plan: |
-      {{ aws_rds_upgrade_path[aws_rds_db_engine][
-        aws_rds_current.instances[0].engine_version.split('.')[0]
-        + "."
-        + aws_rds_current.instances[0].engine_version.split('.')[1]
-      ][aws_rds_db_engine_version] }}
-  when: |
-    aws_rds_upgrade_path[aws_rds_db_engine] is defined
-    and aws_rds_current.instances|length > 0
-    and aws_rds_upgrade_path[aws_rds_db_engine][
-      aws_rds_current.instances[0].engine_version.split('.')[0]
-      + "."
-      + aws_rds_current.instances[0].engine_version.split('.')[1]
-    ] is defined
-    and aws_rds_upgrade_path[aws_rds_db_engine][
-      aws_rds_current.instances[0].engine_version.split('.')[0]
-      + "."
-      + aws_rds_current.instances[0].engine_version.split('.')[1]
-    ][aws_rds_db_engine_version] is defined
+- name: Upgrade read replica RDS instances before primary
+  include_tasks: upgrade_instance.yml
+  loop: "{{ aws_rds_read_replica_instance_identifiers | default([]) }}"
+  loop_control:
+    loop_var: aws_rds_upgrade_target_identifier
 
-- name: Print upgrade plan
-  debug:
-    msg: |
-      Upgrade plan from {{ aws_rds_current.instances[0].engine_version }} to {{ aws_rds_db_engine_version }}
-        {{ aws_rds_current.instances[0].engine_version }} --> {{ " --> ".join(aws_rds_upgrade_plan) }}
-  when: aws_rds_upgrade_plan|length > 0
-
-- name: Upgrade MySQL/MariaDB RDS engine
-  include_tasks: upgrade_iteration.yml
-  loop: "{{ aws_rds_upgrade_plan }}"
+- name: Upgrade primary MySQL/MariaDB RDS engine
+  include_tasks: upgrade_instance.yml
+  vars:
+    aws_rds_upgrade_target_identifier: "{{ aws_rds_instance_name }}"
 
 - name: Create MySQL/MariaDB RDS
   rds_instance:
@@ -149,7 +131,7 @@
   retries: 600
   delay: 5
   until: _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "available" or _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "Storage-optimization"
-  when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].engine_version != aws_rds_db_engine_version
+  when: (aws_rds_primary_current.instances|length) > 0 and aws_rds_primary_current.instances[0].engine_version != (aws_rds_db_engine_version | string)
 
 - name: Remove temporary parameter groups used for engine upgrade
   rds_param_group:
