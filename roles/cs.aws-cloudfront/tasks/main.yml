@@ -1,3 +1,22 @@
+- name: Validate CloudFront alias and certificate configuration
+  ansible.builtin.assert:
+    that:
+      - >
+        (
+          aws_cloudfront_domain_aliases | default([], true) | length
+        ) == 0
+        or
+        (
+          aws_cloudfront_custom_certificate_arn | default('', true) | string | length
+        ) > 0
+    fail_msg: >-
+      CloudFront alternate domain names are configured in `aws_cloudfront_domain_aliases`
+      but `aws_cloudfront_custom_certificate_arn` is empty. CloudFront requires a trusted
+      ACM certificate in `us-east-1` for aliases/CNAMEs. Either set
+      `aws_cloudfront_custom_certificate_arn` to a valid ACM certificate ARN from `us-east-1`
+      that covers {{ aws_cloudfront_domain_aliases | join(', ') }}, or set
+      `aws_cloudfront_domain_aliases: []` to deploy without custom hostnames.
+
 # Setup s3 website config and add cloudfront access policy
 - name: Setup S3 Website (S3 Media)
   import_tasks: setup-s3-media-bucket.yml

@@ -1,3 +1,93 @@
+- name: Validate Magento database config before DI compile
+  ansible.builtin.assert:
+    that:
+      - (mageops_mysql_host | default('') | trim | length) > 0
+      - (mageops_app_mysql_user | default('') | trim | length) > 0
+      - (mageops_app_mysql_db | default('') | trim | length) > 0
+      - (mageops_mysql_host | regex_search('\\{\\{')) is none
+      - (mageops_app_mysql_user | regex_search('\\{\\{')) is none
+      - (mageops_app_mysql_db | regex_search('\\{\\{')) is none
+      - ((magento_app_etc_config.db.table_prefix | default('')) | regex_search('\\{\\{')) is none
+    fail_msg: >-
+      Invalid or unresolved Magento DB config before DI compile.
+      host=`{{ mageops_mysql_host | default('') }}`,
+      user=`{{ mageops_app_mysql_user | default('') }}`,
+      db=`{{ mageops_app_mysql_db | default('') }}`,
+      table_prefix=`{{ magento_app_etc_config.db.table_prefix | default('') }}`.
+
+- name: Check Magento default website count before DI compile
+  command: >
+    mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+    -N --batch
+    -u {{ mageops_app_mysql_user | quote }}
+    -p{{ mageops_app_mysql_pass | quote }}
+    -h {{ mageops_mysql_host | quote }}
+    -e "SELECT COUNT(*) FROM `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` WHERE is_default = 1;"
+  changed_when: false
+  failed_when: false
+  register: _magento_default_website_count_before_compile
+
+- name: Restore default website marker when missing before DI compile
+  block:
+    - name: Select first website id for default marker recovery
+      command: >
+        mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+        -N --batch
+        -u {{ mageops_app_mysql_user | quote }}
+        -p{{ mageops_app_mysql_pass | quote }}
+        -h {{ mageops_mysql_host | quote }}
+        -e "SELECT website_id FROM `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` ORDER BY website_id ASC LIMIT 1;"
+      changed_when: false
+      failed_when: false
+      register: _magento_first_website_id
+
+    - name: Ensure Magento website exists for default marker recovery
+      ansible.builtin.assert:
+        that:
+          - (_magento_first_website_id.rc | default(1)) == 0
+          - (_magento_first_website_id.stdout | default('') | trim | length) > 0
+        fail_msg: >-
+          Magento database has no website rows; cannot set default website before DI compile.
+          mysql rc={{ _magento_first_website_id.rc | default('n/a') }},
+          stdout=`{{ _magento_first_website_id.stdout | default('') | trim }}`,
+          stderr=`{{ _magento_first_website_id.stderr | default('') | trim }}`.
+
+    - name: Set first website as default before DI compile
+      command: >
+        mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+        -N --batch
+        -u {{ mageops_app_mysql_user | quote }}
+        -p{{ mageops_app_mysql_pass | quote }}
+        -h {{ mageops_mysql_host | quote }}
+        -e "UPDATE `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` SET is_default = 0; UPDATE `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` SET is_default = 1 WHERE website_id = {{ _magento_first_website_id.stdout | trim | int }};"
+      changed_when: true
+  when:
+    - (_magento_default_website_count_before_compile.rc | default(1)) == 0
+    - (_magento_default_website_count_before_compile.stdout | default('0') | trim | int) == 0
+
+- name: Re-check Magento default website count before DI compile
+  command: >
+    mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
+    -N --batch
+    -u {{ mageops_app_mysql_user | quote }}
+    -p{{ mageops_app_mysql_pass | quote }}
+    -h {{ mageops_mysql_host | quote }}
+    -e "SELECT COUNT(*) FROM `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` WHERE is_default = 1;"
+  changed_when: false
+  failed_when: false
+  register: _magento_default_website_count_after_recovery
+
+- name: Validate default website state before DI compile
+  ansible.builtin.assert:
+    that:
+      - (_magento_default_website_count_after_recovery.rc | default(1)) == 0
+      - (_magento_default_website_count_after_recovery.stdout | default('0') | trim | int) > 0
+    fail_msg: >-
+      Magento database has no default website before DI compile.
+      mysql rc={{ _magento_default_website_count_after_recovery.rc | default('n/a') }},
+      stdout=`{{ _magento_default_website_count_after_recovery.stdout | default('') | trim }}`,
+      stderr=`{{ _magento_default_website_count_after_recovery.stderr | default('') | trim }}`.
+
 - name: Compile Magento DI
   become: yes
   become_user: "{{ magento_user }}"

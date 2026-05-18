@@ -36,17 +36,17 @@
 
 - name: Keep all default versions
   set_fact:
-    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(query) }}"
+    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(launch_template_version_query) }}"
   vars:
-    query: "[?DefaultVersion]"
+    launch_template_version_query: "[?DefaultVersion]"
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
   when: aws_ec2_cleanup_lt_to_keep > 0
 
 - name: Keep last N versions
   set_fact:
-    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(query) }}"
+    _to_keep: "{{ _to_keep + item.LaunchTemplateVersions | json_query(launch_template_version_query) }}"
   vars:
-    query: "[:{{aws_ec2_cleanup_lt_to_keep}}]"
+    launch_template_version_query: "[:{{aws_ec2_cleanup_lt_to_keep}}]"
   loop: "{{ _launch_template_version_output.stdout_lines | map('from_json') | list }}"
   when: aws_ec2_cleanup_lt_to_keep > 0
 
@@ -55,17 +55,6 @@
     _ami_to_keep: "{{ _ami_to_keep + [item.LaunchTemplateData.ImageId ] }}"
   when: item.LaunchTemplateData.ImageId not in _ami_to_keep
   loop: "{{ _to_keep }}"
-
-- name: Get available Launch Configurations (TEMPORARY STEP)
-  ec2_lc_info:
-    region: "{{ aws_region }}"
-  register: _aws_ec2_cleanup_all_lcs
-
-- name: Keep amis required for all launch configurations (TEMPORARY STEP)
-  set_fact:
-    _ami_to_keep: "{{ _ami_to_keep + [item] }}"
-  when: item not in _ami_to_keep
-  loop: "{{ _aws_ec2_cleanup_all_lcs.launch_configurations | map(attribute='image_id') | list}}"
 
 - name: Select versions to remove
   set_fact:
@@ -125,15 +114,15 @@
   when: aws_ec2_cleanup_lt_to_keep > 0
 
 - name: Delete whole LT
-  ec2_launch_template:
-    name: "{{item.name | quote }}"
+  amazon.aws.ec2_launch_template:
+    name: "{{ item.name | quote }}"
     state: absent
     region: "{{ aws_region }}"
   loop: "{{ _remove_template_version }}"
   when: aws_ec2_cleanup_lt_to_keep == 0
 
-- name : Remove obsoled AMIs
-  ec2_ami:
+- name: Remove obsoled AMIs
+  amazon.aws.ec2_ami:
     image_id: "{{ item }}"
     state: absent
     delete_snapshot: True

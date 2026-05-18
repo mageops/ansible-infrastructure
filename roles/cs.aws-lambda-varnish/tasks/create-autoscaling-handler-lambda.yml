@@ -1,44 +1,151 @@
 - name: Transform instance filters to format used in Lambda
   set_fact:
-    varnish_instances_filter_lambda: "{{ varnish_instances_aws_tags | prefix_keys('tag:') | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
-    varnish_backend_instances_filter_lambda: "{{ varnish_backend_instances_aws_tags | prefix_keys('tag:')  | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
-    varnish_extra_instances_filter_lambda: "{{ varnish_extra_instances_aws_tags | prefix_keys('tag:') | dict2items | map('json_query', _jq_map_ec2_instance_filter)|list }}"
+    varnish_instances_filter_lambda: >-
+      {{
+        varnish_instances_aws_tags
+        | prefix_keys('tag:')
+        | dict2items
+        | map('json_query', _jq_map_ec2_instance_filter)
+        | list
+      }}
+    varnish_backend_instances_filter_lambda: >-
+      {{
+        varnish_backend_instances_aws_tags
+        | prefix_keys('tag:')
+        | dict2items
+        | map('json_query', _jq_map_ec2_instance_filter)
+        | list
+      }}
+    varnish_extra_instances_filter_lambda: >-
+      {{
+        varnish_extra_instances_aws_tags
+        | prefix_keys('tag:')
+        | dict2items
+        | map('json_query', _jq_map_ec2_instance_filter)
+        | list
+      }}
   vars:
     _jq_map_ec2_instance_filter: '{Name: key, Values: [value]}'
 
-- name: Check if lambda function exists
-  community.aws.lambda_info:
-    region: "{{ aws_region }}"
+- name: Check if autoscaling event lambda function exists
+  ansible.builtin.command:
+    argv:
+      - aws
+      - lambda
+      - get-function-configuration
+      - --region
+      - "{{ aws_region }}"
+      - --function-name
+      - "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
   register: _lambda_facts
+  changed_when: false
+  failed_when: false
+
+- name: Select autoscaling event lambda facts
+  set_fact:
+    _handle_varnish_autoscaling_event_lambda_fact: >-
+      {{
+        (_lambda_facts.stdout | default('') | length > 0)
+        | ternary((_lambda_facts.stdout | from_json), {})
+      }}
 
 - name: Delete lambda function if it exists with different runtime
-  lambda:
+  amazon.aws.lambda:
     name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
     state: absent
     region: "{{ aws_region }}"
-  when: _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name] is defined and _lambda_facts.ansible_facts.lambda_facts.function[aws_lambda_handle_varnish_autoscaling_event_name].runtime != aws_lambda_varnish_runtime
+  when:
+    - _handle_varnish_autoscaling_event_lambda_fact | length > 0
+    - _handle_varnish_autoscaling_event_lambda_fact.Runtime != aws_lambda_varnish_runtime
 
 - name: Register lambda handler for autoscaling event
-  lambda:
-    name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
-    state: present
-    zip_file: "{{ aws_lambda_varnish_deploy_package_path }}"
-    runtime: "{{ aws_lambda_varnish_runtime }}"
-    role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_autoscaling_event_lambda }}"
-    handler: handle_autoscaling_event.handle
-    region: "{{ aws_region }}"
-    timeout: 120
-    environment_variables:
-        VARNISH_INSTANCE_FILTER: "{{ varnish_instances_filter_lambda | to_json }}"
-        BACKEND_INSTANCE_FILTER: "{{ varnish_backend_instances_filter_lambda | to_json }}"
-        EXTRA_INSTANCE_FILTER: "{{ varnish_extra_instances_filter_lambda | to_json }}"
-        KEY_BUCKET: "{{ aws_lambda_update_varnish_vcl_function_s3_bucket_name }}"
-        KEY_NAME: "{{ aws_lambda_update_varnish_vcl_function_ssh_key_name }}"
-        SSH_USERNAME: "{{ varnish_manager_user }}"
-        ASG_PREFIX: "{{ mageops_app_name }}"
-        TERMINATE_HOOK: "{{ aws_app_node_webnodedown_hook_name }}"
-        UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
-  register: handle_autoscaling_event_lambda
+  block:
+    - name: Upsert autoscaling event lambda
+      amazon.aws.lambda:
+        name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
+        state: present
+        zip_file: "{{ aws_lambda_varnish_deploy_package_path }}"
+        runtime: "{{ aws_lambda_varnish_runtime }}"
+        role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_autoscaling_event_lambda }}"
+        handler: handle_autoscaling_event.handle
+        region: "{{ aws_region }}"
+        timeout: 120
+        environment_variables:
+          VARNISH_INSTANCE_FILTER: "{{ varnish_instances_filter_lambda | to_json }}"
+          BACKEND_INSTANCE_FILTER: "{{ varnish_backend_instances_filter_lambda | to_json }}"
+          EXTRA_INSTANCE_FILTER: "{{ varnish_extra_instances_filter_lambda | to_json }}"
+          KEY_BUCKET: "{{ aws_lambda_update_varnish_vcl_function_s3_bucket_name }}"
+          KEY_NAME: "{{ aws_lambda_update_varnish_vcl_function_ssh_key_name }}"
+          SSH_USERNAME: "{{ varnish_manager_user }}"
+          ASG_PREFIX: "{{ mageops_app_name }}"
+          TERMINATE_HOOK: "{{ aws_app_node_webnodedown_hook_name }}"
+          UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
+      register: handle_autoscaling_event_lambda
+  rescue:
+    - name: Delete autoscaling event lambda after failed registration attempt
+      amazon.aws.lambda:
+        name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
+        state: absent
+        region: "{{ aws_region }}"
+
+    - name: Recreate autoscaling event lambda after failed registration attempt
+      block:
+        - name: Create autoscaling event lambda from scratch
+          amazon.aws.lambda:
+            name: "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
+            state: present
+            zip_file: "{{ aws_lambda_varnish_deploy_package_path }}"
+            runtime: "{{ aws_lambda_varnish_runtime }}"
+            role: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_autoscaling_event_lambda }}"
+            handler: handle_autoscaling_event.handle
+            region: "{{ aws_region }}"
+            timeout: 120
+            environment_variables:
+              VARNISH_INSTANCE_FILTER: "{{ varnish_instances_filter_lambda | to_json }}"
+              BACKEND_INSTANCE_FILTER: "{{ varnish_backend_instances_filter_lambda | to_json }}"
+              EXTRA_INSTANCE_FILTER: "{{ varnish_extra_instances_filter_lambda | to_json }}"
+              KEY_BUCKET: "{{ aws_lambda_update_varnish_vcl_function_s3_bucket_name }}"
+              KEY_NAME: "{{ aws_lambda_update_varnish_vcl_function_ssh_key_name }}"
+              SSH_USERNAME: "{{ varnish_manager_user }}"
+              ASG_PREFIX: "{{ mageops_app_name }}"
+              TERMINATE_HOOK: "{{ aws_app_node_webnodedown_hook_name }}"
+              UPDATE_LAMBDA_NAME: "{{ aws_lambda_update_varnish_backends_name }}"
+          register: handle_autoscaling_event_lambda
+      rescue:
+        - name: Wait for autoscaling event lambda to become active after recreation timeout
+          ansible.builtin.command:
+            argv:
+              - aws
+              - lambda
+              - get-function-configuration
+              - --region
+              - "{{ aws_region }}"
+              - --function-name
+              - "{{ aws_lambda_handle_varnish_autoscaling_event_name }}"
+          register: handle_autoscaling_event_lambda_info
+          changed_when: false
+          failed_when: false
+          until: >-
+            (
+              (
+                handle_autoscaling_event_lambda_info.stdout | default('{}')
+                | from_json
+              ).State | default('')
+            ) == 'Active'
+          retries: "{{ aws_lambda_varnish_wait_retries }}"
+          delay: "{{ aws_lambda_varnish_wait_delay }}"
+
+        - name: Normalize autoscaling event lambda result after recreation timeout
+          set_fact:
+            handle_autoscaling_event_lambda:
+              changed: true
+              configuration:
+                function_arn: "{{ (handle_autoscaling_event_lambda_info.stdout | from_json).FunctionArn }}"
+      always:
+        - name: Fail if autoscaling event lambda is still unavailable after recreation
+          fail:
+            msg: "{{ ansible_failed_result.msg | default('Recreating autoscaling event lambda failed') }}"
+          when: handle_autoscaling_event_lambda is not defined
 
 - name: Register autoscaling trigger
   set_fact:

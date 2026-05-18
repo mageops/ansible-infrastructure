@@ -1,8 +1,9 @@
 - name: Make sure backup root bind mount is absent
-  mount:
+  ansible.posix.mount:
     path: "{{ _s3fs_premount_temp_dir.path }}"
-    src: "/"
-    state: absent
+    state: unmounted
+  register: _s3_cleanup_mount
+  failed_when: false
 
 - name: Remove backup mount temp dir
   file:

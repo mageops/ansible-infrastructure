@@ -17,8 +17,8 @@ https_termination_sts_max_age: 63072000
 https_termination_crt_install_search_paths:
   - "{{ mageops_project_certs_dir | default('') }}"
   - "certs/"
-  - "{{ playbook_dir }}/"
-  - "{{ playbook_dir }}/certs/"
+  - "."
+  - "certs"
 
 https_termination_crt_dir:              "{{ nginx_etc_dir }}/certs"
 https_termination_crt_archive_dir:      "{{ https_termination_crt_dir }}/archive"

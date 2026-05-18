@@ -19,19 +19,58 @@
   set_fact:
     https_termination_vhosts: "{{ https_termination_vhosts | default({}) | combine({ vhost_derived.name: vhost_derived }) }}"
   vars:
+    host_server_name_raw: "{{ host.server_name | default('*') }}"
+    host_server_name_resolved: >-
+      {%- set ns = namespace(value=host_server_name_raw) -%}
+      {%- if ns.value is string -%}
+      {%- for _ in range(5) -%}
+      {%- for var_name in ns.value | regex_findall('\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}') -%}
+      {%- set replacement = ((hostvars[inventory_hostname] | default({})).get(var_name, lookup('vars', var_name, default='{{ ' ~ var_name ~ ' }}')) | string) -%}
+      {%- set ns.value = ns.value | regex_replace('\\{\\{\\s*' ~ var_name ~ '\\s*\\}\\}', replacement) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- endif -%}
+      {{ ns.value }}
+    host_aliases_resolved: >-
+      {%- set aliases = [] -%}
+      {%- for alias in host.aliases | default([]) -%}
+      {%- set ns = namespace(value=alias) -%}
+      {%- if ns.value is string -%}
+      {%- for _ in range(5) -%}
+      {%- for var_name in ns.value | regex_findall('\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}') -%}
+      {%- set replacement = ((hostvars[inventory_hostname] | default({})).get(var_name, lookup('vars', var_name, default='{{ ' ~ var_name ~ ' }}')) | string) -%}
+      {%- set ns.value = ns.value | regex_replace('\\{\\{\\s*' ~ var_name ~ '\\s*\\}\\}', replacement) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- endif -%}
+      {%- set _ = aliases.append(ns.value) -%}
+      {%- endfor -%}
+      {{ aliases }}
+    host_name_raw: "{{ host.name | default(host_server_name_resolved) }}"
+    host_name_resolved: >-
+      {%- set ns = namespace(value=host_name_raw) -%}
+      {%- if ns.value is string -%}
+      {%- for _ in range(5) -%}
+      {%- for var_name in ns.value | regex_findall('\\{\\{\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*\\}\\}') -%}
+      {%- set replacement = ((hostvars[inventory_hostname] | default({})).get(var_name, lookup('vars', var_name, default='{{ ' ~ var_name ~ ' }}')) | string) -%}
+      {%- set ns.value = ns.value | regex_replace('\\{\\{\\s*' ~ var_name ~ '\\s*\\}\\}', replacement) -%}
+      {%- endfor -%}
+      {%- endfor -%}
+      {%- endif -%}
+      {{ ns.value }}
     vhost_derived:
       params:       "{{ host }}"
-      label:        "{{ host.name }}"
-      name:         "{{ host.name | trim | lower | regex_replace('[^a-z0-9.-]+', '_') }}"
+      label:        "{{ host_name_resolved }}"
+      name:         "{{ host_name_resolved | trim | lower | regex_replace('[^a-z0-9.-]+', '_') }}"
 
-      conf_path:          "{{ nginx_confd_dir }}/050-vhost-{{ host.name }}.conf"
+      conf_path:          "{{ nginx_confd_dir }}/050-vhost-{{ host_name_resolved }}.conf"
       conf_custom_block:  "{{ host.extra_config | default(false, true) }}"
 
       upstream_uri:         "{{ host.upstream | default(https_termination_default_upstream_uri, true) }}"
       upstream_proxy_http:  "{{ host.proxy_http | default(https_termination_proxy_http_port) }}"
 
-      server_name:                "{{ host.server_name | default('*') }}"
-      server_aliases:             "{{ host.aliases | default([]) }}"
+      server_name:                "{{ host_server_name_resolved }}"
+      server_aliases:             "{{ host_aliases_resolved }}"
       server_aliases_redirect:    "{{ host.redirect_aliases | default(false) }}"
       server_aliases_redirect_include_domain: "{{ redirect_aliases_include_domain | default(false) }}"
       server_custom_block:        "{{ host.extra_vhost_config | default(false, true) }}"
@@ -124,7 +163,7 @@
         '127.0.0.1',
         '::1',
         'localhost',
-        ansible_hostname,
+        ansible_facts['hostname'] | default(''),
         inventory_hostname
       ]
   loop: "{{ https_termination_vhosts.values() | list }}"
@@ -137,7 +176,7 @@
 
 
 - name: Handle missing ACME gracefully
-  when: not (https_termination_crt_acme_email | default(false, true))
+  when: (https_termination_crt_acme_email | default('', true) | string | length) == 0
   block:
     - name: Set ACME e-mail to a dummy fallback value
       set_fact:

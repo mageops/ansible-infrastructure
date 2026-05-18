@@ -1,5 +1,7 @@
 - name: Enable tideways
-  when: tideways_enable and tideways_api_key | default(false, true)
+  when:
+    - tideways_enable | bool
+    - (tideways_api_key | default('', true) | string | length) > 0
   block:
     - name: Install tideways repo GPG keys
       rpm_key:

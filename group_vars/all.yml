@@ -622,16 +622,16 @@ aws_autoscaling_rolling_instance_refresh_min_healthy_percent: 100
 # ----------------------------------------
 
 # Path to directory where provisioning caches / temporary files will be stored
-mageops_ansible_temp_dir: "{{ playbook_dir }}/tmp"
+mageops_ansible_temp_dir: "tmp"
 
 # Inventory group for the current app
 mageops_app_host_group: "app_{{ mageops_app_id }}"
 
 # Where to load global configuration vars from
-mageops_global_vars_dir: "{{ playbook_dir }}/vars/global"
+mageops_global_vars_dir: "vars/global"
 
 # Where to load project configuration vars from
-mageops_project_vars_dir: "{{ playbook_dir }}/vars/project"
+mageops_project_vars_dir: "vars/project"
 
 # Where to load project configuration vars from
 mageops_project_tasks_dir: "{{ mageops_project_vars_dir }}/tasks"
@@ -643,7 +643,7 @@ mageops_project_certs_dir: "{{ mageops_project_vars_dir }}/certs"
 mageops_project_templates_dir: "{{ mageops_project_vars_dir }}/templates"
 
 # Where to load generated configuration vars from
-mageops_generated_vars_dir: "{{ playbook_dir }}/vars/generated"
+mageops_generated_vars_dir: "vars/generated"
 
 # Company prefix for namespacing resource identifiers
 mageops_prefix: cs
@@ -1161,25 +1161,41 @@ magento_core_config_settings_default:
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set secure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set unsecure media url to cloudfront domain
     path: "web/secure/base_media_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
   - name: Set unsecure static url to cloudfront domain
     path: "web/secure/base_static_url"
     value: "https://{{ aws_cloudfront_distribution_domain | default('') }}/static/"
     default: "{{ aws_cloudfront_domain_aliases | default([]) | length > 0 }}"
-    enabled: "{{ aws_cloudfront_distribution_domain is string and aws_cloudfront_distribution_create }}"
+    enabled: >-
+      {{
+        (aws_cloudfront_distribution_domain | default('', true) | string | length) > 0
+        and (aws_cloudfront_distribution_create | bool)
+      }}
 
 
 # Extra core config settings to be set at deploy,
@@ -1507,7 +1523,7 @@ nginx_version: "1.10.3"
 nginx_user: "nginx"
 nginx_group: "nginx"
 
-nginx_worker_processes: "{{ ansible_processor_vcpus|default(ansible_processor_count + 1) }}"
+nginx_worker_processes: "{{ (ansible_facts | default({})).get('processor_vcpus', (((ansible_facts | default({})).get('processor_count', 0) | int) + 1)) }}"
 nginx_worker_connections: "1024"
 
 nginx_multi_accept: "off"
@@ -1578,7 +1594,7 @@ elasticsearch_node_name: master
 
 elasticsearch_http_port: 9200
 elasticsearch_transport_tcp_port: 9300
-elasticsearch_heap_size: "{{ ((ansible_memtotal_mb / 2) | int ) ~ 'm' }}"
+elasticsearch_heap_size: "{{ ((ansible_facts['memtotal_mb'] / 2) | int ) ~ 'm' }}"
 elasticsearch_plugins:
     - analysis-icu
     - analysis-phonetic

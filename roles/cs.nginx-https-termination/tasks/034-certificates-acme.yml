@@ -7,13 +7,22 @@
   set_fact:
     certbot_args_default: >-
       {{
-          [ '/usr/bin/certbot', 'certonly' ]
-            + certbot_args_base
-            + https_termination_crt_acme_email | default(false, true) | ternary(certbot_args_email, [])
-            + https_termination_crt_acme_staging | default(false, true) | ternary(
+        [ '/usr/bin/certbot', 'certonly' ]
+          + certbot_args_base
+          + (
+            (https_termination_crt_acme_email | default('', true) | string | length > 0)
+            | ternary(certbot_args_email, [])
+          )
+          + (
+            (https_termination_crt_acme_staging | bool)
+            | ternary(
                 [ '--staging' ],
-                https_termination_crt_acme_directory | default(false, true) | ternary(https_termination_crt_acme_directory, [])
+                (
+                  (https_termination_crt_acme_directory | default('', true) | string | length > 0)
+                  | ternary(certbot_args_acme_server, [])
+                )
               )
+          )
       }}
   vars:
     certbot_args_base: [
@@ -41,16 +50,33 @@
     name: nginx
     state: reloaded
 
+- name: Validate certbot domains for vhost
+  ansible.builtin.assert:
+    that:
+      - (_vhost_domains | string | length) > 0
+      - (_vhost_domains | regex_search('\\{\\{')) is none
+      - (_vhost_domains | regex_search('\\}\\}')) is none
+    fail_msg: >-
+      Vhost `{{ vhost.name }}` has unresolved domain template(s): `{{ _vhost_domains }}`.
+      Ensure referenced variables are defined and resolved before ACME run.
+  vars:
+    _vhost_domains: "{{ ([vhost.server_name] + (vhost.server_aliases | default([], true))) | join(',') }}"
+  when: vhost.crt_do_acme
+  loop: "{{ https_termination_vhosts.values() | list }}"
+  loop_control:
+    label: "{{ vhost.name }} -> {{ _vhost_domains }}"
+    loop_var: vhost
+
 - name: Run certbot for vhost
   command:
     argv: "{{ certbot_args_default + certbot_args_vhost }}"
   vars:
     certbot_args_vhost: [
       --webroot,
-      --webroot-path,   "{{ vhost.crt_acme_webroot_dir }}",
-      --domains,        "{{ ([vhost.server_name] + vhost.server_aliases | default([], true)) | join(',') }}",
-      --cert-name,      "{{ vhost.name }}",
-      --post-hook,      "/usr/bin/systemctl reload nginx"
+      --webroot-path, "{{ vhost.crt_acme_webroot_dir }}",
+      --domains, "{{ ([vhost.server_name] + vhost.server_aliases | default([], true)) | join(',') }}",
+      --cert-name, "{{ vhost.name }}",
+      --post-hook, "/usr/bin/systemctl reload nginx"
     ]
   when: vhost.crt_do_acme
   loop: "{{ https_termination_vhosts.values() | list }}"
@@ -58,11 +84,31 @@
     label: "{{ vhost.name }} -> {{ (certbot_args_default + certbot_args_vhost) | join(' ') }}"
     loop_var: vhost
   register: https_termination_certbot_run
+  changed_when: true
+  failed_when: false
+
+- name: Fail with certbot output when certificate request fails
+  fail:
+    msg: |
+      Certbot failed for {{ certbot_result.vhost.name }}.
+      Command: {{ certbot_result.cmd | default('unknown') }}
+      RC: {{ certbot_result.rc | default('unknown') }}
+      STDOUT:
+      {{ certbot_result.stdout | default('') }}
+      STDERR:
+      {{ certbot_result.stderr | default('') }}
+  loop: "{{ https_termination_certbot_run.results | default([]) }}"
+  loop_control:
+    loop_var: certbot_result
+    label: "{{ certbot_result.vhost.name | default('unknown-vhost') }}"
+  when:
+    - certbot_result.skipped is not defined or not certbot_result.skipped
+    - (certbot_result.rc | default(0)) != 0
 
 - name: Symlink latest ACME certificates as live ones
   file:
     state: link
-    src:  "{{ vhost[key.src] }}"
+    src: "{{ vhost[key.src] }}"
     dest: "{{ vhost[key.dst] }}"
   when: vhost.crt_do_acme
   vars:
@@ -88,6 +134,7 @@
     path: /etc/sysconfig/certbot
     regexp: '^CERTBOT_ARGS='
     line: 'CERTBOT_ARGS="--allow-subset-of-names"'
+    mode: "0644"
     create: yes
   notify: Reload systemctl daemon
 

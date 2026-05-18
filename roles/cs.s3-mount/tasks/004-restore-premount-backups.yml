@@ -1,10 +1,28 @@
 - name: Bind mount rootfs to temp dir
-  mount:
-    path: "{{ _s3fs_premount_temp_dir.path }}"
-    src: "/"
-    opts: bind
-    fstype: none
-    state: mounted
+  block:
+    - name: Read backup root bind mount state
+      ansible.builtin.command: findmnt -n -o SOURCE,FSTYPE {{ _s3fs_premount_temp_dir.path }}
+      register: _s3_premount_bind_state
+      changed_when: false
+      failed_when: false
+
+    - name: Ensure backup root bind mount is not occupied by another source
+      ansible.builtin.assert:
+        that:
+          - (_s3_premount_bind_state.rc | default(1)) != 0
+            or ((_s3_premount_bind_state.stdout | default('') | trim).split() | first) == '/'
+        fail_msg: >-
+          Temporary premount backup path is already mounted from another source:
+          `{{ _s3_premount_bind_state.stdout | default('') | trim }}`.
+
+    - name: Bind mount rootfs to temp dir
+      ansible.posix.mount:
+        src: /
+        path: "{{ _s3fs_premount_temp_dir.path }}"
+        fstype: none
+        opts: bind
+        state: ephemeral
+      when: (_s3_premount_bind_state.rc | default(1)) != 0
 
 - name: Restore premount backup to new mountpoints
   shell: >
@@ -29,4 +47,11 @@
 
 - name: Print remount file restore log
   debug:
-    var: _s3fs_mountpoint_backup_restore_sync.stdout_lines
+    msg: >-
+      {{
+        _s3fs_mountpoint_backup_restore_sync.results
+        | default([])
+        | map(attribute='stdout_lines')
+        | list
+        | flatten
+      }}

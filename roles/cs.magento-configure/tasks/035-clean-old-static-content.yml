@@ -6,8 +6,6 @@
 ###
 - name: Make sure previous Mangeto static cache files are gone
   shell: "[[ ! -d '{{ magento_static_cache_dir }}' ]] || find '{{ magento_static_cache_dir }}' -xdev -type f -exec rm -vf {} \\;"
-  args:
-    warn: no
   changed_when: _magento_install_clean_statics.stdout | trim | length > 0
   register: _magento_install_clean_statics
   retries: 5

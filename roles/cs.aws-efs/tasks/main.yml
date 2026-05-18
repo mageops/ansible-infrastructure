@@ -1,6 +1,8 @@
 - name: Perform AWS API tasks
   delegate_to: localhost
   become: no
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   block:
     - name: Create EFS
       efs:
@@ -54,15 +56,14 @@
 # EFS Once created takes a really long time to become available
 # hence the retries
 - name: Configure root mount
-  mount:
-    boot: yes
+  ansible.posix.mount:
     src: "{{ _aws_efs.efs.file_system_id }}:/"
     path: "{{ efs_root_mountpoint }}"
     fstype: efs
-    state: mounted
     opts: "defaults,{{ efs_mount_opts }}"
+    state: mounted
   register: efs_root_mount
-  until: efs_root_mount is not failed
+  until: efs_root_mount is succeeded
   retries: 300
   delay: 30
 
@@ -96,14 +97,15 @@
     - "{{ _efs_local_mountpoints.results }}"
 
 - name: Configure mounts
-  mount:
-    boot: yes
-    src: "{{ _aws_efs.efs.file_system_id }}:{{ item.remote_path }}"
-    path: "{{ item.local_mountpoint }}"
+  ansible.posix.mount:
+    src: "{{ _aws_efs.efs.file_system_id }}:{{ efs_mount.remote_path }}"
+    path: "{{ efs_mount.local_mountpoint }}"
     fstype: efs
-    state: mounted
     opts: "defaults,{{ efs_mount_opts }}"
-  with_items: "{{ efs_mounts }}"
+    state: mounted
+  loop: "{{ efs_mounts }}"
+  loop_control:
+    loop_var: efs_mount
 
 # Warning, this has to be done post-mount!
 - name: Ensure mount permissions

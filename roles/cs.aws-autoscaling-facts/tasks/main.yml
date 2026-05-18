@@ -1,5 +1,5 @@
 - name: Get ASG app information
-  ec2_asg_info:
+  amazon.aws.autoscaling_group_info:
     region: "{{ aws_region }}"
     tags: >-
         {{
@@ -15,10 +15,12 @@
               )
             )
         }}
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: _aws_asg_app
 
 - name: Get ASG app-extra information
-  ec2_asg_info:
+  amazon.aws.autoscaling_group_info:
     region: "{{ aws_region }}"
     tags: >-
       {{
@@ -35,10 +37,12 @@
         )
        )
       }}
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: _aws_asg_app_extra
 
 - name: Get ASG app-pio information
-  ec2_asg_info:
+  amazon.aws.autoscaling_group_info:
     region: "{{ aws_region }}"
     tags: >-
       {{ aws_tags_default | combine(
@@ -46,6 +50,8 @@
            aws_tags_node_pio,
          )
        }}
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
   register: _aws_asg_app_pio
 
 - name: Show found ASG

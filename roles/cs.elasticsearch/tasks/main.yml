@@ -149,12 +149,15 @@
   loop: "{{ elasticsearch_plugins }}"
   notify: Restart elasticsearch
 
+- name: Gather service facts
+  service_facts:
+
 - name: Ensure opensearch is stopped and disabled
   service:
     name: opensearch
     state: stopped
     enabled: no
-  ignore_errors: true
+  when: "'opensearch.service' in ansible_facts.services"
 
 - name: Ensure elasticsearch is started and enabled
   service:
