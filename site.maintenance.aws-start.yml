@@ -1,9 +1,9 @@
-
-- hosts: localhost
+- name: Start AWS maintenance resources
+  hosts: localhost
   connection: local
   vars:
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
-    start: yes
+    start: true
     start_ec2: "{{ start }}"
     start_asg: "{{ start }}"
     start_rds: "{{ start }}"
@@ -13,7 +13,6 @@
     - role: cs.aws-node-facts
     - role: cs.aws-autoscaling-facts
 
-
   tasks:
     - name: Start standalone EC2 instances
       when: start_ec2
@@ -21,7 +20,7 @@
         instance_ids: "{{ item.instance_id }}"
         region: "{{ aws_region }}"
         state: running
-        wait: yes
+        wait: true
       with_items:
         - "{{ aws_persistent_node_instance }}"
         - "{{ aws_varnish_node_instance }}"
@@ -29,7 +28,7 @@
     - name: Wait 300 seconds for port 22 to become open and contain "OpenSSH"
       ansible.builtin.wait_for:
         port: 22
-        host: '{{ aws_varnish_node_elastic_ip }}'
+        host: "{{ aws_varnish_node_elastic_ip }}"
         search_regex: OpenSSH
         delay: 10
       connection: local
@@ -50,7 +49,7 @@
             state: present
             desired_capacity: "{{ aws_app_asg_desired_capacity | default(1) }}"
             min_size: "{{ aws_app_asg_min_size | default(1) }}"
-            wait_for_instances: yes
+            wait_for_instances: true
             wait_timeout: 600
           with_items: "{{ start_asgs }}"
           vars:
@@ -72,15 +71,27 @@
             state: present
             desired_capacity: "{{ aws_extra_app_asg_desired_capacity | default(0) }}"
             min_size: "{{ aws_extra_app_asg_min_size | default(0) }}"
-            wait_for_instances: yes
+            wait_for_instances: true
             wait_timeout: 600
           with_items: "{{ start_asgs }}"
           vars:
             start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name } ') }}"
 
-    - name: Start RDS instance
-      rds_instance:
+    - name: Start Aurora RDS cluster
+      amazon.aws.rds_cluster:
+        state: started
+        region: "{{ aws_region }}"
+        db_cluster_identifier: "{{ aws_rds_cluster.db_cluster_identifier }}"
+      when:
+        - start_rds
+        - aws_rds_cluster is defined
+
+    - name: Start standalone RDS instance
+      amazon.aws.rds_instance:
         state: started
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-      when: start_rds and aws_rds_instance is defined
+      when:
+        - start_rds
+        - aws_rds_instance is defined
+        - aws_rds_instance.db_cluster_identifier is not defined or not aws_rds_instance.db_cluster_identifier

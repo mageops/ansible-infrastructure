@@ -1,44 +1,111 @@
-- name: Import New Relic GPG key
-  ansible.builtin.rpm_key:
-    key: https://download.newrelic.com/php_agent/NEWRELIC_RPM_BD2E199C.public
-    state: present
+- name: Fail when New Relic architecture is unsupported
+  ansible.builtin.fail:
+    msg: >-
+      New Relic PHP agent role supports only x86_64 and aarch64.
+      Current architecture is {{ ansible_architecture }}.
+  when: ansible_architecture not in ['x86_64', 'aarch64']
 
-- name: Install new relic repo
-  dnf:
-    name: "{{ new_relic_repo_url }}"
-    state: present
-    disable_gpg_check: true
+- name: Fail when New Relic ARM requirements are not met
+  ansible.builtin.fail:
+    msg: >-
+      New Relic PHP agent on ARM64 requires PHP 8.0+.
+      Current php_version is {{ php_version }} on architecture {{ ansible_architecture }}.
+  when:
+    - ansible_architecture == 'aarch64'
+    - php_version is version('8.0', '<')
 
-- name: Install new relic packages
-  dnf:
-    name: "{{ new_relic_packages }}"
-    state: latest
+- name: Install New Relic via RPM on x86_64
+  when: ansible_architecture == 'x86_64'
+  block:
+    - name: Import New Relic GPG key
+      ansible.builtin.rpm_key:
+        key: https://download.newrelic.com/php_agent/NEWRELIC_RPM_BD2E199C.public
+        state: present
 
-- name: Initialize new relic
-  shell: "NR_INSTALL_SILENT=1 newrelic-install install"
+    - name: Install new relic repo
+      ansible.builtin.dnf:
+        name: "{{ new_relic_repo_url }}"
+        state: present
+        disable_gpg_check: true
+
+    - name: Install new relic packages
+      ansible.builtin.dnf:
+        name: "{{ new_relic_packages }}"
+        state: latest
+
+    - name: Initialize new relic from RPM install
+      ansible.builtin.command:
+        argv:
+          - newrelic-install
+          - install
+      environment:
+        NR_INSTALL_SILENT: "1"
+      changed_when: true
+
+- name: Install New Relic via tarball on ARM64
+  when: ansible_architecture == 'aarch64'
+  block:
+    - name: Ensure New Relic tarball root exists
+      ansible.builtin.file:
+        path: "{{ new_relic_tarball_root }}"
+        state: directory
+        mode: "0755"
+
+    - name: Download New Relic tarball
+      ansible.builtin.get_url:
+        url: "{{ new_relic_tarball_url }}"
+        dest: "{{ new_relic_tarball_root }}/{{ new_relic_tarball_filename }}"
+        mode: "0644"
+
+    - name: Extract New Relic tarball
+      ansible.builtin.unarchive:
+        src: "{{ new_relic_tarball_root }}/{{ new_relic_tarball_filename }}"
+        dest: "{{ new_relic_tarball_root }}"
+        remote_src: true
+
+    - name: Initialize new relic from tarball
+      ansible.builtin.command:
+        argv:
+          - ./newrelic-install
+          - install
+      args:
+        chdir: "{{ new_relic_tarball_extract_dir }}"
+      environment:
+        NR_INSTALL_SILENT: "1"
+      changed_when: true
 
 - name: Render config
-  template:
+  ansible.builtin.template:
     src: newrelic.ini.j2
     dest: /etc/php.d/newrelic.ini
+    mode: "0644"
 
 - name: Reload php-fpm
-  service:
+  ansible.builtin.service:
     name: php-fpm
     state: reloaded
 
 - name: Install feature flag module
-  copy:
+  ansible.builtin.copy:
     src: newrelic_feature.bash
     dest: "{{ mageops_cli_features_dir }}/newrelic_feature.bash"
+    mode: "0644"
   when: aws_use
 
 - name: Set feature flag
-  shell: "mageopscli set_feature_flag newrelic_apm {{ new_relic_enabled | ternary('true', 'false') }}"
+  ansible.builtin.command:
+    argv:
+      - mageopscli
+      - set_feature_flag
+      - newrelic_apm
+      - "{{ new_relic_enabled | ternary('true', 'false') }}"
+  changed_when: true
   when: aws_use
 
 - name: Setup cron
-  template:
+  ansible.builtin.template:
     src: cron.j2
     dest: /etc/cron.d/newrelic
-  when: new_relic_cron_enabled
+    mode: "0644"
+  when:
+    - new_relic_cron_enabled

@@ -1,9 +1,9 @@
-
-- hosts: localhost
+- name: Stop AWS maintenance resources
+  hosts: localhost
   connection: local
   vars:
     ansible_python_interpreter: "{{ ansible_playbook_python }}"
-    stop: yes
+    stop: true
     stop_ec2: "{{ stop }}"
     stop_asg: "{{ stop }}"
     stop_rds: "{{ stop }}"
@@ -30,7 +30,7 @@
             state: present
             desired_capacity: 0
             min_size: 0
-            wait_for_instances: no
+            wait_for_instances: false
           with_items: "{{ stop_asgs }}"
           vars:
             stop_asgs: "{{ stop_asg_facts | json_query('results[].{ name: auto_scaling_group_name }') }}"
@@ -41,7 +41,7 @@
         instance_ids: "{{ item.instance_id }}"
         region: "{{ aws_region }}"
         state: stopped
-        wait: no
+        wait: false
       with_items:
         - "{{ aws_persistent_node_instance }}"
         - "{{ aws_varnish_node_instance }}"
@@ -54,14 +54,26 @@
         state: present
         desired_capacity: 0
         min_size: 0
-        wait_for_instances: no
+        wait_for_instances: false
       with_items:
         - "{{ aws_autoscaling_app }}"
         - "{{ aws_autoscaling_app_extra }}"
 
-    - name: Stop RDS instance
-      rds_instance:
+    - name: Stop Aurora RDS cluster
+      amazon.aws.rds_cluster:
+        state: stopped
+        region: "{{ aws_region }}"
+        db_cluster_identifier: "{{ aws_rds_cluster.db_cluster_identifier }}"
+      when:
+        - stop_rds
+        - aws_rds_cluster is defined
+
+    - name: Stop standalone RDS instance
+      amazon.aws.rds_instance:
         state: stopped
         region: "{{ aws_region }}"
         db_instance_identifier: "{{ aws_rds_instance.db_instance_identifier }}"
-      when: stop_rds and aws_rds_instance is defined
+      when:
+        - stop_rds
+        - aws_rds_instance is defined
+        - aws_rds_instance.db_cluster_identifier is not defined or not aws_rds_instance.db_cluster_identifier

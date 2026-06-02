@@ -1,4 +1,9 @@
 new_relic_repo_url: http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm
+new_relic_arm_tar_version: "12.7.0.36"
+new_relic_tarball_root: "/usr/local/src"
+new_relic_tarball_filename: "newrelic-php5-{{ new_relic_arm_tar_version }}-linux.tar.gz"
+new_relic_tarball_url: "https://download.newrelic.com/php_agent/release/{{ new_relic_tarball_filename }}"
+new_relic_tarball_extract_dir: "{{ new_relic_tarball_root }}/newrelic-php5-{{ new_relic_arm_tar_version }}-linux"
 new_relic_packages:
   - newrelic-php5
 # new_relic_license:

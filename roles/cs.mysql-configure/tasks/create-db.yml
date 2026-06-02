@@ -1,30 +1,58 @@
 - name: Ensure project database exists
-  mysql_db:
+  community.mysql.mysql_db:
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_mysql_root_user }}"
     login_password: "{{ mageops_mysql_root_pass }}"
+    config_file: ""
     name: "{{ mageops_app_mysql_db }}"
     state: present
 
 - name: Ensure project db user for external connections exists
-  mysql_user:
+  community.mysql.mysql_user:
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_mysql_root_user }}"
     login_password: "{{ mageops_mysql_root_pass }}"
+    config_file: ""
     name: "{{ mageops_app_mysql_user }}"
     password: "{{ mageops_app_mysql_pass }}"
     host: "%"
+    update_password: on_create
     state: present
-    priv: "{{ mageops_app_mysql_db }}.*:{{ mysql_configure_all_db_permissions }}"
 
-- name: Ensure project db user for localhost exists
-  mysql_user:
+- name: Ensure project db user for external connections has privileges
+  community.mysql.mysql_user:
     login_host: "{{ mageops_mysql_host }}"
     login_user: "{{ mageops_mysql_root_user }}"
     login_password: "{{ mageops_mysql_root_pass }}"
+    config_file: ""
+    name: "{{ mageops_app_mysql_user }}"
+    host: "%"
+    priv: "{{ mageops_app_mysql_db }}.*:{{ mysql_configure_all_db_permissions }}"
+    append_privs: true
+    state: present
+
+- name: Ensure project db user for localhost exists
+  community.mysql.mysql_user:
+    login_host: "{{ mageops_mysql_host }}"
+    login_user: "{{ mageops_mysql_root_user }}"
+    login_password: "{{ mageops_mysql_root_pass }}"
+    config_file: ""
     name: "{{ mageops_app_mysql_user }}"
     password: "{{ mageops_app_mysql_pass }}"
     host: "localhost"
+    update_password: on_create
     state: present
+  when: mysql_user_localhost_access
+
+- name: Ensure project db user for localhost has privileges
+  community.mysql.mysql_user:
+    login_host: "{{ mageops_mysql_host }}"
+    login_user: "{{ mageops_mysql_root_user }}"
+    login_password: "{{ mageops_mysql_root_pass }}"
+    config_file: ""
+    name: "{{ mageops_app_mysql_user }}"
+    host: "localhost"
     priv: "{{ mageops_app_mysql_db }}.*:{{ mysql_configure_all_db_permissions }}"
+    append_privs: true
+    state: present
   when: mysql_user_localhost_access
