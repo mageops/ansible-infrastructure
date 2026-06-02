@@ -13,7 +13,11 @@
   set_fact:
     aws_rds_instances: "{{ aws_rds_instances | json_query(rds_instances_tag_filter_query) | default([]) }}"
   vars:
-    rds_instances_tag_filter_query: "[?{% for k, v in aws_rds_facts_mysql_tags.items() -%}tags.{{ k }} == '{{ v }}'{% if not loop.last %} && {% endif %}{% endfor %}]"
+    rds_instances_tag_filter_query: >-
+      [?{%- for k, v in aws_rds_facts_mysql_tags.items() -%}
+      tags.{{ k }} == '{{ v }}'{%- if not loop.last %} && {% endif -%}
+      {%- endfor -%}
+      ]
 
 - name: Warn when more than one instance has been found
   debug:
@@ -29,9 +33,38 @@
     aws_rds_instance_host: "{{ (aws_rds_instances | first).endpoint.address }}"
   when: aws_rds_instances | length > 0
 
-- debug:
-    msg: "Found MySQL RDS instance: {{ aws_rds_instance.db_instance_identifier }} / {{ aws_rds_instance.endpoint.address }} ({{ aws_rds_instance.engine }} v{{ aws_rds_instance.engine_version }})"
+- name: Get facts about project's RDS cluster
+  amazon.aws.rds_cluster_info:
+    region: "{{ aws_region }}"
+    db_cluster_identifier: "{{ aws_rds_instance.db_cluster_identifier }}"
+  register: rds_cluster_info
+  when:
+    - aws_rds_instance is defined
+    - aws_rds_instance.db_cluster_identifier is defined
+    - aws_rds_instance.db_cluster_identifier
+    - aws_rds_instance.engine is match("^aurora")
+
+- name: Set facts about project's RDS cluster
+  set_fact:
+    aws_rds_cluster: "{{ rds_cluster_info.clusters | first }}"
+  when:
+    - rds_cluster_info.clusters is defined
+    - rds_cluster_info.clusters | length > 0
+
+- name: Show project's RDS instance
+  debug:
+    msg: >-
+      Found MySQL RDS instance: {{ aws_rds_instance.db_instance_identifier }} / {{ aws_rds_instance.endpoint.address }}
+      ({{ aws_rds_instance.engine }} v{{ aws_rds_instance.engine_version }})
   when: aws_rds_instance is defined
+
+- name: Show project's RDS cluster
+  debug:
+    msg: >-
+      Found RDS cluster: {{ aws_rds_cluster.db_cluster_identifier }}
+      ({{ aws_rds_cluster.engine }} v{{ aws_rds_cluster.engine_version }}, status: {{ aws_rds_cluster.status }})
+  when: aws_rds_cluster is defined
+
 
 - name: Set MySQL host to the RDS instance
   set_fact:
