@@ -86,7 +86,7 @@
 
     - role: cs.cron
 
-    - role: cs.ntp
+    - role: geerlingguy.ntp
 
     - role: cs.supervisor
       supervisor_programs: "{{ mageops_supervisor_programs_app_node }}"

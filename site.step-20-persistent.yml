@@ -56,7 +56,7 @@
     - role: cs.aws-cli
       when: aws_use
     - role: cs.cron
-    - role: cs.ntp
+    - role: geerlingguy.ntp
     - role: cs.opensearch
       when: mageops_elasticsearch_opensearch_flavor == "opensearch"
     - role: cs.elasticsearch
