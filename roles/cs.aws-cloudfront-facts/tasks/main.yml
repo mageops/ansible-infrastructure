@@ -1,5 +1,5 @@
 - name: Get list of cloudfront distributions
-  community.aws.cloudfront_distribution_info:
+  cloudfront_distribution_info:
     region: "{{ aws_region }}"
     summary: yes
   vars:
