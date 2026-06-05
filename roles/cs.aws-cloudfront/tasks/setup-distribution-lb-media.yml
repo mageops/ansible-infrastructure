@@ -45,7 +45,7 @@
       }}
 
 - name: Set up cloudfront distribution
-  community.aws.cloudfront_distribution:
+  cloudfront_distribution:
     state: present
     enabled: true
 
