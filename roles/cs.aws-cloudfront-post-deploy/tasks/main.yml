@@ -4,7 +4,7 @@
 # cached at the new urls (basically the static asset version in the url is ignored by magento).
 
 - name: Invalidate cloudfront magento static assets
-  cloudfront_invalidation:
+  community.aws.cloudfront_invalidation:
     distribution_id: "{{ aws_cloudfront_distribution_id }}"
     caller_reference: "deploy-{{ ansible_date_time.iso8601_basic_short }}"
     target_paths:

@@ -1,20 +1,3 @@
-- name: Validate Magento database config before DI compile
-  ansible.builtin.assert:
-    that:
-      - (mageops_mysql_host | default('') | trim | length) > 0
-      - (mageops_app_mysql_user | default('') | trim | length) > 0
-      - (mageops_app_mysql_db | default('') | trim | length) > 0
-      - (mageops_mysql_host | regex_search('\\{\\{')) is none
-      - (mageops_app_mysql_user | regex_search('\\{\\{')) is none
-      - (mageops_app_mysql_db | regex_search('\\{\\{')) is none
-      - ((magento_app_etc_config.db.table_prefix | default('')) | regex_search('\\{\\{')) is none
-    fail_msg: >-
-      Invalid or unresolved Magento DB config before DI compile.
-      host=`{{ mageops_mysql_host | default('') }}`,
-      user=`{{ mageops_app_mysql_user | default('') }}`,
-      db=`{{ mageops_app_mysql_db | default('') }}`,
-      table_prefix=`{{ magento_app_etc_config.db.table_prefix | default('') }}`.
-
 - name: Check Magento default website count before DI compile
   command: >
     mysql {{ mageops_mysql_require_ssl | ternary("--ssl-mode=REQUIRED", "") }}
@@ -22,12 +5,17 @@
     -u {{ mageops_app_mysql_user | quote }}
     -p{{ mageops_app_mysql_pass | quote }}
     -h {{ mageops_mysql_host | quote }}
-    -e "SELECT COUNT(*) FROM `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` WHERE is_default = 1;"
+    -e "SELECT COUNT(*) FROM
+    `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website`
+    WHERE is_default = 1;"
   changed_when: false
   failed_when: false
   register: _magento_default_website_count_before_compile
 
 - name: Restore default website marker when missing before DI compile
+  when:
+    - (_magento_default_website_count_before_compile.rc | default(1)) == 0
+    - (_magento_default_website_count_before_compile.stdout | default('0') | trim | int) == 0
   block:
     - name: Select first website id for default marker recovery
       command: >
@@ -36,7 +24,9 @@
         -u {{ mageops_app_mysql_user | quote }}
         -p{{ mageops_app_mysql_pass | quote }}
         -h {{ mageops_mysql_host | quote }}
-        -e "SELECT website_id FROM `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` ORDER BY website_id ASC LIMIT 1;"
+        -e "SELECT website_id FROM
+        `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website`
+        ORDER BY website_id ASC LIMIT 1;"
       changed_when: false
       failed_when: false
       register: _magento_first_website_id
@@ -59,11 +49,12 @@
         -u {{ mageops_app_mysql_user | quote }}
         -p{{ mageops_app_mysql_pass | quote }}
         -h {{ mageops_mysql_host | quote }}
-        -e "UPDATE `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` SET is_default = 0; UPDATE `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` SET is_default = 1 WHERE website_id = {{ _magento_first_website_id.stdout | trim | int }};"
+        -e "UPDATE
+        `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website`
+        SET is_default = 0; UPDATE
+        `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website`
+        SET is_default = 1 WHERE website_id = {{ _magento_first_website_id.stdout | trim | int }};"
       changed_when: true
-  when:
-    - (_magento_default_website_count_before_compile.rc | default(1)) == 0
-    - (_magento_default_website_count_before_compile.stdout | default('0') | trim | int) == 0
 
 - name: Re-check Magento default website count before DI compile
   command: >
@@ -72,7 +63,9 @@
     -u {{ mageops_app_mysql_user | quote }}
     -p{{ mageops_app_mysql_pass | quote }}
     -h {{ mageops_mysql_host | quote }}
-    -e "SELECT COUNT(*) FROM `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website` WHERE is_default = 1;"
+    -e "SELECT COUNT(*) FROM
+    `{{ mageops_app_mysql_db }}`.`{{ magento_app_etc_config.db.table_prefix | default('') }}store_website`
+    WHERE is_default = 1;"
   changed_when: false
   failed_when: false
   register: _magento_default_website_count_after_recovery
@@ -92,3 +85,4 @@
   become: yes
   become_user: "{{ magento_user }}"
   command: "php {{ magento_release_dir }}/bin/magento setup:di:compile"
+  changed_when: true

@@ -1,5 +1,5 @@
 - name: Get current cloudfront distribution config
-  cloudfront_distribution_info_compat:
+  community.aws.cloudfront_distribution_info:
     region: "{{ aws_region }}"
     distribution: true
     distribution_id: "{{ aws_cloudfront_distribution_id }}"
@@ -45,7 +45,7 @@
       }}
 
 - name: Set up cloudfront distribution
-  cloudfront_distribution:
+  community.aws.cloudfront_distribution:
     state: present
     enabled: true
 
