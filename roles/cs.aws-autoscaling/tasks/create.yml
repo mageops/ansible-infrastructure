@@ -49,6 +49,63 @@
       - Name: "{{ autoscaling_asg_name }}"
   register: _aws_asg
 
+- name: Get AutoScaling Group information after update
+  amazon.aws.autoscaling_group_info:
+    region: "{{ aws_region }}"
+    name: "{{ autoscaling_asg_name }}"
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+  register: _aws_asg_current
+
+- name: Remove stale PIO RoleImage tag from AutoScaling Group
+  command:
+    argv: >-
+      {{ [ 'aws', 'autoscaling', 'delete-tags' ]
+          + aws_asg_instance_refresh_cli_args_base
+          + [ '--tags', _autoscaling_stale_pio_asg_tag | to_json ] }}
+  vars:
+    _autoscaling_stale_pio_asg_tag:
+      - ResourceId: "{{ autoscaling_asg_name }}"
+        ResourceType: auto-scaling-group
+        Key: RoleImage
+        Value: pio
+  when: >-
+    autoscaling_instance_tags.RoleImage | default('') != 'pio'
+      and _aws_asg_current.results | default([]) | length > 0
+      and (
+        _aws_asg_current.results
+          | first
+      ).tags
+        | default([])
+        | selectattr('key', 'equalto', 'RoleImage')
+        | selectattr('value', 'equalto', 'pio')
+        | list
+        | length > 0
+
+- name: Remove stale PIO RoleImage tag from AutoScaling Group instances
+  amazon.aws.ec2_tag:
+    region: "{{ aws_region }}"
+    resource: "{{ item }}"
+    state: absent
+    tags:
+      RoleImage: pio
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    _autoscaling_asg_instance_ids: >-
+      {{
+        (
+          _aws_asg_current.results
+            | default([])
+            | first
+            | default({})
+        ).instances
+          | default([])
+          | map(attribute='instance_id')
+          | list
+      }}
+  loop: "{{ _autoscaling_asg_instance_ids }}"
+  when: autoscaling_instance_tags.RoleImage | default('') != 'pio'
+
 - name: Perform Rolling Instance Refresh
   include_tasks: refresh-instances.yml
   when: >-
