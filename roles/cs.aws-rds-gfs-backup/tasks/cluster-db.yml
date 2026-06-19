@@ -2,7 +2,7 @@
   shell: "aws rds create-db-cluster-snapshot --db-cluster-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --db-cluster-identifier '{{ rds_gfs_cluster_id }}' --tags '{{ rds_gfs_daily_snapshot_tags | to_json }}' --region '{{ aws_region }}'"
 
 - name: Wait until daily cluster snapshot is created
-  shell: "aws rds describe-db-cluster-snapshots --db-cluster-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --region '{{ aws_region }}'"
+  shell: "aws rds describe-db-cluster-snapshots --snapshot-type manual --db-cluster-snapshot-identifier '{{ rds_gfs_daily_snapshot_id }}' --region '{{ aws_region }}'"
   register: rds_gfs_daily_snapshot_status
   until: (rds_gfs_daily_snapshot_status.stdout | default({})|from_json).DBClusterSnapshots[0].Status == "available"
   retries: 40
