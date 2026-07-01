@@ -10,5 +10,20 @@ aws_cloudfront_use_s3_website_origin: yes
 # Warning the certificate has to be in N. Virginia aws_region!
 aws_cloudfront_custom_certificate_arn: no
 aws_cloudfront_domain_aliases: []
+aws_cloudfront_minimum_protocol_version_map:
+  "1.0": TLSv1
+  "1.1": TLSv1.1_2016
+  "1.2": TLSv1.2_2021
+  # CloudFront does not provide a TLS 1.3-only minimum policy here.
+  # Workaround: use the strongest CloudFront TLS 1.2 policy and enforce
+  # TLS 1.3 on the origin/client-facing layer that supports it.
+  "1.3": TLSv1.2_2021
+aws_cloudfront_minimum_protocol_version: >-
+  {{
+    (mageops_tls_min_version | string in aws_cloudfront_minimum_protocol_version_map) | ternary(
+      aws_cloudfront_minimum_protocol_version_map[mageops_tls_min_version | string],
+      undef('mageops_tls_min_version=' ~ mageops_tls_min_version ~ ' cannot be mapped to a supported CloudFront viewer TLS policy')
+    )
+  }}
 aws_cloudfront_forward_headers:
- - Origin
+  - Origin

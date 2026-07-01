@@ -166,12 +166,11 @@
         {% if aws_cloudfront_custom_certificate_arn %}
             "SSLSupportMethod": "sni-only",
             "ACMCertificateArn": "{{ aws_cloudfront_custom_certificate_arn }}",
-            "MinimumProtocolVersion": "TLSv1.1_2016",
+            "MinimumProtocolVersion": "{{ aws_cloudfront_minimum_protocol_version }}",
             "Certificate": "{{ aws_cloudfront_custom_certificate_arn }}",
             "CertificateSource": "acm"
         {% else %}
             "CloudFrontDefaultCertificate": true,
-            "MinimumProtocolVersion": "TLSv1",
             "CertificateSource": "cloudfront"
         {% endif %}
     },
