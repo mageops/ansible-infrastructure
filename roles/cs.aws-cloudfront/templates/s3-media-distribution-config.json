@@ -65,12 +65,8 @@
                 "OriginPath": "",
                 "CustomOriginConfig": {
                     "OriginSslProtocols": {
-                        "Items": [
-                            "TLSv1",
-                            "TLSv1.1",
-                            "TLSv1.2"
-                        ],
-                        "Quantity": 3
+                        "Items": {{ aws_cloudfront_origin_ssl_protocols | to_json }},
+                        "Quantity": {{ aws_cloudfront_origin_ssl_protocols | length }}
                     },
                     "OriginProtocolPolicy": "http-only",
                     "OriginReadTimeout": 30,
@@ -88,12 +84,8 @@
                 "OriginPath": "",
                 "CustomOriginConfig": {
                     "OriginSslProtocols": {
-                        "Items": [
-                            "TLSv1",
-                            "TLSv1.1",
-                            "TLSv1.2"
-                        ],
-                        "Quantity": 3
+                        "Items": {{ aws_cloudfront_origin_ssl_protocols | to_json }},
+                        "Quantity": {{ aws_cloudfront_origin_ssl_protocols | length }}
                     },
                     "OriginProtocolPolicy": "http-only",
                     "OriginReadTimeout": 30,
@@ -170,7 +162,9 @@
             "Certificate": "{{ aws_cloudfront_custom_certificate_arn }}",
             "CertificateSource": "acm"
         {% else %}
+            {# MinimumProtocolVersion is ignored by AWS for CloudFrontDefaultCertificate: https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-cloudfront-distribution-viewercertificate.html #}
             "CloudFrontDefaultCertificate": true,
+            "MinimumProtocolVersion": "TLSv1",
             "CertificateSource": "cloudfront"
         {% endif %}
     },

@@ -29,6 +29,9 @@
 
     aliases: "{{ aws_cloudfront_domain_aliases | default(omit, true) }}"
 
+    # MinimumProtocolVersion applies only with custom viewer certificates.
+    # With CloudFrontDefaultCertificate, AWS forces TLSv1 regardless of this value.
+    # See: https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-cloudfront-distribution-viewercertificate.html
     viewer_certificate: >-
       {{
         aws_cloudfront_custom_certificate_arn | default(false, true) | ternary(
@@ -37,9 +40,7 @@
             "ssl_support_method": "sni-only",
             "minimum_protocol_version": aws_cloudfront_minimum_protocol_version
           },
-          {
-            "cloudfront_default_certificate": true
-          }
+          omit
         )
       }}
 
@@ -63,6 +64,7 @@
     origins:
       - id: "WebsiteRoot"
         domain_name: "{{ magento_hostname }}"
+        custom_origin_config: "{{ cloudfront_distribution_custom_origin_config }}"
         custom_headers:
           - header_name: X-MageOps-Cloudfront-Origin
             header_value: WebsiteMedia
@@ -70,6 +72,7 @@
       - id: "WebsiteMedia"
         domain_name: "{{ magento_hostname }}"
         origin_path: "/media"
+        custom_origin_config: "{{ cloudfront_distribution_custom_origin_config }}"
         custom_headers:
           - header_name: X-MageOps-Cloudfront-Origin
             header_value: WebsiteMedia
@@ -96,6 +99,10 @@
           }}
 
   vars:
+    cloudfront_distribution_custom_origin_config:
+      origin_ssl_protocols:
+        items: "{{ aws_cloudfront_origin_ssl_protocols }}"
+
     cloudfront_distribution_cache_behaviour_defaults:
       default_ttl: 86400
 

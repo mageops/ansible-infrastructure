@@ -1642,6 +1642,13 @@ redis_aws_elasticache_instance_type: t3a.micro
 mageops_https_termination_enable: "{{ mageops_https_enable }}"
 # Supported valus: 1.0, 1.1, 1.2, 1.3
 mageops_tls_min_version: "1.2"
+# CloudFront viewer TLS policy applies only when aws_cloudfront_custom_certificate_arn is set.
+# With the default *.cloudfront.net certificate, AWS forces the viewer security policy to TLSv1.
+# See: https://docs.aws.amazon.com/AWSCloudFormation/latest/TemplateReference/aws-properties-cloudfront-distribution-viewercertificate.html
+aws_cloudfront_minimum_protocol_version: TLSv1.2_2021
+# CloudFront origin SSL protocols control CloudFront -> custom origin HTTPS connections.
+aws_cloudfront_origin_ssl_protocols:
+  - TLSv1.2
 mageops_prevent_mime_sniffing: yes
 
 # Backwards compat fallback
