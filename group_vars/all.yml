@@ -1009,6 +1009,16 @@ aws_magento_cron_crons_extra: []
 aws_magento_cron_crons_tpl: []
 aws_magento_cron_crons: "{{ (aws_magento_cron_crons_tpl | flatten) + aws_magento_cron_crons_extra }}"
 
+# ------------------------------------
+# --------  Sansec eComscan  --------
+# ------------------------------------
+
+sansec_ecomscan_enabled: no
+# sansec_ecomscan_license_key:
+# sansec_ecomscan_monitor: security@example.com
+sansec_ecomscan_store_path: "{{ magento_live_release_dir }}"
+sansec_ecomscan_only_cron_node: "{{ aws_use }}"
+
 # ----------------------------------
 # --------  Magento Deploy  --------
 # ----------------------------------

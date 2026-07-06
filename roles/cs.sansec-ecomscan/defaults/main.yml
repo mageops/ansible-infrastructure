@@ -1,0 +1,24 @@
+sansec_ecomscan_enabled: no
+
+sansec_ecomscan_binary_path: /usr/local/bin/ecomscan
+sansec_ecomscan_download_arch: "{{ sansec_ecomscan_download_arch_map[ansible_architecture] | default('linux-amd64') }}"
+sansec_ecomscan_download_arch_map:
+  x86_64: linux-amd64
+  aarch64: linux-arm64
+  arm64: linux-arm64
+sansec_ecomscan_download_url: "https://ecomscan.com/downloads/{{ sansec_ecomscan_download_arch }}/ecomscan"
+sansec_ecomscan_checksum: ""
+
+sansec_ecomscan_license_key: ""
+sansec_ecomscan_monitor: ""
+sansec_ecomscan_store_path: "{{ magento_live_release_dir }}"
+sansec_ecomscan_user: "{{ magento_user }}"
+
+sansec_ecomscan_cron_name: Sansec eComscan monitoring
+sansec_ecomscan_cron_minute: "10"
+sansec_ecomscan_cron_hour: "*"
+sansec_ecomscan_cron_day: "*"
+sansec_ecomscan_cron_month: "*"
+sansec_ecomscan_cron_weekday: "*"
+sansec_ecomscan_only_cron_node: "{{ aws_use }}"
+sansec_ecomscan_extra_args: ""

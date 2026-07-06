@@ -1,0 +1,48 @@
+- name: Install Sansec eComscan when enabled
+  when: sansec_ecomscan_enabled | bool
+  block:
+    - name: Validate Sansec eComscan cron configuration
+      assert:
+        that:
+          - (sansec_ecomscan_monitor | string | length) > 0
+          - (sansec_ecomscan_store_path | string | length) > 0
+        fail_msg: "Set sansec_ecomscan_monitor and sansec_ecomscan_store_path to enable Sansec eComscan cron mode."
+
+    - name: Install Sansec eComscan binary
+      get_url:
+        url: "{{ sansec_ecomscan_download_url }}"
+        dest: "{{ sansec_ecomscan_binary_path }}"
+        checksum: "{{ ((sansec_ecomscan_checksum | string | length) > 0) | ternary(sansec_ecomscan_checksum, omit) }}"
+        mode: "u=rwx,g=rx,o=rx"
+
+    - name: Install Sansec eComscan monitoring cron
+      no_log: true
+      cron:
+        name: "{{ sansec_ecomscan_cron_name }}"
+        user: "{{ sansec_ecomscan_user }}"
+        minute: "{{ sansec_ecomscan_cron_minute }}"
+        hour: "{{ sansec_ecomscan_cron_hour }}"
+        day: "{{ sansec_ecomscan_cron_day }}"
+        month: "{{ sansec_ecomscan_cron_month }}"
+        weekday: "{{ sansec_ecomscan_cron_weekday }}"
+        job: >-
+          {{ sansec_ecomscan_only_cron_node | bool | ternary('/usr/local/bin/mageopscli is_cron_node && ', '') }}{{ sansec_ecomscan_binary_path }}
+          {{ ((sansec_ecomscan_license_key | string | length) > 0) | ternary('--key=' ~ (sansec_ecomscan_license_key | quote), '') }}
+          --monitor={{ sansec_ecomscan_monitor | quote }}
+          {{ sansec_ecomscan_extra_args }}
+          {{ sansec_ecomscan_store_path | quote }}
+
+- name: Check if crontab is available
+  when: not sansec_ecomscan_enabled | bool
+  stat:
+    path: /usr/bin/crontab
+  register: sansec_ecomscan_crontab
+
+- name: Remove Sansec eComscan cron when disabled
+  when:
+    - not sansec_ecomscan_enabled | bool
+    - sansec_ecomscan_crontab.stat.exists
+  cron:
+    name: "{{ sansec_ecomscan_cron_name }}"
+    state: absent
+    user: "{{ sansec_ecomscan_user }}"

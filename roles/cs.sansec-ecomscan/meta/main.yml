@@ -1,0 +1,7 @@
+dependencies:
+  - role: cs.cron
+    when: sansec_ecomscan_enabled | bool
+  - role: cs.mageops-cli
+    when:
+      - sansec_ecomscan_enabled | bool
+      - sansec_ecomscan_only_cron_node | bool
