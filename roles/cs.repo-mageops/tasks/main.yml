@@ -4,12 +4,22 @@
     dest: "/etc/yum.repos.d/mageops.repo"
     mode: 0644
 
+- name: Download gpg cert 2023
+  command: curl -fsSL -o /etc/pki/rpm-gpg/REPO-GPG-KEY-2023 https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY-2023
+  args:
+    creates: /etc/pki/rpm-gpg/REPO-GPG-KEY-2023
+
 - name: Install gpg cert 2023
   rpm_key:
     state: present
-    key: https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY-2023
+    key: /etc/pki/rpm-gpg/REPO-GPG-KEY-2023
+
+- name: Download gpg cert 2024
+  command: curl -fsSL -o /etc/pki/rpm-gpg/REPO-GPG-KEY https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY
+  args:
+    creates: /etc/pki/rpm-gpg/REPO-GPG-KEY
 
 - name: Install gpg cert 2024
   rpm_key:
     state: present
-    key: https://cs-mageops-rocky-9.s3.eu-central-1.amazonaws.com/REPO-GPG-KEY
+    key: /etc/pki/rpm-gpg/REPO-GPG-KEY
