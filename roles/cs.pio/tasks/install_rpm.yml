@@ -5,9 +5,7 @@
   register: _temp_dir
 
 - name: Download pio-worker rpm
-  get_url:
-    url: "{{ pio_package_url_rpm[ansible_facts.architecture] }}"
-    dest: "{{ _temp_dir.path }}/pio-worker.rpm"
+  command: curl -fsSL -o {{ _temp_dir.path }}/pio-worker.rpm {{ pio_package_url_rpm[ansible_facts.architecture] }}
 
 - name: Install pio-worker rpm
   dnf:

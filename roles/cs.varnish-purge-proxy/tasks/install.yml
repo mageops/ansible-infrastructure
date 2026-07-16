@@ -1,5 +1,9 @@
 - name: "Copy varnish-purge-proxy binary file"
-  get_url:
-    url: "{{ varnish_pp_bin.src }}"
-    dest: "{{ varnish_pp_bin.path }}"
-    mode: 0755
+  command: curl -fsSL -o {{ varnish_pp_bin.path }} {{ varnish_pp_bin.src }}
+  args:
+    creates: "{{ varnish_pp_bin.path }}"
+
+- name: "Set varnish-purge-proxy binary permissions"
+  file:
+    path: "{{ varnish_pp_bin.path }}"
+    mode: "0755"

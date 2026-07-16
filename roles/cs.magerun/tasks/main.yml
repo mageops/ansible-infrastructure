@@ -1,6 +1,18 @@
 - name: Install magerun release
-  get_url:
-    dest: /usr/local/bin/magerun
-    url: https://files.magerun.net/n98-magerun2-{{ magerun_version }}.phar
-    checksum: "{{ magerun_checksum }}"
+  command: curl -fsSL -o /usr/local/bin/magerun https://files.magerun.net/n98-magerun2-{{ magerun_version }}.phar
+
+- name: Verify magerun checksum
+  stat:
+    path: /usr/local/bin/magerun
+    checksum_algorithm: "{{ magerun_checksum.split(':')[0] }}"
+  register: _magerun_stat
+
+- name: Fail if magerun checksum does not match
+  fail:
+    msg: "Checksum mismatch for magerun: expected {{ magerun_checksum }}, got {{ _magerun_stat.stat.checksum }}"
+  when: _magerun_stat.stat.checksum != magerun_checksum.split(':')[1]
+
+- name: Set magerun permissions
+  file:
+    path: /usr/local/bin/magerun
     mode: "u=rwx,g=rx,o=rx"
