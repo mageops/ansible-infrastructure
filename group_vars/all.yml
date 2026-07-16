@@ -2077,9 +2077,17 @@ versionlock_varnish_ban_packages: []
 versionlock_persistent_ban_packages: []
 versionlock_app_node_ban_packages: []
 
-versionlock_varnish_ban_packages_base: []
-versionlock_persistent_ban_packages_base: []
-versionlock_app_node_ban_packages_base: []
+# openssl-libs 3.5.5 breaks Python 3.9 ssl module (ASN1: NOT_ENOUGH_DATA)
+# Temporary ban until python3.9 fix propagates to Rocky Linux mirrors
+# https://forums.rockylinux.org/t/rocky-linux-9-8-issue-with-openssl-1-3-5-5-5-el9-8-x86-64/20675
+versionlock_openssl_ban_packages:
+  - "openssl-libs-1:3.5.5-5.el9_8.*"
+  - "openssl-1:3.5.5-5.el9_8.*"
+  - "openssl-fips-provider-1:3.5.5-5.el9_8.*"
+
+versionlock_varnish_ban_packages_base: "{{ versionlock_openssl_ban_packages }}"
+versionlock_persistent_ban_packages_base: "{{ versionlock_openssl_ban_packages }}"
+versionlock_app_node_ban_packages_base: "{{ versionlock_openssl_ban_packages }}"
 
 # Per project customizations
 versionlock_varnish_packages_extra: []
