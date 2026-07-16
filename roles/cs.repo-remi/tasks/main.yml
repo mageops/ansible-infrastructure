@@ -8,6 +8,11 @@
     state: present
     key: /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2021
 
+- name: Download Remi's repo release package
+  command: curl -fsSL -o /tmp/{{ php_repo_remi_package_name | basename }} {{ php_repo_remi_package_name }}
+  args:
+    creates: /tmp/{{ php_repo_remi_package_name | basename }}
+
 - name: Ensure Remi's repo release package is installed and up-to-date
   dnf:
-    name: "{{ php_repo_remi_package_name }}"
+    name: /tmp/{{ php_repo_remi_package_name | basename }}

@@ -27,9 +27,14 @@
         key: /etc/pki/rpm-gpg/NEWRELIC_RPM_BD2E199C.public
         state: present
 
+    - name: Download new relic repo RPM
+      ansible.builtin.command: curl -fsSL -o /tmp/{{ new_relic_repo_url | basename }} {{ new_relic_repo_url }}
+      args:
+        creates: /tmp/{{ new_relic_repo_url | basename }}
+
     - name: Install new relic repo
       dnf:
-        name: "{{ new_relic_repo_url }}"
+        name: /tmp/{{ new_relic_repo_url | basename }}
         state: present
         disable_gpg_check: true
 

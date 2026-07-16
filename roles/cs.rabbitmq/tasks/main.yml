@@ -5,13 +5,19 @@
     name: "erlang"
   notify: Restart rabbitmq
 
+- name: Download RabbitMQ Erlang RPM for aarch64
+  when: ansible_facts.architecture == 'aarch64'
+  command: curl -fsSL -o /tmp/{{ rabbitmq_erlang_aarch64_rpm_url | basename }} {{ rabbitmq_erlang_aarch64_rpm_url }}
+  args:
+    creates: /tmp/{{ rabbitmq_erlang_aarch64_rpm_url | basename }}
+
 - name: Install RabbitMQ Erlang RPM for aarch64
   when: ansible_facts.architecture == 'aarch64'
   dnf:
     allow_downgrade: no
     # RabbitMQ's direct aarch64 Erlang RPM is not signed.
     disable_gpg_check: yes
-    name: "{{ rabbitmq_erlang_aarch64_rpm_url }}"
+    name: /tmp/{{ rabbitmq_erlang_aarch64_rpm_url | basename }}
     state: present
   notify: Restart rabbitmq
 
