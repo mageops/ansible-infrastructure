@@ -17,9 +17,14 @@
 - name: Install New Relic via RPM on x86_64
   when: ansible_facts.architecture == 'x86_64'
   block:
+    - name: Download New Relic GPG key
+      ansible.builtin.command: curl -fsSL -o /etc/pki/rpm-gpg/NEWRELIC_RPM_BD2E199C.public https://download.newrelic.com/php_agent/NEWRELIC_RPM_BD2E199C.public
+      args:
+        creates: /etc/pki/rpm-gpg/NEWRELIC_RPM_BD2E199C.public
+
     - name: Import New Relic GPG key
       ansible.builtin.rpm_key:
-        key: https://download.newrelic.com/php_agent/NEWRELIC_RPM_BD2E199C.public
+        key: /etc/pki/rpm-gpg/NEWRELIC_RPM_BD2E199C.public
         state: present
 
     - name: Install new relic repo

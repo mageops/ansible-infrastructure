@@ -1,7 +1,12 @@
+- name: Download gpg cert
+  command: curl -fsSL -o /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2021 https://rpms.remirepo.net/RPM-GPG-KEY-remi2021
+  args:
+    creates: /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2021
+
 - name: Install gpg cert
   rpm_key:
     state: present
-    key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2021
+    key: /etc/pki/rpm-gpg/RPM-GPG-KEY-remi2021
 
 - name: Ensure Remi's repo release package is installed and up-to-date
   dnf:

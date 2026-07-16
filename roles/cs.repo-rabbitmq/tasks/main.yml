@@ -9,8 +9,14 @@
     dest: /etc/yum.repos.d/rabbitmq.repo
     mode: "0644"
 
+- name: Download RabbitMQ release signing key for ARM package repositories
+  when: ansible_facts.architecture == 'aarch64'
+  command: curl -fsSL -o /etc/pki/rpm-gpg/rabbitmq-release-signing-key.asc https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc
+  args:
+    creates: /etc/pki/rpm-gpg/rabbitmq-release-signing-key.asc
+
 - name: Import RabbitMQ release signing key for ARM package repositories
   when: ansible_facts.architecture == 'aarch64'
   rpm_key:
     state: present
-    key: https://github.com/rabbitmq/signing-keys/releases/download/3.0/rabbitmq-release-signing-key.asc
+    key: /etc/pki/rpm-gpg/rabbitmq-release-signing-key.asc

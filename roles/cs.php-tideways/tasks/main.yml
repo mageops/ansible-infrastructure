@@ -3,10 +3,19 @@
     - tideways_enable | bool
     - (tideways_api_key | default('', true) | string | length) > 0
   block:
+    - name: Download tideways repo GPG keys
+      command: curl -fsSL -o /etc/pki/rpm-gpg/{{ key_url | basename }} {{ key_url }}
+      args:
+        creates: /etc/pki/rpm-gpg/{{ key_url | basename }}
+      loop: "{{ tideways_repo_gpgkeys }}"
+      loop_control:
+        loop_var: key_url
+        label: "{{ key_url | basename }}"
+
     - name: Install tideways repo GPG keys
       rpm_key:
         state: present
-        key: "{{ key_url }}"
+        key: /etc/pki/rpm-gpg/{{ key_url | basename }}
       loop: "{{ tideways_repo_gpgkeys }}"
       loop_control:
         loop_var: key_url

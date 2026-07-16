@@ -6,10 +6,15 @@
 # - name: Workaround SHA-1 gpg key disable (https://github.com/elastic/elasticsearch/issues/85876)
 #   shell: update-crypto-policies --set DEFAULT
 
+- name: Download gpg cert
+  command: curl -fsSL -o /etc/pki/rpm-gpg/GPG-KEY-elasticsearch {{ repo_elasticsearch_gpg_url }}
+  args:
+    creates: /etc/pki/rpm-gpg/GPG-KEY-elasticsearch
+
 - name: Install gpg cert
   rpm_key:
     state: present
-    key: "{{ repo_elasticsearch_gpg_url }}"
+    key: /etc/pki/rpm-gpg/GPG-KEY-elasticsearch
 
 - name: Install elasticsearch repo
   template:
