@@ -762,6 +762,12 @@ mageops_https_enable: yes
 # Whether to password-protect the site using basic auth on varnish or nginx level
 # - this is standard procedure for every test system and preproduction environment
 mageops_secure_site: yes
+# Limit Varnish basic auth protection to exact domains. Leave empty to protect all domains.
+# Example:
+# mageops_secure_site_domains:
+#   - staging.example.com
+#   - protected.example.com
+mageops_secure_site_domains: []
 mageops_secure_site_user: "{{ mageops_project }}"
 # Mandatory! Set this per project in an encrypted credentials file
 # mageops_secure_site_password:
