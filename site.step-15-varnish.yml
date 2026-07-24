@@ -63,6 +63,7 @@
       varnish_port: "{{ mageops_varnish_port }}"
       varnish_backend_port: "{{ mageops_varnish_backend_port }}"
       varnish_secure_site: "{{ mageops_secure_site }}"
+      varnish_secure_site_domains: "{{ mageops_secure_site_domains }}"
       varnish_secure_site_user: "{{ mageops_secure_site_user }}"
       varnish_secure_site_password: "{{ mageops_secure_site_password }}"
       varnish_trusted_ips: "{{ mageops_trusted_cidr_blocks }}"
