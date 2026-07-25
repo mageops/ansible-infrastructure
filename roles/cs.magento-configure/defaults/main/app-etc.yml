@@ -215,6 +215,88 @@ magento_app_etc_config_cache_default_redis_l2:
       search_ajax_suggest:
         frontend: stale_cache_enabled
 
+# Optional Symfony Cache based L2 config (Magento >= 2.4.9)
+# Uses the new 'symfony_l2' backend instead of RemoteSynchronizedCache.
+# See: https://experienceleague.adobe.com/en/docs/commerce-operations/configuration-guide/cache/level-two-cache
+magento_app_etc_config_cache_default_redis_l2_symfony:
+  cache:
+    frontend:
+      default:
+        id_prefix: '061_'
+        backend: symfony_l2
+        backend_options:
+          remote_backend: redis
+          remote_backend_options:
+            server: "{{ mageops_redis_host }}"
+            database: "0"
+            port: "{{ mageops_redis_port }}"
+            password: ""
+            persistent_id: magento_l2_default
+            persistent: "{{ magento_redis_cache_l2_symfony_persistent | ternary('1', '0') }}"
+            serializer: "{{ magento_redis_cache_l2_symfony_serializer }}"
+            compression_lib: "{{ magento_redis_cache_l2_symfony_compression_lib }}"
+            timeout: "{{ magento_redis_cache_l2_symfony_timeout }}"
+            read_timeout: "{{ magento_redis_cache_l2_symfony_read_timeout }}"
+            use_lua: "{{ magento_redis_cache_l2_symfony_use_lua | ternary('1', '0') }}"
+            preload_keys:
+              - 061_EAV_ENTITY_TYPES:hash
+              - 061_GLOBAL_PLUGIN_LIST:hash
+              - 061_DB_IS_UP_TO_DATE:hash
+              - 061_SYSTEM_DEFAULT:hash
+          local_backend: file
+          local_backend_options:
+            cache_dir: "{{ magento_redis_cache_l2_dir }}"
+          cleanup_percentage: "{{ magento_redis_cache_l2_symfony_cleanup_percentage }}"
+        frontend_options:
+          write_control: false
+      stale_cache_enabled:
+        id_prefix: '061_'
+        backend: symfony_l2
+        backend_options:
+          remote_backend: redis
+          remote_backend_options:
+            server: "{{ mageops_redis_host }}"
+            database: "0"
+            port: "{{ mageops_redis_port }}"
+            password: ""
+            persistent_id: magento_l2_stale
+            persistent: "{{ magento_redis_cache_l2_symfony_persistent | ternary('1', '0') }}"
+            serializer: "{{ magento_redis_cache_l2_symfony_serializer }}"
+            compression_lib: "{{ magento_redis_cache_l2_symfony_compression_lib }}"
+            timeout: "{{ magento_redis_cache_l2_symfony_timeout }}"
+            read_timeout: "{{ magento_redis_cache_l2_symfony_read_timeout }}"
+            use_lua: "{{ magento_redis_cache_l2_symfony_use_lua | ternary('1', '0') }}"
+          local_backend: file
+          local_backend_options:
+            cache_dir: "{{ magento_redis_cache_l2_dir }}"
+          use_stale_cache: true
+          cleanup_percentage: "{{ magento_redis_cache_l2_symfony_cleanup_percentage }}"
+        frontend_options:
+          write_control: false
+    type:
+      default:
+        frontend: default
+      layout:
+        frontend: stale_cache_enabled
+      block_html:
+        frontend: stale_cache_enabled
+      reflection:
+        frontend: stale_cache_enabled
+      config_integration:
+        frontend: stale_cache_enabled
+      config_integration_api:
+        frontend: stale_cache_enabled
+      full_page:
+        frontend: stale_cache_enabled
+      translate:
+        frontend: stale_cache_enabled
+      elasticsuite:
+        frontend: stale_cache_enabled
+      navigation:
+        frontend: stale_cache_enabled
+      search_ajax_suggest:
+        frontend: stale_cache_enabled
+
 
 magento_app_etc_config_cache_page_redis:
   cache:
