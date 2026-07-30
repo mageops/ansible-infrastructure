@@ -1,0 +1,18 @@
+security_updates_enabled: false
+
+security_updates_download_timer_on_calendar: "*-*-* 09:00"
+security_updates_install_timer_on_calendar: "*-*-* 03:00"
+security_updates_randomized_delay_sec: 30m
+
+# For a Slack app named "Security updates", install the app in the workspace,
+# invite it to the target channel, grant the bot chat:write, and configure:
+#   mageops_notifications_slack_bot_token: "xoxb-..."
+#   mageops_security_updates_slack_channel: "#security-updates"
+#
+# Set mageops_security_updates_slack_enable: false to keep local logs but skip Slack.
+security_updates_slack_enable: true
+security_updates_slack_bot_token: ""
+security_updates_slack_channel: ~
+security_updates_global_kill_switch_url: ""
+
+security_updates_log_identifier: security-updates
