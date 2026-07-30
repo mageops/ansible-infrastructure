@@ -56,6 +56,17 @@ main::main() {
         if [ $# != 1 ];then main::help; fi
         main::clear_opcache
     ;;
+    set_security_updates)
+        if [ $# != 3 ];then main::help; fi
+        local scope=$2
+        local state=$3
+        main::set_security_updates "$scope" "$state"
+    ;;
+    security_updates)
+        if [ $# != 2 ];then main::help; fi
+        local mode=$2
+        main::security_updates "$mode"
+    ;;
     *) main::help ;;
     esac
 }
@@ -133,6 +144,91 @@ main::clear_opcache() {
     mageops::clear_php_opcache
 }
 
+main::set_security_updates() {
+    local scope=$1
+    local state=$2
+    local feature_state
+
+    main::assert_aws_cli
+
+    case "$scope" in
+    all|app|varnish|persistent)
+        ;;
+    *)
+        main::panic "invalid security update node scope '$scope' (expected all, app, varnish or persistent)"
+        ;;
+    esac
+
+    case "$state" in
+    on)
+        feature_state=true
+        ;;
+    off)
+        feature_state=false
+        ;;
+    *)
+        main::panic "invalid security update state '$state' (expected on or off)"
+        ;;
+    esac
+
+    main::eprintln "Setting security updates $state for $scope nodes in features.json..."
+    mageops::set_security_updates_scope "$feature_state" "$scope"
+    main::eprintln "OK"
+}
+
+main::security_updates() {
+    local mode=$1
+    local config_path="${SECURITY_UPDATES_CONFIG_PATH:-/etc/dnf/security-updates.conf}"
+
+    if [ -r "$config_path" ];then
+        # shellcheck source=/dev/null
+        source "$config_path"
+    fi
+
+    case "$mode" in
+    check)
+        main::eprintln "Checking security update eligibility..."
+        mageops::security_updates_log "Security update execution started on $(hostname -f) in ${mode} mode."
+        if mageops::security_updates_check;then
+            main::eprintln "Security update check passed."
+            return 0
+        fi
+        return 1
+    ;;
+    download)
+        if [ -t 0 ];then
+            main::eprintln "Download mode expects a dnf-automatic report on stdin; nothing to read."
+            return 0
+        fi
+        main::eprintln "Recording dnf-automatic download/install report..."
+        mageops::security_updates_log "Security update execution started on $(hostname -f) in ${mode} mode."
+        mageops::security_updates_download
+        main::eprintln "Security update report recorded."
+    ;;
+    download-complete)
+        mageops::security_updates_log "Security update execution completed on $(hostname -f) in download mode."
+    ;;
+    install)
+        main::eprintln "Checking post-update restart/reboot actions..."
+        mageops::security_updates_log "Security update execution started on $(hostname -f) in ${mode} mode."
+        mageops::security_updates_install_if_downloaded
+        main::eprintln "Security update install hook complete."
+    ;;
+    startup)
+        main::eprintln "Installing startup security updates before opening traffic..."
+        mageops::security_updates_log "Security update execution started on $(hostname -f) in ${mode} mode."
+        mageops::security_updates_startup_install
+        main::eprintln "Startup security update install complete."
+    ;;
+    status)
+        mageops::security_updates_print_status
+    ;;
+    *)
+        main::panic "invalid security update mode '$mode' (expected check or status)"
+    ;;
+    esac
+}
+
 main::help() {
     main::eprintln "  $0 <cmd>"
     main::eprintln ""
@@ -151,6 +247,11 @@ main::help() {
     main::eprintln "  is_feature_flag_set <feature>        Checks if there is any value set for feature flag"
     main::eprintln "                                       status code 0 means flag is set, 1 otherwise"
     main::eprintln "  apply_features                       Apply feature updates to this host"
+    main::eprintln "  set_security_updates <scope> <on|off>"
+    main::eprintln "                                       Enable or disable automatic security updates"
+    main::eprintln "                                       scope: all, app, varnish or persistent"
+    main::eprintln "  security_updates check               Check whether automatic security updates may run"
+    main::eprintln "  security_updates status              Check automatic security update setup"
     main::eprintln ""
     main::eprintln " Mageops cli tools"
     main::eprintln "  (c) Creativestyle 2020"

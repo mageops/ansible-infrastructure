@@ -35,6 +35,8 @@
       packages_install: "{{ mageops_packages_common + mageops_packages_persistent + mageops_packages_persistent_extra }}"
       packages_remove: "{{ mageops_packages_banned }}"
       packages_full_update: no
+    - role: cs.mageops-cli
+      when: aws_use
     - role: cs.mageops-cli-profile
     - role: cs.mageops-cli-user
       mageops_cli_user: root
@@ -94,6 +96,15 @@
       monitoring_redis_exporter_enabled: yes
       when: mageops_monitoring_enabled
     - role: cs.packages
+    - role: cs.dnf-automatic
+      security_updates_enabled: "{{ mageops_security_updates_enabled }}"
+      security_updates_download_timer_on_calendar: "{{ mageops_security_updates_download_timer_on_calendar }}"
+      security_updates_install_timer_on_calendar: "{{ mageops_security_updates_install_timer_on_calendar }}"
+      security_updates_randomized_delay_sec: "{{ mageops_security_updates_randomized_delay_sec }}"
+      security_updates_slack_enable: "{{ mageops_security_updates_slack_enable }}"
+      security_updates_slack_bot_token: "{{ mageops_security_updates_slack_bot_token }}"
+      security_updates_slack_channel: "{{ mageops_security_updates_slack_channel }}"
+      security_updates_global_kill_switch_url: "{{ mageops_security_updates_global_kill_switch_url }}"
     - role: cs.tracer
 
   tasks:

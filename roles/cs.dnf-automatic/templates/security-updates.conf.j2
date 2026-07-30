@@ -1,0 +1,6 @@
+SLACK_ENABLED={{ (security_updates_slack_enable | bool) | ternary('true', 'false') | quote }}
+SLACK_BOT_TOKEN={{ security_updates_slack_bot_token | quote }}
+SLACK_CHANNEL={{ security_updates_slack_channel | default('', true) | quote }}
+LOG_IDENTIFIER={{ security_updates_log_identifier | quote }}
+SECURITY_UPDATES_NODE_ROLE={{ mageops_node_role | default('generic') | quote }}
+GLOBAL_KILL_SWITCH_URL={{ security_updates_global_kill_switch_url | quote }}

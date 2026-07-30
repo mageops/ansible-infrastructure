@@ -1,0 +1,135 @@
+- name: Install security update automation packages
+  dnf:
+    name:
+      - awscli
+      - curl
+      - dnf-automatic
+    state: present
+  when: security_updates_enabled
+
+- name: Install security update environment
+  template:
+    src: security-updates.conf.j2
+    dest: /etc/dnf/security-updates.conf
+    owner: root
+    group: root
+    mode: "0600"
+  when: security_updates_enabled
+
+- name: Configure dnf-automatic security updates
+  ini_file:
+    path: /etc/dnf/automatic.conf
+    section: "{{ item.section }}"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    owner: root
+    group: root
+    mode: "0644"
+    no_extra_spaces: yes
+  loop:
+    - section: commands
+      option: upgrade_type
+      value: security
+    - section: commands
+      option: download_updates
+      value: "yes"
+    - section: commands
+      option: apply_updates
+      value: "yes"
+    - section: commands
+      option: reboot
+      value: never
+    - section: emitters
+      option: emit_via
+      value: "stdio, command"
+    - section: emitters
+      option: send_error_messages
+      value: "yes"
+    - section: command
+      option: command_format
+      value: /usr/local/bin/mageopscli security_updates download
+    - section: command
+      option: stdin_format
+      value: "{body}"
+  when: security_updates_enabled
+
+- name: Create dnf-automatic systemd override directories
+  file:
+    path: "/etc/systemd/system/{{ item }}.d"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - dnf-automatic-download.service
+    - dnf-automatic-install.service
+    - dnf-automatic-download.timer
+    - dnf-automatic-install.timer
+  when: security_updates_enabled
+
+- name: Install dnf-automatic service overrides
+  template:
+    src: dnf-automatic.service.override.conf.j2
+    dest: "/etc/systemd/system/{{ item.name }}.d/security-updates.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  loop: "{{ security_updates_service_overrides }}"
+  vars:
+    security_updates_service_overrides:
+      - name: dnf-automatic-download.service
+        download_hooks: yes
+      - name: dnf-automatic-install.service
+        install_hooks: yes
+  when: security_updates_enabled
+
+- name: Install dnf-automatic timer override
+  template:
+    src: dnf-automatic.timer.override.conf.j2
+    dest: "/etc/systemd/system/{{ item.name }}.d/security-updates.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ security_updates_timer_overrides }}"
+  vars:
+    security_updates_timer_overrides:
+      - name: dnf-automatic-download.timer
+        on_calendar: "{{ security_updates_download_timer_on_calendar }}"
+      - name: dnf-automatic-install.timer
+        on_calendar: "{{ security_updates_install_timer_on_calendar }}"
+  when: security_updates_enabled
+
+- name: Enable dnf-automatic timers
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  loop:
+    - dnf-automatic-download.timer
+    - dnf-automatic-install.timer
+  when: security_updates_enabled
+
+- name: Remove dnf-automatic systemd overrides
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/dnf-automatic-download.service.d/security-updates.conf
+    - /etc/systemd/system/dnf-automatic-install.service.d/security-updates.conf
+    - /etc/systemd/system/dnf-automatic-download.timer.d/security-updates.conf
+    - /etc/systemd/system/dnf-automatic-install.timer.d/security-updates.conf
+    - /etc/dnf/security-updates.conf
+  when: not security_updates_enabled
+
+- name: Disable security update automation
+  systemd:
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+    daemon_reload: yes
+  loop:
+    - dnf-automatic-download.timer
+    - dnf-automatic-install.timer
+  failed_when: no
+  when: not security_updates_enabled

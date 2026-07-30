@@ -102,15 +102,29 @@
             )
         }}
       autoscaling_instance_start_script: |
+        # Keep Varnish health probes failing until startup hooks complete.
+        /usr/bin/systemctl stop nginx || true
+
         {{ aws_app_node_launch_script_extra }}
         {% if not magento_aws_ondemand_import_instance_enable and magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
 
         /usr/bin/systemctl enable supervisord
         /usr/bin/systemctl start supervisord
+
         {% if mageops_pio_worker_enable and mageops_pio_worker_dedicated_asg %}
         /usr/bin/systemctl disable --now pio-worker
         {% endif %}
-
+        /usr/bin/systemctl enable nginx || exit $?
+        {% if mageops_security_updates_enabled | bool %}
+        /usr/local/bin/mageopscli security_updates startup
+        security_updates_startup_rc=$?
+        if [ "$security_updates_startup_rc" -eq 194 ]; then
+          exit 0
+        fi
+        if [ "$security_updates_startup_rc" -ne 0 ]; then
+          exit "$security_updates_startup_rc"
+        fi
+        {% endif %}
     - role: cs.aws-autoscaling
       when: aws_extra_app_asg_enable or magento_aws_ondemand_import_instance_enable
       autoscaling_assign_public_ip: yes
@@ -152,15 +166,29 @@
             )
         }}
       autoscaling_instance_start_script: |
+        # Keep Varnish health probes failing until startup hooks complete.
+        /usr/bin/systemctl stop nginx || true
+
         {{ aws_app_node_launch_script_extra }}
         {% if magento_import_dispatcher_enable %}{{ magento_import_dispatcher_switch_script_path }} on{% endif %}
 
         /usr/bin/systemctl enable supervisord
         /usr/bin/systemctl start supervisord
+
         {% if mageops_pio_worker_enable and mageops_pio_worker_dedicated_asg %}
         /usr/bin/systemctl disable --now pio-worker
         {% endif %}
-
+        /usr/bin/systemctl enable nginx || exit $?
+        {% if mageops_security_updates_enabled | bool %}
+        /usr/local/bin/mageopscli security_updates startup
+        security_updates_startup_rc=$?
+        if [ "$security_updates_startup_rc" -eq 194 ]; then
+          exit 0
+        fi
+        if [ "$security_updates_startup_rc" -ne 0 ]; then
+          exit "$security_updates_startup_rc"
+        fi
+        {% endif %}
     - role: cs.aws-autoscaling
       autoscaling_asg_enabled: "{{ mageops_pio_worker_dedicated_asg and mageops_pio_worker_enable }}"
       autoscaling_assign_public_ip: yes
@@ -191,6 +219,9 @@
             )
         }}
       autoscaling_instance_start_script: |
+        # Keep app traffic blocked until startup hooks complete.
+        /usr/bin/systemctl stop nginx || true
+
         /usr/bin/systemctl disable --now php-fpm
         /usr/bin/systemctl disable --now nginx
         {% if mageops_monitoring_enabled %}
@@ -202,3 +233,15 @@
         {% if tideways_enable %}
         /usr/bin/systemctl disable --now tideways-daemon
         {% endif %}
+
+        {% if mageops_security_updates_enabled | bool %}
+        /usr/local/bin/mageopscli security_updates startup
+        security_updates_startup_rc=$?
+        if [ "$security_updates_startup_rc" -eq 194 ]; then
+          exit 0
+        fi
+        if [ "$security_updates_startup_rc" -ne 0 ]; then
+          exit "$security_updates_startup_rc"
+        fi
+        {% endif %}
+        /usr/bin/systemctl disable --now nginx

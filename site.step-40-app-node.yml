@@ -22,6 +22,8 @@
       become: no
       when: aws_use
 
+    - role: cs.mageops-cli
+      when: aws_use
     - role: cs.mageops-cli-user
       mageops_cli_user: root
       mageops_cli_user_bashrc_fragments:
@@ -176,6 +178,16 @@
     # We need to upgrade packages at the end as they might break some ansible action
     # ansible would need to recconnect to node to refresh some python dependencies
     - role: cs.packages
+    - role: cs.dnf-automatic
+      security_updates_enabled: "{{ mageops_security_updates_enabled }}"
+      security_updates_download_timer_on_calendar: "{{ mageops_security_updates_download_timer_on_calendar }}"
+      security_updates_install_timer_on_calendar: "{{ mageops_security_updates_install_timer_on_calendar }}"
+      security_updates_randomized_delay_sec: "{{ mageops_security_updates_randomized_delay_sec }}"
+      security_updates_slack_enable: "{{ mageops_security_updates_slack_enable }}"
+      security_updates_slack_bot_token: "{{ mageops_security_updates_slack_bot_token }}"
+      security_updates_slack_channel: "{{ mageops_security_updates_slack_channel }}"
+      security_updates_global_kill_switch_url: "{{ mageops_security_updates_global_kill_switch_url }}"
+    - role: cs.tracer
 
   tasks:
     - set_fact:

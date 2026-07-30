@@ -141,6 +141,18 @@
           build_nr: "{{ mageops_artifact_build_nr | default(none) }}"
       delegate_to: localhost
 
+    - name: Stop nginx before AMI creation
+      systemd:
+        name: nginx
+        enabled: no
+        state: stopped
+
+    - name: Disable node warmup before AMI creation
+      systemd:
+        name: magento-node-warmup.service
+        enabled: no
+        state: stopped
+
     # This speeds up ami creation and starting new instance with asg
     # This should be last step in on builder node
     - name: Run fstrim to reduce ami size)

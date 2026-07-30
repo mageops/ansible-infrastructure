@@ -2117,7 +2117,21 @@ ntp_timezone: "{{ mageops_timezone }}"
 # -------------------------------------------------
 
 mageops_notifications_slack_channel: ~
+mageops_notifications_slack_bot_token: ""
 mageops_notifications_slack_enable: "{{ mageops_notifications_slack_channel | default('') | length > 0 }}"
+
+# ------------------------------------------------
+# --------  Automatic Security Updates  ----------
+# ------------------------------------------------
+
+mageops_security_updates_enabled: false
+mageops_security_updates_download_timer_on_calendar: "*-*-* 09:00"
+mageops_security_updates_install_timer_on_calendar: "*-*-* 03:00"
+mageops_security_updates_randomized_delay_sec: 30m
+mageops_security_updates_slack_channel: ~
+mageops_security_updates_slack_enable: "{{ mageops_security_updates_slack_channel | default('', true) | length > 0 }}"
+mageops_security_updates_slack_bot_token: "{{ mageops_notifications_slack_bot_token }}"
+mageops_security_updates_global_kill_switch_url: ""
 
 # ------------------------
 # --------  SSHD  --------
