@@ -29,6 +29,12 @@ if (resp.http.X-Rewrite-HTML-Maxage) {
         set resp.http.Expires = "0";
     {% endif %}
 }
+if (resp.status == 200
+    && req.url ~ "^/static/version[0-9]+/"
+    && resp.http.Cache-Control
+    && resp.http.Cache-Control !~ "(?i)(no-cache|no-store|private)") {
+    set resp.http.Cache-Control = resp.http.Cache-Control + ", immutable";
+}
 
 if (req.http.{{ varnish_debug_request_info_header_name }}) {
     set resp.http.{{ varnish_debug_request_info_header_name }} =
