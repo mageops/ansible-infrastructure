@@ -1,0 +1,70 @@
+- name: Check current RDS configuration for upgrade target
+  rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_upgrade_target_identifier }}"
+  register: aws_rds_upgrade_target_current
+
+- name: Derive upgrade families for current RDS target
+  set_fact:
+    _aws_rds_target_engine_version: "{{ aws_rds_db_engine_version | string }}"
+    _aws_rds_target_engine_version_parts: "{{ (aws_rds_db_engine_version | string).split('.') }}"
+    _aws_rds_current_engine_family: >-
+      {{ aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[0:2] | join('.') }}
+    _aws_rds_target_engine_family: >-
+      {{ (aws_rds_db_engine_version | string).split('.')[0:2] | join('.') }}
+  when: aws_rds_upgrade_target_current.instances | length > 0
+
+# When we have known upgrade path:
+# we create temporary parameter group for specific db version
+# we upgrade database to next engine version
+# then we proceed with usual rds provisioning - this will switch to normal parameter group
+# we remove all created temporary parameter groups
+- name: Reset upgrade plan for current RDS target
+  set_fact:
+    aws_rds_upgrade_plan: []
+
+- name: Set upgrade plan for current RDS target
+  set_fact:
+    aws_rds_upgrade_plan: |
+      {{ aws_rds_upgrade_path[aws_rds_db_engine][
+        aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[0]
+        + "."
+        + aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[1]
+      ][_aws_rds_target_engine_version] }}
+  when: |
+    aws_rds_upgrade_path[aws_rds_db_engine] is defined
+    and aws_rds_upgrade_target_current.instances|length > 0
+    and _aws_rds_target_engine_version_parts | length >= 3
+    and aws_rds_upgrade_path[aws_rds_db_engine][
+      aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[0]
+      + "."
+      + aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[1]
+    ] is defined
+    and aws_rds_upgrade_path[aws_rds_db_engine][
+      aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[0]
+      + "."
+      + aws_rds_upgrade_target_current.instances[0].engine_version.split('.')[1]
+    ][_aws_rds_target_engine_version] is defined
+
+- name: Set direct minor upgrade plan for current RDS target
+  set_fact:
+    aws_rds_upgrade_plan:
+      - "{{ _aws_rds_target_engine_version }}"
+  when:
+    - aws_rds_upgrade_target_current.instances | length > 0
+    - _aws_rds_target_engine_version_parts | length >= 3
+    - aws_rds_upgrade_target_current.instances[0].engine_version != _aws_rds_target_engine_version
+    - aws_rds_upgrade_plan | length == 0
+    - _aws_rds_current_engine_family == _aws_rds_target_engine_family
+
+- name: Print upgrade plan for current RDS target
+  debug:
+    msg: |
+      Upgrade plan for {{ aws_rds_upgrade_target_identifier }} from {{ aws_rds_upgrade_target_current.instances[0].engine_version }} to {{ aws_rds_db_engine_version }}
+        {{ aws_rds_upgrade_target_current.instances[0].engine_version }} --> {{ " --> ".join(aws_rds_upgrade_plan) }}
+  when: aws_rds_upgrade_plan|length > 0
+
+- name: Upgrade MySQL/MariaDB RDS engine for current target
+  include_tasks: upgrade_iteration.yml
+  loop: "{{ aws_rds_upgrade_plan }}"
+  when: aws_rds_upgrade_plan|length > 0
