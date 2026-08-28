@@ -77,6 +77,7 @@
       varnish_bypass_request_header_name: "{{ mageops_bypass_token_http_header }}"
       varnish_magento_vary_sign: "{{ mageops_magento_vary_sign_enabled }}"
       varnish_magento_vary_secret: "{{ mageops_magento_vary_sign_secret }}"
+    - role: cs.varnish-watchdog
     - role: cs.varnish-manager
       when: varnish_standalone and aws_use
     - role: cs.mageops-cli-profile

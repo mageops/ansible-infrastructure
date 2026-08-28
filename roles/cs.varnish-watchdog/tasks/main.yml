@@ -1,0 +1,60 @@
+- name: Install Varnish watchdog script
+  ansible.builtin.copy:
+    dest: "{{ varnish_watchdog_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+
+      TIMEOUT="{{ varnish_watchdog_timeout }}"
+      RESTART_CMD="{{ varnish_watchdog_restart_cmd }}"
+
+      if ! timeout "${TIMEOUT}" varnishadm ping >/dev/null 2>&1; then
+          logger -t varnish-watchdog "Varnish is unresponsive, restarting service"
+          ${RESTART_CMD}
+      fi
+
+- name: Install Varnish watchdog service unit
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ varnish_watchdog_service_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Varnish watchdog health check
+      Wants=network-online.target
+      After=network-online.target varnish.service
+
+      [Service]
+      Type=oneshot
+      ExecStart={{ varnish_watchdog_script_path }}
+
+- name: Install Varnish watchdog timer unit
+  ansible.builtin.copy:
+    dest: "/etc/systemd/system/{{ varnish_watchdog_timer_name }}"
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      [Unit]
+      Description=Run Varnish watchdog every minute
+
+      [Timer]
+      OnCalendar={{ varnish_watchdog_interval }}
+      Persistent=true
+      Unit={{ varnish_watchdog_service_name }}
+
+      [Install]
+      WantedBy=timers.target
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start Varnish watchdog timer
+  ansible.builtin.systemd:
+    name: "{{ varnish_watchdog_timer_name }}"
+    enabled: true
