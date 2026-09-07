@@ -241,3 +241,11 @@ varnish_gzip_bypass_extensions:
 varnish_auth_bypass_urls: []
 varnish_custom_bypass: []
 gtm_enabled: false
+# Supported values: subdomain, path
+gtm_routing_mode: subdomain
+# Path segment without leading or trailing slash, for example: gtm
+gtm_path_prefix: ""
+gtm_preview_path_prefix: ""
+gtm_path_host: "{{ magento_hostname | default('') }}"
+# Set the real value in credentials.yaml.
+gtm_container_config: ""

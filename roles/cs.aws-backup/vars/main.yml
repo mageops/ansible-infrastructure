@@ -1,0 +1,23 @@
+_aws_backup_resource_kind_selections:
+  efs:
+    resources:
+      - arn:aws:elasticfilesystem:*:*:file-system/*
+    tags: {}
+  rds:
+    resources:
+      - arn:aws:rds:*:*:db:*
+      - arn:aws:rds:*:*:cluster:*
+    tags: {}
+  persistent_ebs:
+    resources:
+      - arn:aws:ec2:*:*:volume/*
+    tags: "{{ aws_tags_role_persistent }}"
+
+_aws_backup_enabled_resource_kinds: >-
+  {{
+    aws_backup_resource_kinds
+    | dict2items
+    | selectattr('value', 'equalto', true)
+    | map(attribute='key')
+    | list
+  }}

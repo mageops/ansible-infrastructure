@@ -28,15 +28,11 @@
 {% if varnish_standalone %}
     {# This has to be first line, remember this is not declarative config, we always need the director! #}
     {% if (gtm_enabled | default(false)) %}
-    if (req.http.Host == "{{ mageops_gtm_domain }}" ) {
-        set req.backend_hint = gtm_director.backend();
-        return (pass);
-    } elsif (req.http.Host == "{{ mageops_gtm_preview_domain }}" ) {
-        set req.backend_hint = gtm_preview_director.backend();
-        return (pass);
-    } else {
-        set req.backend_hint = app_director.backend();
-    }
+    {% if gtm_routing_mode == 'path' %}
+    {% include "vcl/subroutines/recv_gtm_path.vcl.j2" %}
+    {% else %}
+    {% include "vcl/subroutines/recv_gtm_subdomain.vcl.j2" %}
+    {% endif %}
     {% else %}
     set req.backend_hint = app_director.backend();
     {% endif %}
@@ -95,6 +91,7 @@ if (req.method != "GET" &&
     req.method != "HEAD" &&
     req.method != "PUT" &&
     req.method != "POST" &&
+    req.method != "PATCH" &&
     req.method != "TRACE" &&
     req.method != "OPTIONS" &&
     req.method != "DELETE") {

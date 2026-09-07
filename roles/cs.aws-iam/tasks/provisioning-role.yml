@@ -15,3 +15,6 @@
     - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_2 }}"
     - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_3 }}"
     - "arn:aws:iam::{{ aws_account_id }}:policy/{{ aws_iam_policy_provisioning_4 }}"
+    # Keep this attached directly: AWSBackupFullAccess exceeds IAM's 6,144-character
+    # limit for customer-managed policies built by aws_iam_provisioning_policies.
+    - arn:aws:iam::aws:policy/AWSBackupFullAccess

@@ -40,7 +40,7 @@
         - "{{ aws_persistent_node_instance }}"
         - "{{ aws_varnish_node_instance }}"
 
-    - name: Scale down all App Node ASGs
+    - name: Scale down all App and PIO Node ASGs
       when: stop_asg
       amazon.aws.autoscaling_group:
         name: "{{ item.auto_scaling_group_name }}"
@@ -52,6 +52,7 @@
       with_items:
         - "{{ aws_autoscaling_app }}"
         - "{{ aws_autoscaling_app_extra }}"
+        - "{{ aws_autoscaling_app_pio }}"
 
     - name: Stop Aurora RDS cluster
       ansible.builtin.command:

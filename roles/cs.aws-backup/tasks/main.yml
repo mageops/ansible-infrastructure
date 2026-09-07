@@ -1,0 +1,55 @@
+- name: Validate AWS Backup resource kinds
+  ansible.builtin.assert:
+    that:
+      - aws_backup_resource_kinds is mapping
+      - aws_backup_resource_kinds.keys() | difference(_aws_backup_resource_kind_selections.keys()) | length == 0
+      - aws_backup_resource_kinds.values() | map('type_debug') | difference(['bool']) | length == 0
+    fail_msg: >-
+      aws_backup_resource_kinds must be a map of supported resource kinds to boolean values.
+
+- name: Ensure AWS Backup vault exists
+  amazon.aws.backup_vault:
+    state: present
+    backup_vault_name: "{{ aws_backup_vault_name }}"
+    region: "{{ aws_region }}"
+    tags: "{{ aws_tags_default }}"
+  delegate_to: localhost
+  become: no
+
+- name: Ensure AWS Backup plan exists
+  amazon.aws.backup_plan:
+    state: present
+    backup_plan_name: "{{ aws_backup_plan_name }}"
+    region: "{{ aws_region }}"
+    tags: "{{ aws_tags_default }}"
+    rules:
+      - rule_name: "{{ aws_backup_plan_name }}"
+        target_backup_vault_name: "{{ aws_backup_vault_name }}"
+        schedule_expression: "{{ aws_backup_schedule_expression }}"
+        lifecycle:
+          delete_after_days: "{{ aws_backup_retention_days }}"
+        recovery_point_tags: "{{ aws_tags_default }}"
+  delegate_to: localhost
+  become: no
+
+- name: Reconcile AWS Backup resource selections
+  amazon.aws.backup_selection:
+    state: "{{ (item.key in _aws_backup_enabled_resource_kinds) | ternary('present', 'absent') }}"
+    backup_plan_name: "{{ aws_backup_plan_name }}"
+    selection_name: "{{ aws_backup_plan_name }}-{{ item.key | replace('_', '-') }}"
+    iam_role_arn: "arn:aws:iam::{{ aws_account_id }}:role/{{ aws_iam_role_backup }}"
+    region: "{{ aws_region }}"
+    resources: "{{ item.value.resources }}"
+    conditions:
+      string_equals: >-
+        {{
+          aws_tags_default
+          | combine(item.value.tags)
+          | prefix_keys('aws:ResourceTag/')
+          | dict2items(key_name='condition_key', value_name='condition_value')
+        }}
+  loop: "{{ _aws_backup_resource_kind_selections | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  delegate_to: localhost
+  become: no

@@ -1,3 +1,18 @@
+/var/log/php-fpm.log {
+    rotate 2
+    size 100M
+    missingok
+    notifempty
+    compress
+    compresscmd /usr/bin/zstd
+    uncompresscmd /usr/bin/unzstd
+    compressext .zstd
+    compressoptions -19
+    copytruncate
+    create 0660 root root
+    su root root
+}
+
 {{ php_fpm_log_dir_path }}/*.log {
     rotate 8
     size 128M

@@ -16,6 +16,14 @@
         region: "{{ aws_region }}"
         state: running
         wait: yes
+      register: start_ec2_result
+      # Retry only capacity errors so that unexpected failures fail immediately.
+      until: >-
+        start_ec2_result is not failed or
+        'InsufficientInstanceCapacity' not in (start_ec2_result.msg | default(''))
+      # Retry delays total up to four hours (240 retries x 60 seconds)
+      retries: 240
+      delay: 60
       with_items:
         - "{{ aws_persistent_node_instance }}"
         - "{{ aws_varnish_node_instance }}"
@@ -45,7 +53,7 @@
             desired_capacity: "{{ aws_app_asg_desired_capacity | default(1) }}"
             min_size: "{{ aws_app_asg_min_size | default(1) }}"
             wait_for_instances: yes
-            wait_timeout: 600
+            wait_timeout: 14400
           with_items: "{{ start_asgs }}"
           vars:
             start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name } ') }}"
@@ -67,10 +75,23 @@
             desired_capacity: "{{ aws_extra_app_asg_desired_capacity | default(0) }}"
             min_size: "{{ aws_extra_app_asg_min_size | default(0) }}"
             wait_for_instances: yes
-            wait_timeout: 600
+            wait_timeout: 14400
           with_items: "{{ start_asgs }}"
           vars:
             start_asgs: "{{ start_asg_facts | json_query('results[].{ name: auto_scaling_group_name } ') }}"
+
+    - name: Scale up PIO ASGs
+      when: start_asg and mageops_pio_worker_enable and mageops_pio_worker_dedicated_asg
+      amazon.aws.autoscaling_group:
+        name: "{{ item.auto_scaling_group_name }}"
+        region: "{{ aws_region }}"
+        state: present
+        desired_capacity: "{{ aws_pio_asg_desired_capacity | default(1) }}"
+        min_size: "{{ aws_pio_asg_min_size | default(1) }}"
+        wait_for_instances: yes
+        wait_timeout: 14400
+      with_items:
+        - "{{ aws_autoscaling_app_pio }}"
 
     - name: Start Aurora RDS cluster
       ansible.builtin.command:

@@ -1,0 +1,8 @@
+aws_backup_vault_name: "{{ mageops_app_name }}-backup-vault"
+aws_backup_plan_name: "{{ mageops_app_name }}-backup-plan"
+aws_backup_schedule_expression: "cron(0 5 ? * * *)"
+aws_backup_retention_days: 7
+aws_backup_resource_kinds:
+  efs: false
+  rds: false
+  persistent_ebs: false

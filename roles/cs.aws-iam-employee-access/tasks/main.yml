@@ -23,6 +23,7 @@
         state: present
         managed_policy:
           - "{{ employee_full_access.policy.arn }}"
+          - arn:aws:iam::aws:policy/AWSBackupFullAccess
 
     - name: Create role for limited employee access
       iam_role:

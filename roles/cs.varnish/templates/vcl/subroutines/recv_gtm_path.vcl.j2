@@ -1,0 +1,21 @@
+if (req.http.Host == "{{ gtm_path_host }}" && req.url ~ "^/{{ gtm_preview_path_prefix }}(/|$)") {
+    set req.backend_hint = gtm_preview_director.backend();
+    set req.url = regsub(req.url, "^/{{ gtm_preview_path_prefix }}", "");
+
+    if (req.url == "") {
+        set req.url = "/";
+    }
+
+    return (pass);
+} elsif (req.http.Host == "{{ gtm_path_host }}" && req.url ~ "^/{{ gtm_path_prefix }}(/|$)") {
+    set req.backend_hint = gtm_director.backend();
+    set req.url = regsub(req.url, "^/{{ gtm_path_prefix }}", "");
+
+    if (req.url == "") {
+        set req.url = "/";
+    }
+
+    return (pass);
+} else {
+    set req.backend_hint = app_director.backend();
+}

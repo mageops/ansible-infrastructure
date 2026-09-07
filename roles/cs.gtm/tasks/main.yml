@@ -12,6 +12,16 @@
     name: gcr.io/cloud-tagging-10302018/gtm-cloud-image
     tag: stable
 
+- name: Set GTM preview server URL for path routing
+  ansible.builtin.set_fact:
+    gtm_preview_server_url: "https://{{ gtm_path_host }}/{{ gtm_preview_path_prefix }}"
+  when: gtm_routing_mode == 'path'
+
+- name: Set GTM preview server URL for subdomain routing
+  ansible.builtin.set_fact:
+    gtm_preview_server_url: "https://{{ mageops_gtm_preview_domain }}"
+  when: gtm_routing_mode == 'subdomain'
+
 # MAIN (tagging) container
 - name: Run GTM SS main container and create systemd service
   containers.podman.podman_container:
@@ -24,7 +34,7 @@
       - "8080:8080"
     env:
       PORT: "8080"
-      PREVIEW_SERVER_URL: "https://{{ mageops_gtm_preview_domain }}"
+      PREVIEW_SERVER_URL: "{{ gtm_preview_server_url }}"
       CONTAINER_CONFIG: "{{ gtm_container_config }}"
     generate_systemd:
       path: /etc/systemd/system

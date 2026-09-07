@@ -37,6 +37,7 @@ aws_iam_name_prefix: MageOps
 aws_iam_role_app_node: "{{ aws_iam_name_prefix }}AppNode"
 aws_iam_role_varnish: "{{ aws_iam_role_app_node }}"
 aws_iam_role_persistent_node: "{{ aws_iam_name_prefix }}PersistentNode"
+aws_iam_role_backup: "{{ aws_iam_name_prefix }}AWSBackup"
 aws_iam_role_basic_lambda_execution: "{{ aws_iam_name_prefix }}BasicLambdaExecution"
 aws_iam_role_autoscaling_event_lambda: "{{ aws_iam_name_prefix }}HandleAutoscalingEventLambdaExecution"
 aws_iam_role_update_varnish_backend_lambda_execution: "{{ aws_iam_name_prefix }}UpdateVarnishBackendsLambdaExecution"
@@ -551,6 +552,20 @@ efs_aws_subnet_ids: "{{ aws_vpc_subnet_ids }}"
 # efs_aws_subnet_ids: [ "{{ aws_vpc_subnet_id }}" ]
 efs_aws_security_group_id: "{{ aws_security_group_efs_id | default(omit, true) }}"
 
+# -----------------------------
+# -------- AWS Backup  --------
+# -----------------------------
+
+# Opt in resource kinds to the shared daily backup plan. Every selected resource
+# must match aws_tags_default; persistent EBS volumes must also have Role=persistent.
+mageops_aws_backup: false
+aws_backup_resource_kinds:
+  efs: false
+  rds: false
+  persistent_ebs: false
+aws_backup_schedule_expression: "cron(0 5 ? * * *)"
+aws_backup_retention_days: 7
+
 # -------------------------------
 # --------  AWS Logging  --------
 # -------------------------------
@@ -1013,16 +1028,12 @@ aws_magento_cron_crons: "{{ (aws_magento_cron_crons_tpl | flatten) + aws_magento
 # --------  Magento Deploy  --------
 # ----------------------------------
 
-magento_post_deploy_commands_pio:
-  - "bin/magento config:set dev/lazy_resize/token_secret {{ lazy_resize_secret }}"
-
 # Magento commands that should be always executed as the last post-deploy step
 # on one of the *new* web-nodes (created from the AMI being deployed).
 magento_post_deploy_commands_basic_tpl: [
   # Flush the full_page cache in case old page version got cached in varnish
   # between last flush and new nodes going up.
-  [ "bin/magento cache:flush full_page" ],
-  [ "{{ mageops_pio_worker_enable | ternary(magento_post_deploy_commands_pio, []) }}" ]
+  [ "bin/magento cache:flush full_page" ]
 ]
 
 # Use this variable to define custom per-project commands
@@ -1627,6 +1638,7 @@ redis_maxmemory: 200M
 redis_persistence_enable: no # We don't need to persist magento cache
 
 # Sessions redis instance settings, rest inherited from base
+redis_sessions_databases: 2
 redis_sessions_maxmemory_policy: allkeys-lru
 redis_sessions_maxmemory: 100M
 redis_sessions_persistence_enable: yes
@@ -1724,7 +1736,6 @@ varnish_original_url: false
 varnish_html_cache_control_max_age: 60
 varnish_strip_params:
   - "gclid"
-  - "gad_source"
   - "gclsrc"
   - "utm_[^=&]+"
   - "gdftrk"
@@ -1732,6 +1743,9 @@ varnish_strip_params:
   - "_gl" # google analytics
   - "mc_[^=&]+" # mailchimp
   - "trk_[^=&]+"
+  - "_bta_[^=&]+" # bronto
+  - "mtm_[^=&]+" # matomo
+  - "pk_[^=&]+" # matomo
   - "dm_i"
   - "fbclid" # facebook
   - "igshid" # instagram
@@ -2204,3 +2218,11 @@ mageops_new_relic_enabled: no
 # ----- Google Tag Manger -----
 # ---------------------
 gtm_enabled: no
+# Supported values: subdomain, path
+gtm_routing_mode: subdomain
+# Path segment without leading or trailing slash, for example: gtm
+gtm_path_prefix: ""
+gtm_preview_path_prefix: ""
+gtm_path_host: "{{ magento_hostname | default('') }}"
+# Set the real value in credentials.yaml.
+gtm_container_config: ""

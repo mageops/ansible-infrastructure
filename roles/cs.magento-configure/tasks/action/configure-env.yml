@@ -43,11 +43,18 @@
               | combine(magento_app_etc_config_cache_default_redis, recursive=true) }}
 
     - name: Enable 2-level default Redis cache
-      when: magento_redis_cache_l2 | bool
+      when: magento_redis_cache_l2 | bool and not (magento_redis_cache_l2_symfony | bool)
       set_fact:
         magento_app_etc_config: >-
           {{ magento_app_etc_config
               | combine(magento_app_etc_config_cache_default_redis_l2, recursive=true) }}
+
+    - name: Enable Symfony L2 cache
+      when: magento_redis_cache_l2 | bool and magento_redis_cache_l2_symfony | bool
+      set_fact:
+        magento_app_etc_config: >-
+          {{ magento_app_etc_config
+              | combine(magento_app_etc_config_cache_default_redis_l2_symfony, recursive=true) }}
 
     - name: Configure Redis page cache
       set_fact:
