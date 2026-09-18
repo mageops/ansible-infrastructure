@@ -1,8 +1,19 @@
+# Retries here guard against transient egress failures ([Errno 101] Network
+# is unreachable) on freshly-launched builder nodes whose NAT/default route
+# is not yet ready when this role runs. Mirrors the retry pattern in cs.packages.
 - name: Install gpg cert
   rpm_key:
     state: present
     key: https://rpms.remirepo.net/RPM-GPG-KEY-remi2021
+  register: remi_gpg_key_command
+  retries: 10
+  delay: 30
+  until: not remi_gpg_key_command is failed
 
 - name: Ensure Remi's repo release package is installed and up-to-date
   dnf:
     name: "{{ php_repo_remi_package_name }}"
+  register: remi_release_command
+  retries: 10
+  delay: 30
+  until: not remi_release_command is failed
