@@ -15,6 +15,15 @@
         dest: "{{ sansec_ecomscan_binary_path }}"
         mode: "u=rwx,g=rx,o=rx"
 
+    - name: Configure Sansec eComscan license environment
+      no_log: true
+      cron:
+        name: ECOMSCAN_KEY
+        user: "{{ sansec_ecomscan_user }}"
+        env: true
+        job: "{{ sansec_ecomscan_license_key }}"
+        state: "{{ ((sansec_ecomscan_license_key | string | length) > 0) | ternary('present', 'absent') }}"
+
     - name: Install Sansec eComscan monitoring cron
       no_log: true
       cron:
@@ -27,7 +36,6 @@
         weekday: "{{ sansec_ecomscan_cron_weekday }}"
         job: >-
           {{ sansec_ecomscan_only_cron_node | bool | ternary('/usr/local/bin/mageopscli is_cron_node && ', '') }}{{ sansec_ecomscan_binary_path }}
-          {{ ((sansec_ecomscan_license_key | string | length) > 0) | ternary('--key=' ~ (sansec_ecomscan_license_key | quote), '') }}
           --monitor={{ sansec_ecomscan_monitor | quote }}
           {{ sansec_ecomscan_extra_args }}
           {{ magento_live_release_dir | quote }}
