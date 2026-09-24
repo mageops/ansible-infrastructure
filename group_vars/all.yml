@@ -1764,6 +1764,7 @@ varnish_strip_params:
   - "sc_[^=&]+" # emarsys
   - "tduid" # tradedoubler
   - "_ke" # klaviyo
+  - "mtm_[^=&]+" # matomo
   - "ml_[^=&]+" # mailerlite
   - "hsa_[^=&]+" # hubspot
   - "__hs[^=&]+" # hubspot
