@@ -1,18 +1,13 @@
 sansec_ecomscan_enabled: no
 
 sansec_ecomscan_binary_path: /usr/local/bin/ecomscan
-sansec_ecomscan_download_architecture: >-
-  {{
-    ami_facts_architecture_map[
-      (aws_app_node_instance_type_forced | default(aws_app_node_instance_type, true)).split('.')[0]
-    ] if aws_use | bool else ansible_architecture
-  }}
-sansec_ecomscan_download_arch: "{{ sansec_ecomscan_download_arch_map[sansec_ecomscan_download_architecture] }}"
-sansec_ecomscan_download_arch_map:
-  x86_64: linux-amd64
-  aarch64: linux-arm64
-  arm64: linux-arm64
-sansec_ecomscan_download_url: "https://ecomscan.com/downloads/{{ sansec_ecomscan_download_arch }}/ecomscan"
+sansec_ecomscan_signature_arch: "{{ ansible_facts['system'] | lower }}-{{ ansible_facts['architecture'] | lower }}"
+sansec_ecomscan_latest_version_url: "https://api.sansec.io/downloads/{{ sansec_ecomscan_signature_arch }}/ecomscan-latest.txt"
+sansec_ecomscan_download_url: "https://api.sansec.io/downloads/{{ sansec_ecomscan_signature_arch }}/ecomscan-{{ sansec_ecomscan_version }}"
+sansec_ecomscan_signature_url: "https://api.sansec.io/downloads/{{ sansec_ecomscan_signature_arch }}/ecomscan-{{ sansec_ecomscan_version }}.asc"
+sansec_ecomscan_pgp_key_url: https://sansec.io/downloads/sansec.pubkey.txt
+sansec_ecomscan_pgp_fingerprint: "7EB6 04FB 24FB 3A8B 61F1 70EA 9D0D 094C D2C7 E669"
+sansec_ecomscan_pgp_fingerprint_normalized: "{{ sansec_ecomscan_pgp_fingerprint | replace(' ', '') }}"
 
 sansec_ecomscan_license_key: ""
 sansec_ecomscan_monitor: ""

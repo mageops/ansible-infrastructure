@@ -9,11 +9,145 @@
         fail_msg: sansec_ecomscan_monitor must be set when sansec_ecomscan_enabled is enabled.
         quiet: true
 
-    - name: Install Sansec eComscan binary
-      get_url:
-        url: "{{ sansec_ecomscan_download_url }}"
-        dest: "{{ sansec_ecomscan_binary_path }}"
-        mode: "u=rwx,g=rx,o=rx"
+    - name: Install tools for Sansec eComscan signature verification
+      package:
+        name:
+          - curl
+          - gnupg2
+        state: present
+
+    - name: Verify and install Sansec eComscan binary
+      block:
+        - name: Fetch latest Sansec eComscan version
+          uri:
+            url: "{{ sansec_ecomscan_latest_version_url }}"
+            return_content: true
+            status_code: 200
+          changed_when: false
+          register: sansec_ecomscan_latest_version
+
+        - name: Set Sansec eComscan version
+          set_fact:
+            sansec_ecomscan_version: "{{ sansec_ecomscan_latest_version.content | trim }}"
+          changed_when: false
+
+        - name: Validate Sansec eComscan version
+          assert:
+            that:
+              - sansec_ecomscan_version is match('^[0-9]+(\\.[0-9]+)+$')
+            fail_msg: Unable to determine Sansec eComscan version for signature verification.
+            quiet: true
+
+        - name: Download Sansec eComscan binary
+          get_url:
+            url: "{{ sansec_ecomscan_download_url }}"
+            dest: /tmp/ecomscan
+            owner: root
+            group: root
+            mode: "u=rwx,g=rx,o=rx"
+          changed_when: false
+
+        - name: Download Sansec PGP public key
+          get_url:
+            url: "{{ sansec_ecomscan_pgp_key_url }}"
+            dest: /tmp/sansec.pubkey.txt
+            owner: root
+            group: root
+            mode: "u=rw,g=r,o=r"
+          changed_when: false
+
+        - name: Create temporary Sansec eComscan GnuPG home
+          file:
+            path: /tmp/sansec-ecomscan.gnupg
+            state: directory
+            owner: root
+            group: root
+            mode: "0700"
+          changed_when: false
+
+        - name: Inspect Sansec PGP public key
+          command:
+            argv:
+              - gpg
+              - --homedir
+              - /tmp/sansec-ecomscan.gnupg
+              - --with-colons
+              - --show-keys
+              - --fingerprint
+              - /tmp/sansec.pubkey.txt
+          changed_when: false
+          register: sansec_ecomscan_pgp_key
+
+        - name: Validate Sansec PGP public key fingerprint
+          assert:
+            that:
+              - sansec_ecomscan_pgp_fingerprint_normalized in sansec_ecomscan_pgp_key.stdout
+            fail_msg: >-
+              Sansec PGP public key fingerprint does not match expected
+              {{ sansec_ecomscan_pgp_fingerprint }}.
+            quiet: true
+
+        - name: Import Sansec PGP public key
+          command:
+            argv:
+              - gpg
+              - --homedir
+              - /tmp/sansec-ecomscan.gnupg
+              - --import
+              - /tmp/sansec.pubkey.txt
+          changed_when: false
+
+        - name: Verify Sansec eComscan signature # noqa command-instead-of-module
+          shell: >-
+            set -o pipefail &&
+            curl --fail --show-error --silent --location --proto '=https'
+            {{ sansec_ecomscan_signature_url | quote }}
+            | gpg --homedir /tmp/sansec-ecomscan.gnupg
+            --status-fd 1
+            --verify - /tmp/ecomscan
+          args:
+            executable: /bin/bash
+          changed_when: false
+          register: sansec_ecomscan_gpg_verify
+
+        - name: Validate Sansec eComscan signature fingerprint
+          assert:
+            that:
+              - >-
+                sansec_ecomscan_gpg_verify.stdout_lines
+                | select('match', '^\\[GNUPG:\\] VALIDSIG .*' ~ sansec_ecomscan_pgp_fingerprint_normalized ~ '.*$')
+                | list
+                | length > 0
+            fail_msg: >-
+              Sansec eComscan signature was not associated with expected key
+              {{ sansec_ecomscan_pgp_fingerprint }}.
+            quiet: true
+
+        - name: Install verified Sansec eComscan binary
+          copy:
+            src: /tmp/ecomscan
+            dest: "{{ sansec_ecomscan_binary_path }}"
+            remote_src: true
+            mode: "u=rwx,g=rx,o=rx"
+      always:
+        - name: Remove temporary Sansec eComscan files
+          file:
+            path: "{{ item }}"
+            state: absent
+          changed_when: false
+          loop:
+            - /tmp/ecomscan
+            - /tmp/sansec.pubkey.txt
+            - /tmp/sansec-ecomscan.gnupg
+
+    - name: Configure Sansec eComscan license environment
+      no_log: true
+      cron:
+        name: ECOMSCAN_KEY
+        user: "{{ sansec_ecomscan_user }}"
+        env: true
+        job: "{{ sansec_ecomscan_license_key }}"
+        state: "{{ ((sansec_ecomscan_license_key | string | length) > 0) | ternary('present', 'absent') }}"
 
     - name: Install Sansec eComscan monitoring cron
       no_log: true
@@ -27,7 +161,6 @@
         weekday: "{{ sansec_ecomscan_cron_weekday }}"
         job: >-
           {{ sansec_ecomscan_only_cron_node | bool | ternary('/usr/local/bin/mageopscli is_cron_node && ', '') }}{{ sansec_ecomscan_binary_path }}
-          {{ ((sansec_ecomscan_license_key | string | length) > 0) | ternary('--key=' ~ (sansec_ecomscan_license_key | quote), '') }}
           --monitor={{ sansec_ecomscan_monitor | quote }}
           {{ sansec_ecomscan_extra_args }}
           {{ magento_live_release_dir | quote }}
