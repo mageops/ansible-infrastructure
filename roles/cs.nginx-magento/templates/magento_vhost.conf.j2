@@ -114,6 +114,7 @@ server {
     set $MAGE_ROOT {{ nginx_app_root_dir }};
     set $MAGE_MODE {{ nginx_magento_mode }}; # or production or default
     set $PROJ_NAME {{ mageops_project }};
+    set $FASTCGI_REQUEST_URI $request_uri;
 {% if nginx_magento_run_type in ('store', 'website') %}
     set $MAGE_RUN_TYPE {{ nginx_magento_run_type }};
 {% endif %}

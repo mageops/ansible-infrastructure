@@ -15,6 +15,10 @@ nginx_serverd_dir: "{{ nginx_etc_dir }}/server.d"
 nginx_serverd_defaults_dir: "{{ nginx_etc_dir }}/server.d/defaults"
 nginx_modules_conf_dir: "{{ nginx_etc_dir }}/modules.d"
 
+nginx_real_ip_trusted_addresses:
+  - 127.0.0.1
+  - "{{ mageops_varnish_host }}"
+
 # --- Automatic auto-loaded config file cleanup ---
 # See comment in `tasks/099-cleanup.yml` for details.
 

@@ -1,11 +1,11 @@
 fastcgi_param  PHP_VALUE        "memory_limit=${PHP_MEMORY_LIMIT} \n max_execution_time=${PHP_MAX_EXECUTION_TIME} \n ${PHP_EXTRA_VALUE}";
 fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+fastcgi_param  ACCESS_LOG_HOST  $http_host;
+fastcgi_param  REQUEST_URI      $FASTCGI_REQUEST_URI;
+fastcgi_param  REAL_REMOTE_ADDR $remote_addr;
 fastcgi_param  PHP_IDE_CONFIG   serverName=$PROJ_NAME;
 fastcgi_param  MAGE_MODE        $MAGE_MODE;
 fastcgi_param  ORIGINAL_URI     $request_uri;
-{% if nginx_magento_routing_configuration %}
-fastcgi_param  REQUEST_URI      $FASTCGI_REQUEST_URI;
-{% endif %}
 fastcgi_param  REMOTE_PORT      $http_x_remote_port;
 fastcgi_param  HTTPS            "{{ mageops_https_enable | ternary('on', 'off') }}";
 
