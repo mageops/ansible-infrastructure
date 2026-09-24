@@ -7,6 +7,7 @@
           - sansec_ecomscan_monitor is not none
           - sansec_ecomscan_monitor | string | trim | length > 0
         fail_msg: sansec_ecomscan_monitor must be set when sansec_ecomscan_enabled is enabled.
+        quiet: true
 
     - name: Install Sansec eComscan binary
       get_url:
