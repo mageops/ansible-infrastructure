@@ -181,6 +181,7 @@
     - role: cs.dnf-automatic
       security_updates_startup_enabled: yes
     - role: cs.tracer
+      when: security_updates_enabled
 
   tasks:
     - set_fact:
