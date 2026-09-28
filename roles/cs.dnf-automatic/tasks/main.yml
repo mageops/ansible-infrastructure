@@ -110,6 +110,35 @@
     - dnf-automatic-install.timer
   when: security_updates_enabled
 
+- name: Install startup security update unit
+  copy:
+    src: security-updates-startup.service
+    dest: /etc/systemd/system/security-updates-startup.service
+    owner: root
+    group: root
+    mode: "0644"
+  when: security_updates_enabled and security_updates_startup_enabled
+
+# Enable only. A start now would update, and maybe reboot, the node during
+# provisioning.
+- name: Enable startup security updates for the next boots
+  systemd:
+    name: security-updates-startup.service
+    enabled: yes
+    daemon_reload: yes
+  when: security_updates_enabled and security_updates_startup_enabled
+
+# Remove the enablement link directly, because `systemctl disable` fails when
+# the unit file does not exist.
+- name: Remove startup security update unit
+  file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/systemd/system/multi-user.target.wants/security-updates-startup.service
+    - /etc/systemd/system/security-updates-startup.service
+  when: not (security_updates_enabled and security_updates_startup_enabled)
+
 - name: Remove dnf-automatic systemd overrides
   file:
     path: "{{ item }}"

@@ -4,6 +4,10 @@ security_updates_download_timer_on_calendar: "*-*-* 09:00"
 security_updates_install_timer_on_calendar: "*-*-* 03:00"
 security_updates_randomized_delay_sec: 30m
 
+# Install security updates at every boot, before nginx starts.
+# Enable it for the image that starts new nodes (the app AMI).
+security_updates_startup_enabled: false
+
 # For a Slack app named "Security updates", install the app in the workspace,
 # invite it to the target channel, grant the bot chat:write, and configure:
 #   mageops_notifications_slack_bot_token: "xoxb-..."

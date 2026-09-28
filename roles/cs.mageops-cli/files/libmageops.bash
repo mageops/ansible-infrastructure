@@ -367,7 +367,7 @@ ${report}"
 
     mageops::security_updates_notify "Security update startup install completed on $(hostname -f):
 ${report}"
-    SECURITY_UPDATES_REBOOT_EXIT_CODE=194 mageops::security_updates_install
+    mageops::security_updates_install
 }
 
 

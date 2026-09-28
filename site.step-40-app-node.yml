@@ -179,6 +179,7 @@
     # ansible would need to recconnect to node to refresh some python dependencies
     - role: cs.packages
     - role: cs.dnf-automatic
+      security_updates_startup_enabled: yes
     - role: cs.tracer
 
   tasks:
