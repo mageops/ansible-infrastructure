@@ -107,30 +107,11 @@ mageops::security_updates_log() {
     printf '%s\n' "$message"
 }
 
-mageops::json_escape() {
-    local value="$1"
-
-    value="${value//\\/\\\\}"
-    value="${value//\"/\\\"}"
-    value="${value//$'\r'/}"
-    value="${value//$'\n'/\\n}"
-
-    printf '%s' "$value"
-}
-
 mageops::security_updates_slack_payload() {
     local message="$1"
-    local channel="${SLACK_CHANNEL:-}"
-    local channel_json=""
 
-    message="$(mageops::json_escape "$message")"
-    channel="$(mageops::json_escape "$channel")"
-
-    if [[ -n "$channel" ]]; then
-        channel_json=",\"channel\":\"${channel}\""
-    fi
-
-    printf '{"text":"%s"%s}' "$message" "$channel_json"
+    printf '%s' "$message" | jq --raw-input --slurp --compact-output --arg channel "${SLACK_CHANNEL:-}" \
+        '{text: .} + (if $channel == "" then {} else {channel: $channel} end)'
 }
 
 mageops::security_updates_notify_slack_bot() {
@@ -138,16 +119,18 @@ mageops::security_updates_notify_slack_bot() {
     local slack_bot_token="${SLACK_BOT_TOKEN:-}"
     local response
 
-    response="$(curl --silent --show-error --fail --max-time 10 \
-        --header "Authorization: Bearer ${slack_bot_token}" \
+    # Pass the token and the report through file descriptors.
+    # Other local users can read the arguments of a process.
+    response="$(mageops::security_updates_slack_payload "$message" | curl --silent --show-error --fail --max-time 10 \
+        --header @<(printf 'Authorization: Bearer %s\n' "$slack_bot_token") \
         --header 'Content-Type: application/json; charset=utf-8' \
-        --data "$(mageops::security_updates_slack_payload "$message")" \
+        --data-binary @- \
         https://slack.com/api/chat.postMessage)" || {
         mageops::security_updates_log "Failed to send security update notification to Slack bot API."
         return 1
     }
 
-    if ! printf '%s' "$response" | grep -q '"ok"[[:space:]]*:[[:space:]]*true'; then
+    if ! printf '%s' "$response" | jq --exit-status '.ok == true' > /dev/null 2>&1; then
         mageops::security_updates_log "Failed to send security update notification to Slack bot API: ${response}"
         return 1
     fi
