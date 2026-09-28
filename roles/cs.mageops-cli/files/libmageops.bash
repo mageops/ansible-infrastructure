@@ -286,7 +286,6 @@ mageops::security_updates_install() {
     local tracer_rc
     local restart_commands
     local restart_rc=0
-    local reboot_exit_code="${SECURITY_UPDATES_REBOOT_EXIT_CODE:-1}"
 
     set +e
     tracer -va
@@ -324,7 +323,7 @@ ${restart_commands}"
     if [[ "$tracer_rc" -eq 101 || "$tracer_rc" -eq 103 || "$tracer_rc" -eq 104 ]]; then
         mageops::security_updates_notify "Rebooting $(hostname -f) after security updates; tracer reported exit code ${tracer_rc}."
         /usr/bin/systemctl reboot
-        exit "$reboot_exit_code"
+        return 0
     fi
 
     mageops::security_updates_notify "Security updates on $(hostname -f) left tracer advisory code ${tracer_rc}; no automatic host reboot performed."
