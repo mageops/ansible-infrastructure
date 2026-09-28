@@ -251,7 +251,7 @@ mageops::security_updates_print_status() {
     fi
 }
 
-mageops::security_updates_download() {
+mageops::security_updates_report() {
     local report
 
     report="$(cat)"

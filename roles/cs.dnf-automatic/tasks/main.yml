@@ -47,7 +47,7 @@
       value: "yes"
     - section: command
       option: command_format
-      value: /usr/local/bin/mageopscli security_updates download
+      value: /usr/local/bin/mageopscli security_updates report
     - section: command
       option: stdin_format
       value: "{body}"

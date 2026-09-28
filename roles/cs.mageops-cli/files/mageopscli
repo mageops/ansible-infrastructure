@@ -195,14 +195,14 @@ main::security_updates() {
         fi
         return 1
     ;;
-    download)
+    report)
         if [ -t 0 ];then
-            main::eprintln "Download mode expects a dnf-automatic report on stdin; nothing to read."
+            main::eprintln "Report mode expects a dnf-automatic report on stdin. Nothing to read."
             return 0
         fi
-        main::eprintln "Recording dnf-automatic download/install report..."
+        main::eprintln "Recording dnf-automatic report..."
         mageops::security_updates_log "Security update execution started on $(hostname -f) in ${mode} mode."
-        mageops::security_updates_download
+        mageops::security_updates_report
         main::eprintln "Security update report recorded."
     ;;
     download-complete)
@@ -224,7 +224,7 @@ main::security_updates() {
         mageops::security_updates_print_status
     ;;
     *)
-        main::panic "invalid security update mode '$mode' (expected check or status)"
+        main::panic "invalid security update mode '$mode' (expected check, status, report, download-complete, install or startup)"
     ;;
     esac
 }
