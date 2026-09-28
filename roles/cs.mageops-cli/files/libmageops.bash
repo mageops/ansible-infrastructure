@@ -340,6 +340,11 @@ mageops::security_updates_install_if_downloaded() {
 }
 
 mageops::security_updates_startup_install() {
+    # Same retry policy as roles/cs.packages/tasks/main.yml. A mirror can return 404
+    # until the 30 s DNS cache expires and dnf selects another mirror.
+    local -r attempts=10
+    local -r retry_delay_sec=30
+    local attempt
     local report
     local dnf_rc
 
@@ -348,13 +353,22 @@ mageops::security_updates_startup_install() {
         return 0
     fi
 
-    set +e
-    report="$(dnf -y --security update 2>&1)"
-    dnf_rc=$?
-    set -e
+    for (( attempt = 1; ; attempt++ )); do
+        set +e
+        report="$(dnf -y --security update 2>&1)"
+        dnf_rc=$?
+        set -e
+
+        if [[ "$dnf_rc" -eq 0 || "$attempt" -ge "$attempts" ]];then
+            break
+        fi
+
+        mageops::security_updates_log "Security update startup install attempt ${attempt} of ${attempts} failed on $(hostname -f) with exit code ${dnf_rc}. Next attempt in ${retry_delay_sec} s."
+        sleep "$retry_delay_sec"
+    done
 
     if [[ "$dnf_rc" -ne 0 ]];then
-        mageops::security_updates_notify "Security update startup install failed on $(hostname -f) with exit code ${dnf_rc}:
+        mageops::security_updates_notify "Security update startup install failed on $(hostname -f) with exit code ${dnf_rc} after ${attempt} attempts:
 ${report}"
         return "$dnf_rc"
     fi
