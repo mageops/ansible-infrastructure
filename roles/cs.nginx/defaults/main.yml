@@ -1,6 +1,7 @@
 nginx_remove_default_vhost: yes
 nginx_client_max_body_size: 20M
 nginx_worker_connections: 1024
+nginx_variables_hash_bucket_size: 128
 nginx_package: nginx
 nginx_packages_extra: []
 
