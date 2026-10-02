@@ -1,0 +1,15 @@
+[Unit]
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/dnf/security-updates.conf
+RuntimeDirectory=security-updates
+ExecCondition=/usr/local/bin/mageopscli security_updates check
+{% if item.download_hooks | default(false) %}
+ExecStartPost=/usr/local/bin/mageopscli security_updates download-complete
+{% endif %}
+{% if item.install_hooks | default(false) %}
+ExecStartPre=/usr/bin/rm -f /run/security-updates/dnf-automatic-emitted
+ExecStartPost=/usr/local/bin/mageopscli security_updates install
+{% endif %}
