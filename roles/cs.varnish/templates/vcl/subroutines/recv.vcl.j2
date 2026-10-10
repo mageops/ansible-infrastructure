@@ -237,6 +237,9 @@ if (req.url ~ "(?i)^/(media|static)/.*\.({{ varnish_allowed_extensions | join("|
         ! req.url ~ "(?i)^/(media|static)/.*\.(html|json|{{ varnish_allowed_extensions | join("|") }})(\?.*)?$"
         && ! req.url ~ "^/cron.php$"
         && ! req.url ~ "^/rest/.*$"
+    {% if varnish_secure_site_domains | length > 0 %}
+        && req.http.host ~ "(?i)^({{ varnish_secure_site_domains | map('regex_escape') | join('|') }})$"
+    {% endif %}
     {% for url in varnish_auth_bypass_urls %}
         && ! req.url ~ "^{{ url }}.*$"
     {% endfor %}
