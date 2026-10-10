@@ -25,6 +25,17 @@ aws_rds_slowlog_enabled: yes
 aws_rds_slowlog_time: 10
 aws_rds_cloudwatch_logs_exports: []
 aws_rds_publicly_accessible: yes
+aws_rds_read_replica_enabled: no
+aws_rds_read_replica_name: "{{ aws_rds_instance_name }}-read"
+aws_rds_read_replica_instance_type: t4g.medium
+aws_rds_read_replica_availability_zone: "{{ aws_rds_availability_zone }}"
+aws_rds_read_replica_param_group_name:
+aws_rds_read_replica_performance_insights: no
+aws_rds_read_replica_publicly_accessible: "{{ aws_rds_publicly_accessible }}"
+aws_rds_read_replica_security_groups: "{{ aws_rds_security_groups }}"
+aws_rds_read_replica_source_region:
+aws_rds_read_replica_subnet_group_name: "{{ aws_rds_subnet_group_name }}"
+aws_rds_read_replica_tags: "{{ aws_tags_default | combine(aws_tags_role_database, {'RoleDatabase': 'mysql-read-replica'}, aws_tags_node_mysql) }}"
 aws_rds_upgrade_path:
   mariadb:
     '10.2':
