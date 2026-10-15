@@ -21,6 +21,16 @@
     tags: "{{ aws_tags_default }}"
     params: "{{ aws_rds_param_group_params | default(omit) }}"
 
+- name: Upgrade read replicas to the same engine version first
+  include_tasks: upgrade_read_replicas.yml
+  vars:
+    aws_rds_replica_target_engine_version: "{{ item }}"
+    aws_rds_replica_param_group_name: "{{ _aws_rds_upgrade_parameter_group }}"
+    aws_rds_replica_allow_major_version_upgrade: yes
+  when:
+    - aws_rds_current.instances | length > 0
+    - aws_rds_current.instances[0].read_replica_db_instance_identifiers | default([]) | length > 0
+
 - name: Upgrade RDS
   amazon.aws.rds_instance:
     region: "{{ aws_region }}"
