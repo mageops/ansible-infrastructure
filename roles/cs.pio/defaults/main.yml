@@ -17,6 +17,15 @@ pio_media_target_ssim: 0.000548 # this is 99 quality
 pio_media_fast_quality: 95
 pio_quality_target_spread: 100
 pio_media_quality_spread: 100
+
+# SSIMULACRA2 configuration for pio-worker 0.14+
+# Thumbnail targets use the quality from each signed URL.
+pio_ssimulacra2_enabled: false
+# Media score. Higher values require better quality. Null disables this gate.
+# Both the DSSIM and SSIMULACRA2 targets apply when this is set.
+# Recommended: 81.105 (QUALITY_SSIMULACRA2[99] in pio-worker), matching the default DSSIM quality.
+pio_media_target_ssimulacra2: null
+
 pio_target_directory: pio_cache
 pio_media_target_directory: pio_cache_cms
 pio_optimize_media: yes
