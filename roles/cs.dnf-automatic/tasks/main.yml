@@ -4,6 +4,7 @@
       - awscli
       - curl
       - dnf-automatic
+      - tracer
     state: present
   when: security_updates_enabled
 
@@ -103,7 +104,7 @@
   systemd:
     name: "{{ item }}"
     enabled: yes
-    state: started
+    state: "{{ (security_updates_start_timers | bool) | ternary('started', 'stopped') }}"
     daemon_reload: yes
   loop:
     - dnf-automatic-download.timer

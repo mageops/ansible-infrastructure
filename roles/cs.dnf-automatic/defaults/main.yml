@@ -1,5 +1,8 @@
 security_updates_enabled: false
 
+# Keep timers enabled for future boots without running them on an AMI builder.
+security_updates_start_timers: true
+
 security_updates_download_timer_on_calendar: "*-*-* 09:00"
 security_updates_install_timer_on_calendar: "*-*-* 03:00"
 security_updates_randomized_delay_sec: 30m

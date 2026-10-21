@@ -178,10 +178,11 @@
     # We need to upgrade packages at the end as they might break some ansible action
     # ansible would need to recconnect to node to refresh some python dependencies
     - role: cs.packages
+    # Configure automatic updates for launched nodes without patching or
+    # rebooting the builder. Startup updates run on the image's next boot.
     - role: cs.dnf-automatic
       security_updates_startup_enabled: yes
-    - role: cs.tracer
-      when: security_updates_enabled
+      security_updates_start_timers: no
 
   tasks:
     - set_fact:
