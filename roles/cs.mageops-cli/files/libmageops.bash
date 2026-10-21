@@ -99,6 +99,18 @@ mageops::set_security_updates_scope() {
     esac
 }
 
+mageops::security_updates_node_label() (
+    local node_ip
+
+    # Use the same installed identity as the SSH prompt, including under systemd.
+    # Keep profile exports scoped to this subshell.
+    source /etc/profile.d/002-mageops-env.sh
+
+    # Resolve at runtime so nodes launched from the AMI use their own address.
+    node_ip="$(hostname -I | awk '{print $1}')"
+    printf '%s.%s-%s (%s)' "$MAGEOPS_NODE_ROLE" "$MAGEOPS_PROJECT" "$MAGEOPS_ENVIRONMENT" "$node_ip"
+)
+
 mageops::security_updates_log() {
     local message="$1"
     local log_identifier="${LOG_IDENTIFIER:-security-updates}"
@@ -178,7 +190,7 @@ mageops::security_updates_check_kill_switch_url() {
     }
 
     if [ "$value" = true ]; then
-        mageops::security_updates_notify "Security updates blocked on $(hostname -f): ${label} kill switch is active."
+        mageops::security_updates_notify "Security updates blocked on $(mageops::security_updates_node_label): ${label} kill switch is active."
         return 1
     fi
 
@@ -261,7 +273,7 @@ mageops::security_updates_report() {
 
     mkdir -p /run/security-updates
     touch /run/security-updates/dnf-automatic-emitted
-    mageops::security_updates_notify "dnf-automatic report on $(hostname -f):
+    mageops::security_updates_notify "dnf-automatic report on $(mageops::security_updates_node_label):
 ${report}"
 }
 
@@ -280,7 +292,7 @@ mageops::security_updates_install() {
     fi
 
     if [[ "$tracer_rc" -lt 100 ]]; then
-        mageops::security_updates_notify "Tracer failed after security updates on $(hostname -f) with exit code ${tracer_rc}."
+        mageops::security_updates_notify "Tracer failed after security updates on $(mageops::security_updates_node_label) with exit code ${tracer_rc}."
         return "$tracer_rc"
     fi
 
@@ -289,7 +301,7 @@ mageops::security_updates_install() {
         restart_commands="$(tracer --daemons-only | tail -n +3 | sed '/^[[:space:]]*$/d')"
         set -e
         if [[ -n "$restart_commands" ]]; then
-            mageops::security_updates_notify "Restarting services affected by security updates on $(hostname -f):
+            mageops::security_updates_notify "Restarting services affected by security updates on $(mageops::security_updates_node_label):
 ${restart_commands}"
             while IFS= read -r restart_command; do
                 if ! bash -c "$restart_command"; then
@@ -298,18 +310,18 @@ ${restart_commands}"
             done <<< "$restart_commands"
         fi
         if [[ "$restart_rc" -ne 0 ]]; then
-            mageops::security_updates_notify "One or more service restarts failed after security updates on $(hostname -f)."
+            mageops::security_updates_notify "One or more service restarts failed after security updates on $(mageops::security_updates_node_label)."
         fi
         return "$restart_rc"
     fi
 
     if [[ "$tracer_rc" -eq 101 || "$tracer_rc" -eq 103 || "$tracer_rc" -eq 104 ]]; then
-        mageops::security_updates_notify "Rebooting $(hostname -f) after security updates; tracer reported exit code ${tracer_rc}."
+        mageops::security_updates_notify "Rebooting $(mageops::security_updates_node_label) after security updates; tracer reported exit code ${tracer_rc}."
         /usr/bin/systemctl reboot
         return 0
     fi
 
-    mageops::security_updates_notify "Security updates on $(hostname -f) left tracer advisory code ${tracer_rc}; no automatic host reboot performed."
+    mageops::security_updates_notify "Security updates on $(mageops::security_updates_node_label) left tracer advisory code ${tracer_rc}; no automatic host reboot performed."
     return 0
 }
 
@@ -332,7 +344,7 @@ mageops::security_updates_startup_install() {
     local dnf_rc
 
     if ! mageops::security_updates_check;then
-        mageops::security_updates_log "Security update startup install skipped on $(hostname -f): eligibility check blocked the run."
+        mageops::security_updates_log "Security update startup install skipped on $(mageops::security_updates_node_label): eligibility check blocked the run."
         return 0
     fi
 
@@ -346,22 +358,22 @@ mageops::security_updates_startup_install() {
             break
         fi
 
-        mageops::security_updates_log "Security update startup install attempt ${attempt} of ${attempts} failed on $(hostname -f) with exit code ${dnf_rc}. Next attempt in ${retry_delay_sec} s."
+        mageops::security_updates_log "Security update startup install attempt ${attempt} of ${attempts} failed on $(mageops::security_updates_node_label) with exit code ${dnf_rc}. Next attempt in ${retry_delay_sec} s."
         sleep "$retry_delay_sec"
     done
 
     if [[ "$dnf_rc" -ne 0 ]];then
-        mageops::security_updates_notify "Security update startup install failed on $(hostname -f) with exit code ${dnf_rc} after ${attempt} attempts:
+        mageops::security_updates_notify "Security update startup install failed on $(mageops::security_updates_node_label) with exit code ${dnf_rc} after ${attempt} attempts:
 ${report}"
         return "$dnf_rc"
     fi
 
     if [[ "$report" =~ (Nothing[[:space:]]+to[[:space:]]+do|No[[:space:]]+security[[:space:]]+updates[[:space:]]+needed) ]];then
-        mageops::security_updates_log "Security update startup install completed on $(hostname -f): no security updates to apply."
+        mageops::security_updates_log "Security update startup install completed on $(mageops::security_updates_node_label): no security updates to apply."
         return 0
     fi
 
-    mageops::security_updates_notify "Security update startup install completed on $(hostname -f):
+    mageops::security_updates_notify "Security update startup install completed on $(mageops::security_updates_node_label):
 ${report}"
     mageops::security_updates_install
 }
