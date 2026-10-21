@@ -4,6 +4,7 @@
 # Map for checking if the current request path is blacklisted
 map $request_uri ${{ nginx_blacklist_map_variable_name }} {
     default 0;
+    ~^/\.well-known/acme-challenge/[A-Za-z0-9_-]+$ 0;
 
 {% for pattern in nginx_blacklist_urls %}
     ~{{ pattern }} 1;

@@ -36,7 +36,7 @@
     name: cs.nginx
     tasks_from: 099-cleanup.yml
 
-- name: Ensure nginx is running so it can serve the ACME challenges
+- name: Reload nginx so it can serve the latest ACME challenge config
   service:
     name: nginx
     state: reloaded
