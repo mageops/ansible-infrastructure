@@ -1,0 +1,23 @@
+sansec_ecomscan_enabled: no
+
+sansec_ecomscan_binary_path: /usr/local/bin/ecomscan
+sansec_ecomscan_signature_arch: "{{ ansible_facts['system'] | lower }}-{{ ansible_facts['architecture'] | lower }}"
+sansec_ecomscan_latest_version_url: "https://api.sansec.io/downloads/{{ sansec_ecomscan_signature_arch }}/ecomscan-latest.txt"
+sansec_ecomscan_download_url: "https://api.sansec.io/downloads/{{ sansec_ecomscan_signature_arch }}/ecomscan-{{ sansec_ecomscan_version }}"
+sansec_ecomscan_signature_url: "https://api.sansec.io/downloads/{{ sansec_ecomscan_signature_arch }}/ecomscan-{{ sansec_ecomscan_version }}.asc"
+sansec_ecomscan_pgp_key_url: https://sansec.io/downloads/sansec.pubkey.txt
+sansec_ecomscan_pgp_fingerprint: "7EB6 04FB 24FB 3A8B 61F1 70EA 9D0D 094C D2C7 E669"
+sansec_ecomscan_pgp_fingerprint_normalized: "{{ sansec_ecomscan_pgp_fingerprint | replace(' ', '') }}"
+
+sansec_ecomscan_license_key: ""
+sansec_ecomscan_monitor: ""
+sansec_ecomscan_user: root
+
+sansec_ecomscan_cron_name: Sansec eComscan monitoring
+sansec_ecomscan_cron_minute: "10"
+sansec_ecomscan_cron_hour: "*"
+sansec_ecomscan_cron_day: "*"
+sansec_ecomscan_cron_month: "*"
+sansec_ecomscan_cron_weekday: "*"
+sansec_ecomscan_only_cron_node: no
+sansec_ecomscan_extra_args: ""

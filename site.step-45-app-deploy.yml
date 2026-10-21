@@ -103,6 +103,9 @@
 
     - role: cs.aws-magento-cron
 
+    - role: cs.sansec-ecomscan
+      when: sansec_ecomscan_enabled | bool
+
     - role: cs.magento-preload-fscache
       magento_preload_fscache_enable: "{{ mageops_magento_preload_fscache_enable }}"
 
