@@ -4,3 +4,16 @@ aws_builder_node_ebs_volume_type: "{{ aws_ec2_ebs_volume_type | default('gp3', t
 aws_builder_node_ebs_gp3_convert: "{{ aws_ec2_ebs_gp3_convert | default(false) }}"
 aws_builder_node_ebs_gp3_iops: "{{ aws_ec2_ebs_gp3_iops | default(3000, true) }}"
 aws_builder_node_ebs_gp3_throughput: "{{ aws_ec2_ebs_gp3_throughput | default(125, true) }}"
+
+# Suppress inherited automatic updates on builders, including when an app AMI
+# is reused. Runtime conditions leave the resulting AMI's enablement intact.
+builder_security_update_units:
+  - security-updates-startup.service
+  - dnf-automatic.service
+  - dnf-automatic.timer
+  - dnf-automatic-download.service
+  - dnf-automatic-download.timer
+  - dnf-automatic-install.service
+  - dnf-automatic-install.timer
+  - dnf-automatic-notifyonly.service
+  - dnf-automatic-notifyonly.timer

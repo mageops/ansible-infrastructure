@@ -1,0 +1,23 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mageops-builder"
+
+--mageops-builder
+Content-Type: text/cloud-boothook; charset="us-ascii"
+
+#cloud-boothook
+#!/bin/sh
+set -eu
+
+# Ansible cannot guard inherited services after SSH becomes available: they
+# may already be updating packages. This hook runs before network-online.target.
+# /run is temporary, so application instances retain their normal updates.
+touch /run/mageops-ami-builder
+{% for unit in builder_security_update_units %}
+mkdir -p {{ ('/run/systemd/system/' ~ unit ~ '.d') | quote }}
+printf '[Unit]\nConditionPathExists=!/run/mageops-ami-builder\n' > {{ ('/run/systemd/system/' ~ unit ~ '.d/00-mageops-builder.conf') | quote }}
+{% endfor %}
+systemctl daemon-reload
+
+--mageops-builder
+{{ builder_instance_user_data }}
+--mageops-builder--
