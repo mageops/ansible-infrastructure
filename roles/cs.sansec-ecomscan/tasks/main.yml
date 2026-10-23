@@ -140,14 +140,14 @@
             - /tmp/sansec.pubkey.txt
             - /tmp/sansec-ecomscan.gnupg
 
-    - name: Configure Sansec eComscan license environment
+    - name: Configure Sansec eComscan license environment file
       no_log: true
-      cron:
-        name: ECOMSCAN_KEY
-        user: "{{ sansec_ecomscan_user }}"
-        env: true
-        job: "{{ sansec_ecomscan_license_key }}"
-        state: "{{ ((sansec_ecomscan_license_key | string | length) > 0) | ternary('present', 'absent') }}"
+      copy:
+        dest: /etc/sansec-ecomscan.env
+        content: "export ECOMSCAN_KEY={{ sansec_ecomscan_license_key | string | trim | quote }}\n"
+        owner: "{{ sansec_ecomscan_user }}"
+        group: root
+        mode: "0600"
 
     - name: Install Sansec eComscan monitoring cron
       no_log: true
@@ -160,6 +160,7 @@
         month: "{{ sansec_ecomscan_cron_month }}"
         weekday: "{{ sansec_ecomscan_cron_weekday }}"
         job: >-
+          . /etc/sansec-ecomscan.env &&
           {{ sansec_ecomscan_only_cron_node | bool | ternary('/usr/local/bin/mageopscli is_cron_node && ', '') }}{{ sansec_ecomscan_binary_path }}
           --monitor={{ sansec_ecomscan_monitor | quote }}
           {{ sansec_ecomscan_extra_args }}
