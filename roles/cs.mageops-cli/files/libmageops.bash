@@ -101,6 +101,9 @@ mageops::set_security_updates_scope() {
 
 mageops::security_updates_node_label() (
     local node_ip
+    local public_ip
+    local metadata_token
+    local -a curl_headers=()
 
     # Use the same installed identity as the SSH prompt, including under systemd.
     # Keep profile exports scoped to this subshell.
@@ -108,7 +111,17 @@ mageops::security_updates_node_label() (
 
     # Resolve at runtime so nodes launched from the AMI use their own address.
     node_ip="$(hostname -I | awk '{print $1}')"
-    printf '%s.%s-%s (%s)' "$MAGEOPS_NODE_ROLE" "$MAGEOPS_PROJECT" "$MAGEOPS_ENVIRONMENT" "$node_ip"
+    case "$config__public_ip_v4_api_url" in
+    http://169.254.169.254/*|http://instance-data/*)
+        metadata_token="$(curl -fsS --connect-timeout 2 --max-time 5 -X PUT \
+            -H 'X-aws-ec2-metadata-token-ttl-seconds: 60' \
+            http://169.254.169.254/latest/api/token 2>/dev/null)" || metadata_token=""
+        curl_headers=(-H "X-aws-ec2-metadata-token: $metadata_token")
+    ;;
+    esac
+    public_ip="$(curl -fsS --connect-timeout 2 --max-time 5 "${curl_headers[@]}" \
+        "$config__public_ip_v4_api_url" 2>/dev/null)" || public_ip=""
+    printf '%s.%s-%s (private: %s, public: %s)' "$MAGEOPS_NODE_ROLE" "$MAGEOPS_PROJECT" "$MAGEOPS_ENVIRONMENT" "$node_ip" "${public_ip:-unavailable}"
 )
 
 mageops::security_updates_log() {
@@ -263,6 +276,21 @@ mageops::security_updates_print_status() {
     fi
 }
 
+# DNF's transaction table uses one leading space for package names, including
+# wrapped names; continuation and obsoleted-package rows are indented further.
+mageops::security_updates_package_names() {
+    awk '
+        /^[^[:space:]].*:/ {
+            packages = ($0 ~ /^(Installing|Upgrading|Reinstalling|Downgrading)( dependencies| weak dependencies| group\/module packages| group packages)?:$/)
+        }
+        /^Transaction Summary/ { packages = 0 }
+        packages && /^ [^[:space:]]/ && !seen[$1]++ {
+            printf "%s%s", separator, $1
+            separator = ", "
+        }
+    '
+}
+
 mageops::security_updates_report() {
     local report
 
@@ -271,28 +299,59 @@ mageops::security_updates_report() {
         return 0
     fi
 
-    mkdir -p /run/security-updates
-    touch /run/security-updates/dnf-automatic-emitted
-    mageops::security_updates_notify "dnf-automatic report on $(mageops::security_updates_node_label):
-${report}"
+    mageops::security_updates_log "$report"
+    case "$report" in
+    "The following updates have been applied"*)
+        mkdir -p /run/security-updates
+        printf '%s\n' "$report" | mageops::security_updates_package_names > /run/security-updates/dnf-automatic-emitted
+        ;;
+    "The following updates were downloaded"*|"The following updates are available"*)
+        # Downloads are logged locally; only installed updates belong in Slack.
+        ;;
+    *)
+        mageops::security_updates_notify "DNF error on $(mageops::security_updates_node_label); see journal for details."
+        ;;
+    esac
 }
 
 mageops::security_updates_install() {
+    local packages="${1:-}"
+    local startup="${2:-false}"
+    local package_summary="updates applied"
+    local summary
     local tracer_rc
+    local tracer_report
+    local reboot_reason
     local restart_commands
+    local restart_command
+    local service_label
+    local restarted=""
+    local failed=""
     local restart_rc=0
 
+    if [[ -n "$packages" ]]; then
+        package_summary="$(printf '%s\n' "$packages" | awk -F ', ' '{print NF}') packages updated"
+    fi
+    summary="Security updates on $(mageops::security_updates_node_label): ${package_summary}"
+    if [[ "$startup" == true ]]; then
+        summary="Startup security updates on $(mageops::security_updates_node_label): ${package_summary}"
+    fi
+
     set +e
-    tracer -va
+    tracer_report="$(LC_ALL=C tracer -va 2>&1)"
     tracer_rc=$?
     set -e
+    mageops::security_updates_log "$tracer_report"
 
     if [[ "$tracer_rc" -eq 0 ]]; then
+        if [[ "$startup" != true ]]; then
+            mageops::security_updates_notify "${summary}; restarted: none."
+        fi
         return 0
     fi
 
     if [[ "$tracer_rc" -lt 100 ]]; then
-        mageops::security_updates_notify "Tracer failed after security updates on $(mageops::security_updates_node_label) with exit code ${tracer_rc}."
+        mageops::security_updates_notify "${summary}; tracer failed (exit ${tracer_rc}); restarts unknown."
         return "$tracer_rc"
     fi
 
@@ -301,37 +360,47 @@ mageops::security_updates_install() {
         restart_commands="$(tracer --daemons-only | tail -n +3 | sed '/^[[:space:]]*$/d')"
         set -e
         if [[ -n "$restart_commands" ]]; then
-            mageops::security_updates_notify "Restarting services affected by security updates on $(mageops::security_updates_node_label):
-${restart_commands}"
+            mageops::security_updates_log "Restart commands: ${restart_commands}"
             while IFS= read -r restart_command; do
-                if ! bash -c "$restart_command"; then
+                service_label="$(printf '%s' "$restart_command" | sed -E 's@^.*systemctl[[:space:]]+restart[[:space:]]+@@; s@^.*service[[:space:]]+([^[:space:]]+)[[:space:]]+restart$@\1@' | awk '{$1=$1; print}')"
+                if bash -c "$restart_command"; then
+                    restarted="${restarted:+${restarted}, }${service_label}"
+                else
+                    failed="${failed:+${failed}, }${service_label}"
                     restart_rc=1
                 fi
             done <<< "$restart_commands"
         fi
-        if [[ "$restart_rc" -ne 0 ]]; then
-            mageops::security_updates_notify "One or more service restarts failed after security updates on $(mageops::security_updates_node_label)."
+        if [[ "$startup" != true || "$restart_rc" -ne 0 ]]; then
+            mageops::security_updates_notify "${summary}; restarted: ${restarted:-none}${failed:+; restart failed: ${failed}}."
         fi
         return "$restart_rc"
     fi
 
     if [[ "$tracer_rc" -eq 101 || "$tracer_rc" -eq 103 || "$tracer_rc" -eq 104 ]]; then
-        mageops::security_updates_notify "Rebooting $(mageops::security_updates_node_label) after security updates; tracer reported exit code ${tracer_rc}."
+        case "$tracer_rc" in
+        101) reboot_reason="application restart required; rebooting per node policy" ;;
+        103) reboot_reason="session restart required; rebooting per node policy" ;;
+        104) reboot_reason="system reboot required" ;;
+        esac
+        mageops::security_updates_notify "${summary}; rebooting node (${reboot_reason}). Details in journal."
         /usr/bin/systemctl reboot
         return 0
     fi
 
-    mageops::security_updates_notify "Security updates on $(mageops::security_updates_node_label) left tracer advisory code ${tracer_rc}; no automatic host reboot performed."
+    mageops::security_updates_notify "${summary}; tracer advisory ${tracer_rc}; no automatic host reboot performed."
     return 0
 }
 
 mageops::security_updates_install_if_downloaded() {
+    local packages
     if [[ ! -e /run/security-updates/dnf-automatic-emitted ]]; then
         return 0
     fi
 
+    packages="$(cat /run/security-updates/dnf-automatic-emitted)"
     rm -f /run/security-updates/dnf-automatic-emitted
-    mageops::security_updates_install
+    mageops::security_updates_install "$packages"
 }
 
 mageops::security_updates_startup_install() {
@@ -350,7 +419,7 @@ mageops::security_updates_startup_install() {
 
     for (( attempt = 1; ; attempt++ )); do
         set +e
-        report="$(dnf -y --security update 2>&1)"
+        report="$(LC_ALL=C dnf -y --security update 2>&1)"
         dnf_rc=$?
         set -e
 
@@ -363,8 +432,8 @@ mageops::security_updates_startup_install() {
     done
 
     if [[ "$dnf_rc" -ne 0 ]];then
-        mageops::security_updates_notify "Security update startup install failed on $(mageops::security_updates_node_label) with exit code ${dnf_rc} after ${attempt} attempts:
-${report}"
+        mageops::security_updates_log "$report"
+        mageops::security_updates_notify "Startup security updates failed on $(mageops::security_updates_node_label) (exit ${dnf_rc}, ${attempt} attempts); see journal for details."
         return "$dnf_rc"
     fi
 
@@ -373,9 +442,9 @@ ${report}"
         return 0
     fi
 
-    mageops::security_updates_notify "Security update startup install completed on $(mageops::security_updates_node_label):
+    mageops::security_updates_log "Security update startup install completed on $(mageops::security_updates_node_label):
 ${report}"
-    mageops::security_updates_install
+    mageops::security_updates_install "$(printf '%s\n' "$report" | mageops::security_updates_package_names)" true
 }
 
 
