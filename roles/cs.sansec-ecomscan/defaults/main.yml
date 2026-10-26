@@ -13,11 +13,6 @@ sansec_ecomscan_license_key: ""
 sansec_ecomscan_monitor: ""
 sansec_ecomscan_user: root
 
-sansec_ecomscan_cron_name: Sansec eComscan monitoring
-sansec_ecomscan_cron_minute: "10"
-sansec_ecomscan_cron_hour: "*"
-sansec_ecomscan_cron_day: "*"
-sansec_ecomscan_cron_month: "*"
-sansec_ecomscan_cron_weekday: "*"
+sansec_ecomscan_timer_on_calendar: "*-*-* *:10:00"
 sansec_ecomscan_only_cron_node: no
 sansec_ecomscan_extra_args: ""
