@@ -11,9 +11,11 @@ set -eu
 # Ansible cannot guard inherited services after SSH becomes available: they
 # may already be updating packages. This hook runs before network-online.target.
 # Provisioning re-enables the configured updates before creating the AMI.
-{% for unit in security_updates_dnf_units + ['security-updates-startup.service'] %}
+# The startup unit goes first: it can reboot the builder. A failure on one unit
+# must not leave the next ones enabled.
+{% for unit in (security_updates_startup_units + security_updates_dnf_units) %}
 if systemctl cat {{ unit | quote }} >/dev/null 2>&1; then
-    systemctl disable --now {{ unit | quote }}
+    systemctl disable --now {{ unit | quote }} || true
 fi
 {% endfor %}
 

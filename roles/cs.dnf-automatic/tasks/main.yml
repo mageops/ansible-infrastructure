@@ -102,9 +102,7 @@
     enabled: yes
     state: "{{ (security_updates_start_timers | bool) | ternary('started', 'stopped') }}"
     daemon_reload: yes
-  loop:
-    - dnf-automatic-download.timer
-    - dnf-automatic-install.timer
+  loop: "{{ security_updates_dnf_timers }}"
   when: security_updates_enabled
 
 - name: Install startup security update unit
@@ -138,14 +136,15 @@
 
 - name: Remove dnf-automatic systemd overrides
   file:
-    path: "{{ item }}"
+    path: "/etc/systemd/system/{{ item }}.d/security-updates.conf"
     state: absent
-  loop:
-    - /etc/systemd/system/dnf-automatic-download.service.d/security-updates.conf
-    - /etc/systemd/system/dnf-automatic-install.service.d/security-updates.conf
-    - /etc/systemd/system/dnf-automatic-download.timer.d/security-updates.conf
-    - /etc/systemd/system/dnf-automatic-install.timer.d/security-updates.conf
-    - /etc/dnf/security-updates.conf
+  loop: "{{ security_updates_dnf_units }}"
+  when: not security_updates_enabled
+
+- name: Remove security update environment
+  file:
+    path: /etc/dnf/security-updates.conf
+    state: absent
   when: not security_updates_enabled
 
 - name: Disable security update automation
@@ -154,8 +153,6 @@
     enabled: no
     state: stopped
     daemon_reload: yes
-  loop:
-    - dnf-automatic-download.timer
-    - dnf-automatic-install.timer
+  loop: "{{ security_updates_dnf_timers }}"
   failed_when: no
   when: not security_updates_enabled
