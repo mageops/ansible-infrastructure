@@ -2159,11 +2159,15 @@ mageops_security_updates_slack_bot_token: "{{ mageops_notifications_slack_bot_to
 mageops_security_updates_global_kill_switch_url: ""
 
 # Shared by DNF override provisioning and the AMI builder boot guard.
-security_updates_dnf_units:
+security_updates_dnf_services:
   - dnf-automatic-download.service
   - dnf-automatic-install.service
+security_updates_dnf_timers:
   - dnf-automatic-download.timer
   - dnf-automatic-install.timer
+security_updates_dnf_units: "{{ security_updates_dnf_services + security_updates_dnf_timers }}"
+security_updates_startup_units:
+  - security-updates-startup.service
 
 # Pass security update configuration into `cs.dnf-automatic` role vars
 security_updates_enabled: "{{ (aws_use | bool) and (mageops_security_updates_enabled | bool) }}"
