@@ -1,3 +1,12 @@
+{# Normalize before custom code or checkout POST requests can return(pass). #}
+if (req.restarts == 0) {
+    # Local Nginx supplies the visitor port in X-Remote-Port.
+    if (client.ip != "127.0.0.1") {
+        # Direct clients cannot override their connection port with a header.
+        set req.http.X-Remote-Port = std.port(client.ip);
+    }
+}
+
 {% if varnish_lang_redirects | length > 0 %}
     set req.http.X-Full-Url = req.http.host + req.url;
     set req.http.Accept-Language = al_rule.filter(std.tolower(req.http.Accept-Language));

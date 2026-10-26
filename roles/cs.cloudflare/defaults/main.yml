@@ -10,3 +10,13 @@ cloudflare_nginx_map: "{{ nginx_confd_dir }}/{{ cloudflare_nginx_map_filename }}
 cloudflare_update_script: "/etc/cron.daily/update_nginx_config.sh"
 cloudflare_nginx_block_non_cf_traffic_config_directory: "{{ nginx_etc_dir }}/server.d/defaults"
 cloudflare_nginx_block_non_cf_traffic_config: "{{ cloudflare_nginx_block_non_cf_traffic_config_directory }}/ban-non-cf.conf"
+
+# Visitor source port header; used only when cloudflare_enabled is true.
+# In the Cloudflare dashboard for the site, open Rules > Overview > Create rule
+# > Request Header Transform Rule. Match all shop hostnames (including checkout/API).
+# Choose Set dynamic, header X-Client-Source-Port (or the name configured below),
+# value to_string(cf.edge.client_port), then Deploy. Set overwrites client-supplied values.
+# The header name must be outside the reserved CF-/X-CF- prefixes.
+# This role does not create the Cloudflare rule. Nginx accepts the header only
+# from Cloudflare connection IPs. Traffic must pass through Nginx for this support.
+cloudflare_source_port_header: X-Client-Source-Port
