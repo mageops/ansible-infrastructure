@@ -9,6 +9,14 @@
         fail_msg: sansec_ecomscan_monitor must be set when sansec_ecomscan_enabled is enabled.
         quiet: true
 
+    - name: Validate Sansec eComscan license key
+      no_log: true
+      assert:
+        that:
+          - sansec_ecomscan_license_key | default('', true) | string | trim | length > 0
+        fail_msg: sansec_ecomscan_license_key must be set when sansec_ecomscan_enabled is enabled.
+        quiet: true
+
     - name: Install tools for Sansec eComscan signature verification
       package:
         name:
@@ -140,28 +148,29 @@
             - /tmp/sansec.pubkey.txt
             - /tmp/sansec-ecomscan.gnupg
 
-    - name: Configure Sansec eComscan license environment file
+    - name: Write Sansec eComscan service config
       no_log: true
-      copy:
-        dest: /etc/sansec-ecomscan.env
-        content: "export ECOMSCAN_KEY={{ sansec_ecomscan_license_key | string | trim | quote }}\n"
-        owner: "{{ sansec_ecomscan_user }}"
+      template:
+        src: sansec-ecomscan.default.j2
+        dest: /etc/default/sansec-ecomscan
+        owner: root
         group: root
         mode: "0600"
 
-    - name: Install Sansec eComscan monitoring cron
-      no_log: true
-      cron:
-        name: "{{ sansec_ecomscan_cron_name }}"
-        user: "{{ sansec_ecomscan_user }}"
-        minute: "{{ sansec_ecomscan_cron_minute }}"
-        hour: "{{ sansec_ecomscan_cron_hour }}"
-        day: "{{ sansec_ecomscan_cron_day }}"
-        month: "{{ sansec_ecomscan_cron_month }}"
-        weekday: "{{ sansec_ecomscan_cron_weekday }}"
-        job: >-
-          . /etc/sansec-ecomscan.env &&
-          {{ sansec_ecomscan_only_cron_node | bool | ternary('/usr/local/bin/mageopscli is_cron_node && ', '') }}{{ sansec_ecomscan_binary_path }}
-          --monitor={{ sansec_ecomscan_monitor | quote }}
-          {{ sansec_ecomscan_extra_args }}
-          {{ magento_live_release_dir | quote }}
+    - name: Install Sansec eComscan systemd units
+      template:
+        src: "{{ item }}"
+        dest: "/etc/systemd/system/{{ item }}"
+        owner: root
+        group: root
+        mode: "0644"
+      loop:
+        - sansec-ecomscan.service
+        - sansec-ecomscan.timer
+
+    - name: Enable Sansec eComscan timer
+      systemd:
+        name: sansec-ecomscan.timer
+        enabled: yes
+        state: started
+        daemon_reload: yes
