@@ -45,4 +45,18 @@
         - supervisord.service
       loop_control:
         loop_var: service_name
-      
+
+# One-time migration of root-owned pio cache entries. TODO: remove after 2027-01-28.
+# This play runs after the ASG instance refresh. No node with the old worker configuration still writes.
+# The service runs in the background and does not block the deploy.
+# When the next deploy replaces this node, the next run continues from the saved progress.
+- hosts: app:&current:&immutable
+  gather_facts: no
+  tasks:
+    - name: Start pio cache owner migration
+      systemd:
+        name: pio-cache-owner.service
+        state: started
+        daemon_reload: yes
+      run_once: true
+      when: mageops_pio_worker_enable and pio_filesystem == 'local'

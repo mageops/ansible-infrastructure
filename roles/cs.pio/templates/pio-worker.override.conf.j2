@@ -1,2 +1,7 @@
 [Service]
 CPUShares={{ pio_worker_cpu_shares }}
+UMask={{ pio_worker_umask }}
+Group={{ pio_worker_group }}
+{% if _pio_worker_user %}
+User={{ _pio_worker_user }}
+{% endif %}
