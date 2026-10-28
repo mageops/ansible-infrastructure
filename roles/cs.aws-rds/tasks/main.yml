@@ -150,10 +150,10 @@
   register: _aws_rds_wait_upgrade_result
   retries: 600
   delay: 5
-  until: >-
-    (_aws_rds_wait_upgrade_result.instances[0].db_instance_status | lower)
-    in (["available", "storage-optimization"] | map('lower') | list)
-  when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].engine_version != aws_rds_db_engine_version
+  until: _aws_rds_wait_upgrade_result.instances[0].db_instance_status in ["available", "storage-optimization"]
+  when: >-
+    (aws_rds_current.instances|length) > 0
+    and (aws_rds_current.instances[0].engine_version.split('.')[:2] | join('.')) != aws_rds_db_engine_version
 
 - name: Remove temporary parameter groups used for engine upgrade
   amazon.aws.rds_instance_param_group:
