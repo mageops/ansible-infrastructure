@@ -21,6 +21,34 @@
     state: directory
     mode: 0755
 
+# One-time migration of root-owned cache entries. TODO: remove after 2027-01-28.
+- name: Check pio cache owner migration marker
+  stat:
+    path: "{{ pio_cache_owner_done_marker }}"
+  register: _pio_cache_owner_done
+  when: pio_filesystem == 'local'
+
+# The worker can run as the Magento user only after it owns, or can write, every cache entry.
+- name: Select pio-worker user
+  set_fact:
+    _pio_worker_user: >-
+      {{ pio_worker_user or ((_pio_cache_owner_done.stat.exists | default(false)) | ternary(magento_user, '')) }}
+
+- name: Install pio cache owner migration
+  when: pio_filesystem == 'local'
+  block:
+    - name: Install pio cache owner migration script
+      template:
+        src: "pio-cache-owner.sh.j2"
+        dest: "/usr/local/bin/pio-cache-owner"
+        mode: 0755
+
+    - name: Install pio cache owner migration service
+      template:
+        src: "pio-cache-owner.service.j2"
+        dest: "/etc/systemd/system/pio-cache-owner.service"
+        mode: 0644
+
 - name: Write service override
   template:
     src: "pio-worker.override.conf.j2"

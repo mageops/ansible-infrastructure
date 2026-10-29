@@ -1,0 +1,53 @@
+#!/bin/bash
+# One-time migration: gives the root-owned pio cache entries to the Magento user.
+# TODO: remove after 2027-01-28, together with pio-cache-owner.service, its tasks in tasks/app.yml,
+# and its start in site.step-65-post-deploy.yml.
+#
+# Old worker releases ran as root and wrote root:root entries. The worker now runs with the
+# Magento group and umask 0002. After this migration completes, the next deploy runs it as the
+# Magento user (see tasks/app.yml).
+#
+# You can stop and start this script again at any time. More runs at the same time are safe.
+set -euo pipefail
+
+export OWNER={{ magento_user | quote }}
+export GROUP={{ magento_group | quote }}
+DONE_MARKER={{ pio_cache_owner_done_marker | quote }}
+# EFS metadata operations use filesystem throughput that Magento shares.
+PARALLEL_JOBS=64
+SPLIT_DEPTH=2
+CACHE_DIRECTORIES=(
+    {{ (pio_filesystem_local_dir ~ '/' ~ pio_target_directory) | quote }}
+    {{ (pio_filesystem_local_dir ~ '/' ~ pio_media_target_directory) | quote }}
+)
+
+# Gives each entry in the walk that has another owner or group to the Magento user.
+# Extra arguments limit the walk, for example -maxdepth 1.
+# -ignore_readdir_race ignores temporary files that the worker renames during the walk.
+change_owner() {
+    local path=$1
+    shift
+    find "$path" -xdev -ignore_readdir_race "$@" \( ! -user "$OWNER" -o ! -group "$GROUP" \) \
+        -exec chown --no-dereference "$OWNER:$GROUP" {} +
+}
+export -f change_owner
+
+for directory in "${CACHE_DIRECTORIES[@]}"; do
+    if [[ ! -d $directory ]]; then
+        continue
+    fi
+
+    # The levels above the split depth have few entries. One job is enough for them.
+    change_owner "$directory" -maxdepth $((SPLIT_DEPTH - 1))
+
+    # Each entry at the split depth is one parallel job for its full subtree.
+    # shellcheck disable=SC2016 # The child bash expands $1.
+    find "$directory" -xdev -mindepth "$SPLIT_DEPTH" -maxdepth "$SPLIT_DEPTH" -print0 |
+        xargs --null --no-run-if-empty --max-args=1 --max-procs="$PARALLEL_JOBS" \
+            bash -c 'change_owner "$1"' change_owner
+done
+
+# Only a run without errors gets here. After this marker exists, the unit does not start again
+# and the next deploy runs the worker as the Magento user.
+touch "$DONE_MARKER"
+echo "Migration complete."
