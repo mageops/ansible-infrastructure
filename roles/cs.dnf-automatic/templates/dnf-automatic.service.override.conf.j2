@@ -3,6 +3,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+# Keep command-emitter report headings stable for summary parsing.
+Environment=LC_ALL=C
 EnvironmentFile=/etc/dnf/security-updates.conf
 RuntimeDirectory=security-updates
 ExecCondition=/usr/local/bin/mageopscli security_updates check
