@@ -113,6 +113,14 @@
   include_tasks: upgrade_iteration.yml
   loop: "{{ aws_rds_upgrade_plan }}"
 
+- name: Upgrade read replicas to target engine version before primary reconciliation
+  include_tasks: upgrade_read_replicas.yml
+  vars:
+    aws_rds_replica_target_engine_version: "{{ aws_rds_db_engine_version }}"
+  when:
+    - aws_rds_current.instances | length > 0
+    - aws_rds_current.instances[0].read_replica_db_instance_identifiers | default([]) | length > 0
+
 - name: Create MySQL/MariaDB RDS
   amazon.aws.rds_instance:
     region: "{{ aws_region }}"
@@ -142,16 +150,101 @@
     enable_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports }}"
     apply_immediately: yes
     wait: yes
+  register: _aws_rds_instance_result
 
-- name: Wait for upgrade to finish
+- name: Wait for AWS to acknowledge that rds update is happening (workaround)
+  pause:
+    minutes: 1
+  when:
+    - aws_rds_current.instances | length > 0
+    - _aws_rds_instance_result.changed
+
+- name: Wait for RDS update to finish
   amazon.aws.rds_instance_info:
     region: "{{ aws_region }}"
     db_instance_identifier: "{{ aws_rds_instance_name }}"
   register: _aws_rds_wait_upgrade_result
   retries: 600
   delay: 5
-  until: _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "available" or _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "Storage-optimization"
-  when: (aws_rds_current.instances|length) > 0 and aws_rds_current.instances[0].engine_version != aws_rds_db_engine_version
+  until:
+    - _aws_rds_wait_upgrade_result.instances[0].db_instance_status == "available"
+    - _aws_rds_wait_upgrade_result.instances[0].pending_modified_values | default({}) | length == 0
+  when:
+    - aws_rds_current.instances | length > 0
+    - _aws_rds_instance_result.changed
+
+- name: Wait for RDS primary to be ready for read replica creation
+  amazon.aws.rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_instance_name }}"
+  register: _aws_rds_read_replica_source
+  retries: 600
+  delay: 5
+  until:
+    - _aws_rds_read_replica_source.instances | length > 0
+    - _aws_rds_read_replica_source.instances[0].db_instance_status == "available"
+    - _aws_rds_read_replica_source.instances[0].pending_modified_values | default({}) | length == 0
+  when: aws_rds_read_replica_enabled | bool
+
+- name: Check current RDS read replica configuration
+  amazon.aws.rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_read_replica_name }}"
+  register: _aws_rds_read_replica_current
+  when: aws_rds_read_replica_enabled | bool
+
+- name: Create RDS read replica
+  amazon.aws.rds_instance:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_read_replica_name }}"
+    source_db_instance_identifier: "{{ aws_rds_instance_name }}"
+    source_region: "{{ aws_rds_read_replica_source_region | default(omit, true) }}"
+    read_replica: yes
+    db_instance_class: "{{ aws_rds_read_replica_instance_type }}"
+    availability_zone: "{{ aws_rds_read_replica_availability_zone | default(omit, true) }}"
+    db_parameter_group_name: "{{ aws_rds_read_replica_param_group_name | default(omit, true) }}"
+    publicly_accessible: "{{ aws_rds_read_replica_publicly_accessible }}"
+    db_subnet_group_name: "{{ aws_rds_read_replica_subnet_group_name }}"
+    vpc_security_group_ids: "{{ aws_rds_read_replica_security_groups }}"
+    auto_minor_version_upgrade: "{{ aws_rds_auto_minor_version_upgrade }}"
+    tags: "{{ aws_rds_read_replica_tags }}"
+    enable_performance_insights: "{{ aws_rds_read_replica_performance_insights }}"
+    performance_insights_retention_period: "{{ aws_rds_performance_insights_retention_period if aws_rds_read_replica_performance_insights else omit }}"
+    performance_insights_kms_key_id: >-
+      {{ aws_rds_encryption_key_name if aws_rds_storage_encrypt and aws_rds_dedicated_encryption_key and aws_rds_read_replica_performance_insights else omit }}
+    enable_cloudwatch_logs_exports: "{{ aws_rds_cloudwatch_logs_exports }}"
+    wait: yes
+  register: _aws_rds_read_replica_result
+  when:
+    - aws_rds_read_replica_enabled | bool
+    - _aws_rds_read_replica_current.instances | length == 0
+
+- name: Tag existing RDS read replica
+  amazon.aws.rds_instance:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_read_replica_name }}"
+    tags: "{{ aws_rds_read_replica_tags }}"
+    purge_tags: no
+    wait: yes
+  when:
+    - aws_rds_read_replica_enabled | bool
+    - _aws_rds_read_replica_current.instances | length > 0
+
+- name: Wait for RDS read replica creation to finish
+  amazon.aws.rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ aws_rds_read_replica_name }}"
+  register: _aws_rds_wait_read_replica_result
+  retries: 600
+  delay: 5
+  until:
+    - _aws_rds_wait_read_replica_result.instances | length > 0
+    - _aws_rds_wait_read_replica_result.instances[0].db_instance_status == "available"
+    - _aws_rds_wait_read_replica_result.instances[0].pending_modified_values | default({}) | length == 0
+  when:
+    - aws_rds_read_replica_enabled | bool
+    - _aws_rds_read_replica_result is defined
+    - _aws_rds_read_replica_result.changed
 
 - name: Remove temporary parameter groups used for engine upgrade
   amazon.aws.rds_instance_param_group:

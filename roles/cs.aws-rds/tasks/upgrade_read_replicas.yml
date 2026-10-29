@@ -1,0 +1,43 @@
+- name: Set current read replica ids
+  set_fact:
+    _aws_rds_read_replica_ids: "{{ aws_rds_current.instances[0].read_replica_db_instance_identifiers | default([]) }}"
+    _aws_rds_replica_param_group_name: "{{ aws_rds_replica_param_group_name | default(aws_rds_param_group_name) }}"
+
+- name: Gather current read replica configuration
+  rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ item }}"
+  loop: "{{ _aws_rds_read_replica_ids }}"
+  register: _aws_rds_read_replicas_current
+
+- name: Upgrade read replicas before upgrading primary
+  rds_instance:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ item.item }}"
+    engine: "{{ aws_rds_db_engine }}"
+    engine_version: "{{ aws_rds_replica_target_engine_version }}"
+    db_parameter_group_name: "{{ _aws_rds_replica_param_group_name }}"
+    auto_minor_version_upgrade: "{{ aws_rds_auto_minor_version_upgrade }}"
+    allow_major_version_upgrade: "{{ aws_rds_replica_allow_major_version_upgrade | default(aws_rds_allow_major_version_upgrade) }}"
+    apply_immediately: yes
+    wait: yes
+  loop: "{{ _aws_rds_read_replicas_current.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when:
+    - item.instances | length > 0
+    - >-
+      item.instances[0].engine_version != aws_rds_replica_target_engine_version
+      or _aws_rds_replica_param_group_name not in (
+        item.instances[0].db_parameter_groups | default([]) | map(attribute='db_parameter_group_name') | list
+      )
+
+- name: Wait for read replicas to be available
+  rds_instance_info:
+    region: "{{ aws_region }}"
+    db_instance_identifier: "{{ item }}"
+  register: _aws_rds_wait_replica_finish_result
+  retries: 600
+  delay: 5
+  until: _aws_rds_wait_replica_finish_result.instances[0].db_instance_status == "available"
+  loop: "{{ _aws_rds_read_replica_ids }}"
