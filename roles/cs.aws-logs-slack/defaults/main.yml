@@ -29,6 +29,8 @@ aws_logs_slack_log_groups_extra: []
 aws_logs_slack_log_groups_default:
     - group: "nginx/error.log"
       filter: 'FastCGI Fatal'
+    - group: "syslog"
+      filter: '%systemd-oomd.*Killed.*memory|earlyoom.*sending.*SIG|Out.*of.*memory|oom-kill|Killed.*process%'
 
 aws_logs_slack_log_groups_report:
     - group: "magento/report"
