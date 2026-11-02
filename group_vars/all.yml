@@ -2021,7 +2021,7 @@ mageops_packages_tools:
 # Ops tools
 mageops_packages_ops:
   - htop
-  - iotop
+  - iotop-c
   - sysstat
   - strace
   - nmap
