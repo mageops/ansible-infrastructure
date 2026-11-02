@@ -1,3 +1,5 @@
 allow_duplicates: false
 dependencies:
   - role: cs.nginx
+  - role: cs.cloudflare
+    when: cloudflare_enabled | bool
