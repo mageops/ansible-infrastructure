@@ -29,9 +29,10 @@
     rds_gfs_weekly_to_delete: "{{ _rds_gfs_snapshots.snapshots | json_query(_filter_weekly_query) | sort(attribute='snapshot_create_time', reverse=True) | json_query('[' ~ rds_gfs_weekly_snapshot_retention ~ ':].db_snapshot_identifier') }}"
     rds_gfs_monthly_to_delete: "{{ _rds_gfs_snapshots.snapshots | json_query(_filter_monthly_query) | sort(attribute='snapshot_create_time', reverse=True) | json_query('[' ~ rds_gfs_monthly_snapshot_retention ~ ':].db_snapshot_identifier') }}"
   vars:
-    _filter_daily_query: "[?tags.GfsType=='daily']"
-    _filter_weekly_query: "[?tags.GfsType=='weekly']"
-    _filter_monthly_query: "[?tags.GfsType=='monthly']"
+    # rds_snapshot_info returns the AWS snapshot tags in tag_list.
+    _filter_daily_query: "[?tag_list[?key=='GfsType' && value=='daily']]"
+    _filter_weekly_query: "[?tag_list[?key=='GfsType' && value=='weekly']]"
+    _filter_monthly_query: "[?tag_list[?key=='GfsType' && value=='monthly']]"
 
 - name: Set snapshots to remove
   set_fact:

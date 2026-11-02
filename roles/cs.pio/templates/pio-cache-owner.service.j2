@@ -1,0 +1,10 @@
+# One-time migration of root-owned pio cache entries. TODO: remove after 2027-01-28.
+# site.step-65-post-deploy.yml starts this unit. It is not enabled at boot.
+[Unit]
+Description=Give pio cache entries to the Magento user
+RequiresMountsFor={{ pio_filesystem_local_dir }}
+ConditionPathExists=!{{ pio_cache_owner_done_marker }}
+
+[Service]
+Type=exec
+ExecStart=/usr/local/bin/pio-cache-owner

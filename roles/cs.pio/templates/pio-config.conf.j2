@@ -18,6 +18,7 @@
         kind: "LazyResizeHttpServer",
         addr: "127.0.0.1:8441",
         quality_target_spread: {{ pio_quality_target_spread }},
+        ssimulacra2_enabled: {{ pio_ssimulacra2_enabled | bool | lower }},
         secret: "{{ lazy_resize_secret }}",
         source_directory: "catalog/product",
         target_directory: "{{ pio_target_directory }}",
@@ -31,6 +32,9 @@
                     spread: {{ pio_media_quality_spread }}
                 ),
                 target_ssim: {{ pio_media_target_ssim }},
+{% if pio_media_target_ssimulacra2 is not none %}
+                target_ssimulacra2: {{ pio_media_target_ssimulacra2 }},
+{% endif %}
                 source_directory: "",
                 target_directory: "{{ pio_media_target_directory }}",
                 excluded_paths: [

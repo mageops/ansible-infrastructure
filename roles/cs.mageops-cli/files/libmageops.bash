@@ -73,6 +73,377 @@ mageops::update_s3_file() {
     echo "$content" | aws s3 cp - "$url"
 }
 
+mageops::set_security_updates_scope() {
+    local state=$1
+    local scope=$2
+
+    if [ "$scope" = all ] || [ "$scope" = app ];then
+        features::update_feature_flag security_updates_app "$state"
+    fi
+
+    if [ "$scope" = all ] || [ "$scope" = varnish ];then
+        features::update_feature_flag security_updates_varnish "$state"
+    fi
+
+    if [ "$scope" = all ] || [ "$scope" = persistent ];then
+        features::update_feature_flag security_updates_persistent "$state"
+    fi
+
+    case "$scope" in
+    all|app|varnish|persistent)
+        return 0
+    ;;
+    *)
+        return 2
+    ;;
+    esac
+}
+
+mageops::security_updates_node_label() (
+    local node_ip
+    local public_ip
+
+    # Use the same installed identity as the SSH prompt, including under systemd.
+    # Keep profile exports scoped to this subshell.
+    source /etc/profile.d/002-mageops-env.sh
+
+    # Resolve at runtime so nodes launched from the AMI use their own address.
+    node_ip="$(hostname -I | awk '{print $1}')"
+    case "$config__public_ip_v4_api_url" in
+    http://169.254.169.254/*|http://instance-data/*)
+        public_ip="$(aws::public_ipv4 2>/dev/null)" || public_ip=""
+    ;;
+    *)
+        public_ip="$(curl -fsS --connect-timeout 2 --max-time 5 \
+            "$config__public_ip_v4_api_url" 2>/dev/null)" || public_ip=""
+    ;;
+    esac
+    printf '%s.%s-%s (private: %s, public: %s)' "$MAGEOPS_NODE_ROLE" "$MAGEOPS_PROJECT" "$MAGEOPS_ENVIRONMENT" "$node_ip" "${public_ip:-unavailable}"
+)
+
+mageops::security_updates_log() {
+    local message="$1"
+    local log_identifier="${LOG_IDENTIFIER:-security-updates}"
+
+    logger -t "$log_identifier" -- "$message"
+    printf '%s\n' "$message"
+}
+
+mageops::security_updates_slack_payload() {
+    local message="$1"
+
+    printf '%s' "$message" | jq --raw-input --slurp --compact-output --arg channel "${SLACK_CHANNEL:-}" \
+        '{text: .} + (if $channel == "" then {} else {channel: $channel} end)'
+}
+
+mageops::security_updates_notify_slack_bot() {
+    local message="$1"
+    local slack_bot_token="${SLACK_BOT_TOKEN:-}"
+    local response
+
+    # Pass the token and the report through file descriptors.
+    # Other local users can read the arguments of a process.
+    response="$(mageops::security_updates_slack_payload "$message" | curl --silent --show-error --fail --max-time 10 \
+        --header @<(printf 'Authorization: Bearer %s\n' "$slack_bot_token") \
+        --header 'Content-Type: application/json; charset=utf-8' \
+        --data-binary @- \
+        https://slack.com/api/chat.postMessage)" || {
+        mageops::security_updates_log "Failed to send security update notification to Slack bot API."
+        return 1
+    }
+
+    if ! printf '%s' "$response" | jq --exit-status '.ok == true' > /dev/null 2>&1; then
+        mageops::security_updates_log "Failed to send security update notification to Slack bot API: ${response}"
+        return 1
+    fi
+
+    return 0
+}
+
+mageops::security_updates_notify() {
+    local message="$1"
+    local slack_bot_token="${SLACK_BOT_TOKEN:-}"
+    local slack_channel="${SLACK_CHANNEL:-}"
+
+    mageops::security_updates_log "$message"
+
+    if [ "${SLACK_ENABLED:-true}" != true ]; then
+        mageops::security_updates_log "Security update Slack notification skipped: SLACK_ENABLED is not true."
+        return 0
+    fi
+
+    if [[ -z "$slack_bot_token" ]]; then
+        mageops::security_updates_log "Security update Slack notification skipped: SLACK_BOT_TOKEN is empty."
+        return 0
+    fi
+
+    if [[ -z "$slack_channel" ]]; then
+        mageops::security_updates_log "Security update Slack notification skipped: SLACK_CHANNEL is empty."
+        return 0
+    fi
+
+    mageops::security_updates_notify_slack_bot "$message" || true
+}
+
+mageops::security_updates_check_kill_switch_url() {
+    local label="$1"
+    local url="$2"
+    local value
+
+    if [[ -z "$url" ]]; then
+        return 0
+    fi
+
+    value="$(curl --silent --show-error --fail --max-time 10 "$url" 2>/dev/null)" || {
+        mageops::security_updates_log "Security updates ${label} kill switch could not be read; continuing."
+        return 0
+    }
+
+    if [ "$value" = true ]; then
+        mageops::security_updates_notify "Security updates blocked on $(mageops::security_updates_node_label): ${label} kill switch is active."
+        return 1
+    fi
+
+    return 0
+}
+
+mageops::security_updates_check() {
+    local node_role="${SECURITY_UPDATES_NODE_ROLE:-generic}"
+    local feature_value
+
+    mageops::security_updates_check_kill_switch_url "global" "${GLOBAL_KILL_SWITCH_URL:-}" || return 1
+
+    case "$node_role" in
+    app|varnish|persistent)
+        feature_value="$(features::read_feature_flag "security_updates_${node_role}" "true")"
+        if [ "$feature_value" = true ];then
+            return 0
+        fi
+
+        mageops::security_updates_log "Security updates skipped: features.json disabled security_updates_${node_role}."
+        return 1
+    ;;
+    *)
+        return 0
+    ;;
+    esac
+}
+
+mageops::security_updates_print_status() {
+    local config_path="${SECURITY_UPDATES_CONFIG_PATH:-/etc/dnf/security-updates.conf}"
+    local node_role="${SECURITY_UPDATES_NODE_ROLE:-generic}"
+    local download_timer_name="dnf-automatic-download.timer"
+    local install_timer_name="dnf-automatic-install.timer"
+    local value
+
+    printf 'Security updates setup\n'
+    printf '  config: %s\n' "$config_path"
+    printf '  node_role: %s\n' "$node_role"
+
+    printf 'Features\n'
+    case "$node_role" in
+    app|varnish|persistent)
+        value="$(features::read_feature_flag "security_updates_${node_role}" "true")"
+        printf '  security_updates_%s: %s\n' "$node_role" "$value"
+    ;;
+    *)
+        printf '  security_updates: not scoped for node role\n'
+    ;;
+    esac
+
+    printf 'Systemd\n'
+    if command -v systemctl >/dev/null 2>&1;then
+        printf '  download_timer: %s\n' "$download_timer_name"
+        value="$(systemctl is-enabled "$download_timer_name" 2>/dev/null || true)"
+        printf '  download_timer_enabled: %s\n' "${value:-unknown}"
+        value="$(systemctl is-active "$download_timer_name" 2>/dev/null || true)"
+        printf '  download_timer_active: %s\n' "${value:-unknown}"
+        printf '  install_timer: %s\n' "$install_timer_name"
+        value="$(systemctl is-enabled "$install_timer_name" 2>/dev/null || true)"
+        printf '  install_timer_enabled: %s\n' "${value:-unknown}"
+        value="$(systemctl is-active "$install_timer_name" 2>/dev/null || true)"
+        printf '  install_timer_active: %s\n' "${value:-unknown}"
+    else
+        printf '  download_timer: %s\n' "$download_timer_name"
+        printf '  download_timer_enabled: unknown\n'
+        printf '  download_timer_active: unknown\n'
+        printf '  install_timer: %s\n' "$install_timer_name"
+        printf '  install_timer_enabled: unknown\n'
+        printf '  install_timer_active: unknown\n'
+    fi
+}
+
+# DNF's transaction table uses one leading space for package names, including
+# wrapped names; continuation and obsoleted-package rows are indented further.
+mageops::security_updates_package_names() {
+    awk '
+        /^[^[:space:]].*:/ {
+            packages = ($0 ~ /^(Installing|Upgrading|Reinstalling|Downgrading)( dependencies| weak dependencies| group\/module packages| group packages)?:$/)
+        }
+        /^Transaction Summary/ { packages = 0 }
+        packages && /^ [^[:space:]]/ && !seen[$1]++ {
+            printf "%s%s", separator, $1
+            separator = ", "
+        }
+    '
+}
+
+mageops::security_updates_report() {
+    local report
+
+    report="$(cat)"
+    if [[ -z "$report" ]]; then
+        return 0
+    fi
+
+    mageops::security_updates_log "$report"
+    case "$report" in
+    "The following updates have been applied"*)
+        mkdir -p /run/security-updates
+        printf '%s\n' "$report" | mageops::security_updates_package_names > /run/security-updates/dnf-automatic-emitted
+        ;;
+    "The following updates were downloaded"*|"The following updates are available"*)
+        # Downloads are logged locally; only installed updates belong in Slack.
+        ;;
+    *)
+        mageops::security_updates_notify "DNF error on $(mageops::security_updates_node_label); see journal for details."
+        ;;
+    esac
+}
+
+mageops::security_updates_install() {
+    local packages="${1:-}"
+    local startup="${2:-false}"
+    local package_summary="updates applied"
+    local summary
+    local tracer_rc
+    local tracer_report
+    local reboot_reason
+    local restart_commands
+    local restart_command
+    local service_label
+    local restarted=""
+    local failed=""
+    local restart_rc=0
+
+    if [[ -n "$packages" ]]; then
+        package_summary="$(printf '%s\n' "$packages" | awk -F ', ' '{print NF}') packages updated"
+    fi
+    summary="Security updates on $(mageops::security_updates_node_label): ${package_summary}"
+    if [[ "$startup" == true ]]; then
+        summary="Startup security updates on $(mageops::security_updates_node_label): ${package_summary}"
+    fi
+
+    set +e
+    tracer_report="$(LC_ALL=C tracer -va 2>&1)"
+    tracer_rc=$?
+    set -e
+    mageops::security_updates_log "$tracer_report"
+
+    if [[ "$tracer_rc" -eq 0 ]]; then
+        if [[ "$startup" != true ]]; then
+            mageops::security_updates_notify "${summary}; restarted: none."
+        fi
+        return 0
+    fi
+
+    if [[ "$tracer_rc" -lt 100 ]]; then
+        mageops::security_updates_notify "${summary}; tracer failed (exit ${tracer_rc}); restarts unknown."
+        return "$tracer_rc"
+    fi
+
+    if [[ "$tracer_rc" -eq 102 ]]; then
+        set +e
+        restart_commands="$(tracer --daemons-only | tail -n +3 | sed '/^[[:space:]]*$/d')"
+        set -e
+        if [[ -n "$restart_commands" ]]; then
+            mageops::security_updates_log "Restart commands: ${restart_commands}"
+            while IFS= read -r restart_command; do
+                service_label="$(printf '%s' "$restart_command" | sed -E 's@^.*systemctl[[:space:]]+restart[[:space:]]+@@; s@^.*service[[:space:]]+([^[:space:]]+)[[:space:]]+restart$@\1@' | awk '{$1=$1; print}')"
+                if bash -c "$restart_command"; then
+                    restarted="${restarted:+${restarted}, }${service_label}"
+                else
+                    failed="${failed:+${failed}, }${service_label}"
+                    restart_rc=1
+                fi
+            done <<< "$restart_commands"
+        fi
+        if [[ "$startup" != true || "$restart_rc" -ne 0 ]]; then
+            mageops::security_updates_notify "${summary}; restarted: ${restarted:-none}${failed:+; restart failed: ${failed}}."
+        fi
+        return "$restart_rc"
+    fi
+
+    if [[ "$tracer_rc" -eq 101 || "$tracer_rc" -eq 103 || "$tracer_rc" -eq 104 ]]; then
+        case "$tracer_rc" in
+        101) reboot_reason="application restart required; rebooting per node policy" ;;
+        103) reboot_reason="session restart required; rebooting per node policy" ;;
+        104) reboot_reason="system reboot required" ;;
+        esac
+        mageops::security_updates_notify "${summary}; rebooting node (${reboot_reason}). Details in journal."
+        /usr/bin/systemctl reboot
+        return 0
+    fi
+
+    mageops::security_updates_notify "${summary}; tracer advisory ${tracer_rc}; no automatic host reboot performed."
+    return 0
+}
+
+mageops::security_updates_install_if_downloaded() {
+    local packages
+    if [[ ! -e /run/security-updates/dnf-automatic-emitted ]]; then
+        return 0
+    fi
+
+    packages="$(cat /run/security-updates/dnf-automatic-emitted)"
+    rm -f /run/security-updates/dnf-automatic-emitted
+    mageops::security_updates_install "$packages"
+}
+
+mageops::security_updates_startup_install() {
+    # Same retry policy as roles/cs.packages/tasks/main.yml. A mirror can return 404
+    # until the 30 s DNS cache expires and dnf selects another mirror.
+    local -r attempts=10
+    local -r retry_delay_sec=30
+    local attempt
+    local report
+    local dnf_rc
+
+    if ! mageops::security_updates_check;then
+        mageops::security_updates_log "Security update startup install skipped on $(mageops::security_updates_node_label): eligibility check blocked the run."
+        return 0
+    fi
+
+    for (( attempt = 1; ; attempt++ )); do
+        set +e
+        report="$(LC_ALL=C dnf -y --security update 2>&1)"
+        dnf_rc=$?
+        set -e
+
+        if [[ "$dnf_rc" -eq 0 || "$attempt" -ge "$attempts" ]];then
+            break
+        fi
+
+        mageops::security_updates_log "Security update startup install attempt ${attempt} of ${attempts} failed on $(mageops::security_updates_node_label) with exit code ${dnf_rc}. Next attempt in ${retry_delay_sec} s."
+        sleep "$retry_delay_sec"
+    done
+
+    if [[ "$dnf_rc" -ne 0 ]];then
+        mageops::security_updates_log "$report"
+        mageops::security_updates_notify "Startup security updates failed on $(mageops::security_updates_node_label) (exit ${dnf_rc}, ${attempt} attempts); see journal for details."
+        return "$dnf_rc"
+    fi
+
+    if [[ "$report" =~ (Nothing[[:space:]]+to[[:space:]]+do|No[[:space:]]+security[[:space:]]+updates[[:space:]]+needed) ]];then
+        mageops::security_updates_log "Security update startup install completed on $(mageops::security_updates_node_label): no security updates to apply."
+        return 0
+    fi
+
+    mageops::security_updates_log "Security update startup install completed on $(mageops::security_updates_node_label):
+${report}"
+    mageops::security_updates_install "$(printf '%s\n' "$report" | mageops::security_updates_package_names)" true
+}
+
 
 mageops::clear_php_opcache() {
     for dir in "${config__opcache_file_paths[@]}";do

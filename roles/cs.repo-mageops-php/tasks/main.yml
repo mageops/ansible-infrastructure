@@ -1,0 +1,11 @@
+- name: Configure MageOps PHP repository
+  yum_repository:
+    name: mageops-php-modular
+    description: "MageOps PHP modular repository for Enterprise Linux $releasever - $basearch"
+    file: mageops-php
+    baseurl: "{{ repo_mageops_php_url }}/enterprise/{{ ansible_facts.distribution_major_version }}/modular/$basearch/"
+    gpgcheck: yes
+    gpgkey: "{{ repo_mageops_php_url }}/RPM-GPG-KEY-mageops"
+    # Security fixes must reach new deploys soon. The dnf default is 48 hours.
+    metadata_expire: "3600"
+    state: "{{ repo_mageops_php_enabled | ternary('present', 'absent') }}"

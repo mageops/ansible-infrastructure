@@ -1,0 +1,17 @@
+[Unit]
+Description=Install security updates before nginx starts
+Wants=network-online.target
+After=network-online.target
+# Ordering only: nginx also starts when this unit fails.
+# A failed update must not keep the node out of service.
+Before=nginx.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/mageopscli security_updates startup
+# Oneshot units have no start timeout by default. 30 min is more than all dnf
+# attempts and a slow download. After it, systemd stops the update and nginx starts.
+TimeoutStartSec=30min
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+[Unit]
+Description=Run Sansec eComscan monitoring
+
+[Timer]
+OnCalendar={{ sansec_ecomscan_timer_on_calendar }}
+
+[Install]
+WantedBy=timers.target

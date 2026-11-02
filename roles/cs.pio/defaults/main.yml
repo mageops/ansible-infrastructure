@@ -17,6 +17,15 @@ pio_media_target_ssim: 0.000548 # this is 99 quality
 pio_media_fast_quality: 95
 pio_quality_target_spread: 100
 pio_media_quality_spread: 100
+
+# SSIMULACRA2 configuration for pio-worker 0.14+
+# Thumbnail targets use the quality from each signed URL.
+pio_ssimulacra2_enabled: false
+# Media score. Higher values require better quality. Null disables this gate.
+# Both the DSSIM and SSIMULACRA2 targets apply when this is set.
+# Recommended: 81.105 (QUALITY_SSIMULACRA2[99] in pio-worker), matching the default DSSIM quality.
+pio_media_target_ssimulacra2: null
+
 pio_target_directory: pio_cache
 pio_media_target_directory: pio_cache_cms
 pio_optimize_media: yes
@@ -36,6 +45,17 @@ pio_package_url_rpm:
   aarch64:
 
 pio_worker_cpu_shares: 2
+
+# The Magento group and umask 0002 let the Magento user change cache entries that the worker created.
+pio_worker_group: "{{ magento_group }}"
+pio_worker_umask: "0002"
+
+# One-time migration of root-owned cache entries. TODO: remove after 2027-01-28.
+# Before removal, make sure that the migration marker exists on every project.
+# Then set the default worker user to magento_user.
+# An empty user selects magento_user after the migration marker exists, and root before.
+pio_worker_user: ""
+pio_cache_owner_done_marker: "{{ pio_filesystem_local_dir }}/.pio-owner-migration-done"
 
 # List of paths mappings that should be bypassed by pio-worker
 # This list takes precedence over all other settings

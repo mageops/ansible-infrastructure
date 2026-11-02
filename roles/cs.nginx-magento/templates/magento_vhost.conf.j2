@@ -35,6 +35,7 @@ server {
     set $MAGE_ROOT {{ magento_live_release_dir }};
     set $MAGE_MODE {{ nginx_magento_mode }};
     set $PROJ_NAME {{ mageops_project }};
+    set $PROJ_ENV {{ mageops_environment }};
     set $MAGE_RUN_TYPE {{ nginx_magento_run_type | default('store') }};
 {% if nginx_mage_default_run_code %}
     set $MAGE_RUN_CODE {{ nginx_mage_default_run_code }};
@@ -114,6 +115,7 @@ server {
     set $MAGE_ROOT {{ nginx_app_root_dir }};
     set $MAGE_MODE {{ nginx_magento_mode }}; # or production or default
     set $PROJ_NAME {{ mageops_project }};
+    set $PROJ_ENV {{ mageops_environment }};
     set $FASTCGI_REQUEST_URI $request_uri;
 {% if nginx_magento_run_type in ('store', 'website') %}
     set $MAGE_RUN_TYPE {{ nginx_magento_run_type }};

@@ -103,6 +103,9 @@
 
     - role: cs.aws-magento-cron
 
+    - role: cs.sansec-ecomscan
+      when: sansec_ecomscan_enabled | bool
+
     - role: cs.magento-preload-fscache
       magento_preload_fscache_enable: "{{ mageops_magento_preload_fscache_enable }}"
 
@@ -140,6 +143,10 @@
           release_id: "{{ deploy_release_id | default(none) }}"
           build_nr: "{{ mageops_artifact_build_nr | default(none) }}"
       delegate_to: localhost
+
+    - name: Clear DNF cache before AMI creation
+      command: dnf clean all
+      changed_when: true
 
     # This speeds up ami creation and starting new instance with asg
     # This should be last step in on builder node
