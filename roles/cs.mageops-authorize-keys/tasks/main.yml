@@ -1,11 +1,23 @@
+- name: Read EC2 launch SSH key
+  amazon.aws.ec2_metadata_facts:
+  when: aws_use
+
+- name: Require EC2 launch SSH key
+  assert:
+    that:
+      - ansible_ec2_public_key is defined
+      - ansible_ec2_public_key | trim | length > 0
+      - ansible_ec2_public_key | trim != 'None'
+  when: aws_use
+
 - name: Authorize root keys
+  vars:
+    ec2_launch_key: "{{ [ansible_ec2_public_key] if aws_use else [] }}"
   authorized_key:
     user: root
     state: present
-    key: "{{ item }}"
-  loop: "{{ mageops_root_ssh_keys }}"
-  loop_control:
-    label: "{{ item.split(' ')[2:] | join(' ') }}"
+    key: "{{ (mageops_root_ssh_keys + (mageops_cli_user_authorized_keys | default([])) + ec2_launch_key) | unique | join('\n') }}"
+    exclusive: "{{ aws_use }}"
 
 - name: Authorize app keys
   authorized_key:
