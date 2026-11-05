@@ -61,11 +61,7 @@
     owner: root
     group: root
     mode: "0755"
-  loop:
-    - dnf-automatic-download.service
-    - dnf-automatic-install.service
-    - dnf-automatic-download.timer
-    - dnf-automatic-install.timer
+  loop: "{{ security_updates_dnf_units }}"
   when: security_updates_enabled
 
 - name: Install dnf-automatic service overrides

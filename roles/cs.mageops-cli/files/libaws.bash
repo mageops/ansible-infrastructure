@@ -23,6 +23,10 @@ aws::current_instance_id() {
     aws::_curl http://instance-data/latest/meta-data/instance-id || return 1
 }
 
+aws::public_ipv4() {
+    aws::_curl --connect-timeout 2 --max-time 5 http://instance-data/latest/meta-data/public-ipv4 || return 1
+}
+
 aws::get_current_region() {
     aws::_curl http://instance-data/latest/meta-data/placement/availability-zone | sed 's/[a-z]$//' || return 1
 }
