@@ -1,0 +1,29 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="mageops-builder"
+
+--mageops-builder
+Content-Type: text/cloud-boothook; charset="us-ascii"
+
+#cloud-boothook
+#!/bin/sh
+set -eu
+
+# Ansible cannot guard inherited services after SSH becomes available: they
+# may already be updating packages. This hook runs before network-online.target.
+# Provisioning re-enables the configured updates before creating the AMI.
+{% for unit in security_updates_dnf_units + ['security-updates-startup.service'] %}
+if systemctl cat {{ unit | quote }} >/dev/null 2>&1; then
+    systemctl disable --now {{ unit | quote }}
+fi
+{% endfor %}
+
+--mageops-builder
+{% if builder_instance_user_data.startswith('#!') %}
+Content-Type: text/x-shellscript
+
+{% elif builder_instance_user_data.split('\n', 1)[0] | trim == '#cloud-config' %}
+Content-Type: text/cloud-config
+
+{% endif %}
+{{ builder_instance_user_data }}
+--mageops-builder--
