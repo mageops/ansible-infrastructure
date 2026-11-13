@@ -14,5 +14,6 @@ sansec_ecomscan_monitor: ""
 sansec_ecomscan_user: root
 
 sansec_ecomscan_timer_on_calendar: "*-*-* *:10:00"
+sansec_ecomscan_full_timer_on_calendar: "*-*-* 03:40:00"
 sansec_ecomscan_only_cron_node: no
 sansec_ecomscan_extra_args: ""
