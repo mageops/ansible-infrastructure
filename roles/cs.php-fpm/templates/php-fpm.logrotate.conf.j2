@@ -1,0 +1,13 @@
+/var/log/php-fpm/*.log {
+    missingok
+    notifempty
+    daily
+    rotate 14
+    compress
+    delaycompress
+    create 0640 root root
+    sharedscripts
+    postrotate
+        /bin/kill -SIGUSR1 $(cat /var/run/php-fpm/php-fpm.pid 2>/dev/null) 2>/dev/null || true
+    endscript
+}
