@@ -1,5 +1,7 @@
 # Whether to password protect the website (basic auth)
 varnish_secure_site: yes
+# Limit basic auth protection to these exact domains. Leave empty to protect all domains.
+varnish_secure_site_domains: []
 
 # Credentials for basic auth protection
 varnish_secure_site_user: varnish
