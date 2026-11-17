@@ -1,0 +1,8 @@
+[Unit]
+Description=Run Sansec eComscan full scan on cron node
+
+[Timer]
+OnCalendar={{ sansec_ecomscan_full_timer_on_calendar }}
+
+[Install]
+WantedBy=timers.target

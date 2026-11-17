@@ -193,6 +193,10 @@
       autoscaling_instance_start_script: |
         /usr/bin/systemctl disable --now php-fpm
         /usr/bin/systemctl disable --now nginx
+        {% if sansec_ecomscan_enabled | bool %}
+        /usr/bin/systemctl disable --now sansec-ecomscan.timer
+        /usr/bin/systemctl disable --now sansec-ecomscan-full.timer
+        {% endif %}
         {% if mageops_monitoring_enabled %}
         /usr/bin/systemctl disable --now php-fpm-exporter
         {% endif %}

@@ -167,10 +167,15 @@
       loop:
         - sansec-ecomscan.service
         - sansec-ecomscan.timer
+        - sansec-ecomscan-full.service
+        - sansec-ecomscan-full.timer
 
-    - name: Enable Sansec eComscan timer
+    - name: Enable Sansec eComscan timers
       systemd:
-        name: sansec-ecomscan.timer
+        name: "{{ item }}"
         enabled: yes
         state: started
         daemon_reload: yes
+      loop:
+        - sansec-ecomscan.timer
+        - sansec-ecomscan-full.timer

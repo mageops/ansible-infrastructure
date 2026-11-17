@@ -10,4 +10,4 @@ EnvironmentFile=/etc/default/sansec-ecomscan
 {% if sansec_ecomscan_only_cron_node | bool %}
 ExecCondition=/usr/local/bin/mageopscli is_cron_node
 {% endif %}
-ExecStart={{ sansec_ecomscan_binary_path }} --monitor={{ sansec_ecomscan_monitor | quote }} {{ sansec_ecomscan_extra_args }} {{ magento_live_release_dir | quote }}
+ExecStart={{ sansec_ecomscan_binary_path }} --monitor={{ sansec_ecomscan_monitor | quote }} --one-file-system --tag {{ mageops_app_name | quote }} {{ sansec_ecomscan_extra_args }} {{ magento_live_release_dir | quote }}
