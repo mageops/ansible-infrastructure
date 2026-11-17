@@ -131,14 +131,27 @@
 - name: Force update of elasticsearch plugins on version change
   block:
     - name: Get list of installed elasticsearch plugins
-      command: /usr/share/elasticsearch/bin/elasticsearch-plugin list --silent
-      register: elasticsearch_plugin_list_command
+      find:
+        paths: /usr/share/elasticsearch/plugins
+        file_type: directory
+      register: elasticsearch_plugin_directories
 
-    - name: Remove current elasticsearch plugins so new version is installed
-      command: "/usr/share/elasticsearch/bin/elasticsearch-plugin remove {{ item }} --verbose"
-      args:
-        removes: "/usr/share/elasticsearch/plugins/{{ item }}"
-      loop: "{{ elasticsearch_plugin_list_command.stdout_lines }}"
+    # The new CLI cannot parse some descriptors from older Elasticsearch versions.
+    - name: Remove current elasticsearch plugin files so new version is installed
+      file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ elasticsearch_plugin_directories.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+
+    - name: Remove current elasticsearch plugin binaries
+      file:
+        path: "/usr/share/elasticsearch/bin/{{ item.path | basename }}"
+        state: absent
+      loop: "{{ elasticsearch_plugin_directories.files }}"
+      loop_control:
+        label: "{{ item.path | basename }}"
   when: >-
     elasticsearch_version_number != elasticsearch_running_version_number
 
