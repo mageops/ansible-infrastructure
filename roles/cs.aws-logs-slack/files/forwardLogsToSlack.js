@@ -3,7 +3,30 @@ const zlib = require('zlib'),
     url = require('url');
 
 const slackHook = url.parse(process.env.SLACK_HOOK_URL),
-    channel = process.env.SLACK_CHANNEL;
+    channel = process.env.SLACK_CHANNEL,
+    maintenanceWindows = JSON.parse(process.env.MAINTENANCE_WINDOWS || '[]'),
+    maintenanceTimezone = process.env.MAINTENANCE_TIMEZONE || 'UTC';
+
+function isMaintenanceWindow(now, windows, timezone) {
+    if (windows.length === 0) {
+        return false;
+    }
+
+    const time = new Intl.DateTimeFormat('en-GB', {
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+    }).format(now);
+
+    return windows.some(({ start, end }) => {
+        if (start < end) {
+            return time >= start && time < end;
+        }
+
+        return time >= start || time < end;
+    });
+}
 
 function postToSlack(payload) {
     payload = JSON.stringify(payload);
@@ -113,6 +136,11 @@ function handleData(data) {
 }
 
 exports.handler = (event, context, done) => {
+    if (isMaintenanceWindow(new Date(), maintenanceWindows, maintenanceTimezone)) {
+        console.log('Slack alert skipped during maintenance window.');
+        return done(null);
+    }
+
     let payload = new Buffer(event.awslogs.data, 'base64');
 
     zlib.gunzip(payload, (e, result) => {
@@ -123,3 +151,5 @@ exports.handler = (event, context, done) => {
         })
     });
 };
+
+exports.isMaintenanceWindow = isMaintenanceWindow;

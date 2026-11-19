@@ -1,3 +1,13 @@
+- name: Resolve Slack maintenance windows
+  set_fact:
+    aws_logs_slack_effective_maintenance_windows: >-
+      {{ aws_logs_slack_maintenance_windows if aws_logs_slack_maintenance_windows is not none
+         else [{'start': _patch_start, 'end': '%02d:%02d' | format((_patch_end_minute | int) // 60, (_patch_end_minute | int) % 60)}] }}
+  vars:
+    _patch_start: "{{ mageops_security_updates_install_timer_on_calendar.split()[-1] }}"
+    _patch_start_minute: "{{ (_patch_start.split(':')[0] | int) * 60 + (_patch_start.split(':')[1] | int) }}"
+    _patch_end_minute: "{{ ((_patch_start_minute | int) + (aws_logs_slack_maintenance_duration_minutes | int)) % 1440 }}"
+
 - name: Get log groups
   set_fact:
     aws_logs_slack_log_groups: "{{ aws_logs_slack_log_groups_default + aws_logs_slack_log_groups_extra }}"
@@ -51,6 +61,8 @@
     environment_variables:
       SLACK_HOOK_URL: "{{ aws_logs_slack_hook_url }}"
       SLACK_CHANNEL: "{{ aws_logs_slack_channel }}"
+      MAINTENANCE_WINDOWS: "{{ aws_logs_slack_effective_maintenance_windows | to_json }}"
+      MAINTENANCE_TIMEZONE: "{{ mageops_timezone }}"
 
 - name: Allow slack log forwarder lambda function to be invoked by CloudWatch Logs
   lambda_policy:
