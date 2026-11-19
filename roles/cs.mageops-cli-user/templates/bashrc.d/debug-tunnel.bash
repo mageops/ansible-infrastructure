@@ -14,7 +14,12 @@ cat<<ENDMSG
     -o ExitOnForwardFailure=yes \\
     -o GatewayPorts=yes \\
     -R {{ php_fpm_debug_pool_xdebug_remote_port }}:localhost:{{ php_fpm_debug_pool_xdebug_remote_port }} \\
-      $(whoami)@$(curl -sL '{{ mageops_public_ip_v4_api_url }}')$(echo -en "\033[0m")
+      $(whoami)@$(case '{{ mageops_public_ip_v4_api_url }}' in
+        http://169.254.169.254/*|http://instance-data/*)
+          source /usr/local/lib/mageops/libaws.bash
+          aws::public_ipv4 ;;
+        *) curl -sL '{{ mageops_public_ip_v4_api_url }}' ;;
+      esac)$(echo -en "\033[0m")
   2. Start debugging by adding query parameter to the URL:
 
   $(echo -en "\033[0;35m")?{{mageops_debug_token_query_param }}={{ mageops_debug_token }}$(echo -en "\033[0m")
