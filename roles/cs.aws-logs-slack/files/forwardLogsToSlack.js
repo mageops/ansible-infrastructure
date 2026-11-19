@@ -3,7 +3,37 @@ const zlib = require('zlib'),
     url = require('url');
 
 const slackHook = url.parse(process.env.SLACK_HOOK_URL),
-    channel = process.env.SLACK_CHANNEL;
+    channel = process.env.SLACK_CHANNEL,
+    maintenanceWindows = JSON.parse(process.env.MAINTENANCE_WINDOWS || '[]'),
+    maintenanceTimezone = process.env.MAINTENANCE_TIMEZONE || 'UTC';
+
+function isMaintenanceWindow(now, windows, timezone) {
+    if (windows.length === 0) {
+        return false;
+    }
+
+    for (const { start, end } of windows) {
+        if (start === end) {
+            throw new Error(`Maintenance window start and end must differ: ${start}`);
+        }
+    }
+
+    // Lambda runs in UTC, so convert to the maintenance timezone before comparing clock times.
+    const time = new Intl.DateTimeFormat('en-GB', {
+        timeZone: timezone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+    }).format(now);
+
+    return windows.some(({ start, end }) => {
+        if (start < end) {
+            return time >= start && time < end;
+        }
+
+        return time >= start || time < end;
+    });
+}
 
 function postToSlack(payload) {
     payload = JSON.stringify(payload);
@@ -87,6 +117,7 @@ function handleLogItem(data, project, env, software, link) {
 
 function handleData(data) {
     let handled = [],
+        skipped = 0,
         group = data.logGroup,
         stream = data.logStream,
         groupData = parseGroup(group),
@@ -98,6 +129,11 @@ function handleData(data) {
 
 
     data.logEvents.forEach((item) => {
+        if (isMaintenanceWindow(new Date(item.timestamp), maintenanceWindows, maintenanceTimezone)) {
+            skipped++;
+            return;
+        }
+
         handled.push(
             handleLogItem(
                 item,
@@ -108,6 +144,10 @@ function handleData(data) {
             )
         );
     })
+
+    if (skipped > 0) {
+        console.log(`Skipped ${skipped} Slack alert(s) during maintenance window.`);
+    }
 
     return Promise.all(handled);
 }
@@ -123,3 +163,5 @@ exports.handler = (event, context, done) => {
         })
     });
 };
+
+exports.isMaintenanceWindow = isMaintenanceWindow;

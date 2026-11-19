@@ -1,3 +1,34 @@
+- name: Derive Slack maintenance window from security update timer
+  set_fact:
+    aws_logs_slack_effective_maintenance_windows:
+      - start: "{{ _patch_start }}"
+        end: "{{ '%02d:%02d' | format((_patch_end_minute | int) // 60, (_patch_end_minute | int) % 60) }}"
+  vars:
+    _patch_start: "{{ mageops_security_updates_install_timer_on_calendar.split()[-1] }}"
+    _patch_start_minute: "{{ (_patch_start.split(':')[0] | int) * 60 + (_patch_start.split(':')[1] | int) }}"
+    _patch_end_minute: "{{ ((_patch_start_minute | int) + (aws_logs_slack_maintenance_duration_minutes | int)) % 1440 }}"
+  when:
+    - aws_logs_slack_maintenance_windows is none
+    - mageops_security_updates_enabled | bool
+
+- name: Disable derived Slack maintenance window when security updates are off
+  set_fact:
+    aws_logs_slack_effective_maintenance_windows: []
+  when:
+    - aws_logs_slack_maintenance_windows is none
+    - not (mageops_security_updates_enabled | bool)
+
+- name: Use configured Slack maintenance windows
+  set_fact:
+    aws_logs_slack_effective_maintenance_windows: "{{ aws_logs_slack_maintenance_windows }}"
+  when: aws_logs_slack_maintenance_windows is not none
+
+- name: Reject Slack maintenance windows with identical start and end times
+  assert:
+    that: item.start != item.end
+    fail_msg: "Slack maintenance window start and end must differ: {{ item.start }}"
+  loop: "{{ aws_logs_slack_effective_maintenance_windows }}"
+
 - name: Get log groups
   set_fact:
     aws_logs_slack_log_groups: "{{ aws_logs_slack_log_groups_default + aws_logs_slack_log_groups_extra }}"
@@ -51,6 +82,8 @@
     environment_variables:
       SLACK_HOOK_URL: "{{ aws_logs_slack_hook_url }}"
       SLACK_CHANNEL: "{{ aws_logs_slack_channel }}"
+      MAINTENANCE_WINDOWS: "{{ aws_logs_slack_effective_maintenance_windows | to_json }}"
+      MAINTENANCE_TIMEZONE: "{{ mageops_timezone }}"
 
 - name: Allow slack log forwarder lambda function to be invoked by CloudWatch Logs
   lambda_policy:
