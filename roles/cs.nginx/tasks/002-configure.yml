@@ -10,6 +10,18 @@
     - "{{ nginx_serverd_dir }}"
     - "{{ nginx_serverd_defaults_dir }}"
 
+# The Nginx RPM preserves local changes to this file during upgrades.
+- name: Provision an empty default Nginx configuration
+  copy:
+    content: ""
+    dest: "{{ nginx_confd_dir }}/default.conf"
+    mode: '0644'
+  notify: Reload nginx
+
+- name: Register the default Nginx configuration
+  set_fact:
+    nginx_config_cleanup_provisioned_files: "{{ nginx_config_cleanup_provisioned_files + [nginx_confd_dir ~ '/default.conf'] }}"
+
 - name: Ensure var directories always exist
   lineinfile:
     path: /etc/tmpfiles.d/nginx.conf
