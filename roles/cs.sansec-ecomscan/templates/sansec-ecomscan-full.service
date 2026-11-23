@@ -7,5 +7,6 @@ Wants=network-online.target
 Type=oneshot
 User={{ sansec_ecomscan_user }}
 EnvironmentFile=/etc/default/sansec-ecomscan
+CPUQuota={{ sansec_ecomscan_cpu_limit }}%
 ExecCondition=/usr/local/bin/mageopscli is_cron_node
 ExecStart={{ sansec_ecomscan_binary_path }} --monitor={{ sansec_ecomscan_monitor | quote }} --tag {{ mageops_app_name | quote }} {{ sansec_ecomscan_extra_args }} {{ magento_live_release_dir | quote }}
