@@ -1032,6 +1032,7 @@ sansec_ecomscan_enabled: no
 # sansec_ecomscan_license_key:
 # sansec_ecomscan_monitor: security@example.com
 sansec_ecomscan_only_cron_node: no
+sansec_ecomscan_cpu_limit: 50
 
 # ----------------------------------
 # --------  Magento Deploy  --------
