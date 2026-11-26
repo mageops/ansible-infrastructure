@@ -16,5 +16,6 @@
 - name: Authorize import user to access
   authorized_key:
     user: "{{ sftp_user }}"
-    key: "{{ item }}"
-  with_items: "{{ sftp_authorized_keys }}"
+    state: present
+    key: "{{ sftp_authorized_keys | unique | join('\n') }}"
+    exclusive: yes
